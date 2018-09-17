@@ -1,4 +1,4 @@
-package com.joelapenna.bikebuds.feature;
+package com.joelapenna.bikebuds;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.joelapenna.bikebuds.feature;
+package com.joelapenna.bikebuds;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.joelapenna.bikebuds.feature.test", appContext.getPackageName());
+        assertEquals("com.joelapenna.bikebuds", appContext.getPackageName());
     }
 }
