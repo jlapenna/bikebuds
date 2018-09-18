@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "294988021695",
+    "firebase_url": "https://bikebuds-app.firebaseio.com",
+    "project_id": "bikebuds-app",
+    "storage_bucket": "bikebuds-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:294988021695:android:0162c8b72f40c936",
+        "android_client_info": {
+          "package_name": "com.joelapenna.bikebuds"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "294988021695-rq7han6024vf5j49f2q11ehmgbibn010.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joelapenna.bikebuds",
+            "certificate_hash": "edb9318d79ffb45ecc8a013cca8aaaf18e3e775c"
+          }
+        },
+        {
+          "client_id": "294988021695-bl6tgue0mcd8khflvqiqhndsdbdvgvjh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joelapenna.bikebuds",
+            "certificate_hash": "8ad9cf00147b7d4fe17bfc27decdc552d0af99b3"
+          }
+        },
+        {
+          "client_id": "294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhyIo4e57vzLqH8RoKiB8fLUJF0kl-Pls"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
