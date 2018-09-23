@@ -4,25 +4,25 @@
 # ./gae/setup_env.sh
 
 function main() {
-  local repo_basepath=$(readlink -e "$PWD")
-  if [[ "$(readlink $PWD)" != "bikebuds" ]]; then
+  local repo_path=$(readlink -e "$PWD")
+  if [[ "$(basename $repo_path)" != "bikebuds" ]]; then
     echo "Must be in the bikebuds code repo."
     exit 1;
   fi
+  local backend_path="${repo_path}/backend"
 
-  local backend_basepath="${repo_basepath}/backend"
-  local env_basepath=$(readlink -f "$HOME/appengine_env")
+  local env_path=$(readlink -f "$HOME/appengine_env")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;
   fi
 
-  echo "Setting up virtual environment at ${env_basepath}"
-  virtualenv --python python2 "${env_basepath}"
-  source "${env_basepath}/bin/activate"
+  echo "Setting up virtual environment at ${env_path}"
+  virtualenv --python python2 "${env_path}"
+  source "${env_path}/bin/activate"
 
   echo "Installing backend dependencies."
-  pip install -t lib -r "${backend_basepath}/requirements.txt"
+  pip install -t lib -r "${backend_path}/requirements.txt"
 }
 
 main "$@"
