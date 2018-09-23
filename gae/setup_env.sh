@@ -9,7 +9,7 @@ function main() {
     echo "Must be in the bikebuds code repo."
     exit 1;
   fi
-  local backend_path="${repo_path}/backend"
+  local backend_path="${repo_path}/gae/backend"
 
   local env_path=$(readlink -f "$HOME/appengine_env")
   if [ "$?" -ne 0 ]; then
@@ -22,7 +22,7 @@ function main() {
   source "${env_path}/bin/activate"
 
   echo "Installing backend dependencies."
-  pip install -t lib -r "${backend_path}/requirements.txt"
+  pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
 }
 
 main "$@"
