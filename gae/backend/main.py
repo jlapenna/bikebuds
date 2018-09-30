@@ -21,7 +21,8 @@ from firebase_admin import auth
 from firebase_admin import credentials
 
 ORIGINS = ['http://localhost:8080', 'https://bikebuds.appspot.com']
-cred = credentials.Certificate('lib/bikebuds-app-firebase-adminsdk-888ix-59094dc1a3.json')
+cred = credentials.Certificate(
+        'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-59094dc1a3.json')
 firebase_admin.initialize_app(cred)
 app = flask.Flask(__name__)
 flask_cors.CORS(app, origins=ORIGINS)

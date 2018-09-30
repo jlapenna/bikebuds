@@ -17,12 +17,19 @@ function main() {
     exit 1;
   fi
 
+  echo "Setting up environment for deployment..."
+  echo ""
   echo "Setting up virtual environment at ${env_path}"
   virtualenv --python python2 "${env_path}"
   source "${env_path}/bin/activate"
 
+  echo ""
   echo "Installing backend dependencies."
   pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
+
+  echo ""
+  echo "Copying over service keys."
+  cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
 }
 
 main "$@"
