@@ -13,3 +13,4 @@ handlers:
 
 env_variables:
   FIREBASE_PROJECT_ID: 'bikebuds-app'
+  GAE_USE_SOCKETS_HTTPLIB : 'true'

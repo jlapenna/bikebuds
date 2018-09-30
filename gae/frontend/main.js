@@ -25,12 +25,10 @@ $(function() {
         var welcomeName = name ? name : user.email;
 
         user.getToken().then(function(idToken) {
-
           /* Now that the user is authenicated, Do things... */
           $('#user').text(welcomeName);
           $('#logged-in').show();
-          callTestAjax(idToken)
-
+          createSession(idToken);
         });
 
       } else {
@@ -59,6 +57,40 @@ $(function() {
     ui.start('#firebaseui-auth-container', uiConfig);
   }
 
+  function createSession(idToken) {
+    console.log('createSession');
+    $.ajax(backendHostUrl + '/create_session', {
+      /* Set header for the XMLHttpRequest to get data from the web server
+      associated with userIdToken */
+      headers: {
+        'Authorization': 'Bearer ' + idToken
+      },
+      method: 'POST',
+      xhrFields: {
+        withCredentials: true
+      },
+    }).then(function(data){
+      console.log("createSession complete");
+    });
+  }
+
+  function closeSession(idToken) {
+    console.log('closeSession');
+    $.ajax(backendHostUrl + '/close_session', {
+      /* Set header for the XMLHttpRequest to get data from the web server
+      associated with userIdToken */
+      headers: {
+        'Authorization': 'Bearer ' + idToken
+      },
+      method: 'POST',
+      xhrFields: {
+        withCredentials: true
+      },
+    }).then(function(data){
+      console.log("closeSession: complete");
+    });
+  }
+
   function callTestAjax(idToken) {
     $.ajax(backendHostUrl + '/test_ajax', {
       /* Set header for the XMLHttpRequest to get data from the web server
@@ -75,11 +107,14 @@ $(function() {
   var signOutBtn = $('#sign-out');
   signOutBtn.click(function(event) {
     event.preventDefault();
-
-    firebase.auth().signOut().then(function() {
-      console.log("Sign out successful");
-    }, function(error) {
-      console.log(error);
+    var user = firebase.auth().currentUser;
+    user.getToken().then(function(idToken) {
+      closeSession(idToken);
+      firebase.auth().signOut().then(function() {
+        console.log("Sign out successful");
+      }, function(error) {
+        console.log(error);
+      });
     });
   });
 
