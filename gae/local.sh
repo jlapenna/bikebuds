@@ -8,7 +8,7 @@ function main() {
     exit 1;
   fi
 
-  sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http://localhost:8081';/" gae/frontend/main.js
+  sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http:\/\/localhost:8081';/" gae/frontend/main.js
   dev_appserver.py gae/frontend/app.yaml gae/backend/app.yaml
 }
 
