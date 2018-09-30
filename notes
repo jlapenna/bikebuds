@@ -1,0 +1,69 @@
+Code:
+        https://source.cloud.google.com/bikebuds-app/bikebuds/+/master:
+	https://source.cloud.google.com/bikebuds-app/bikebuds/+/master
+	git clone https://source.developers.google.com/p/bikebuds-app/r/bikebuds
+
+Emulator:
+	/home/jlapenna/android/sdk/emulator/emulator -netdelay none -netspeed full -avd Pixel_2_API_28
+
+APIs:
+	https://console.developers.google.com/flows/enableapi?apiid=sheets.googleapis.com&pli=1&project=bikebuds-app
+	https://firebase.google.com/docs/auth/
+
+
+Credentials:
+	https://console.developers.google.com/apis/credentials?project=bikebuds-app
+
+Code Style:
+	Import into Android Studio, android/codestyles/AndroidStyle.xml
+	Manage Code Styles -> set from (RHS of dialog, select android)
+
+Cloud Repositories
+	curl https://sdk.cloud.google.com | bash
+	exec -l $SHELL
+	gcloud init
+----
+
+"""
+Before I asked why GAE can't find TensorFlow lib here https://stackoverflow.com/questions/40241846/why-googleappengine-gives-me-importerror-no-module-named-tensorflow
+
+And Dmytro Sadovnychyi told me that GAE can't run TensorFlow, but GAE flexible can.
+"""
+
+https://cloud.google.com/appengine/docs/flexible/python/flexible-for-standard-users
+The flexible environment is intended to be complementary to the standard
+environment. If you have an existing application running in the standard
+environment, it’s not usually necessary to migrate the entire application to
+the flexible environment. Instead, identify the parts of your application that
+require more CPU, more RAM, a specialized third-party library or program, or
+that need to perform actions that aren’t possible in the standard environment.
+Once you’ve identified these parts of your application, create small App Engine
+services that use the flexible environment to handle just those parts. Your
+existing service running in the standard environment can call the other
+services using HTTP, Cloud Tasks alpha, or Cloud Pub/Sub.  """
+
+
+https://github.com/armujahid/appengine-tensorflow-python3
+https://cloud.google.com/appengine/docs/standard/go/quickstart
+
+
+Choosing an environment
+https://cloud.google.com/appengine/docs/the-appengine-environments
+https://cloud.google.com/solutions/mobile/mobile-app-backend-services
+
+
+# commands I've run
+gcloud --project=bikebuds-app app domain-mappings list
+gcloud --project=bikebuds-app app domain-mappings create bikebuds.joelapenna.com
+gcloud --project=bikebuds-app domains list-user-verified
+gcloud --project=bikebuds-app app logs tail -s frontend
+gcloud --project=bikebuds-app app logs tail -s backend
+
+# Things that have helped
+https://github.com/hozn/stravalib
+https://github.com/hozn/stravalib/issues/58 - Developing with GAE
+
+# Use Cloud Endpoints to serve an API and do stuff.
+
+# Cookies & Sessions
+https://firebase.google.com/docs/auth/admin/manage-cookies

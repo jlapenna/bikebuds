@@ -1,6 +1,5 @@
-$(function(){
-  var backendHostUrl = 'https://backend-dot-bikebuds-app.appspot.com';
-  //var backendHostUrl = 'https://backend-dot-bikebuds-app.appspot.com';
+$(function() {
+  var backendHostUrl = 'http://localhost:8081';
 
   // Initialize Firebase
   var config = {
@@ -11,9 +10,6 @@ $(function(){
     storageBucket: "bikebuds-app.appspot.com",
     messagingSenderId: "294988021695"
   };
-
-  // This is passed into the backend to authenticate the user.
-  var userIdToken = null;
 
   // Firebase log-in
   function configureFirebaseLogin() {
@@ -29,11 +25,11 @@ $(function(){
         var welcomeName = name ? name : user.email;
 
         user.getToken().then(function(idToken) {
-          userIdToken = idToken;
 
           /* Now that the user is authenicated, Do things... */
           $('#user').text(welcomeName);
           $('#logged-in').show();
+          callTestAjax(idToken)
 
         });
 
@@ -63,8 +59,20 @@ $(function(){
     ui.start('#firebaseui-auth-container', uiConfig);
   }
 
+  function callTestAjax(idToken) {
+    $.ajax(backendHostUrl + '/test_ajax', {
+      /* Set header for the XMLHttpRequest to get data from the web server
+      associated with userIdToken */
+      headers: {
+        'Authorization': 'Bearer ' + idToken
+      }
+    }).then(function(data){
+      console.log("Fetched: " + data);
+    });
+  }
+
   // Sign out a user
-  var signOutBtn =$('#sign-out');
+  var signOutBtn = $('#sign-out');
   signOutBtn.click(function(event) {
     event.preventDefault();
 
