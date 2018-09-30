@@ -1,19 +1,20 @@
 import datetime
 import logging
 
-from flask import Flask, jsonify, request
+import flask
 import flask_cors
+
 from google.appengine.ext import ndb
-import google.auth.transport.requests
 import google.oauth2.id_token
-import requests_toolbelt.adapters.appengine
 
 # Use the App Engine Requests adapter. This makes sure that Requests uses
 # URLFetch.
+import google.auth.transport.requests
+import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
 HTTP_REQUEST = google.auth.transport.requests.Request()
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 flask_cors.CORS(app)
 
 
@@ -30,7 +31,7 @@ class TestModel(ndb.Expando):
 def test_ajax():
     logging.info("/test_ajax")
     # Verify Firebase auth.
-    id_token = request.headers['Authorization'].split(' ').pop()
+    id_token = flask.request.headers['Authorization'].split(' ').pop()
     claims = google.oauth2.id_token.verify_firebase_token(
         id_token, HTTP_REQUEST)
     if not claims:
