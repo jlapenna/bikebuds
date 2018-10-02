@@ -24,7 +24,7 @@ $(function() {
         /* Use the user's name or email for a custom message. */
         var welcomeName = name ? name : user.email;
 
-        user.getToken().then(function(idToken) {
+        user.getIdToken().then(function(idToken) {
           /* Now that the user is authenicated, Do things... */
           $('#user').text(welcomeName);
           $('#logged-in').show();
@@ -45,12 +45,34 @@ $(function() {
   // Firebase log-in widget
   function configureFirebaseLoginWidget() {
     var uiConfig = {
-      'signInSuccessUrl': '/',
-      'signInOptions': [
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID
+      callbacks: {
+        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          // Return false to not redirect
+          return false;
+        },
+        signInFailure: function(error) {
+          // Some unrecoverable error occurred during sign-in.
+          // Return a promise when error handling is completed and FirebaseUI
+          // will reset, clearing any UI. This commonly occurs for error code
+          // 'firebaseui/anonymous-upgrade-merge-conflict' when merge conflict
+          // occurs. Check below for more details on this.
+          return handleUIError(error);
+        },
+        uiShown: function() {
+          // The widget is rendered.
+        }
+      },
+      signInSuccessUrl: '/',
+      signInOptions: [
+        {
+          provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          authMethod: 'https://accounts.google.com',
+          clientId: '294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com'
+        },
       ],
-      // Terms of service url
-      'tosUrl': '<your-tos-url>',
+      // Required to enable one-tap sign-up credential helper.
+      // This will auto-signin a user.
+      credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
     };
 
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
@@ -108,7 +130,7 @@ $(function() {
   signOutBtn.click(function(event) {
     event.preventDefault();
     var user = firebase.auth().currentUser;
-    user.getToken().then(function(idToken) {
+    user.getIdToken().then(function(idToken) {
       closeSession(idToken);
       firebase.auth().signOut().then(function() {
         console.log("Sign out successful");

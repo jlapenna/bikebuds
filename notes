@@ -6,11 +6,6 @@ Code:
 Emulator:
 	/home/jlapenna/android/sdk/emulator/emulator -netdelay none -netspeed full -avd Pixel_2_API_28
 
-APIs:
-	https://console.developers.google.com/flows/enableapi?apiid=sheets.googleapis.com&pli=1&project=bikebuds-app
-	https://firebase.google.com/docs/auth/
-
-
 Credentials:
 	https://console.developers.google.com/apis/credentials?project=bikebuds-app
 
@@ -69,3 +64,7 @@ https://github.com/hozn/stravalib/issues/58 - Developing with GAE
 https://firebase.google.com/docs/admin/setup
 https://firebase.google.com/docs/auth/admin/manage-cookies
 https://medium.com/@hiranya911/firebase-introducing-session-cookies-for-server-side-web-apps-fb46cce40b2
+
+# Auth
+https://developers.google.com/identity/one-tap/web/get-started
+https://firebase.google.com/docs/auth/
