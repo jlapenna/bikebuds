@@ -1,47 +1,6 @@
 $(function() {
   var backendHostUrl = 'http://localhost:8081';
 
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyCzIzSoOZe6mlkxbSvfvi4zI8AJwlUN94k",
-    authDomain: "bikebuds-app.firebaseapp.com",
-    databaseURL: "https://bikebuds-app.firebaseio.com",
-    projectId: "bikebuds-app",
-    storageBucket: "bikebuds-app.appspot.com",
-    messagingSenderId: "294988021695"
-  };
-
-  // Firebase log-in
-  function configureFirebaseLogin() {
-
-    firebase.initializeApp(config);
-
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        $('#logged-out').hide();
-        var name = user.displayName;
-
-        /* Use the user's name or email for a custom message. */
-        var welcomeName = name ? name : user.email;
-
-        user.getIdToken().then(function(idToken) {
-          /* Now that the user is authenicated, Do things... */
-          $('#user').text(welcomeName);
-          $('#logged-in').show();
-          createSession(idToken);
-        });
-
-      } else {
-        $('#logged-in').hide();
-        $('#logged-out').show();
-
-      }
-      // [END gae_python_state_change]
-
-    });
-
-  }
-
   // Firebase log-in widget
   function configureFirebaseLoginWidget() {
     var uiConfig = {
@@ -79,9 +38,28 @@ $(function() {
     ui.start('#firebaseui-auth-container', uiConfig);
   }
 
+  // Listens for state changes related to login.
+  function listenToAuthStateChanges() {
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        var name = user.displayName;
+        var welcomeName = name ? name : user.email;
+        $('#user').text(welcomeName);
+        $('#logged-in').show();
+        $('#logged-out').hide();
+
+        user.getIdToken().then(createSession);
+      } else {
+        $('#logged-in').hide();
+        $('#logged-out').show();
+
+      }
+    });
+  }
+
   function createSession(idToken) {
     console.log('createSession');
-    $.ajax(backendHostUrl + '/create_session', {
+    return $.ajax(backendHostUrl + '/create_session', {
       /* Set header for the XMLHttpRequest to get data from the web server
       associated with userIdToken */
       headers: {
@@ -92,13 +70,13 @@ $(function() {
         withCredentials: true
       },
     }).then(function(data){
-      console.log("createSession complete");
+      console.log("createSession: complete: " + data);
     });
   }
 
   function closeSession(idToken) {
     console.log('closeSession');
-    $.ajax(backendHostUrl + '/close_session', {
+    return $.ajax(backendHostUrl + '/close_session', {
       /* Set header for the XMLHttpRequest to get data from the web server
       associated with userIdToken */
       headers: {
@@ -109,26 +87,24 @@ $(function() {
         withCredentials: true
       },
     }).then(function(data){
-      console.log("closeSession: complete");
+      console.log("closeSession: complete: " + data);
     });
   }
 
   function callTestAjax(idToken) {
-    $.ajax(backendHostUrl + '/test_ajax', {
+    console.log('callTestAjax');
+    return $.ajax(backendHostUrl + '/test_ajax', {
       /* Set header for the XMLHttpRequest to get data from the web server
       associated with userIdToken */
       headers: {
         'Authorization': 'Bearer ' + idToken
       }
     }).then(function(data){
-      console.log("Fetched: " + data);
+      console.log("callTestAjax: complete: " + data);
     });
   }
 
-  // Sign out a user
-  var signOutBtn = $('#sign-out');
-  signOutBtn.click(function(event) {
-    event.preventDefault();
+  function signOutUser() {
     var user = firebase.auth().currentUser;
     user.getIdToken().then(function(idToken) {
       closeSession(idToken);
@@ -138,9 +114,34 @@ $(function() {
         console.log(error);
       });
     });
-  });
+  }
 
-  configureFirebaseLogin();
-  configureFirebaseLoginWidget();
+  function listenToSignOutButton() {
+    // Sign out a user
+    var signOutBtn = $('#sign-out');
+    signOutBtn.click(function(event) {
+      event.preventDefault();
+      signOutUser();
+    });
+  }
+
+  function main() {
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyCzIzSoOZe6mlkxbSvfvi4zI8AJwlUN94k",
+      authDomain: "bikebuds-app.firebaseapp.com",
+      databaseURL: "https://bikebuds-app.firebaseio.com",
+      projectId: "bikebuds-app",
+      storageBucket: "bikebuds-app.appspot.com",
+      messagingSenderId: "294988021695"
+    };
+    firebase.initializeApp(config);
+
+    configureFirebaseLoginWidget();
+    listenToAuthStateChanges();
+    listenToSignOutButton();
+  }
+
+  main();
 
 });
