@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 
@@ -6,16 +7,9 @@ import flask
 import flask_cors
 from flask_cors import cross_origin
 
-import google.oauth2.id_token
-from google.appengine.ext import ndb
+import auth_util
 
-# Use the App Engine Requests adapter. This makes sure that Requests uses
-# URLFetch. This needs to be ordered the way it is, for some reason.
-# https://github.com/firebase/firebase-admin-python/issues/185
-import google.auth.transport.requests
-import requests_toolbelt.adapters.appengine
-requests_toolbelt.adapters.appengine.monkeypatch()
-HTTP_REQUEST = google.auth.transport.requests.Request()
+from google.appengine.ext import ndb
 
 # Firebase addmin setup
 import firebase_admin
@@ -38,6 +32,7 @@ ORIGINS = [BACKEND_URL, FRONTEND_URL]
 app = flask.Flask(__name__)
 flask_cors.CORS(app, origins=ORIGINS)
 
+
 class TestModel(ndb.Expando):
     """Holds test info."""
     name = ndb.StringProperty()
@@ -50,7 +45,7 @@ class TestModel(ndb.Expando):
 @app.route('/test_ajax', methods=['GET'])
 def test_ajax():
     logging.info("/test_ajax")
-    claims = verify_claims(flask.request)
+    claims = auth_util.verify_claims(flask.request)
     logging.info("/test_ajax: authorized")
 
     test_model = TestModel.for_user(claims,
@@ -65,7 +60,7 @@ def test_ajax():
 def test_session():
     session_cookie = flask.request.cookies.get('session')
     logging.info('/test_session: cookie get: ' + str(session_cookie))
-    verify_claims_from_cookie(flask.request)
+    auth_util.verify_claims_from_cookie(flask.request)
     return flask.make_response('OK', 200)
 
 
@@ -73,7 +68,7 @@ def test_session():
 @cross_origin(supports_credentials=True, origins=ORIGINS)
 def create_session():
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
-    verify_claims(flask.request)
+    auth_util.verify_claims(flask.request)
 
     try:
         id_token = flask.request.headers['Authorization'].split(' ').pop()
@@ -96,28 +91,6 @@ def close_session():
     response = flask.make_response('OK', 200)
     response.set_cookie('session', '', expires=0)
     return response
-
-
-def verify_claims(request):
-    """Return valid claims or throw an AuthError."""
-    id_token = request.headers['Authorization'].split(' ').pop()
-    claims = google.oauth2.id_token.verify_firebase_token(
-        id_token, HTTP_REQUEST)
-    if not claims:
-        raise auth.AuthError('Unable to find valid token')
-    return claims
-
-
-def verify_claims_from_cookie(request):
-    """Return valid claims or throw an AuthError."""
-    session_cookie = request.cookies.get('session')
-    # Verify the session cookie. In this case an additional check is added to
-    # detect if the user's Firebase session was revoked, user deleted/disabled,
-    # etc.
-    try:
-        return auth.verify_session_cookie( session_cookie, check_revoked=True)
-    except ValueError, e:
-        raise auth.AuthError('Unable to validate cookie')
 
 
 @app.errorhandler(500)
