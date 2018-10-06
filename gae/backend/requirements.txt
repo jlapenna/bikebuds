@@ -6,3 +6,4 @@ requests==2.19.1
 requests-toolbelt==0.8.0
 firebase-admin
 stravalib
+nokia

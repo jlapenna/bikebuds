@@ -14,6 +14,8 @@ from google.appengine.ext import ndb
 import auth_util
 from config import config
 import users
+import services
+from withings import withings
 
 from config import config
 from strava import strava
@@ -29,6 +31,7 @@ firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 # Flask setup
 app = flask.Flask(__name__)
 app.register_blueprint(strava.module)
+app.register_blueprint(withings.module)
 flask_cors.CORS(app, origins=config.origins)
 
 
@@ -55,6 +58,10 @@ def test_session():
     firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 
+    service = services.Service.create(user, 'test_service')
+    service.put()
+    service_creds = services.ServiceCredentials.create(service)
+    service_creds.put()
     return flask.make_response('OK', 200)
 
 

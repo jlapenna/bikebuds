@@ -7,6 +7,7 @@ class ProdConfig(object):
         self.frontend_url = 'https://bikebuds.joelapenna.com'
         self.origins = [self.backend_url, self.frontend_url]
         self.strava_creds = json.load(open('lib/service_keys/strava.json'))
+        self.withings_creds = json.load(open('lib/service_keys/withings.json'))
 
 
 class LocalConfig(object):
@@ -15,6 +16,7 @@ class LocalConfig(object):
         self.frontend_url = 'http://localhost:8080'
         self.origins = [self.backend_url, self.frontend_url]
         self.strava_creds = json.load(open('lib/service_keys/strava-local.json'))
+        self.withings_creds = json.load(open('lib/service_keys/withings-local.json'))
 
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
