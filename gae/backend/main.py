@@ -8,6 +8,7 @@ import flask_cors
 from flask_cors import cross_origin
 
 import auth_util
+from config import config
 
 from google.appengine.ext import ndb
 
@@ -19,18 +20,10 @@ FIREBASE_ADMIN_CREDS = credentials.Certificate(
         'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-59094dc1a3.json')
 firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 
-# Environment setup
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    BACKEND_URL = 'https://backend-dot-bikebuds-app.appspot.com'
-    FRONTEND_URL = 'https://bikebuds.joelapenna.com'
-else:
-    BACKEND_URL = 'http://localhost:8081'
-    FRONTEND_URL = 'http://localhost:8080'
-ORIGINS = [BACKEND_URL, FRONTEND_URL]
-
 # Flask setup
 app = flask.Flask(__name__)
-flask_cors.CORS(app, origins=ORIGINS)
+flask_cors.CORS(app, origins=config.origins)
+logging.info(app.config)
 
 
 class TestModel(ndb.Expando):
@@ -65,7 +58,7 @@ def test_session():
 
 
 @app.route('/create_session', methods=['POST'])
-@cross_origin(supports_credentials=True, origins=ORIGINS)
+@cross_origin(supports_credentials=True, origins=config.origins)
 def create_session():
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
     auth_util.verify_claims(flask.request)
@@ -85,7 +78,7 @@ def create_session():
 
 
 @app.route('/close_session', methods=['POST'])
-@cross_origin(supports_credentials=True, origins=ORIGINS)
+@cross_origin(supports_credentials=True, origins=config.origins)
 def close_session():
     logging.info('/close_session')
     response = flask.make_response('OK', 200)
