@@ -91,6 +91,23 @@ $(function() {
     });
   }
 
+  function stravaInit(idToken) {
+    console.log('stravaInit');
+    $.ajax(backendHostUrl + '/strava_init', {
+      /* Set header for the XMLHttpRequest to get data from the web server
+      associated with userIdToken */
+      headers: {
+        'Authorization': 'Bearer ' + idToken
+      },
+      method: 'POST',
+      xhrFields: {
+        withCredentials: true
+      },
+    }).then(function(data){
+      console.log("stravaInit complete");
+    });
+  }
+
   function callTestAjax(idToken) {
     console.log('callTestAjax');
     return $.ajax(backendHostUrl + '/test_ajax', {

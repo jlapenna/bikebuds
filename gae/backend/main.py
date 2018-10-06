@@ -3,6 +3,8 @@ import json
 import logging
 import os
 
+from google.appengine.ext import ndb
+
 import flask
 import flask_cors
 from flask_cors import cross_origin
@@ -14,8 +16,9 @@ from config import config
 import users
 
 from config import config
+from strava import strava
 
-# Firebase addmin setup
+# Firebase admin setup
 import firebase_admin
 from firebase_admin import auth
 from firebase_admin import credentials
@@ -25,8 +28,8 @@ firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 
 # Flask setup
 app = flask.Flask(__name__)
+app.register_blueprint(strava.module)
 flask_cors.CORS(app, origins=config.origins)
-logging.info(app.config)
 
 
 class TestModel(ndb.Expando):

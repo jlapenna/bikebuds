@@ -5,3 +5,4 @@ google-auth==1.5.1
 requests==2.19.1
 requests-toolbelt==0.8.0
 firebase-admin
+stravalib
