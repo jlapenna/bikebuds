@@ -41,7 +41,7 @@ class TestModel(ndb.Expando):
 @app.route('/test_ajax', methods=['GET'])
 def test_ajax():
     logging.info("/test_ajax")
-    claims = auth_util.verify_claims(flask.request)
+    claims = auth_util.verify(flask.request)
     user = users.User.get(claims)
 
     return flask.make_response('OK', 200)
@@ -50,7 +50,7 @@ def test_ajax():
 @app.route('/test_session', methods=['GET'])
 def test_session():
     logging.info("/test_session")
-    claims = auth_util.verify_claims_from_cookie(flask.request)
+    claims = auth_util.verify(flask.request)
     firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 
@@ -62,7 +62,7 @@ def test_session():
 def create_session():
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
     logging.info("/create_session")
-    claims = auth_util.verify_claims(flask.request)
+    claims = auth_util.verify(flask.request)
     firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 

@@ -32,15 +32,14 @@ class ServiceCredentials(ndb.Expando):
     def get_key(cls, service_key):
         return ndb.Key(ServiceCredentials, 'default', parent=service_key)
 
-    @ndb.transactional
     @classmethod
-    def update(cls, user_key, service_name, **kwargs):
+    def update(cls, user_key, service_name, new_credentials):
         service_key = Service.get_key(user_key, service_name)
         service_creds_key = ServiceCredentials.get_key(service_key)
         service_creds = service_creds_key.get()
         if service_creds is None:
             service_creds = ServiceCredentials(key=service_creds_key)
-            for k, v in kwargs.iteritems():
+            for k, v in new_credentials.iteritems():
                 setattr(service_creds, k, v)
             service_creds.put()
         return service_creds
