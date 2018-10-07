@@ -38,15 +38,7 @@ def test(claims):
 @module.route('/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return make_auth_url_response()
-    else:
-        if flask.request.method == 'POST':
-            return flask.jsonify({'redirect_url': config.frontend_url})
-        else:
-            return flask.redirect(config.frontend_url)
+    return make_auth_url_response()
 
 
 @module.route('/withings/redirect', methods=['GET'])
