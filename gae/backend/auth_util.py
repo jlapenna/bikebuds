@@ -16,11 +16,11 @@ import google.oauth2.id_token
 from firebase_admin import auth
 
 
-def auth_required(func):
+def claims_required(func):
     @functools.wraps(func)
     def wrapper():
-        creds = verify(flask.request)
-        return func()
+        claims = verify(flask.request)
+        return func(claims)
     return wrapper
 
 
@@ -48,7 +48,7 @@ def verify_claims_from_cookie(request):
     # detect if the user's Firebase session was revoked, user deleted/disabled,
     # etc.
     try:
-        return auth.verify_session_cookie( session_cookie, check_revoked=True)
+        return auth.verify_session_cookie(session_cookie, check_revoked=True)
     except ValueError, e:
         raise auth.AuthError(401, 'Unable to validate cookie')
 
