@@ -29,8 +29,17 @@ def test(claims):
         return get_auth_url_response()
 
     client = nokia.NokiaApi(service_creds)
-    measures = client.get_measures(limit=1)[0]
-    logging.info(measures.weight)
+    
+    measures = client.get_measures(limit=10000)
+    logging.info('measures')
+    logging.info(len(measures))
+    logging.info(type(measures))
+    logging.info(dir(measures))
+    logging.info('measure')
+    measure = measures[0]
+    logging.info(measure)
+    logging.info(type(measures))
+    logging.info(dir(measures))
 
     return flask.make_response('OK', 200)
 
