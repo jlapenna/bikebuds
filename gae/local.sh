@@ -15,7 +15,6 @@ function main() {
   fi
 
   echo "Using virtual environment at ${env_path}"
-  virtualenv --python python2 "${env_path}"
   source "${env_path}/bin/activate"
 
   sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http:\/\/localhost:8081';/" gae/frontend/main.js
