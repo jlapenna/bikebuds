@@ -12,7 +12,15 @@ class Service(ndb.Model):
 
     @classmethod
     def get(cls, user_key, name):
-        return Service.get_or_insert(name, parent=user_key)
+        service_key = Service.get_key(user_key, name)
+        service = service_key.get()
+        modified = False
+        if service is None:
+            modified = True
+            service = Service(key=service_key)
+        if modified:
+            service.put()
+        return service
 
     @classmethod
     def get_key(cls, user_key, name):
@@ -33,13 +41,18 @@ class ServiceCredentials(ndb.Expando):
         return ndb.Key(ServiceCredentials, 'default', parent=service_key)
 
     @classmethod
+    @ndb.transactional
     def update(cls, user_key, service_name, new_credentials):
         service_key = Service.get_key(user_key, service_name)
         service_creds_key = ServiceCredentials.get_key(service_key)
         service_creds = service_creds_key.get()
+        modified = False
         if service_creds is None:
+            modified = True
             service_creds = ServiceCredentials(key=service_creds_key)
-            for k, v in new_credentials.iteritems():
-                setattr(service_creds, k, v)
+        for k, v in new_credentials.iteritems():
+            modified = True
+            setattr(service_creds, k, v)
+        if modified:
             service_creds.put()
         return service_creds
