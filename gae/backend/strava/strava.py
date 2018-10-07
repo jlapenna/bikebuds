@@ -28,7 +28,7 @@ def test(claims):
     user = users.User.get(claims)
     service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
     if service_creds is None:
-        return make_auth_url_response()
+        return get_auth_url_response()
 
     client = stravalib.client.Client(
             access_token=service_creds.access_token)
@@ -41,14 +41,16 @@ def test(claims):
 @module.route('/strava/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
-    return make_auth_url_response()
+    dest = flask.request.args.get('dest', '')
+    return get_auth_url_response(dest)
 
 
 @module.route('/strava/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
-@auth_util.claims_requrired
+@auth_util.claims_required
 def redirect(claims):
     user = users.User.get(claims)
+    service = services.Service.get(user.key, SERVICE_NAME)
 
     code = flask.request.args.get('code')
 
@@ -57,17 +59,25 @@ def redirect(claims):
             client_id=config.strava_creds['client_id'],
             client_secret=config.strava_creds['client_secret'], code=code)
 
-    services.ServiceCredentials.update(user_key, SERVICE_NAME,
+    services.ServiceCredentials.update(user.key, SERVICE_NAME,
             dict(access_token=access_token))
 
-    return flask.redirect(config.frontend_url)
+    dest = flask.request.args.get('dest', None)
+    if dest:
+        return flask.redirect(config.backend_url + dest)
+    else:
+        return flask.redirect(config.frontend_url)
 
 
-def make_auth_url_response():
+def get_callback_uri(dest):
+    return config.backend_url + '/' + SERVICE_NAME + '/redirect?dest=' + dest
+
+
+def get_auth_url_response(dest):
     client = stravalib.client.Client()
     authorize_url = client.authorization_url(
             client_id=config.strava_creds['client_id'],
-            redirect_uri=config.backend_url + '/strava/redirect')
+            redirect_uri=get_callback_uri(dest))
 
     if flask.request.method == 'POST':
         return flask.jsonify({'redirect_url': authorize_url})

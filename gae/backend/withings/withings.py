@@ -26,7 +26,7 @@ def test(claims):
     user = users.User.get(claims)
     service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
     if service_creds is None:
-        return make_auth_url_response()
+        return get_auth_url_response()
 
     client = nokia.NokiaApi(service_creds)
     measures = client.get_measures(limit=1)[0]
@@ -38,7 +38,8 @@ def test(claims):
 @module.route('/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
-    return make_auth_url_response()
+    dest = flask.request.args.get('dest', '')
+    return get_auth_url_response(dest)
 
 
 @module.route('/withings/redirect', methods=['GET'])
@@ -46,12 +47,14 @@ def init(claims):
 @auth_util.claims_required
 def redirect(claims):
     user = users.User.get(claims)
+    service = services.Service.get(user.key, SERVICE_NAME)
 
     code = flask.request.args.get('code')
+    dest = flask.request.args.get('dest', '')
 
     auth = nokia.NokiaAuth(config.withings_creds['client_id'],
             config.withings_creds['client_secret'],
-            callback_uri=config.backend_url + '/withings/redirect')
+            callback_uri=get_callback_uri(dest))
     creds = auth.get_credentials(code)
 
     creds_dict = dict(
@@ -65,13 +68,21 @@ def redirect(claims):
     service_creds = services.ServiceCredentials.update(user.key, SERVICE_NAME,
         creds_dict)
 
-    return flask.redirect(config.frontend_url)
+    dest = flask.request.args.get('dest', None)
+    if dest:
+        return flask.redirect(config.backend_url + dest)
+    else:
+        return flask.redirect(config.frontend_url)
 
 
-def make_auth_url_response():
+def get_callback_uri(dest):
+    return config.backend_url + '/withings/redirect?dest=' + dest
+
+
+def get_auth_url_response(dest):
     auth = nokia.NokiaAuth(config.withings_creds['client_id'],
             config.withings_creds['client_secret'],
-            callback_uri=config.backend_url + '/withings/redirect')
+            callback_uri=get_callback_uri(dest))
     if flask.request.method == 'POST':
         return flask.jsonify({'authorize_url': auth.get_authorize_url()})
     else:

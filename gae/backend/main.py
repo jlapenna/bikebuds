@@ -87,6 +87,26 @@ def create_session(claims):
         return flask.abort(401, 'Failed to create a session cookie')
 
 
+@app.route('/signup', methods=['GET'])
+@auth_util.claims_required
+def signup(claims):
+    """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
+    firebase_user = auth.get_user(claims['sub'])
+    user = users.User.get(claims)
+
+    service_names = sorted((withings.SERVICE_NAME, strava.SERVICE_NAME))
+    service_names = sorted((withings.SERVICE_NAME,))
+    user_services = services.Service.query(ancestor=user.key).fetch(
+            len(service_names))
+    user_services_dict = dict(((service.key.id(), service) for service in user_services))
+    logging.info(user_services_dict)
+    for service_name in service_names:
+        if service_name not in user_services_dict:
+            # We haven't initialized this service yet. Lets do it.
+            return flask.redirect(config.backend_url + '/' + service_name + '/init?dest=/signup')
+    return flask.redirect(config.frontend_url)
+
+
 @app.route('/close_session', methods=['POST'])
 @cross_origin(supports_credentials=True, origins=config.origins)
 def close_session():
