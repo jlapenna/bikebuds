@@ -95,15 +95,19 @@ def signup(claims):
     user = users.User.get(claims)
 
     service_names = sorted((withings.SERVICE_NAME, strava.SERVICE_NAME))
-    service_names = sorted((withings.SERVICE_NAME,))
     user_services = services.Service.query(ancestor=user.key).fetch(
             len(service_names))
     user_services_dict = dict(((service.key.id(), service) for service in user_services))
     logging.info(user_services_dict)
     for service_name in service_names:
+        redirect_url = config.backend_url + '/' + service_name + '/init?dest=/signup'
         if service_name not in user_services_dict:
             # We haven't initialized this service yet. Lets do it.
-            return flask.redirect(config.backend_url + '/' + service_name + '/init?dest=/signup')
+            return flask.redirect(redirect_url)
+        service_creds = services.ServiceCredentials.default(user.key, service_name)
+        if not service_creds:
+            return flask.redirect(redirect_url)
+        # TODO: Check if the service creds are valid.
     return flask.redirect(config.frontend_url)
 
 
