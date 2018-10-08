@@ -21,7 +21,7 @@ function main() {
 
   cd gae/backend;
 
-  ipython
+  ipython -i "$1"
 }
 
 main "$@"
