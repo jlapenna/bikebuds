@@ -9,7 +9,11 @@ function main() {
   fi
 
   sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'https:\/\/backend-dot-bikebuds-app.appspot.com';/" gae/frontend/main.js
-  gcloud --project=bikebuds-app app deploy gae/backend/index.yaml gae/frontend/app.yaml backend/app.yaml
+  gcloud --project=bikebuds-app app deploy \
+    gae/frontend/app.yaml \
+    gae/backend/app.yaml \
+    gae/backend/index.yaml \
+    ;
 }
 
 main "$@"
