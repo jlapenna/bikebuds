@@ -67,4 +67,12 @@ https://medium.com/@hiranya911/firebase-introducing-session-cookies-for-server-s
 
 # Auth
 https://developers.google.com/identity/one-tap/web/get-started
+	make sure to add domains in oauth console...
 https://firebase.google.com/docs/auth/
+
+# Prod deploy problems:
+Failed to load https://backend-dot-bikebuds-app.appspot.com/create_session: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'https://bikebuds.joelapenna.com' is therefore not allowed access.
+but then:
+https://stackoverflow.com/questions/50289065/google-yolo-stop-working-the-client-origin-is-not-permitted-to-use-this-api
+looks like its got an abuse problem and temporarily disabled.
+
