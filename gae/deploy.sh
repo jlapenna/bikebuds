@@ -14,6 +14,7 @@ function main() {
     gae/backend/app.yaml \
     gae/backend/index.yaml \
     ;
+  sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http:\/\/localhost:8081';/" gae/frontend/main.js
 }
 
 main "$@"
