@@ -125,3 +125,6 @@ Adding a GET endpoint with a request that has a message body (not VoidMessage):
   KeyError: 'bikebuds.get_user'
   spec file not created.
 https://github.com/cloudendpoints/endpoints-python/issues/126
+
+# withings
+get_measures returns NokiaMeasureGroup.
