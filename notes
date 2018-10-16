@@ -1,3 +1,8 @@
+Money:
+	https://cloud.google.com/appengine/docs/standard/python/console/#setting_a_spending_limit
+	https://console.cloud.google.com/appengine/settings?project=bikebuds-app
+	https://cloud.google.com/appengine/pricing#spending_limit
+	https://console.cloud.google.com/billing/0011D9-CEF324-FFD4AA/budgets?organizationId=0
 Code:
         https://source.cloud.google.com/bikebuds-app/bikebuds/+/master:
 	https://source.cloud.google.com/bikebuds-app/bikebuds/+/master
@@ -45,7 +50,6 @@ https://cloud.google.com/appengine/docs/standard/go/quickstart
 Choosing an environment
 https://cloud.google.com/appengine/docs/the-appengine-environments
 https://cloud.google.com/solutions/mobile/mobile-app-backend-services
-
 
 # commands I've run
 gcloud --project=bikebuds-app app domain-mappings list
