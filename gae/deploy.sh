@@ -8,13 +8,13 @@ function main() {
     exit 1;
   fi
 
-  sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'https:\/\/backend-dot-bikebuds-app.appspot.com';/" gae/frontend/main.js
-  gcloud --project=bikebuds-app app deploy \
+  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'https://backend-dot-bikebuds-app.appspot.com';#" gae/frontend/main.js
+  gcloud app deploy \
     gae/frontend/app.yaml \
     gae/backend/app.yaml \
     gae/backend/index.yaml \
     ;
-  sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http:\/\/localhost:8081';/" gae/frontend/main.js
+  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
 }
 
 main "$@"
