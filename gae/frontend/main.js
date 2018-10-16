@@ -31,7 +31,7 @@ $(function() {
       ],
       // Required to enable one-tap sign-up credential helper.
       // This will auto-signin a user.
-      credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
+      //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
     };
 
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
