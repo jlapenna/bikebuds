@@ -25,6 +25,7 @@ function main() {
 
   echo ""
   echo "Installing backend dependencies."
+  rm -rf "${backend_path}/lib"
   pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
 
   echo ""
