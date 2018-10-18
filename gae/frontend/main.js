@@ -1,5 +1,13 @@
 $(function() {
   var backendHostUrl = 'http://localhost:8081';
+  var config = {
+    apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
+    authDomain: "bikebuds-app.firebaseapp.com",
+    databaseURL: "https://bikebuds-app.firebaseio.com",
+    projectId: "bikebuds-app",
+    storageBucket: "bikebuds-app.appspot.com",
+    messagingSenderId: "294988021695",
+  };
 
   // Firebase log-in widget
   function configureFirebaseLoginWidget() {
@@ -25,12 +33,11 @@ $(function() {
       signInOptions: [
         {
           provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-          authMethod: 'https://accounts.google.com',
-          clientId: '294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com'
+          // Required to enable one-tap sign-up for YOLO
+          //authMethod: 'https://accounts.google.com',
         },
       ],
-      // Required to enable one-tap sign-up credential helper.
-      // This will auto-signin a user.
+      // Required to enable one-tap sign-up for YOLO
       //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
     };
 
@@ -48,6 +55,8 @@ $(function() {
         $('#logged-in').show();
         $('#logged-out').hide();
 
+        // Establish a cookie based session for this user for when we hit the
+        // backend.
         user.getIdToken().then(createSession);
       } else {
         $('#logged-in').hide();
@@ -70,7 +79,7 @@ $(function() {
         withCredentials: true
       },
     }).then(function(data){
-      console.log("createSession: complete: " + data);
+      console.log("createSession: complete", data);
     });
   }
 
@@ -144,14 +153,6 @@ $(function() {
 
   function main() {
     // Initialize Firebase
-    var config = {
-      apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
-      authDomain: "bikebuds-app.firebaseapp.com",
-      databaseURL: "https://bikebuds-app.firebaseio.com",
-      projectId: "bikebuds-app",
-      storageBucket: "bikebuds-app.appspot.com",
-      messagingSenderId: "294988021695"
-    };
     firebase.initializeApp(config);
 
     configureFirebaseLoginWidget();
