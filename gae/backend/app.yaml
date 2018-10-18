@@ -12,5 +12,8 @@ handlers:
   script: main.app
 
 env_variables:
+  # Firebase
   FIREBASE_PROJECT_ID: 'bikebuds-app'
+
+  # Various
   GAE_USE_SOCKETS_HTTPLIB : 'true'
