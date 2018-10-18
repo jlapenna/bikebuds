@@ -25,7 +25,7 @@ import firebase_admin
 from firebase_admin import auth
 from firebase_admin import credentials
 FIREBASE_ADMIN_CREDS = credentials.Certificate(
-        'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-59094dc1a3.json')
+        'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json')
 firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 
 # Flask setup

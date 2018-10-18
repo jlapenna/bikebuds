@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "294988021695-rq7han6024vf5j49f2q11ehmgbibn010.apps.googleusercontent.com",
+          "client_id": "294988021695-1fe7mphu8bvsce3mb8mt2rp73nf3ak6r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joelapenna.bikebuds",
@@ -23,7 +23,7 @@
           }
         },
         {
-          "client_id": "294988021695-bl6tgue0mcd8khflvqiqhndsdbdvgvjh.apps.googleusercontent.com",
+          "client_id": "294988021695-kro101i7h5996jmk4avgm996mdsos3fv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joelapenna.bikebuds",
@@ -31,13 +31,13 @@
           }
         },
         {
-          "client_id": "294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com",
+          "client_id": "294988021695-f95fhsgmgp6tta74qdhd1gtnaitnbjam.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBhyIo4e57vzLqH8RoKiB8fLUJF0kl-Pls"
+          "current_key": "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU"
         }
       ],
       "services": {
@@ -48,7 +48,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "294988021695-47fbiinqpoa0n4pb7qp9khlsdl0leaf1.apps.googleusercontent.com",
+              "client_id": "294988021695-f95fhsgmgp6tta74qdhd1gtnaitnbjam.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -61,3 +61,4 @@
   ],
   "configuration_version": "1"
 }
+

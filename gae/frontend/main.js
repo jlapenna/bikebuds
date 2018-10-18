@@ -145,7 +145,7 @@ $(function() {
   function main() {
     // Initialize Firebase
     var config = {
-      apiKey: "AIzaSyCzIzSoOZe6mlkxbSvfvi4zI8AJwlUN94k",
+      apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
       authDomain: "bikebuds-app.firebaseapp.com",
       databaseURL: "https://bikebuds-app.firebaseio.com",
       projectId: "bikebuds-app",
