@@ -80,3 +80,6 @@ but then:
 https://stackoverflow.com/questions/50289065/google-yolo-stop-working-the-client-origin-is-not-permitted-to-use-this-api
 looks like its got an abuse problem and temporarily disabled.
 
+
+# Copyrights
+for i in $fileswithoutheaders; do echo $i; cat apache_header.py > $i.copy; cat $i >> $i.copy; mv $i.copy $i; done;
