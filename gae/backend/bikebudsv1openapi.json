@@ -1,0 +1,128 @@
+{
+  "basePath": "/_ah/api",
+  "consumes": [
+    "application/json"
+  ],
+  "definitions": {
+    "ApiBikebudsRequest": {
+      "properties": {
+        "content": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ApiBikebudsResponse": {
+      "properties": {
+        "content": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "host": "backend-dot-bikebuds-app.appspot.com",
+  "info": {
+    "title": "bikebuds",
+    "version": "v1"
+  },
+  "paths": {
+    "/bikebuds/v1/getApiKey": {
+      "get": {
+        "operationId": "BikebudsApi_getApiKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/ApiBikebudsResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/getUser": {
+      "post": {
+        "operationId": "BikebudsApi_getUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/ApiBikebudsResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/test": {
+      "post": {
+        "operationId": "BikebudsApi_test",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ApiBikebudsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/ApiBikebudsResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "in": "query",
+      "name": "key",
+      "type": "apiKey"
+    },
+    "firebase": {
+      "authorizationUrl": "",
+      "flow": "implicit",
+      "type": "oauth2",
+      "x-google-issuer": "https://securetoken.google.com/bikebuds-app",
+      "x-google-jwks_uri": "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    },
+    "firebase-dca327ad": {
+      "authorizationUrl": "",
+      "flow": "implicit",
+      "type": "oauth2",
+      "x-google-audiences": "-,a,b,b,d,e,i,k,p,p,s,u",
+      "x-google-issuer": "https://securetoken.google.com/bikebuds-app",
+      "x-google-jwks_uri": "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    }
+  },
+  "swagger": "2.0"
+}

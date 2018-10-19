@@ -63,6 +63,38 @@ https://github.com/hozn/stravalib
 https://github.com/hozn/stravalib/issues/58 - Developing with GAE
 
 # Use Cloud Endpoints to serve an API and do stuff.
+https://console.cloud.google.com/endpoints?project=bikebuds-app
+https://cloud.google.com/endpoints/docs/frameworks/python/get-started-frameworks-python
+https://cloud.google.com/endpoints/docs/frameworks/python/about-cloud-endpoints-frameworks
+https://cloud.google.com/endpoints/docs/frameworks/python/get-started-frameworks-python
+https://cloud.google.com/endpoints/docs/frameworks/python/authenticating-users#authenticating_with_firebase_auth
+https://medium.com/@anttihavanko/firebase-authentication-with-google-cloud-endpoints-e0a2a8d5c537
+https://cloud.google.com/blog/products/gcp/google-cloud-endpoints-now-ga-a-fast-scalable-api-gateway
+https://cloud.google.com/endpoints/docs/frameworks/python/gen_clients
+https://developers.google.com/apis-explorer/?base=http://localhost:8081/_ah/api#p/
+
+https://cloud.google.com/endpoints/docs/frameworks/java/calling-from-android
+  https://developers.google.com/api-client-library/java/google-http-java-client/android
+  https://developers.google.com/api-client-library/java/google-http-java-client/json
+  https://cloud.google.com/endpoints/docs/frameworks/java/migrating-android
+
+https://cloud.google.com/endpoints/docs/frameworks/java/calling-from-javascript
+  https://github.com/google/google-api-javascript-client/issues/399
+
+https://github.com/GoogleCloudPlatform/java-docs-samples/issues/923
+  ENDPOINTS_SERVICE_VERSION is optional
+
+Portal:
+  https://console.cloud.google.com/endpoints/portal?project=bikebuds-app
+  https://endpointsportal.bikebuds-app.cloud.goog/settings
+  https://docs.bikebuds.joelapenna.com/settings
+
+# android api
+requires installing gradle. apt install gradle.
+
+# examples
+curl 'http://localhost:8080/_ah/api/discovery/v1/apis/bikebuds/v1/rest'
+google-chrome --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8081 'http://localhost:8081/_ah/api/explorer'
 
 # Cookies & Sessions
 https://firebase.google.com/docs/admin/setup
@@ -80,6 +112,16 @@ but then:
 https://stackoverflow.com/questions/50289065/google-yolo-stop-working-the-client-origin-is-not-permitted-to-use-this-api
 looks like its got an abuse problem and temporarily disabled.
 
-
 # Copyrights
 for i in $fileswithoutheaders; do echo $i; cat apache_header.py > $i.copy; cat $i >> $i.copy; mv $i.copy $i; done;
+
+# dev setup problems:
+If you encounter the error message DistutilsOptionError: can't combine user with prefix, exec_prefix/home, or install_(plat)base, then you will need to create a virtual environment.
+
+# API Problems
+Adding a GET endpoint with a request that has a message body (not VoidMessage):
+    File "/home/jlapenna/code/bikebuds/gae/backend/lib/endpoints/openapi_generator.py", line 378, in __body_parameter_descriptor
+      self.__request_schema[method_id])
+  KeyError: 'bikebuds.get_user'
+  spec file not created.
+https://github.com/cloudendpoints/endpoints-python/issues/126

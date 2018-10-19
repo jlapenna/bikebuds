@@ -1,0 +1,31 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+service: api
+
+libraries:
+- name: pycrypto
+  version: latest
+- name: ssl
+  version: latest
+
+handlers:
+- url: /_ah/api/.*
+  script: main.api
+
+- url: /bikebuds-v1.discovery
+  static_files: bikebuds-v1.discovery
+  upload: bikebuds-v1.discovery
+  expiration: 0m
+  http_headers:
+    Access-Control-Allow-Origin: '*'
+
+env_variables:
+  # Firebase
+  FIREBASE_PROJECT_ID: 'bikebuds-app'
+
+  # Various
+  GAE_USE_SOCKETS_HTTPLIB : 'true'
+
+  # Endpoints 
+  ENDPOINTS_SERVICE_NAME: api-dot-bikebuds-app.appspot.com

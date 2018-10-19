@@ -1,2 +1,5 @@
 *.pyc
+/api/lib
 /backend/lib
+/frontend/lib
+/api/lib

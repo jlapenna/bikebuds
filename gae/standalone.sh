@@ -21,6 +21,7 @@ source gae/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
+  local api_path="${repo_path}/gae/api"
   local backend_path="${repo_path}/gae/backend"
   local frontend_path="${repo_path}/gae/frontend"
 
@@ -33,6 +34,7 @@ function main() {
   echo "Using virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
 
+  sed -i "s/var apiHostUrl = .*/var apiHostUrl = 'http:\/\/localhost:8081';/" gae/frontend/main.js
   sed -i "s/var backendHostUrl = .*/var backendHostUrl = 'http:\/\/localhost:8082';/" gae/frontend/main.js
 
   cd gae/backend;

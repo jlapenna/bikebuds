@@ -13,7 +13,13 @@
 // limitations under the License.
 
 $(function() {
-  var backendHostUrl = 'http://localhost:8081';
+  var apiHostUrl = 'http://localhost:8081';
+  var backendHostUrl = 'http://localhost:8082';
+  // Local development fails due to CORS...
+  //var bikebudsDiscoveryUrl = backendHostUrl + '/_ah/api/discovery/v1/apis/bikebuds/v1/rest'
+  // Should be the same as the app server one...
+  var bikebudsDiscoveryUrl = apiHostUrl + '/bikebuds-v1.discovery';
+
   var config = {
     apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
     authDomain: "bikebuds-app.firebaseapp.com",
@@ -72,6 +78,9 @@ $(function() {
         // Establish a cookie based session for this user for when we hit the
         // backend.
         user.getIdToken().then(createSession);
+
+        // Then load the gapi client and set up its authentication.
+        loadGapi();
       } else {
         $('#logged-in').hide();
         $('#logged-out').show();
@@ -163,6 +172,47 @@ $(function() {
       event.preventDefault();
       signOutUser();
     });
+  }
+
+  function initJsClient(bikebudsDiscovery) {
+    gapi.client.load(bikebudsDiscovery).then(function () {
+      console.log("initJsClient: bikebuds", gapi.client.bikebuds);
+      firebase.auth().currentUser.getIdToken(true).then(function (idToken) {
+        console.log("initJsClient: idToken", idToken);
+        var tokenDict = {access_token: idToken};
+        gapi.client.setToken(tokenDict);
+        gapi.client.setApiKey(config.apiKey);
+        gapi.client.bikebuds.get_user().then(
+          function(response) {
+            console.log('initJsClient: get_user response', response);
+          });
+      });
+    });
+  }
+
+  /** Loads the gapi libraries and queues client loading. */
+  function loadGapi(idToken) {
+    // Load the API client library.
+    var loadGapiPromise = new Promise(function(resolve, reject) {
+      gapi.load('client', resolve);
+    });
+
+    // Fetch the Bikebuds API discovery served on local server. You can also
+    // pack the json as a string to avoid extra network request.
+    // After this promise is fulfilled, the bikebudsDiscovery variable
+    // will be set.
+    var bikebudsDiscoveryPromise = fetch(bikebudsDiscoveryUrl).then(
+      function(resp){
+        // resp.json() returns a promise...
+        return resp.json();
+      });
+    // When both the gapi.client is loaded and the discovery JSON object
+    // is ready, call initClient to start API call.
+    Promise.all([loadGapiPromise, bikebudsDiscoveryPromise]).then(
+      function(result) {
+        let [unused, bikebudsDiscovery] = result;
+        initJsClient(bikebudsDiscovery);
+      });
   }
 
   function main() {

@@ -23,6 +23,7 @@ source gae/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
+  local api_path="${repo_path}/gae/api"
   local backend_path="${repo_path}/gae/backend"
   local frontend_path="${repo_path}/gae/frontend"
 
@@ -37,6 +38,11 @@ function main() {
   echo "Setting up virtual environment at ${env_path}"
   virtualenv --python python2 "${env_path}"
   source "${env_path}/bin/activate"
+
+  echo ""
+  echo "Installing api dependencies."
+  rm -rf "${api_path}/lib"
+  pip install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
 
   echo ""
   echo "Installing backend dependencies."

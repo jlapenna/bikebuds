@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backend_url">https://backend-dot-bikebuds-app.appspot.com</string>
+    <string name="frontend_url">https://bikebuds.joelapenna.com</string>
+</resources>

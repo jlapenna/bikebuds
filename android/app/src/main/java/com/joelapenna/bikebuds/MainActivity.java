@@ -18,19 +18,32 @@ package com.joelapenna.bikebuds;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.appspot.backend_dot_bikebuds_app.bikebuds.Bikebuds;
+import com.appspot.backend_dot_bikebuds_app.bikebuds.model.ApiBikebudsResponse;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "Bikebuds";
 
     private static final int RC_SIGN_IN = 100;
 
@@ -49,6 +62,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void finishSignIn(FirebaseUser user, IdpResponse response) {
         Log.d(TAG, "finishSignIn: " + user.getDisplayName());
+        final Task<GetTokenResult> tokenTask = user.getIdToken(true);
+        tokenTask.addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull final Task<GetTokenResult> task) {
+                String token = task.isSuccessful() ? task.getResult().getToken() : null;
+                AuthenticatedHttpRequestInitializer httpRequestInitializer =
+                        token != null ? new AuthenticatedHttpRequestInitializer(token) : null;
+                Bikebuds.Builder builder = new Bikebuds.Builder(new NetHttpTransport(),
+                        JacksonFactory.getDefaultInstance(), httpRequestInitializer)
+                        .setRootUrl(getResources().getString(R.string.backend_url) + "/_ah/api/");
+                asyncGetUser(builder.build());
+            }
+        });
+    }
+
+    private void asyncGetUser(final Bikebuds bikebuds) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                final Bikebuds.GetUser request = bikebuds.getUser();
+                Log.d(TAG, "GetUser Request: " + request);
+                ApiBikebudsResponse response = request.execute();
+                Log.d(TAG, "GetUser Response content: " + response.getContent());
+            } catch (IOException e) {
+                Log.d(TAG, "GetUser Unable to execute: ", e);
+            }
+        });
     }
 
     private void startSignIn() {
@@ -87,4 +126,21 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "signInFailed");
     }
 
+    private static class AuthenticatedHttpRequestInitializer implements HttpRequestInitializer {
+        private final String token;
+
+        public AuthenticatedHttpRequestInitializer(String token) {
+            this.token = token;
+        }
+
+        @Override
+        public void initialize(HttpRequest request) throws IOException {
+            HttpHeaders headers = request.getHeaders();
+            if (headers == null) {
+                headers = new HttpHeaders();
+                request.setHeaders(headers);
+            }
+            headers.put("Authorization", Arrays.asList("Bearer " + token));
+        }
+    }
 }
