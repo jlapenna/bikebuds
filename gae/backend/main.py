@@ -26,12 +26,11 @@ from flask_cors import cross_origin
 from google.appengine.ext import ndb
 
 import auth_util
-from config import config
+from shared.config import config
 import users
 import services
 from withings import withings
 
-from config import config
 from strava import strava
 
 # Firebase admin setup

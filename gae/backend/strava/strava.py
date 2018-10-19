@@ -24,7 +24,7 @@ import firebase_admin
 
 import stravalib
 
-from config import config
+from shared.config import config
 import auth_util
 import services
 import users
