@@ -16,12 +16,10 @@
 
 # Run a local instance, rewriting code for local development.
 
+source gae/base.sh
+
 function main() {
-  local repo_path=$(readlink -e "$PWD")
-  if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo."
-    exit 1;
-  fi
+  local repo_path="$(get_repo_path)";
 
   local env_path=$(readlink -f "$HOME/appengine_env")
   if [ "$?" -ne 0 ]; then
@@ -32,9 +30,15 @@ function main() {
   echo "Using virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
 
-  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"http://localhost:8081/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  sed -i "s#var apiHostUrl = .*#var apiHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
+  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
 
-  dev_appserver.py gae/frontend/app.yaml gae/backend/app.yaml
+  dev_appserver.py \
+    gae/frontend/app.yaml \
+    gae/api/app.yaml \
+    gae/backend/app.yaml \
+    ;
 }
 
 main "$@"

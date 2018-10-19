@@ -18,13 +18,13 @@
 #
 # ./gae/setup_env.sh
 
+source gae/base.sh
+
 function main() {
-  local repo_path=$(readlink -e "$PWD")
-  if [[ "$(basename $repo_path)" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo."
-    exit 1;
-  fi
+  local repo_path="$(get_repo_path)";
+
   local backend_path="${repo_path}/gae/backend"
+  local frontend_path="${repo_path}/gae/frontend"
 
   local env_path=$(readlink -f "$HOME/appengine_env")
   if [ "$?" -ne 0 ]; then
@@ -44,7 +44,7 @@ function main() {
   pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
 
   echo ""
-  echo "Copying over service keys."
+  echo "Copying over service keys to backend."
   cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
 }
 

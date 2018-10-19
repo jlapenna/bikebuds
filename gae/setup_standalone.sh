@@ -19,13 +19,13 @@
 #
 # ./gae/setup_standalone.sh
 
+source gae/base.sh
+
 function main() {
-  local repo_path=$(readlink -e "$PWD")
-  if [[ "$(basename $repo_path)" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo."
-    exit 1;
-  fi
+  local repo_path="$(get_repo_path)";
+
   local backend_path="${repo_path}/gae/backend"
+  local frontend_path="${repo_path}/gae/frontend"
 
   local env_path=$(readlink -f "$HOME/standalone_env")
   if [ "$?" -ne 0 ]; then

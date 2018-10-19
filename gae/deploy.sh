@@ -16,20 +16,23 @@
 
 # Deploy the service to appengine, rewriting code to support production.
 
-function main() {
-  local repo_path=$(readlink -e "$PWD")
-  if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo."
-    exit 1;
-  fi
+source gae/base.sh
 
+function main() {
+  local repo_path="$(get_repo_path)";
+
+  # First we update the API endpoint.
+  gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
+
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"https://api-dot-bikebuds-app.appspot.com/_ah/api/\",#" gae/api/bikebuds-v1.discovery
   sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'https://backend-dot-bikebuds-app.appspot.com';#" gae/frontend/main.js
   yes|gcloud app deploy \
     gae/frontend/app.yaml \
     gae/backend/app.yaml \
-    gae/backend/index.yaml \
+    gae/index.yaml \
     ;
-  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"http://localhost:8081/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
 }
 
 main "$@"
