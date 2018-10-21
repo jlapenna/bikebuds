@@ -35,7 +35,7 @@ function main() {
   sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
 
   dev_appserver.py \
-    gae/frontend/app.yaml \
+    --specified_service_ports=api:8081,backend:8082 \
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
