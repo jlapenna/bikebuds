@@ -9,6 +9,7 @@ const backendConfig = {
   apiHostUrl: 'http://localhost:8081',
   backendHostUrl: 'http://localhost:8082',
 }
+const bikebudsDiscoveryUrl = backendConfig.apiHostUrl + '/bikebuds-v1.discovery';
 
 // Configure Firebase.
 const config = {
@@ -138,6 +139,83 @@ class SignInScreen extends React.Component {
 }
 
 
+class GapiWrapper extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gapiLoaded: false,
+      clientLoaded: false,
+      bikebudsDiscovery: undefined,
+      bikebudsLoaded: false,
+    }
+    this.onGapiLoaded = this.onGapiLoaded.bind(this);
+    this.onClientLoaded = this.onClientLoaded.bind(this);
+    this.onDiscoveryFetched = this.onDiscoveryFetched.bind(this);
+    this.onDiscoveryLoaded = this.onDiscoveryLoaded.bind(this);
+  }
+
+  /** Load the gapi client after the library is loaded. */
+  onGapiLoaded() {
+    this.setState({gapiLoaded: true});
+    window.gapi.load('client', this.onClientLoaded);
+  }
+
+  /** Store the client load state after it becomes available. */
+  onClientLoaded() {
+    console.log('GapiWrapper.onClientLoaded', window.gapi.client);
+    this.setState({clientLoaded: true});
+  }
+
+  /** Transform a discovery response to json after it is fetched. */
+  onDiscoveryFetched(discoveryResponse) {
+    console.log('GapiWrapper.onDiscoveryFetched', discoveryResponse);
+    discoveryResponse.json().then(this.onDiscoveryLoaded);
+  }
+
+  /** Store the discoveryJson after it is loaded. */
+  onDiscoveryLoaded(bikebudsDiscovery) {
+    console.log('GapiWrapper.onDiscoveryLoaded', bikebudsDiscovery);
+    this.setState({bikebudsDiscovery: bikebudsDiscovery});
+    // TODO: This should wait for a state change....
+  }
+
+  /** Store the discoveryJson after it is loaded. */
+  onBikebudsLoaded() {
+    console.log('GapiWrapper.onBikebudsLoaded');
+    this.setState({bikebudsLoaded: true});
+  }
+
+  /**
+   * @inheritDoc
+   */
+  componentDidMount() {
+    console.log('GapiWrapper.componentDidMount');
+
+    // Load up the google-api library and a client.
+    const gapiScript = document.createElement('script');
+    gapiScript.src = 'https://apis.google.com/js/api.js?onload=onGapiLoaded';
+    window.onGapiLoaded = this.onGapiLoaded;
+    document.body.appendChild(gapiScript)
+
+    // Fetch a discovery doc.
+    fetch(bikebudsDiscoveryUrl).then(this.onDiscoveryFetched);
+  };
+
+  /**
+   * @inheritDoc
+   */
+  componentWillUnmount() {
+    console.log('GapiWrapper.componentWillUnmount');
+  };
+
+  render() {
+    return (
+      <div className="GapiWrapper" />
+    );
+  };
+}
+
+
 class App extends Component {
 
   state = {
@@ -153,11 +231,12 @@ class App extends Component {
       console.log('App: onAuthStateChanged', signedIn, user);
       this.setState({isSignedIn: signedIn});
 
-      if (signedIn) {
-        // Establish a cookie based session for this user for when we hit the
-        // backend.
-        user.getIdToken().then(this.createSession);
+      if (!signedIn) {
+        return;
       }
+      // Establish a cookie based session for this user for when we hit the
+      // backend.
+      user.getIdToken().then(this.createSession);
     });
   };
 
@@ -173,6 +252,7 @@ class App extends Component {
     return (
       <div className="App">
         <SignInScreen />
+        <GapiWrapper />
       </div>
     );
   };
