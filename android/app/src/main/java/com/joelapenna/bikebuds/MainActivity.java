@@ -22,8 +22,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.appspot.backend_dot_bikebuds_app.bikebuds.Bikebuds;
-import com.appspot.backend_dot_bikebuds_app.bikebuds.model.ApiBikebudsResponse;
+import com.appspot.api_dot_bikebuds_app.bikebuds.Bikebuds;
+import com.appspot.api_dot_bikebuds_app.bikebuds.model.MainBikebudsResponse;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 final Bikebuds.GetUser request = bikebuds.getUser();
                 Log.d(TAG, "GetUser Request: " + request);
-                ApiBikebudsResponse response = request.execute();
+                MainBikebudsResponse response = request.execute();
                 Log.d(TAG, "GetUser Response content: " + response.getContent());
             } catch (IOException e) {
                 Log.d(TAG, "GetUser Unable to execute: ", e);
