@@ -146,37 +146,18 @@ class GapiWrapper extends Component {
       gapiLoaded: false,
       clientLoaded: false,
       bikebudsDiscovery: undefined,
-      bikebudsLoaded: false,
+      bikebudsLoaded: undefined,
     }
     this.onGapiLoaded = this.onGapiLoaded.bind(this);
-    this.onClientLoaded = this.onClientLoaded.bind(this);
-    this.onDiscoveryFetched = this.onDiscoveryFetched.bind(this);
-    this.onDiscoveryLoaded = this.onDiscoveryLoaded.bind(this);
   }
 
   /** Load the gapi client after the library is loaded. */
   onGapiLoaded() {
     this.setState({gapiLoaded: true});
-    window.gapi.load('client', this.onClientLoaded);
-  }
-
-  /** Store the client load state after it becomes available. */
-  onClientLoaded() {
-    console.log('GapiWrapper.onClientLoaded', window.gapi.client);
-    this.setState({clientLoaded: true});
-  }
-
-  /** Transform a discovery response to json after it is fetched. */
-  onDiscoveryFetched(discoveryResponse) {
-    console.log('GapiWrapper.onDiscoveryFetched', discoveryResponse);
-    discoveryResponse.json().then(this.onDiscoveryLoaded);
-  }
-
-  /** Store the discoveryJson after it is loaded. */
-  onDiscoveryLoaded(bikebudsDiscovery) {
-    console.log('GapiWrapper.onDiscoveryLoaded', bikebudsDiscovery);
-    this.setState({bikebudsDiscovery: bikebudsDiscovery});
-    // TODO: This should wait for a state change....
+    window.gapi.load('client', () => {
+      console.log('GapiWrapper.onClientLoaded', window.gapi.client);
+      this.setState({clientLoaded: true});
+    });
   }
 
   /** Store the discoveryJson after it is loaded. */
@@ -198,16 +179,37 @@ class GapiWrapper extends Component {
     document.body.appendChild(gapiScript)
 
     // Fetch a discovery doc.
-    fetch(bikebudsDiscoveryUrl).then(this.onDiscoveryFetched);
+    fetch(bikebudsDiscoveryUrl).then((discoveryResponse) => {
+      console.log('GapiWrapper.onDiscoveryFetched', discoveryResponse);
+      discoveryResponse.json().then((bikebudsDiscovery) => {
+        console.log('GapiWrapper.onDiscoveryLoaded', bikebudsDiscovery);
+        this.setState({bikebudsDiscovery: bikebudsDiscovery});
+      });
+    });
   };
 
   /**
    * @inheritDoc
    */
-  componentWillUnmount() {
-    console.log('GapiWrapper.componentWillUnmount');
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('GapiWrapper.componentDidUpdate', prevState, this.state);
+    if ((this.state.clientLoaded !== prevState.clientLoaded)
+      || (this.state.bikebudsDiscovery !== prevState.bikebudsDiscovery)) {
+      if (this.state.clientLoaded
+        && this.state.bikebudsDiscovery !== undefined
+        && this.bikebudsLoaded === undefined) {
+        this.setState({bikebudsLoaded: false});
+        window.gapi.client.load(this.state.bikebudsDiscovery).then(() => {
+          console.log('GapiWrapper.componentDidUpdate: bikebuds', window.gapi.client.bikebuds);
+          this.setState({bikebudsLoaded: true});
+        });
+      }
+    }
   };
 
+  /**
+   * @inheritDoc
+   */
   render() {
     return (
       <div className="GapiWrapper" />
