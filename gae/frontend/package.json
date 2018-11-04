@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://bikebuds.joelapenna.com",
   "dependencies": {
+    "@material-ui/core": "^3.3.2",
     "ajv": "6.0.0",
     "firebase": "^5.5.7",
     "react": "^16.6.0",
