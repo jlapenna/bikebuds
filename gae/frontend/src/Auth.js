@@ -5,6 +5,8 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
+import Button from '@material-ui/core/Button';
+
 import { backendConfig } from './Config';
 
 
@@ -74,7 +76,9 @@ class SignInScreen extends Component {
       return (
         <div>
           <p>Welcome {firebase.auth().currentUser.displayName}!</p>
-          <button onClick={this.handleSignOut}>Sign-out</button>
+          <Button variant="outlined" color="secondary"
+            onClick={this.handleSignOut}>Sign-out
+          </Button>
         </div>
       );
     } else {
