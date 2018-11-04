@@ -12,12 +12,21 @@ firebase.initializeApp(config);
 
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.onGapiReady = this.onGapiReady.bind(this);
+  }
+
+  onGapiReady() {
+    this.setState({gapiReady: true});
+    console.log('App: gapiReady');
+  }
 
   render() {
     return (
       <div className="App">
         <SignInScreen />
-        <GapiWrapper />
+        <GapiWrapper onReady={this.onGapiReady} />
       </div>
     );
   };

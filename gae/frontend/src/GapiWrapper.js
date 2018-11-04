@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 
-import { backendConfig } from './Config';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
+import { config, backendConfig } from './Config';
 
 const bikebudsDiscoveryUrl = backendConfig.apiHostUrl + '/bikebuds-v1.discovery';
 
@@ -8,27 +11,21 @@ class GapiWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      gapiLoaded: false,
       clientLoaded: false,
       bikebudsDiscovery: undefined,
       bikebudsLoaded: undefined,
+      bikebudsReady: false,
+      authDict: undefined,
     }
     this.onGapiLoaded = this.onGapiLoaded.bind(this);
   }
 
   /** Load the gapi client after the library is loaded. */
   onGapiLoaded() {
-    this.setState({gapiLoaded: true});
     window.gapi.load('client', () => {
       console.log('GapiWrapper.onClientLoaded', window.gapi.client);
       this.setState({clientLoaded: true});
     });
-  }
-
-  /** Store the discoveryJson after it is loaded. */
-  onBikebudsLoaded() {
-    console.log('GapiWrapper.onBikebudsLoaded');
-    this.setState({bikebudsLoaded: true});
   }
 
   /**
@@ -36,6 +33,13 @@ class GapiWrapper extends Component {
    */
   componentDidMount() {
     console.log('GapiWrapper.componentDidMount');
+
+    // Listen for sign-in, sign-out
+    this.unregisterAuthObserver = firebase.auth().onAuthStateChanged((user) => {
+      user.getIdToken(true).then((idToken) => {
+        this.setState({authDict: {access_token: idToken}});
+      });
+    });
 
     // Load up the google-api library and a client.
     const gapiScript = document.createElement('script');
@@ -45,12 +49,18 @@ class GapiWrapper extends Component {
 
     // Fetch a discovery doc.
     fetch(bikebudsDiscoveryUrl).then((discoveryResponse) => {
-      console.log('GapiWrapper.onDiscoveryFetched', discoveryResponse);
       discoveryResponse.json().then((bikebudsDiscovery) => {
-        console.log('GapiWrapper.onDiscoveryLoaded', bikebudsDiscovery);
         this.setState({bikebudsDiscovery: bikebudsDiscovery});
       });
     });
+  };
+
+  /**
+   * @inheritDoc
+   */
+  componentWillUnmount() {
+    console.log('GapiWrapper: componentWillUnmount');
+    this.unregisterAuthObserver();
   };
 
   /**
@@ -65,30 +75,22 @@ class GapiWrapper extends Component {
         && this.bikebudsLoaded === undefined) {
         this.setState({bikebudsLoaded: false});
         window.gapi.client.load(this.state.bikebudsDiscovery).then(() => {
-          console.log('GapiWrapper.componentDidUpdate: bikebuds', window.gapi.client.bikebuds);
           this.setState({bikebudsLoaded: true});
         });
-      }
-    }
+      };
+    };
+    if ((this.state.authDict !== prevState.authDict)
+      || (this.state.bikebudsLoaded !== prevState.bikebudsLoaded)) {
+      if ((this.state.authDict !== undefined)
+        && this.state.bikebudsLoaded) {
+        window.gapi.client.setToken(this.state.authDict);
+        window.gapi.client.setApiKey(config.apiKey);
+        this.setState({bikebudsReady: true});
+        console.log('GapiWrapper: Ready');
+        this.props.onReady();
+      };
+    };
   };
-
-  /*
-  function initJsClient(bikebudsDiscovery) {
-    gapi.client.load(bikebudsDiscovery).then(function () {
-      console.log("initJsClient: bikebuds", gapi.client.bikebuds);
-      firebase.auth().currentUser.getIdToken(true).then(function (idToken) {
-        console.log("initJsClient: idToken", idToken);
-        var tokenDict = {access_token: idToken};
-        gapi.client.setToken(tokenDict);
-        gapi.client.setApiKey(config.apiKey);
-        gapi.client.bikebuds.get_user().then(
-          function(response) {
-            console.log('initJsClient: get_user response', response);
-          });
-      });
-    });
-  }
-  */
 
   /**
    * @inheritDoc
