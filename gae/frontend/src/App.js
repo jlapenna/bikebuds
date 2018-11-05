@@ -3,6 +3,10 @@ import './App.css';
 
 import firebase from 'firebase/app';
 
+import CssBaseline from '@material-ui/core/CssBaseline';
+
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import theme from './theme';
 import { config } from './Config';
 import GapiWrapper from './GapiWrapper';
 import SignInScreen from './Auth';
@@ -24,10 +28,15 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <SignInScreen />
-        <GapiWrapper onReady={this.onGapiReady} />
-      </div>
+        <MuiThemeProvider theme={theme}>
+          <React.Fragment>
+            <CssBaseline />
+            <div className="App">
+              <SignInScreen />
+              <GapiWrapper onReady={this.onGapiReady} />
+            </div>
+          </React.Fragment>
+        </MuiThemeProvider>
     );
   };
 }
