@@ -45,6 +45,10 @@ function main() {
   pip install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
 
   echo ""
+  echo "Copying over service keys to api."
+  cp -rf "${repo_path}/private/service_keys" "${api_path}/lib/"
+
+  echo ""
   echo "Installing backend dependencies."
   rm -rf "${backend_path}/lib"
   pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
