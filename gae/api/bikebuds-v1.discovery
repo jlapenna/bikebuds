@@ -32,7 +32,7 @@
       ]
     },
     "get_user": {
-      "httpMethod": "POST",
+      "httpMethod": "GET",
       "id": "bikebuds.get_user",
       "path": "getUser",
       "response": {

@@ -48,7 +48,7 @@ class BikebudsApi(remote.Service):
         message_types.VoidMessage,
         BikebudsResponse,
         path='getUser',
-        http_method='POST',
+        http_method='GET',
         name='get_user',
         api_key_required=True)
     def get_user(self, request):

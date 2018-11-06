@@ -48,7 +48,7 @@
       }
     },
     "/bikebuds/v1/getUser": {
-      "post": {
+      "get": {
         "operationId": "BikebudsApi_getUser",
         "parameters": [],
         "responses": {

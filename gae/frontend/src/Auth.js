@@ -5,20 +5,18 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
-import Button from '@material-ui/core/Button';
-
 import { backendConfig } from './Config';
 
 
 class SignInScreen extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      isSignedIn: undefined,
+    };
     this.handleSignOut = this.handleSignOut.bind(this);
   };
 
-  state = {
-    isSignedIn: undefined,
-  };
 
   uiConfig = {
     // Popup signin flow rather than redirect flow.
@@ -73,22 +71,13 @@ class SignInScreen extends Component {
       return null;
     }
     if (this.state.isSignedIn) {
-      return (
-        <div>
-          <p>Welcome {firebase.auth().currentUser.displayName}!</p>
-          <Button variant="outlined" color="secondary"
-            onClick={this.handleSignOut}>Sign-out
-          </Button>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <h1>Bikebuds</h1>
-          <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
-        </div>
-      );
+      return null;
     }
+    return (
+      <div>
+        <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
+      </div>
+    );
   };
 }
 
