@@ -34,11 +34,16 @@ function main() {
   sed -i "s#var apiHostUrl = .*#var apiHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
   sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
 
+  pushd gae/frontend;
+  npm run-script start &
+  popd
+
   dev_appserver.py \
     --specified_service_ports=api:8081,backend:8082 \
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
+  fg;
 }
 
 main "$@"
