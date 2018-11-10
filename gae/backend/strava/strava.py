@@ -24,10 +24,10 @@ import firebase_admin
 
 import stravalib
 
+from shared.datastore import users
 from shared.config import config
 import auth_util
 import services
-import users
 
 SERVICE_NAME = 'strava'
 

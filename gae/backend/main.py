@@ -25,11 +25,11 @@ from flask_cors import cross_origin
 
 from google.appengine.ext import ndb
 
-import auth_util
+from shared.datastore import users
 from shared.config import config
-import users
-import services
 from withings import withings
+import auth_util
+import services
 
 from strava import strava
 

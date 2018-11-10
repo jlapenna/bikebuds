@@ -62,11 +62,11 @@ class ProfileCard extends Component {
                 justify="center"
                 alignItems="center">
             <Avatar className={this.props.classes.avatar}
-                    alt={this.props.user.displayName}
-                    src={this.props.user.photoURL}>
+                    alt={this.props.firebaseUser.displayName}
+                    src={this.props.firebaseUser.photoURL}>
             </Avatar>
-            <Typography variant="h5">{this.props.user.displayName}</Typography>
-            <Typography variant="h5">{this.state.response}</Typography>
+            <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
+            <Typography variant="h6">{this.state.response}</Typography>
           </Grid>
         </CardContent>
         <CardActions>

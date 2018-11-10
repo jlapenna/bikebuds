@@ -23,7 +23,7 @@ class App extends Component {
     super(props);
     this.state = {
       isSignedIn: undefined,
-      user: undefined,
+      firebaseUser: undefined,
       gapiReady: false,
     };
     this.onGapiReady = this.onGapiReady.bind(this);
@@ -38,9 +38,10 @@ class App extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver = firebase.auth().onAuthStateChanged((user) => {
-      this.setState({isSignedIn: !!user, user: user});
-    });
+    this.unregisterAuthObserver =
+      firebase.auth().onAuthStateChanged((firebaseUser) => {
+        this.setState({isSignedIn: !!firebaseUser, firebaseUser: firebaseUser});
+      });
   };
 
   /**
@@ -62,7 +63,8 @@ class App extends Component {
             <CssBaseline />
             <Grid container className="App" spacing={16}>
               <Grid item>
-                <ProfileCard user={this.state.user} gapiReady={this.state.gapiReady} />
+                <ProfileCard firebaseUser={this.state.firebaseUser}
+                             gapiReady={this.state.gapiReady} />
               </Grid>
             </Grid>
             <GapiWrapper onReady={this.onGapiReady} />

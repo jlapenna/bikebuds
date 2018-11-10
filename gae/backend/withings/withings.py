@@ -24,8 +24,8 @@ from flask_cors import cross_origin
 import nokia 
 
 import auth_util
+from shared.datastore import users
 from shared.config import config
-import users
 import services
 
 
