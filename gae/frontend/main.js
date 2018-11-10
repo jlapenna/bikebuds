@@ -75,10 +75,6 @@ $(function() {
         $('#logged-in').show();
         $('#logged-out').hide();
 
-        // Establish a cookie based session for this user for when we hit the
-        // backend.
-        user.getIdToken().then(createSession);
-
         // Then load the gapi client and set up its authentication.
         loadGapi();
       } else {
@@ -86,40 +82,6 @@ $(function() {
         $('#logged-out').show();
 
       }
-    });
-  }
-
-  function createSession(idToken) {
-    console.log('createSession');
-    return $.ajax(backendHostUrl + '/create_session', {
-      /* Set header for the XMLHttpRequest to get data from the web server
-      associated with userIdToken */
-      headers: {
-        'Authorization': 'Bearer ' + idToken
-      },
-      method: 'POST',
-      xhrFields: {
-        withCredentials: true
-      },
-    }).then(function(data){
-      console.log("createSession: complete", data);
-    });
-  }
-
-  function closeSession(idToken) {
-    console.log('closeSession');
-    return $.ajax(backendHostUrl + '/close_session', {
-      /* Set header for the XMLHttpRequest to get data from the web server
-      associated with userIdToken */
-      headers: {
-        'Authorization': 'Bearer ' + idToken
-      },
-      method: 'POST',
-      xhrFields: {
-        withCredentials: true
-      },
-    }).then(function(data){
-      console.log("closeSession: complete: " + data);
     });
   }
 
@@ -156,7 +118,6 @@ $(function() {
   function signOutUser() {
     var user = firebase.auth().currentUser;
     user.getIdToken().then(function(idToken) {
-      closeSession(idToken);
       firebase.auth().signOut().then(function() {
         console.log("Sign out successful");
       }, function(error) {

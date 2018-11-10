@@ -65,41 +65,6 @@ def test_ajax(claims):
     return flask.make_response('OK', 200)
 
 
-@app.route('/test_session', methods=['GET'])
-@auth_util.claims_required
-def test_session():
-    firebase_user = auth.get_user(claims['sub'])
-    user = users.User.get(claims)
-
-    service = services.Service.create(user, 'test_service')
-    service.put()
-    service_creds = services.ServiceCredentials.create(service)
-    service_creds.put()
-    return flask.make_response('OK', 200)
-
-
-@app.route('/create_session', methods=['POST'])
-@cross_origin(supports_credentials=True, origins=config.origins)
-@auth_util.claims_required
-def create_session(claims):
-    """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
-    firebase_user = auth.get_user(claims['sub'])
-    user = users.User.get(claims)
-
-    try:
-        id_token = flask.request.headers['Authorization'].split(' ').pop()
-        expires_in = datetime.timedelta(days=5)
-        session_cookie = auth.create_session_cookie(id_token, expires_in=expires_in)
-
-        response = flask.make_response(flask.jsonify({'status': 'success'}))
-        expires = datetime.datetime.now() + expires_in
-        response.set_cookie('session', session_cookie, expires=expires, httponly=True)
-        return response
-    except auth.AuthError, e:
-        logging.error(e)
-        return flask.abort(401, 'Failed to create a session cookie')
-
-
 @app.route('/signup', methods=['GET'])
 @auth_util.claims_required
 def signup(claims):
@@ -122,12 +87,3 @@ def signup(claims):
             return flask.redirect(redirect_url)
         # TODO: Check if the service creds are valid.
     return flask.redirect(config.frontend_url)
-
-
-@app.route('/close_session', methods=['POST'])
-@cross_origin(supports_credentials=True, origins=config.origins)
-def close_session():
-    logging.info('/close_session')
-    response = flask.make_response('OK', 200)
-    response.set_cookie('session', '', expires=0)
-    return response
