@@ -4,11 +4,17 @@ import logging
 logging.getLogger('endpoints').setLevel(logging.DEBUG)
 logging.getLogger('endpoints_management').setLevel(logging.DEBUG)
 
+import google.auth.transport.requests
+import requests_toolbelt.adapters.appengine
+requests_toolbelt.adapters.appengine.monkeypatch()
+HTTP_REQUEST = google.auth.transport.requests.Request()
+
 import endpoints
 from endpoints import message_types
 from endpoints import messages
 from endpoints import remote
 
+import auth_util
 
 class BikebudsRequest(messages.Message):
     content = messages.StringField(1)
@@ -52,10 +58,10 @@ class BikebudsApi(remote.Service):
         name='get_user',
         api_key_required=True)
     def get_user(self, request):
-        user = endpoints.get_current_user()
-        if not user:
+        if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        return BikebudsResponse(content=str(user))
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        return BikebudsResponse(content=str(claims))
 
     @endpoints.method(
         message_types.VoidMessage,

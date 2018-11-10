@@ -105,6 +105,24 @@ https://medium.com/@hiranya911/firebase-introducing-session-cookies-for-server-s
 https://developers.google.com/identity/one-tap/web/get-started
 	make sure to add domains in oauth console...
 https://firebase.google.com/docs/auth/
+https://sookocheff.com/post/appengine/cloud-endpoints/using-basic-authentication-with-google-cloud-endpoints/
+
+# requires google-auth
+(Pdb) auth_header=self.request_state.headers.get('authorization')
+(Pdb) auth_token=auth_header[1]
+*** TypeError: 'NoneType' object is not callable
+(Pdb) import google.auth.transport.requests
+(Pdb) import requests_toolbelt.adapters.appengine
+(Pdb) HTTP_REQUEST = google.auth.transport.requests.Request()
+(Pdb) 
+(Pdb) id_token=auth_token
+(Pdb) google.oauth2.id_token.verify_firebase_token(id_token, HTTP_REQUEST)
+*** TransportError: ('Connection aborted.', error(13, 'Permission denied'))
+(Pdb) 
+# requests and monkepatches
+
+
+google-endpoints-api-management 1.11.0 has requirement cachetools<2,>=1.0.0, but you'll have cachetools 3.0.0 which is incompatible.
 
 # Prod deploy problems:
 Failed to load https://backend-dot-bikebuds-app.appspot.com/create_session: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'https://bikebuds.joelapenna.com' is therefore not allowed access.

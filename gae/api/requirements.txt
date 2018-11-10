@@ -1,6 +1,9 @@
 google-endpoints
 google-endpoints-api-management
-#pycrypto
-# google-endpoints-api-management 1.11.0 has requirement cachetools<2,>=1.0.0, but you'll have cachetools 2.1.0 which is incompatible.
-# google-auth 1.5.1 has requirement cachetools>=2.0.0, but you'll have cachetools 1.1.6 which is incompatible.
-#cachetools<2,>=1.0.0
+
+requests
+requests-toolbelt
+google-auth
+cachetools
+firebase-admin
+pyjwt
