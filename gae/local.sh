@@ -31,11 +31,9 @@ function main() {
   source "${env_path}/bin/activate"
 
   sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#apiHostUrl: .*#apiHostUrl: '${LOCAL_API_URL}',#" gae/frontend/src/Config.js
-  sed -i "s#backendHostUrl: .*#backendHostUrl: '${LOCAL_BACKEND_URL}',#" gae/frontend/src/Config.js
 
   pushd gae/frontend;
-  npm run-script start &
+  BROWSER=none npm start &
   popd
 
   dev_appserver.py \

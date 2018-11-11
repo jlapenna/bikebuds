@@ -22,8 +22,6 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${PROD_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#apiHostUrl: .*#apiHostUrl: '${PROD_API_URL}',#" gae/frontend/src/Config.js
-  sed -i "s#backendHostUrl: .*#backendHostUrl: '${PROD_BACKEND_URL}',#" gae/frontend/src/Config.js
 
   ./gae/update_api.sh
 
@@ -44,8 +42,6 @@ function main() {
 
   # Finally, restore manipulated urls.
   sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#apiHostUrl: .*#apiHostUrl: '${LOCAL_API_URL}',#" gae/frontend/src/Config.js
-  sed -i "s#backendHostUrl: .*#backendHostUrl: '${LOCAL_BACKEND_URL}',#" gae/frontend/src/Config.js
 }
 
 main "$@"

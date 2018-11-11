@@ -1,6 +1,8 @@
 export const backendConfig = {
-  apiHostUrl: 'http://localhost:8081',
-  backendHostUrl: 'http://localhost:8082',
+  apiHostUrl: (process.env.NODE_ENV === 'development')
+      ? 'http://localhost:8081' : 'https://api.bikebuds.cc',
+  backendHostUrl: (process.env.NODE_ENV === 'development')
+      ? 'http://localhost:8082' : 'https://backend.bikebuds.cc',
 }
 
 export const config = {
