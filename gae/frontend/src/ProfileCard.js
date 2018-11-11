@@ -28,7 +28,7 @@ class ProfileCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      response: undefined,
+      profile: undefined,
     }
     this.onSignOut = this.onSignOut.bind(this);
   }
@@ -44,11 +44,13 @@ class ProfileCard extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ProfileCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.response === undefined) {
-      console.log('ProfileCard.componentDidUpdate: get_user');
-      window.gapi.client.bikebuds.get_user().then((response) => {
-        this.setState({response: response.body});
-        console.log('ProfileCard.setState: response: ', response);
+    if (this.props.gapiReady && this.state.profile === undefined) {
+      console.log('ProfileCard.componentDidUpdate: user');
+      window.gapi.client.bikebuds.get_profile().then((response) => {
+        this.setState({profile: response.result,
+                       created: new Date(response.result.created).toLocaleDateString(),
+                      });
+        console.log('ProfileCard.setState: profile: ', response.result);
       });
     }
   }
@@ -66,7 +68,12 @@ class ProfileCard extends Component {
                     src={this.props.firebaseUser.photoURL}>
             </Avatar>
             <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
-            <Typography variant="h6">{this.state.response}</Typography>
+            {this.state.profile &&
+                <i>Joined {this.state.created}</i>
+            }
+            {!this.state.profile &&
+                <i>&#8203;</i>
+            }
           </Grid>
         </CardContent>
         <CardActions>

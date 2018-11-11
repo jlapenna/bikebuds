@@ -4,20 +4,46 @@
     "application/json"
   ],
   "definitions": {
-    "MainBikebudsRequest": {
+    "MainProfileResponse": {
       "properties": {
-        "content": {
+        "created": {
+          "format": "date-time",
           "type": "string"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
         }
       },
       "type": "object"
     },
-    "MainBikebudsResponse": {
+    "MainRequest": {
       "properties": {
         "content": {
           "type": "string"
+        },
+        "header": {
+          "$ref": "#/definitions/MainRequestHeader"
         }
       },
+      "type": "object"
+    },
+    "MainRequestHeader": {
+      "properties": {},
+      "type": "object"
+    },
+    "MainResponse": {
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
+    "MainResponseHeader": {
+      "properties": {},
       "type": "object"
     }
   },
@@ -27,7 +53,7 @@
     "version": "v1"
   },
   "paths": {
-    "/bikebuds/v1/getApiKey": {
+    "/bikebuds/v1/get_api_key": {
       "get": {
         "operationId": "BikebudsApi_getApiKey",
         "parameters": [],
@@ -35,7 +61,7 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/MainBikebudsResponse"
+              "$ref": "#/definitions/MainResponse"
             }
           }
         },
@@ -47,36 +73,16 @@
         ]
       }
     },
-    "/bikebuds/v1/getUser": {
-      "get": {
-        "operationId": "BikebudsApi_getUser",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "A successful response",
-            "schema": {
-              "$ref": "#/definitions/MainBikebudsResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": [],
-            "firebase-dca327ad": []
-          }
-        ]
-      }
-    },
-    "/bikebuds/v1/test": {
+    "/bikebuds/v1/profile": {
       "post": {
-        "operationId": "BikebudsApi_test",
+        "operationId": "BikebudsApi_getProfile",
         "parameters": [
           {
             "in": "body",
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/MainBikebudsRequest"
+              "$ref": "#/definitions/MainRequest"
             }
           }
         ],
@@ -84,12 +90,13 @@
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/MainBikebudsResponse"
+              "$ref": "#/definitions/MainProfileResponse"
             }
           }
         },
         "security": [
           {
+            "api_key": [],
             "firebase-dca327ad": []
           }
         ]

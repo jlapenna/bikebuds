@@ -15,16 +15,31 @@ from endpoints import messages
 from endpoints import remote
 
 import auth_util
+from shared.datastore import users
 
-class BikebudsRequest(messages.Message):
-    content = messages.StringField(1)
 
-class BikebudsResponse(messages.Message):
+class RequestHeader(messages.Message):
+    pass
+
+
+class ResponseHeader(messages.Message):
+    pass
+
+
+class Request(messages.Message):
+    header = messages.MessageField(RequestHeader, 1)
+    content = messages.StringField(2)
+
+
+class Response(messages.Message):
     """A proto Message that contains a simple string field."""
-    content = messages.StringField(1)
+    header = messages.MessageField(ResponseHeader, 1)
+    content = messages.StringField(2)
 
-BIKEBUDS_RESOURCE = endpoints.ResourceContainer(
-    BikebudsRequest)
+
+class ProfileResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    created = message_types.DateTimeField(2)
 
 
 @endpoints.api(
@@ -41,38 +56,27 @@ BIKEBUDS_RESOURCE = endpoints.ResourceContainer(
 class BikebudsApi(remote.Service):
 
     @endpoints.method(
-        BIKEBUDS_RESOURCE,
-        BikebudsResponse,
-        path='test',
+        endpoints.ResourceContainer(Request),
+        ProfileResponse,
+        path='profile',
         http_method='POST',
-        name='test')
-    def test(self, request):
-        output_content = request.content
-        return BikebudsResponse(content=output_content)
-
-    @endpoints.method(
-        message_types.VoidMessage,
-        BikebudsResponse,
-        path='getUser',
-        http_method='GET',
-        name='get_user',
         api_key_required=True)
-    def get_user(self, request):
+    def get_profile(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        return BikebudsResponse(content=str(claims))
+        user = users.User.get(claims)
+        response = ProfileResponse(created=user.created)
+        return response
 
     @endpoints.method(
         message_types.VoidMessage,
-        BikebudsResponse,
-        path='getApiKey',
+        Response,
         http_method='GET',
-        name='get_api_key',
         api_key_required=True)
     def get_api_key(self, request):
         key, key_type = request.get_unrecognized_field_info('key')
-        return BikebudsResponse(content=key)
+        return Response(content=key)
 
 
 api = endpoints.api_server([BikebudsApi])

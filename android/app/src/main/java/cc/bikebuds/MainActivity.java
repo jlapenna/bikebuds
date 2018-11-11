@@ -42,7 +42,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import cc.bikebuds.api.bikebuds.Bikebuds;
-import cc.bikebuds.api.bikebuds.model.MainBikebudsResponse;
+import cc.bikebuds.api.bikebuds.model.MainProfileResponse;
+import cc.bikebuds.api.bikebuds.model.MainRequest;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Bikebuds";
@@ -86,11 +87,11 @@ public class MainActivity extends AppCompatActivity {
     private void asyncGetUser(final Bikebuds bikebuds) {
         CompletableFuture.runAsync(() -> {
             try {
-                final Bikebuds.GetUser request = bikebuds.getUser();
+                final Bikebuds.GetProfile request = bikebuds.getProfile(new MainRequest());
                 Log.d(TAG, "GetUser Request: " + request);
-                MainBikebudsResponse response = request.execute();
-                Log.d(TAG, "GetUser Response content: " + response.getContent());
-                editText.setText(response.getContent());
+                MainProfileResponse response = request.execute();
+                Log.d(TAG, "GetUser Response content: " + response.getCreated());
+                editText.setText(response.getCreated().toString());
             } catch (IOException e) {
                 Log.d(TAG, "GetUser Unable to execute: ", e);
             }
