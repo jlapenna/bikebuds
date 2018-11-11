@@ -4,7 +4,7 @@ apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.joelapenna.bikebuds"
+        applicationId "cc.bikebuds"
         minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
@@ -73,6 +73,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.0.4'
     implementation 'com.firebaseui:firebase-ui-auth:4.1.0'
     implementation 'com.google.firebase:firebase-messaging:17.3.3'
+
+    implementation 'com.google.android.material:material:1.0.0'
 
     // Android extensions for Bikebuds API.
 
