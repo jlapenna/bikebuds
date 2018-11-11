@@ -26,7 +26,7 @@ import nokia
 import auth_util
 from shared.datastore import users
 from shared.config import config
-import services
+from shared.datastore import services
 
 
 SERVICE_NAME = 'withings'
@@ -136,6 +136,9 @@ def sync(claims):
 @module.route('/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
+    user = users.User.get(claims)
+    service = services.Service.get(user.key, SERVICE_NAME)
+
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
 
@@ -166,11 +169,8 @@ def redirect(claims):
     service_creds = services.ServiceCredentials.update(user.key, SERVICE_NAME,
         creds_dict)
 
-    dest = flask.request.args.get('dest', None)
-    if dest:
-        return flask.redirect(config.backend_url + dest)
-    else:
-        return flask.redirect(config.frontend_url)
+    dest = flask.request.args.get('dest', '')
+    return flask.redirect(config.backend_url + dest)
 
 
 def get_callback_uri(dest):

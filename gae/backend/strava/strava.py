@@ -27,7 +27,7 @@ import stravalib
 from shared.datastore import users
 from shared.config import config
 import auth_util
-import services
+from shared.datastore import services
 
 SERVICE_NAME = 'strava'
 
@@ -55,6 +55,9 @@ def test(claims):
 @module.route('/strava/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
+    user = users.User.get(claims)
+    service = services.Service.get(user.key, SERVICE_NAME)
+
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
 

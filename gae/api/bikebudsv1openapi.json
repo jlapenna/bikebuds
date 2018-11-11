@@ -45,6 +45,22 @@
     "MainResponseHeader": {
       "properties": {},
       "type": "object"
+    },
+    "MainServiceResponse": {
+      "properties": {
+        "created": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        },
+        "modified": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
     }
   },
   "host": "api.bikebuds.cc",
@@ -91,6 +107,35 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/MainProfileResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/service": {
+      "post": {
+        "operationId": "BikebudsApi_getService",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainServiceResponse"
             }
           }
         },

@@ -14,6 +14,7 @@ import GapiWrapper from './GapiWrapper';
 import SignInScreen from './Auth';
 
 import ProfileCard from './ProfileCard';
+import ServiceCard from './ServiceCard';
 
 firebase.initializeApp(config);
 
@@ -66,6 +67,14 @@ class App extends Component {
                 <ProfileCard firebaseUser={this.state.firebaseUser}
                              gapiReady={this.state.gapiReady} />
               </Grid>
+              <Grid item>
+                <ServiceCard serviceName="strava"
+                  gapiReady={this.state.gapiReady} />
+              </Grid>
+              <Grid item>
+                <ServiceCard serviceName="withings"
+                  gapiReady={this.state.gapiReady} />
+              </Grid>
             </Grid>
             <GapiWrapper onReady={this.onGapiReady} />
           </React.Fragment>
@@ -76,6 +85,7 @@ class App extends Component {
         <React.Fragment>
           <CssBaseline />
           <div className="App">
+            <img src="icon.png" />
             <SignInScreen />
           </div>
         </React.Fragment>

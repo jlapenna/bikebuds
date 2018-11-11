@@ -14,9 +14,11 @@
 
 # Module supporting storing service info.
 
+import logging
+
 from google.appengine.ext import ndb
 
-import users
+from shared.datastore import users
 
 
 class Service(ndb.Model):
@@ -33,7 +35,8 @@ class Service(ndb.Model):
             modified = True
             service = Service(key=service_key)
         if modified:
-            service.put()
+            r = service.put()
+            logging.info('Created Service, %s', r)
         return service
 
     @classmethod

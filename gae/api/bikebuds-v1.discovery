@@ -45,6 +45,21 @@
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
       ]
+    },
+    "get_service": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_service",
+      "path": "service",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
     }
   },
   "name": "bikebuds",
@@ -142,6 +157,23 @@
     "MainResponseHeader": {
       "id": "MainResponseHeader",
       "properties": {},
+      "type": "object"
+    },
+    "MainServiceResponse": {
+      "id": "MainServiceResponse",
+      "properties": {
+        "created": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "header": {
+          "$ref": "MainResponseHeader"
+        },
+        "modified": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
       "type": "object"
     }
   },

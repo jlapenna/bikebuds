@@ -15,6 +15,7 @@ from endpoints import messages
 from endpoints import remote
 
 import auth_util
+from shared.datastore import services
 from shared.datastore import users
 
 
@@ -42,6 +43,12 @@ class ProfileResponse(messages.Message):
     created = message_types.DateTimeField(2)
 
 
+class ServiceResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    created = message_types.DateTimeField(2)
+    modified = message_types.DateTimeField(3)
+
+
 @endpoints.api(
     name='bikebuds',
     version='v1',
@@ -67,6 +74,22 @@ class BikebudsApi(remote.Service):
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = users.User.get(claims)
         response = ProfileResponse(created=user.created)
+        return response
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request),
+        ServiceResponse,
+        path='service',
+        http_method='POST',
+        api_key_required=True)
+    def get_service(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        service = services.Service.get(user.key, 'strava')
+        response = ServiceResponse(created=service.created,
+                modified=service.modified)
         return response
 
     @endpoints.method(
