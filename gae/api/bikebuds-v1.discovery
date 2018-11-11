@@ -105,7 +105,7 @@
     }
   },
   "protocol": "rest",
-  "rootUrl": "http://localhost:8081/_ah/api/",
+  "rootUrl": "https://api-dot-bikebuds-app.appspot.com/_ah/api/",
   "schemas": {
     "MainBikebudsRequest": {
       "id": "MainBikebudsRequest",

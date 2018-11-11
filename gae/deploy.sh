@@ -21,11 +21,11 @@ source gae/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"https://api-dot-bikebuds-app.appspot.com/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#var apiHostUrl = .*#var apiHostUrl = 'https://api-dot-bikebuds-app.appspot.com';#" gae/frontend/main.js
-  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'https://backend-dot-bikebuds-app.appspot.com';#" gae/frontend/main.js
-  sed -i "s#apiHostUrl: .*#apiHostUrl: 'https://api-dot-bikebuds-app.appspot.com',#" gae/frontend/src/App.js
-  sed -i "s#backendHostUrl: .*#backendHostUrl: 'https://backend-dot-bikebuds-app.appspot.com',#" gae/frontend/src/App.js
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${PROD_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  sed -i "s#apiHostUrl: .*#apiHostUrl: '${PROD_API_URL}',#" gae/frontend/src/Config.js
+  sed -i "s#backendHostUrl: .*#backendHostUrl: '${PROD_BACKEND_URL}',#" gae/frontend/src/Config.js
+
+  ./gae/update_api.sh
 
   # First, update the API endpoint.
   gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
@@ -40,15 +40,12 @@ function main() {
     gae/frontend/app.yaml \
     gae/api/app.yaml \
     gae/backend/app.yaml \
-    gae/index.yaml \
     ;
 
   # Finally, restore manipulated urls.
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"http://localhost:8081/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#var apiHostUrl = .*#var apiHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
-  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
-  sed -i "s#apiHostUrl: .*#apiHostUrl: 'http://localhost:8081',#" gae/frontend/src/App.js
-  sed -i "s#backendHostUrl: .*#backendHostUrl: 'http://localhost:8082',#" gae/frontend/src/App.js
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  sed -i "s#apiHostUrl: .*#apiHostUrl: '${LOCAL_API_URL}',#" gae/frontend/src/Config.js
+  sed -i "s#backendHostUrl: .*#backendHostUrl: '${LOCAL_BACKEND_URL}',#" gae/frontend/src/Config.js
 }
 
 main "$@"

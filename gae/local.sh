@@ -30,9 +30,9 @@ function main() {
   echo "Using virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
 
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"http://localhost:8081/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-  sed -i "s#var apiHostUrl = .*#var apiHostUrl = 'http://localhost:8081';#" gae/frontend/main.js
-  sed -i "s#var backendHostUrl = .*#var backendHostUrl = 'http://localhost:8082';#" gae/frontend/main.js
+  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  sed -i "s#apiHostUrl: .*#apiHostUrl: '${LOCAL_API_URL}',#" gae/frontend/src/Config.js
+  sed -i "s#backendHostUrl: .*#backendHostUrl: '${LOCAL_BACKEND_URL}',#" gae/frontend/src/Config.js
 
   pushd gae/frontend;
   npm run-script start &
