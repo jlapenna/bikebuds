@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PROD_FRONTEND_URL='https://bikebuds.joelapenna.com'
-PROD_API_URL='https://api-dot-bikebuds.joelapenna.com'
-PROD_BACKEND_URL='https://backend-dot-bikebuds-app.appspot.com'
+PROD_FRONTEND_URL='https://www.bikebuds.cc'
+PROD_API_URL='https://api.bikebuds.cc'
+PROD_BACKEND_URL='https://backend.bikebuds.cc'
 
 LOCAL_FRONTEND_URL='http://localhost:8080'
 LOCAL_API_URL='http://localhost:8081'

@@ -14,16 +14,15 @@
  * limitations under the License.
 */
 
-package com.joelapenna.bikebuds;
+package cc.bikebuds;
 
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.EditText;
 
-import com.appspot.api_dot_bikebuds_app.bikebuds.Bikebuds;
-import com.appspot.api_dot_bikebuds_app.bikebuds.model.MainBikebudsResponse;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -42,15 +41,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import cc.bikebuds.api.bikebuds.Bikebuds;
+import cc.bikebuds.api.bikebuds.model.MainBikebudsResponse;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Bikebuds";
 
     private static final int RC_SIGN_IN = 100;
+    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        editText = ((EditText) findViewById(R.id.editText));
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
@@ -71,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
                         token != null ? new AuthenticatedHttpRequestInitializer(token) : null;
                 Bikebuds.Builder builder = new Bikebuds.Builder(new NetHttpTransport(),
                         JacksonFactory.getDefaultInstance(), httpRequestInitializer)
-                        .setRootUrl(getResources().getString(R.string.backend_url) + "/_ah/api/");
+                        .setApplicationName("Bikebuds")
+                        .setRootUrl(getResources().getString(R.string.api_url) + "/_ah/api/");
                 asyncGetUser(builder.build());
             }
         });
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "GetUser Request: " + request);
                 MainBikebudsResponse response = request.execute();
                 Log.d(TAG, "GetUser Response content: " + response.getContent());
+                editText.setText(response.getContent());
             } catch (IOException e) {
                 Log.d(TAG, "GetUser Unable to execute: ", e);
             }

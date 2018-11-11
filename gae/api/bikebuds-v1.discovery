@@ -9,7 +9,7 @@
     }
   },
   "basePath": "/_ah/api/bikebuds/v1/",
-  "baseUrl": "https://api-dot-bikebuds-app.appspot.com/_ah/api/bikebuds/v1/",
+  "baseUrl": "https://api.bikebuds.cc/_ah/api/bikebuds/v1/",
   "batchPath": "batch",
   "description": "This is an API",
   "discoveryVersion": "v1",
@@ -105,7 +105,7 @@
     }
   },
   "protocol": "rest",
-  "rootUrl": "https://api-dot-bikebuds-app.appspot.com/_ah/api/",
+  "rootUrl": "http://localhost:8081/_ah/api/",
   "schemas": {
     "MainBikebudsRequest": {
       "id": "MainBikebudsRequest",

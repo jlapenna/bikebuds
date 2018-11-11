@@ -21,7 +21,7 @@
       "type": "object"
     }
   },
-  "host": "api-dot-bikebuds-app.appspot.com",
+  "host": "api.bikebuds.cc",
   "info": {
     "title": "bikebuds",
     "version": "v1"

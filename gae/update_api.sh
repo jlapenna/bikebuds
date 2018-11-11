@@ -3,7 +3,7 @@
 
 source gae/base.sh
 
-HOSTNAME="api-dot-bikebuds-app.appspot.com"
+HOSTNAME="api.bikebuds.cc"
 API="bikebuds"
 VERSION="v1"
 

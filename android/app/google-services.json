@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:294988021695:android:0162c8b72f40c936",
+        "mobilesdk_app_id": "1:294988021695:android:31f49a6cad59ee46",
         "android_client_info": {
-          "package_name": "com.joelapenna.bikebuds"
+          "package_name": "cc.bikebuds"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "294988021695-1fe7mphu8bvsce3mb8mt2rp73nf3ak6r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joelapenna.bikebuds",
+            "package_name": "cc.bikebuds",
             "certificate_hash": "edb9318d79ffb45ecc8a013cca8aaaf18e3e775c"
           }
         },
@@ -26,7 +26,7 @@
           "client_id": "294988021695-kro101i7h5996jmk4avgm996mdsos3fv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joelapenna.bikebuds",
+            "package_name": "cc.bikebuds",
             "certificate_hash": "8ad9cf00147b7d4fe17bfc27decdc552d0af99b3"
           }
         },

@@ -28,4 +28,4 @@ env_variables:
   GAE_USE_SOCKETS_HTTPLIB : 'true'
 
   # Endpoints 
-  ENDPOINTS_SERVICE_NAME: api-dot-bikebuds-app.appspot.com
+  ENDPOINTS_SERVICE_NAME: api.bikebuds.cc

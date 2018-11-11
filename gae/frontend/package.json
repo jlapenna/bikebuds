@@ -2,7 +2,7 @@
   "name": "bikebuds",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://bikebuds.joelapenna.com",
+  "homepage": "https://bikebuds.cc",
   "dependencies": {
     "@material-ui/core": "^3.3.2",
     "ajv": "6.0.0",
