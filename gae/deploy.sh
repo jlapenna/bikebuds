@@ -21,8 +21,6 @@ source gae/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${PROD_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
-
   ./gae/update_api.sh
 
   # First, update the API endpoint.
@@ -39,9 +37,6 @@ function main() {
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
-
-  # Finally, restore manipulated urls.
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
 }
 
 main "$@"

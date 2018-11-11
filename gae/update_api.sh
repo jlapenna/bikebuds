@@ -3,12 +3,19 @@
 
 source gae/base.sh
 
-HOSTNAME="api.bikebuds.cc"
 API="bikebuds"
 VERSION="v1"
 
 
 function main() {
+
+  local is_local="$1";
+  if [[ "$is_local" ]]; then
+    local hostname="${LOCAL_API_HOSTNAME}";
+  else
+    local hostname="${PROD_API_HOSTNAME}";
+  fi
+
   local repo_path="$(get_repo_path)";
 
   local env_path=$(readlink -f "${HOME}/appengine_env")
@@ -31,7 +38,7 @@ function main() {
 
   python "${api_path}/lib/endpoints/endpointscfg.py" get_openapi_spec main.BikebudsApi \
       -a "${api_path}" \
-      --hostname "${HOSTNAME}" \
+      --hostname "${PROD_API_HOSTNAME}" \
       -o "${api_path}" \
      ;
   if [[ "$?" != 0 || ! -e "${spec_path}" ]]; then
@@ -40,7 +47,7 @@ function main() {
   fi
   python "${api_path}/lib/endpoints/endpointscfg.py" get_discovery_doc main.BikebudsApi \
       -a "${api_path}" \
-      --hostname "${HOSTNAME}" \
+      --hostname "${hostname}" \
       -o "${api_path}" \
      ;
   if [[ "$?" != 0 || ! -e "${discovery_path}" ]]; then
@@ -49,7 +56,7 @@ function main() {
   fi
   python "${api_path}/lib/endpoints/endpointscfg.py" get_client_lib java main.BikebudsApi \
       -a "${api_path}" \
-      --hostname "${HOSTNAME}" \
+      --hostname "${PROD_API_HOSTNAME}" \
       -o "${tmp_path}" \
       -bs gradle \
      ;

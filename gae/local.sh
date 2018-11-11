@@ -30,7 +30,7 @@ function main() {
   echo "Using virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
 
-  sed -i "s#\"rootUrl\": .*#\"rootUrl\": \"${LOCAL_API_URL}/_ah/api/\",#" gae/api/bikebuds-v1.discovery
+  ./gae/update_api.sh local;
 
   pushd gae/frontend;
   BROWSER=none npm start &
