@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -13,6 +14,16 @@ import ServiceCard from './ServiceCard';
 
 
 const styles = {
+  root: {
+    flexGrow: 1,
+  },
+  grow: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginLeft: -12,
+    marginRight: 20,
+  },
 };
 
 class Main extends Component {
@@ -31,29 +42,33 @@ class Main extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <MuiThemeProvider theme={theme}>
-        <React.Fragment>
-          <Grid container spacing={16}
-            style={{margin: 0, width: '100%'}}>
-            <Grid item>
-              <ProfileCard firebaseUser={this.props.firebaseUser}
-                gapiReady={this.state.gapiReady} />
-            </Grid>
-            <Grid item>
-              <ServiceCard serviceName="strava"
-                gapiReady={this.state.gapiReady} />
-            </Grid>
-            <Grid item>
-              <ServiceCard serviceName="withings"
-                gapiReady={this.state.gapiReady} />
-            </Grid>
+      <div className={classes.root}>
+        <AppBar position="static">
+          <Toolbar color="inherit" className={classes.grow}>
+            <Typography className={classes.grow} variant="h6" color="inherit">Bikebuds</Typography>
+          </Toolbar>
+        </AppBar>
+        <Grid container spacing={16}
+          style={{margin: 0, width: '100%'}}>
+          <Grid item>
+            <ProfileCard firebaseUser={this.props.firebaseUser}
+              gapiReady={this.state.gapiReady} />
           </Grid>
-          <GapiWrapper onReady={this.onGapiReady} />
-        </React.Fragment>
-      </MuiThemeProvider>
+          <Grid item>
+            <ServiceCard serviceName="strava"
+              gapiReady={this.state.gapiReady} />
+          </Grid>
+          <Grid item>
+            <ServiceCard serviceName="withings"
+              gapiReady={this.state.gapiReady} />
+          </Grid>
+        </Grid>
+        <GapiWrapper onReady={this.onGapiReady} />
+      </div>
     );
   };
 }
-export default withStyles(styles)(Main);
 
+export default withStyles(styles)(Main);
