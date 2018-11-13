@@ -62,10 +62,11 @@ class App extends Component {
         <MuiThemeProvider theme={theme}>
           <React.Fragment>
             <CssBaseline />
-            <Grid container className="App" spacing={16}>
+            <Grid container className="App" spacing={16}
+              style={{margin: 0, width: '100%'}}>
               <Grid item>
                 <ProfileCard firebaseUser={this.state.firebaseUser}
-                             gapiReady={this.state.gapiReady} />
+                  gapiReady={this.state.gapiReady} />
               </Grid>
               <Grid item>
                 <ServiceCard serviceName="strava"
