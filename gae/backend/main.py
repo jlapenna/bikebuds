@@ -65,6 +65,11 @@ def test_ajax(claims):
     return flask.make_response('OK', 200)
 
 
+@app.route('/frontend', methods=['GET'])
+def frontend():
+    return flask.redirect(config.frontend_url)
+
+
 @app.route('/create_session', methods=['POST'])
 @cross_origin(supports_credentials=True, origins=config.origins)
 @auth_util.claims_required

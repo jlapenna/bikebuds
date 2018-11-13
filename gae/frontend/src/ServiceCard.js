@@ -4,13 +4,14 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 import { withStyles } from '@material-ui/core/styles';
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+
+import { backendConfig } from './Config';
 
 
 const styles = {
@@ -30,6 +31,50 @@ class ServiceCard extends Component {
     this.state = {
       service: undefined,
     }
+    this.onConnect = this.onConnect.bind(this);
+    this.onSync = this.onSync.bind(this);
+    this.updateServiceState = this.updateServiceState.bind(this);
+  }
+
+  onConnect() {
+    if (this.state.connected !== undefined && this.state.connected) {
+      window.gapi.client.bikebuds.disconnect_service(
+        {'id': this.props.serviceName}).then(this.updateServiceState);
+      return;
+    }
+    firebase.auth().currentUser.getIdToken().then((idToken) => {
+      fetch(backendConfig.backendHostUrl + '/create_session', {
+        /* Set header for the XMLHttpRequest to get data from the web server
+         * associated with userIdToken */
+        headers: {
+          'Authorization': 'Bearer ' + idToken
+        },
+        method: 'POST',
+        credentials: 'include'
+      }).then((response) => {
+        if (response.status === 200) {
+          console.log(backendConfig.backendHostUrl + '/'
+            + this.props.serviceName + '/init?dest=/frontend');
+          window.location.replace(backendConfig.backendHostUrl + '/'
+            + this.props.serviceName + '/init?dest=/frontend');
+        } else {
+          console.log('Unable to create a session.', response);
+        }
+      });
+    });
+  }
+
+  onSync() {
+  }
+
+  updateServiceState(response) {
+    this.setState({
+      service: response.result,
+      created: new Date(response.result.created).toLocaleDateString(),
+      modified: new Date(response.result.modified).toLocaleDateString(),
+      connected: response.result.connected
+    });
+    console.log('ServiceCard.setState: service: ', response.result);
   }
 
   /**
@@ -38,20 +83,16 @@ class ServiceCard extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ServiceCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.service === undefined) {
-      console.log('ServiceCard.componentDidUpdate: user');
-      window.gapi.client.bikebuds.get_service().then((response) => {
-        this.setState({service: response.result,
-                       created: new Date(response.result.created).toLocaleDateString(),
-                       modified: new Date(response.result.modified).toLocaleDateString(),
-                      });
-        console.log('ServiceCard.setState: service: ', response.result);
-      });
+      window.gapi.client.bikebuds.get_service(
+        {'id': this.props.serviceName}).then(this.updateServiceState);
     }
   }
 
-  render() {
+  renderCardContent() {
+    if (this.state.service === undefined) {
+      return;
+    }
     return (
-      <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
           <Grid container
                 direction="column"
@@ -66,10 +107,38 @@ class ServiceCard extends Component {
             }
           </Grid>
         </CardContent>
+    )
+  };
+
+  renderCardActions() {
+    if (this.state.service === undefined) {
+      return;
+    }
+    var connectText = this.state.connected ? "Disconnect" : "Connect";
+    if (this.state.connected) {
+      return (
         <CardActions>
+          <Button color="primary" variant="contained"
+            onClick={this.onSync}>Sync</Button>
           <Button color="secondary"
-              onClick={this.onSignOut}>Sign-out</Button>
+            onClick={this.onConnect}>Disconnect</Button>
         </CardActions>
+      )
+    } else {
+      return (
+        <CardActions>
+          <Button color="primary" variant="contained"
+            onClick={this.onConnect}>Connect</Button>
+        </CardActions>
+      )
+    }
+  }
+
+  render() {
+    return (
+      <Card className={this.props.classes.root}>
+        {this.renderCardContent()}
+        {this.renderCardActions()}
       </Card>
     );
   };

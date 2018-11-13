@@ -20,6 +20,30 @@
   "id": "bikebuds:v1",
   "kind": "discovery#restDescription",
   "methods": {
+    "disconnect_service": {
+      "httpMethod": "POST",
+      "id": "bikebuds.disconnect_service",
+      "parameterOrder": [
+        "id"
+      ],
+      "parameters": {
+        "id": {
+          "location": "path",
+          "type": "string"
+        }
+      },
+      "path": "disconnect/{id}",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "get_api_key": {
       "httpMethod": "GET",
       "id": "bikebuds.get_api_key",
@@ -49,7 +73,16 @@
     "get_service": {
       "httpMethod": "POST",
       "id": "bikebuds.get_service",
-      "path": "service",
+      "parameterOrder": [
+        "id"
+      ],
+      "parameters": {
+        "id": {
+          "location": "path",
+          "type": "string"
+        }
+      },
+      "path": "service/{id}",
       "request": {
         "$ref": "MainRequest",
         "parameterName": "resource"
@@ -127,9 +160,6 @@
     "MainRequest": {
       "id": "MainRequest",
       "properties": {
-        "content": {
-          "type": "string"
-        },
         "header": {
           "$ref": "MainRequestHeader"
         }
@@ -145,9 +175,6 @@
       "description": "A proto Message that contains a simple string field.",
       "id": "MainResponse",
       "properties": {
-        "content": {
-          "type": "string"
-        },
         "header": {
           "$ref": "MainResponseHeader"
         }
@@ -162,6 +189,9 @@
     "MainServiceResponse": {
       "id": "MainServiceResponse",
       "properties": {
+        "connected": {
+          "type": "boolean"
+        },
         "created": {
           "format": "date-time",
           "type": "string"

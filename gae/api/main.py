@@ -29,13 +29,11 @@ class ResponseHeader(messages.Message):
 
 class Request(messages.Message):
     header = messages.MessageField(RequestHeader, 1)
-    content = messages.StringField(2)
 
 
 class Response(messages.Message):
     """A proto Message that contains a simple string field."""
     header = messages.MessageField(ResponseHeader, 1)
-    content = messages.StringField(2)
 
 
 class ProfileResponse(messages.Message):
@@ -47,6 +45,7 @@ class ServiceResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     created = message_types.DateTimeField(2)
     modified = message_types.DateTimeField(3)
+    connected = messages.BooleanField(4)
 
 
 @endpoints.api(
@@ -77,9 +76,9 @@ class BikebudsApi(remote.Service):
         return response
 
     @endpoints.method(
-        endpoints.ResourceContainer(Request),
+        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
         ServiceResponse,
-        path='service',
+        path='service/{id}',
         http_method='POST',
         api_key_required=True)
     def get_service(self, request):
@@ -87,9 +86,31 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = users.User.get(claims)
-        service = services.Service.get(user.key, 'strava')
+        logging.info('Getting %s service info.', request.id)
+        service = services.Service.get(user.key, request.id)
+        service_creds = services.ServiceCredentials.default(user.key, request.id)
         response = ServiceResponse(created=service.created,
-                modified=service.modified)
+                modified=service.modified,
+                connected=service_creds is not None)
+        return response
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
+        ServiceResponse,
+        path='disconnect/{id}',
+        http_method='POST',
+        api_key_required=True)
+    def disconnect_service(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        logging.info('Getting %s service info.', request.id)
+        service = services.Service.get(user.key, request.id)
+        services.ServiceCredentials.get_key(service.key).delete()
+        response = ServiceResponse(created=service.created,
+                modified=service.modified,
+                connected=False)
         return response
 
     @endpoints.method(
