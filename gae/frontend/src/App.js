@@ -4,17 +4,13 @@ import './App.css';
 import firebase from 'firebase/app';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
 
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
 import { config } from './Config';
-import GapiWrapper from './GapiWrapper';
-import SignInScreen from './Auth';
-
-import ProfileCard from './ProfileCard';
-import ServiceCard from './ServiceCard';
+import Main from './Main';
+import SignInScreen from './SignInScreen';
 
 firebase.initializeApp(config);
 
@@ -25,14 +21,7 @@ class App extends Component {
     this.state = {
       isSignedIn: undefined,
       firebaseUser: undefined,
-      gapiReady: false,
     };
-    this.onGapiReady = this.onGapiReady.bind(this);
-  }
-
-  onGapiReady() {
-    this.setState({gapiReady: true});
-    console.log('App: gapiReady');
   }
 
   /**
@@ -60,36 +49,22 @@ class App extends Component {
     if (this.state.isSignedIn) {
       return (
         <MuiThemeProvider theme={theme}>
-          <React.Fragment>
+          <div className="App">
             <CssBaseline />
-            <Grid container className="App" spacing={16}
-              style={{margin: 0, width: '100%'}}>
-              <Grid item>
-                <ProfileCard firebaseUser={this.state.firebaseUser}
-                  gapiReady={this.state.gapiReady} />
-              </Grid>
-              <Grid item>
-                <ServiceCard serviceName="strava"
-                  gapiReady={this.state.gapiReady} />
-              </Grid>
-              <Grid item>
-                <ServiceCard serviceName="withings"
-                  gapiReady={this.state.gapiReady} />
-              </Grid>
-            </Grid>
-            <GapiWrapper onReady={this.onGapiReady} />
-          </React.Fragment>
+            <Main firebaseUser={this.state.firebaseUser}/>
+          </div>
         </MuiThemeProvider>
       );
     } else {
       return (
-        <React.Fragment>
-          <CssBaseline />
-          <div className="App">
-            <img src="icon.png" />
-            <SignInScreen />
-          </div>
-        </React.Fragment>
+        <MuiThemeProvider theme={theme}>
+          <React.Fragment>
+            <CssBaseline />
+            <div className="App">
+              <SignInScreen />
+            </div>
+          </React.Fragment>
+        </MuiThemeProvider>
       );
     }
   };

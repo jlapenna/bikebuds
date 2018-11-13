@@ -5,8 +5,6 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
-import { backendConfig } from './Config';
-
 
 class SignInScreen extends Component {
   constructor(props) {
@@ -75,6 +73,7 @@ class SignInScreen extends Component {
     }
     return (
       <div>
+        <img alt="bikebuds logo" src="icon.png" />
         <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
       </div>
     );
