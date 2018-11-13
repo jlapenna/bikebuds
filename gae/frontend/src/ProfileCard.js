@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
@@ -30,6 +31,7 @@ class ProfileCard extends Component {
     super(props);
     this.state = {
       profile: undefined,
+      connectActionPending: false,
     }
     this.onSignOut = this.onSignOut.bind(this);
     this.onConnectServices = this.onConnectServices.bind(this);
@@ -42,6 +44,7 @@ class ProfileCard extends Component {
   };
 
   onConnectServices() {
+    this.setState({connectActionPending: true});
     firebase.auth().currentUser.getIdToken().then((idToken) => {
       fetch(backendConfig.backendHostUrl + '/create_session', {
         /* Set header for the XMLHttpRequest to get data from the web server
@@ -100,7 +103,10 @@ class ProfileCard extends Component {
         </CardContent>
         <CardActions>
           <Button color="primary" variant="contained"
-              onClick={this.onConnectServices}>Connect Services</Button>
+            disabled={this.state.connectActionPending}
+            onClick={this.onConnectServices}>Connect Services
+            {this.state.connectActionPending && <CircularProgress size={20} />}
+          </Button>
           <Button color="secondary"
               onClick={this.onSignOut}>Sign-out</Button>
         </CardActions>

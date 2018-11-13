@@ -8,6 +8,7 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
@@ -30,6 +31,9 @@ class ServiceCard extends Component {
     super(props);
     this.state = {
       service: undefined,
+      syncActionPending: false,
+      connectActionPending: false,
+
     }
     this.onConnect = this.onConnect.bind(this);
     this.onSync = this.onSync.bind(this);
@@ -37,9 +41,13 @@ class ServiceCard extends Component {
   }
 
   onConnect() {
+    this.setState({connectActionPending: true});
     if (this.state.connected !== undefined && this.state.connected) {
       window.gapi.client.bikebuds.disconnect_service(
-        {'id': this.props.serviceName}).then(this.updateServiceState);
+        {'id': this.props.serviceName}).then((response) => {
+          this.updateServiceState(response);
+          this.setState({connectActionPending: false});
+        });
       return;
     }
     firebase.auth().currentUser.getIdToken().then((idToken) => {
@@ -59,12 +67,14 @@ class ServiceCard extends Component {
             + this.props.serviceName + '/init?dest=/frontend');
         } else {
           console.log('Unable to create a session.', response);
+          this.setState({connectActionPending: false});
         }
       });
     });
   }
 
   onSync() {
+    this.setState({syncActionPending: true});
   }
 
   updateServiceState(response) {
@@ -72,7 +82,7 @@ class ServiceCard extends Component {
       service: response.result,
       created: new Date(response.result.created).toLocaleDateString(),
       modified: new Date(response.result.modified).toLocaleDateString(),
-      connected: response.result.connected
+      connected: response.result.connected,
     });
     console.log('ServiceCard.setState: service: ', response.result);
   }
@@ -114,21 +124,29 @@ class ServiceCard extends Component {
     if (this.state.service === undefined) {
       return;
     }
-    var connectText = this.state.connected ? "Disconnect" : "Connect";
     if (this.state.connected) {
       return (
         <CardActions>
           <Button color="primary" variant="contained"
-            onClick={this.onSync}>Sync</Button>
+            disabled={this.state.syncActionPending}
+            onClick={this.onSync}>Sync
+            {this.state.syncActionPending && <CircularProgress size={20} />}
+          </Button>
           <Button color="secondary"
-            onClick={this.onConnect}>Disconnect</Button>
+            disabled={this.state.connectActionPending}
+            onClick={this.onConnect}>Disconnect
+            {this.state.connectActionPending && <CircularProgress size={20} />}
+          </Button>
         </CardActions>
       )
     } else {
       return (
         <CardActions>
           <Button color="primary" variant="contained"
-            onClick={this.onConnect}>Connect</Button>
+            disabled={this.state.connectActionPending}
+            onClick={this.onConnect}>Connect
+            {this.state.connectActionPending && <CircularProgress size={20} />}
+          </Button>
         </CardActions>
       )
     }
