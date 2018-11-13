@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
-import './App.css';
 
-import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import { withStyles, MuiThemeProvider } from '@material-ui/core/styles';
-import theme from './theme';
+import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
@@ -37,7 +34,6 @@ class Main extends Component {
     return (
       <MuiThemeProvider theme={theme}>
         <React.Fragment>
-          <CssBaseline />
           <Grid container spacing={16}
             style={{margin: 0, width: '100%'}}>
             <Grid item>

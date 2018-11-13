@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './App.css';
 
 import firebase from 'firebase/app';
 
@@ -49,21 +48,15 @@ class App extends Component {
     if (this.state.isSignedIn) {
       return (
         <MuiThemeProvider theme={theme}>
-          <div className="App">
-            <CssBaseline />
-            <Main firebaseUser={this.state.firebaseUser}/>
-          </div>
+          <CssBaseline />
+          <Main firebaseUser={this.state.firebaseUser}/>
         </MuiThemeProvider>
       );
     } else {
       return (
         <MuiThemeProvider theme={theme}>
-          <React.Fragment>
-            <CssBaseline />
-            <div className="App">
-              <SignInScreen />
-            </div>
-          </React.Fragment>
+          <CssBaseline />
+          <SignInScreen />
         </MuiThemeProvider>
       );
     }
