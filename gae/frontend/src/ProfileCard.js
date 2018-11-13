@@ -12,6 +12,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
+import { backendConfig } from './Config';
 
 const styles = {
   root: {
@@ -31,11 +32,32 @@ class ProfileCard extends Component {
       profile: undefined,
     }
     this.onSignOut = this.onSignOut.bind(this);
+    this.onConnectServices = this.onConnectServices.bind(this);
   }
 
   onSignOut() {
     firebase.auth().signOut().then(() => {
       window.location.reload();
+    });
+  };
+
+  onConnectServices() {
+    firebase.auth().currentUser.getIdToken().then((idToken) => {
+      fetch(backendConfig.backendHostUrl + '/create_session', {
+        /* Set header for the XMLHttpRequest to get data from the web server
+         * associated with userIdToken */
+        headers: {
+          'Authorization': 'Bearer ' + idToken
+        },
+        method: 'POST',
+        credentials: 'include'
+      }).then((response) => {
+        if (response.status === 200) {
+          window.location.replace(backendConfig.backendHostUrl + '/signup');
+        } else {
+          console.log('Unable to create a session.', response);
+        }
+      });
     });
   };
 
@@ -77,6 +99,8 @@ class ProfileCard extends Component {
           </Grid>
         </CardContent>
         <CardActions>
+          <Button color="primary" variant="contained"
+              onClick={this.onConnectServices}>Connect Services</Button>
           <Button color="secondary"
               onClick={this.onSignOut}>Sign-out</Button>
         </CardActions>
