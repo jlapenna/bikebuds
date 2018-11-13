@@ -50,17 +50,17 @@ class Main extends Component {
             <Typography className={classes.grow} variant="h6" color="inherit">Bikebuds</Typography>
           </Toolbar>
         </AppBar>
-        <Grid container spacing={16}
+        <Grid container spacing={24}
           style={{margin: 0, width: '100%'}}>
-          <Grid item>
+          <Grid item xs={12} md={6}>
             <ProfileCard firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady} />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} md={3}>
             <ServiceCard serviceName="strava"
               gapiReady={this.state.gapiReady} />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} md={3}>
             <ServiceCard serviceName="withings"
               gapiReady={this.state.gapiReady} />
           </Grid>

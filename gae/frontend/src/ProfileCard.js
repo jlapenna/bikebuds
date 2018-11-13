@@ -17,8 +17,6 @@ import { backendConfig } from './Config';
 
 const styles = {
   root: {
-    minWidth: 275,
-    maxWidth: 375,
   },
   avatar: {
     width: 60,
