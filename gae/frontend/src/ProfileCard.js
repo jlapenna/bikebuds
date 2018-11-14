@@ -19,8 +19,8 @@ const styles = {
   root: {
   },
   avatar: {
-    width: 60,
-    height: 60,
+    width: 128,
+    height: 128,
   }
 };
 
