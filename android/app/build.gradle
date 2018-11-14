@@ -76,6 +76,12 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.0.0'
 
+    // Image downloads and manipulation.
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'jp.wasabeef:picasso-transformations:2.1.0'
+
+    compile 'com.android.support:customtabs:28.0.0'
+
     // Android extensions for Bikebuds API.
 
     // https://cloud.google.com/endpoints/docs/frameworks/java/calling-from-android
@@ -93,6 +99,7 @@ dependencies {
 
     // The Library itself.
     implementation files('libs/bikebuds.jar')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
 
 apply plugin: 'com.google.gms.google-services'

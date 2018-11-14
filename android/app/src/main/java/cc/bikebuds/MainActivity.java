@@ -12,21 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package cc.bikebuds;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -35,6 +42,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,19 +52,44 @@ import java.util.concurrent.CompletableFuture;
 import cc.bikebuds.api.bikebuds.Bikebuds;
 import cc.bikebuds.api.bikebuds.model.MainProfileResponse;
 import cc.bikebuds.api.bikebuds.model.MainRequest;
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Bikebuds";
 
     private static final int RC_SIGN_IN = 100;
     private EditText editText;
+    private TextView nameTextView;
+    private ImageView avatarImageView;
+    private MaterialButton signOutButton;
+    private MaterialButton connectServicesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = ((EditText) findViewById(R.id.editText));
+        avatarImageView = findViewById(R.id.avatarImageView);
+        nameTextView = findViewById(R.id.displayNameTextView);
+        signOutButton = findViewById(R.id.signOutButton);
+        signOutButton.setOnClickListener(v -> {
+            Intent intent = getIntent();
+            FirebaseAuth.getInstance().signOut();
+            finish();
+            startActivity(intent);
+        });
+        connectServicesButton = findViewById(R.id.connectServicesButton);
+        connectServicesButton.setOnClickListener(v -> {
+            new CustomTabsIntent.Builder()
+                    .setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                    .setSecondaryToolbarColor(
+                            ContextCompat.getColor(this, R.color.colorSecondary))
+                    .build()
+                    .launchUrl(this,
+                            Uri.withAppendedPath(
+                                    Uri.parse(getResources().getString(R.string.backend_url)),
+                                    "signup"));
+        });
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
@@ -68,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void finishSignIn(FirebaseUser user, IdpResponse response) {
         Log.d(TAG, "finishSignIn: " + user.getDisplayName());
+        nameTextView.setText(user.getDisplayName());
+        Picasso.get().load(user.getPhotoUrl())
+                .transform(new CropCircleTransformation())
+                .into(avatarImageView);
         final Task<GetTokenResult> tokenTask = user.getIdToken(true);
         tokenTask.addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
@@ -91,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "GetUser Request: " + request);
                 MainProfileResponse response = request.execute();
                 Log.d(TAG, "GetUser Response content: " + response.getCreated());
-                editText.setText(response.getCreated().toString());
+                //  editText.setText(response.getCreated().toString());
             } catch (IOException e) {
                 Log.d(TAG, "GetUser Unable to execute: ", e);
             }
