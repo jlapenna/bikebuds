@@ -1,8 +1,18 @@
 import React, { Component } from 'react';
 
+import { withStyles } from '@material-ui/core/styles';
+
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+
+
+const styles = {
+  logo: {
+    display: "block",
+    margin : "20px auto 10px",
+  },
+}
 
 
 class SignInScreen extends Component {
@@ -63,6 +73,7 @@ class SignInScreen extends Component {
   };
 
   render() {
+    const { classes } = this.props;
     if (this.state.isSignedIn === undefined) {
       // We haven't initialized state, so we don't know what to render.
       return null;
@@ -72,11 +83,11 @@ class SignInScreen extends Component {
     }
     return (
       <div>
-        <img alt="bikebuds logo" src="icon.png" />
+        <img className={classes.logo} alt="bikebuds logo" src="icon.png" />
         <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
       </div>
     );
   };
 }
 
-export default SignInScreen;
+export default withStyles(styles)(SignInScreen);
