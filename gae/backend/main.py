@@ -27,11 +27,12 @@ from google.appengine.ext import ndb
 
 from shared.datastore import users
 from shared.config import config
-from withings import withings
 import auth_util
 from shared.datastore import services
 
+from bbfitbit import bbfitbit as fitbit
 from strava import strava
+from withings import withings
 
 # Firebase admin setup
 import firebase_admin
@@ -43,9 +44,17 @@ firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 
 # Flask setup
 app = flask.Flask(__name__)
+app.register_blueprint(fitbit.module)
 app.register_blueprint(strava.module)
 app.register_blueprint(withings.module)
 flask_cors.CORS(app, origins=config.origins)
+
+
+SERVICE_NAMES = (
+        withings.SERVICE_NAME,
+        strava.SERVICE_NAME,
+        fitbit.SERVICE_NAME
+        )
 
 
 class TestModel(ndb.Expando):
@@ -103,11 +112,10 @@ def signup(claims):
     firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 
-    service_names = sorted((withings.SERVICE_NAME, strava.SERVICE_NAME))
     user_services = services.Service.query(ancestor=user.key).fetch()
     user_services_dict = dict(((service.key.id(), service) for service in user_services))
     logging.info('user services: %s', user_services_dict)
-    for service_name in service_names:
+    for service_name in SERVICE_NAMES:
         redirect_url = config.backend_url + '/' + service_name + '/init?dest=/signup'
         if service_name not in user_services_dict:
             # We haven't initialized this service yet. Lets do it.

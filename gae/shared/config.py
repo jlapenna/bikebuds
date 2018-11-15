@@ -21,6 +21,7 @@ class ProdConfig(object):
         self.api_url = 'https://api.bikebuds.cc'
         self.backend_url = 'https://backend.bikebuds.cc'
         self.origins = [self.api_url, self.frontend_url, self.backend_url]
+        self.fitbit_creds = json.load(open('lib/service_keys/fitbit.json'))
         self.strava_creds = json.load(open('lib/service_keys/strava.json'))
         self.withings_creds = json.load(open('lib/service_keys/withings.json'))
         self.prod = True
@@ -33,6 +34,7 @@ class LocalConfig(object):
         self.api_url = 'http://localhost:8081'
         self.backend_url = 'http://localhost:8082'
         self.origins = [self.api_url, self.frontend_url, self.backend_url]
+        self.fitbit_creds = json.load(open('lib/service_keys/fitbit-local.json'))
         self.strava_creds = json.load(open('lib/service_keys/strava-local.json'))
         self.withings_creds = json.load(open('lib/service_keys/withings-local.json'))
         self.prod = False

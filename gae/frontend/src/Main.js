@@ -52,15 +52,19 @@ class Main extends Component {
         </AppBar>
         <Grid container spacing={24}
           style={{margin: 0, width: '100%'}}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <ProfileCard firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={6} lg={3}>
+            <ServiceCard serviceName="fitbit"
+              gapiReady={this.state.gapiReady} />
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
             <ServiceCard serviceName="strava"
               gapiReady={this.state.gapiReady} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={6} lg={3}>
             <ServiceCard serviceName="withings"
               gapiReady={this.state.gapiReady} />
           </Grid>
