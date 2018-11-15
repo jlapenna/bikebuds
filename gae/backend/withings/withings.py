@@ -24,9 +24,9 @@ from flask_cors import cross_origin
 import nokia 
 
 import auth_util
-from shared.datastore import users
 from shared.config import config
 from shared.datastore import services
+from shared.datastore import users
 
 
 SERVICE_NAME = 'withings'
@@ -87,13 +87,12 @@ def test(claims):
     service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
     if service_creds is None:
         return get_auth_url_response()
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
+    client = create_api_client(user.key, service_creds)
 
-    # TODO: pass a refresh_cb function to store refreshed tokens
-    client = nokia.NokiaApi(service_creds)
-    measures = client.get_measures(lastupdate=lastupdate, category=1)
-
+    measures = client.get_measures(category=1)
     logging.info(str(dir(Measure.weight)))
+
+    service_key = services.Service.get_key(user.key, SERVICE_NAME)
     query = Measure.latest_query(service_key, Measure.weight)
     logging.info(query)
     results = query.fetch(1)
@@ -108,9 +107,12 @@ def sync(claims):
     service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
     if service_creds is None:
         return get_auth_url_response()
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
 
     lastupdate = flask.request.args.get('lastupdate', None)
+
+    client = create_api_client(user.key, service_creds)
+
+    service_key = services.Service.get_key(user.key, SERVICE_NAME)
     if lastupdate is None:
         latest = Measure.fetch_lastupdate(service_key)
         if len(latest) == 1:
@@ -119,11 +121,8 @@ def sync(claims):
             lastupdate = 0
     logging.info('lastupdate: ' + str(lastupdate))
 
-    # TODO: pass a refresh_cb function to store refreshed tokens
-    client = nokia.NokiaApi(service_creds)
-
     measures = client.get_measures(lastupdate=lastupdate, category=1)
-    logging.info('lenthg: ' + str(len(measures)))
+    logging.info('length: ' + str(len(measures)))
 
     @ndb.transactional
     def put_measures(measures, service_key):
@@ -157,7 +156,6 @@ def redirect(claims):
             config.withings_creds['client_secret'],
             callback_uri=get_callback_uri(dest))
     creds = auth.get_credentials(code)
-
     creds_dict = dict(
             access_token=creds.access_token,
             token_expiry=creds.token_expiry,
@@ -166,10 +164,10 @@ def redirect(claims):
             user_id=creds.user_id,
             client_id=creds.client_id,
             consumer_secret=creds.consumer_secret)
+
     service_creds = services.ServiceCredentials.update(user.key, SERVICE_NAME,
         creds_dict)
 
-    dest = flask.request.args.get('dest', '')
     return flask.redirect(config.backend_url + dest)
 
 
@@ -185,3 +183,9 @@ def get_auth_url_response(dest):
         return flask.jsonify({'authorize_url': auth.get_authorize_url()})
     else:
         return flask.redirect(auth.get_authorize_url())
+
+
+def create_api_client(user_key, service_creds):
+    def refresh_callback(new_credentials):
+        services.ServiceCredentials.update(user_key, SERVICE_NAME, new_credentials)
+    return nokia.NokiaApi(service_creds, refresh_cb=refresh_callback)

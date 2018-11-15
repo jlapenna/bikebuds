@@ -16,17 +16,15 @@ import json
 import logging
 import os
 
-from google.appengine.ext import ndb
-
 import flask
 from flask_cors import cross_origin
 
+import fitbit
+
 import auth_util
-from shared.datastore import users
 from shared.config import config
 from shared.datastore import services
-
-import fitbit
+from shared.datastore import users
 
 
 SERVICE_NAME = 'fitbit'
@@ -45,15 +43,8 @@ def test(claims):
         return get_auth_url_response()
     service_key = services.Service.get_key(user.key, SERVICE_NAME)
 
-    fitbit_client = fitbit.Fitbit(
-        client_id=config.fitbit_creds['client_id'],
-        client_secret=config.fitbit_creds['client_secret'],
-        access_token=service_creds.access_token,
-        refresh_token=service_creds.refresh_token,
-        expires_at=service_creds.expires_at,
-        redirect_uri=get_redirect_uri('/frontend'))
-
-    logging.info(str(fitbit_client.user_profile_get()))
+    client = create_api_client(user.key, service_creds)
+    logging.info('result: ' + str(client.user_profile_get()))
 
     return flask.make_response('OK', 200)
 
@@ -66,6 +57,9 @@ def sync(claims):
     if service_creds is None:
         return get_auth_url_response()
     service_key = services.Service.get_key(user.key, SERVICE_NAME)
+
+    client = create_api_client(user.key, service_creds)
+    logging.info('result: ' + str(client.user_profile_get()))
 
     return flask.make_response('OK', 200)
 
@@ -116,3 +110,16 @@ def get_auth_url_response(dest):
         return flask.jsonify({'authorize_url': url})
     else:
         return flask.redirect(url)
+
+
+def create_api_client(user_key, service_creds):
+    def refresh_callback(new_credentials):
+        services.ServiceCredentials.update(user_key, SERVICE_NAME, new_credentials)
+    return fitbit.Fitbit(
+            config.fitbit_creds['client_id'],
+            config.fitbit_creds['client_secret'],
+            access_token=service_creds.access_token,
+            refresh_token=service_creds.refresh_token,
+            expires_at=service_creds.expires_at,
+            redirect_uri=get_redirect_uri('frontend'),
+            refresh_cb=refresh_callback)

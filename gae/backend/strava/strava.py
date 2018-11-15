@@ -17,17 +17,15 @@ import logging
 import os
 
 import flask
-import flask_cors
 from flask_cors import cross_origin
-
-import firebase_admin
 
 import stravalib
 
-from shared.datastore import users
-from shared.config import config
 import auth_util
+from shared.config import config
 from shared.datastore import services
+from shared.datastore import users
+
 
 SERVICE_NAME = 'strava'
 
@@ -70,34 +68,35 @@ def redirect(claims):
     service = services.Service.get(user.key, SERVICE_NAME)
 
     code = flask.request.args.get('code')
+    dest = flask.request.args.get('dest', '')
 
     client = stravalib.client.Client()
-    access_token = client.exchange_code_for_token(
+    creds = client.exchange_code_for_token(
             client_id=config.strava_creds['client_id'],
-            client_secret=config.strava_creds['client_secret'], code=code)
+            client_secret=config.strava_creds['client_secret'],
+            code=code)
 
     services.ServiceCredentials.update(user.key, SERVICE_NAME,
-            dict(access_token))
+            dict(creds))
 
-    dest = flask.request.args.get('dest', None)
-    if dest:
-        return flask.redirect(config.backend_url + dest)
-    else:
-        return flask.redirect(config.frontend_url)
+    return flask.redirect(config.backend_url + dest)
 
 
-def get_callback_uri(dest):
+def get_redirect_uri(dest):
     return config.backend_url + '/' + SERVICE_NAME + '/redirect?dest=' + dest
 
 
 def get_auth_url_response(dest):
     client = stravalib.client.Client()
-    authorize_url = client.authorization_url(
+    url = client.authorization_url(
             client_id=config.strava_creds['client_id'],
-            redirect_uri=get_callback_uri(dest),
+            redirect_uri=get_redirect_uri(dest),
             scope='read')
 
     if flask.request.method == 'POST':
-        return flask.jsonify({'redirect_url': authorize_url})
+        return flask.jsonify({'redirect_url': url})
     else:
         return flask.redirect(authorize_url)
+
+def update_creds():
+    pass
