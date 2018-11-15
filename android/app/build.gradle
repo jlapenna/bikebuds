@@ -7,8 +7,9 @@ android {
         applicationId "cc.bikebuds"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        //noinspection HighAppVersionCode
+        versionCode 2018111500
+        versionName "2018111500"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
