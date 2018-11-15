@@ -77,7 +77,7 @@ def redirect(claims):
             client_secret=config.strava_creds['client_secret'], code=code)
 
     services.ServiceCredentials.update(user.key, SERVICE_NAME,
-            dict(access_token=access_token))
+            dict(access_token))
 
     dest = flask.request.args.get('dest', None)
     if dest:
