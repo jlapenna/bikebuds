@@ -16,7 +16,7 @@
 
 # Run a local instance, rewriting code for local development.
 
-source gae/base.sh
+source setup/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

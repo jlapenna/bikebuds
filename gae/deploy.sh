@@ -16,7 +16,7 @@
 
 # Deploy the service to appengine, rewriting code to support production.
 
-source gae/base.sh
+source setup/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

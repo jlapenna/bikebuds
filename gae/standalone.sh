@@ -16,7 +16,7 @@
 
 # Do development in the backend gae environment.
 
-source gae/base.sh
+source setup/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

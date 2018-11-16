@@ -1,7 +1,7 @@
 #!/bin/bash
 # Update API.
 
-source gae/base.sh
+source setup/base.sh
 
 API="bikebuds"
 VERSION="v1"

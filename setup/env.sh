@@ -15,10 +15,8 @@
 # limitations under the License.
 
 # Configures an environment to run the backend in.
-#
-# ./gae/setup_env.sh
 
-source gae/base.sh
+source base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";
