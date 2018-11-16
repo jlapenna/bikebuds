@@ -16,8 +16,6 @@ import json
 import logging
 import os
 
-from google.appengine.ext import ndb
-
 import flask
 from flask_cors import cross_origin
 
@@ -27,6 +25,7 @@ import auth_util
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
+from shared.datastore.withings import Measure
 
 
 SERVICE_NAME = 'withings'
@@ -34,50 +33,6 @@ SERVICE_NAME = 'withings'
 module = flask.Blueprint(SERVICE_NAME, __name__,
         template_folder='templates',
         static_folder='static')
-
-
-class Measure(ndb.Model):
-    """Holds a measure."""
-    date = ndb.DateTimeProperty()
-
-    weight = ndb.FloatProperty()  # 1
-    height = ndb.FloatProperty(indexed=False)  # 4
-    fat_free_mass = ndb.FloatProperty(indexed=False)  # 5
-    fat_ratio = ndb.FloatProperty(indexed=False)  # 6
-    fat_mass_weight = ndb.FloatProperty(indexed=False)  # 8
-    diastolic_blood_pressure = ndb.FloatProperty(indexed=False)  # 9
-    systolic_blood_pressure = ndb.FloatProperty(indexed=False)  # 10
-    heart_pulse = ndb.FloatProperty(indexed=False)  # 11
-    temperature = ndb.FloatProperty(indexed=False)  # 12
-    spo2 = ndb.FloatProperty(indexed=False)  # 54
-    body_temperature = ndb.FloatProperty(indexed=False)  # 71
-    skin_temperature = ndb.FloatProperty(indexed=False)  # 72
-    muscle_mass = ndb.FloatProperty(indexed=False)  # 76
-    hydration = ndb.FloatProperty(indexed=False)  # 77
-    bone_mass = ndb.FloatProperty(indexed=False)  # 88
-    pulse_wave_velocity = ndb.FloatProperty(indexed=False)  # 91
-
-    @classmethod
-    def to_measure(cls, service_key, measure):
-        attributes = dict()
-        for key, type_int in nokia.NokiaMeasureGroup.MEASURE_TYPES:
-            value = measure.get_measure(type_int)
-            if value is not None:
-                attributes[key] = value
-        measure = Measure(id=measure.date.timestamp,
-                parent=service_key,
-                date=measure.date.datetime.replace(tzinfo=None),
-                **attributes)
-        return measure
-
-    @classmethod
-    def latest_query(cls, service_key, measure_type):
-        return Measure.query(measure_type != None, ancestor=service_key).order(
-                measure_type, -Measure.date)
-
-    @classmethod
-    def fetch_lastupdate(cls, service_key):
-        return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
 
 
 @module.route('/withings/test', methods=['GET', 'POST'])
@@ -90,13 +45,10 @@ def test(claims):
     client = create_api_client(user.key, service_creds)
 
     measures = client.get_measures(category=1)
-    logging.info(str(dir(Measure.weight)))
 
     service_key = services.Service.get_key(user.key, SERVICE_NAME)
     query = Measure.latest_query(service_key, Measure.weight)
-    logging.info(query)
     results = query.fetch(1)
-    logging.info(results)
     return flask.make_response('OK', 200)
 
 
@@ -119,10 +71,8 @@ def sync(claims):
             lastupdate = latest[0].key.id()
         else:
             lastupdate = 0
-    logging.info('lastupdate: ' + str(lastupdate))
 
     measures = client.get_measures(lastupdate=lastupdate, category=1)
-    logging.info('length: ' + str(len(measures)))
 
     @ndb.transactional
     def put_measures(measures, service_key):
