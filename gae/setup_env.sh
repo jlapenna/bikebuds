@@ -56,6 +56,12 @@ function main() {
   echo ""
   echo "Copying over service keys to backend."
   cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
+
+  echo ""
+  echo "Initializing npm packages for frontend."
+  pushd gae/frontend
+  npm install
+  popd
 }
 
 main "$@"
