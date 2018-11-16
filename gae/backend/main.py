@@ -17,18 +17,14 @@ import json
 import logging
 import os
 
-from google.appengine.ext import ndb
-
 import flask
 import flask_cors
 from flask_cors import cross_origin
 
-from google.appengine.ext import ndb
-
-from shared.datastore import users
-from shared.config import config
 import auth_util
+from shared.config import config
 from shared.datastore import services
+from shared.datastore import users
 
 from bbfitbit import bbfitbit as fitbit
 from strava import strava
@@ -55,15 +51,6 @@ SERVICE_NAMES = (
         strava.SERVICE_NAME,
         fitbit.SERVICE_NAME
         )
-
-
-class TestModel(ndb.Expando):
-    """Holds test info."""
-    name = ndb.StringProperty()
-
-    @classmethod
-    def for_user(cls, claims, **kwargs):
-        return TestModel(parent=ndb.Key(TestModel, claims['sub']), **kwargs)
 
 
 @app.route('/test_ajax', methods=['GET'])

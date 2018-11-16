@@ -16,6 +16,8 @@ import json
 import logging
 import os
 
+from google.appengine.ext import ndb
+
 import flask
 from flask_cors import cross_origin
 
