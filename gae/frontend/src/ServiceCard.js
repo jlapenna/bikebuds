@@ -16,9 +16,6 @@
 
 import React, { Component } from 'react';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
-
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -29,6 +26,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import { config } from './Config';
+import { createSession } from './session_util';
 
 const styles = {
   root: {
@@ -63,24 +61,14 @@ class ServiceCard extends Component {
         });
       return;
     }
-    firebase.auth().currentUser.getIdToken().then((idToken) => {
-      fetch(config.frontendUrl + '/services/session', {
-        /* Set header for the XMLHttpRequest to get data from the web server
-         * associated with userIdToken */
-        headers: {
-          'Authorization': 'Bearer ' + idToken
-        },
-        method: 'POST',
-        credentials: 'include'
-      }).then((response) => {
-        if (response.status === 200) {
-          window.location.replace(config.frontendUrl + '/services/' +
-            this.props.serviceName + '/init?dest=/frontend');
-        } else {
-          console.log('Unable to create a session.', response);
-          this.setState({connectActionPending: false});
-        }
-      });
+    createSession((response) => {
+      if (response.status === 200) {
+        window.location.replace(config.frontendUrl + '/services/' +
+          this.props.serviceName + '/init?dest=/frontend');
+      } else {
+        console.log('Unable to create a session.', response);
+        this.setState({connectActionPending: false});
+      }
     });
   }
 
