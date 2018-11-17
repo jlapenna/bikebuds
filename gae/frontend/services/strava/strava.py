@@ -34,7 +34,7 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
-@module.route('/strava/test', methods=['GET', 'POST'])
+@module.route('/services/strava/test', methods=['GET', 'POST'])
 @auth_util.claims_required
 def test(claims):
     user = users.User.get(claims)
@@ -50,7 +50,7 @@ def test(claims):
     return flask.make_response('OK', 200)
 
 
-@module.route('/strava/init', methods=['GET', 'POST'])
+@module.route('/services/strava/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
     user = users.User.get(claims)
@@ -60,7 +60,7 @@ def init(claims):
     return get_auth_url_response(dest)
 
 
-@module.route('/strava/redirect', methods=['GET'])
+@module.route('/services/strava/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def redirect(claims):
@@ -79,11 +79,11 @@ def redirect(claims):
     services.ServiceCredentials.update(user.key, SERVICE_NAME,
             dict(creds))
 
-    return flask.redirect(config.backend_url + dest)
+    return flask.redirect(config.frontend_url + dest)
 
 
 def get_redirect_uri(dest):
-    return config.backend_url + '/' + SERVICE_NAME + '/redirect?dest=' + dest
+    return config.frontend_url + '/services/strava/redirect?dest=' + dest
 
 
 def get_auth_url_response(dest):
@@ -96,7 +96,7 @@ def get_auth_url_response(dest):
     if flask.request.method == 'POST':
         return flask.jsonify({'redirect_url': url})
     else:
-        return flask.redirect(authorize_url)
+        return flask.redirect(url)
 
 def update_creds():
     pass

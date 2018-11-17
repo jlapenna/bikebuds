@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-export const backendConfig = {
-  apiHostUrl: (process.env.NODE_ENV === 'development')
-      ? 'http://localhost:8081' : 'https://api.bikebuds.cc',
-  backendHostUrl: (process.env.NODE_ENV === 'development')
-      ? 'http://localhost:8082' : 'https://backend.bikebuds.cc',
-}
-
 export const config = {
     apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
     authDomain: "bikebuds-app.firebaseapp.com",
@@ -28,4 +21,13 @@ export const config = {
     projectId: "bikebuds-app",
     storageBucket: "bikebuds-app.appspot.com",
     messagingSenderId: "294988021695",
+
+    devserverUrl: (process.env.NODE_ENV === 'development')
+        ? 'http://localhost:8081' : '',
+    frontendUrl: (process.env.NODE_ENV === 'development')
+        ? 'http://localhost:8081' : '',
+    apiUrl: (process.env.NODE_ENV === 'development')
+        ? 'http://localhost:8082' : 'https://api.bikebuds.cc',
+    backendUrl: (process.env.NODE_ENV === 'development')
+        ? 'http://localhost:8083' : 'https://backend.bikebuds.cc',
 };

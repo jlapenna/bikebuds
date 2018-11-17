@@ -27,15 +27,17 @@ function main() {
 
   local env_path=$(readlink -f "${repo_path}/appengine_env")
   if [ "$?" -ne 0 ]; then
-    echo "Unable to locate the virtual environment"
+    echo "Unable to locate the virtual environment."
     exit 1;
   fi
 
-  echo "Setting up environment for deployment..."
-  echo ""
   echo "Setting up virtual environment at ${env_path}"
-  virtualenv --python python2 "${env_path}"
+  virtualenv --python python2 "${env_path}" 2>&1 > /dev/null
   source "${env_path}/bin/activate"
+  if [ "$?" -ne 0 ]; then
+    echo "Unable to setup virtual environment."
+    exit 2;
+  fi
 
   echo ""
   echo "Installing frontend dependencies."

@@ -19,9 +19,9 @@ import React, { Component } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-import { config, backendConfig } from './Config';
+import { config } from './Config';
 
-const bikebudsDiscoveryUrl = backendConfig.apiHostUrl + '/bikebuds-v1.discovery';
+const bikebudsDiscoveryUrl = config.apiUrl + '/bikebuds-v1.discovery';
 
 class GapiWrapper extends Component {
   constructor(props) {

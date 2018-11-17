@@ -1,0 +1,12 @@
+Flask
+pyjwt
+flask-cors
+google-auth
+requests
+requests-toolbelt
+
+firebase-admin
+
+stravalib
+nokia
+fitbit

@@ -34,7 +34,7 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
-@module.route('/fitbit/test', methods=['GET', 'POST'])
+@module.route('/services/fitbit/test', methods=['GET', 'POST'])
 @auth_util.claims_required
 def test(claims):
     user = users.User.get(claims)
@@ -49,7 +49,7 @@ def test(claims):
     return flask.make_response('OK', 200)
 
 
-@module.route('/fitbit/sync', methods=['GET', 'POST'])
+@module.route('/services/fitbit/sync', methods=['GET', 'POST'])
 @auth_util.claims_required
 def sync(claims):
     user = users.User.get(claims)
@@ -64,7 +64,7 @@ def sync(claims):
     return flask.make_response('OK', 200)
 
 
-@module.route('/fitbit/init', methods=['GET', 'POST'])
+@module.route('/services/fitbit/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
     user = users.User.get(claims)
@@ -74,7 +74,7 @@ def init(claims):
     return get_auth_url_response(dest)
 
 
-@module.route('/fitbit/redirect', methods=['GET'])
+@module.route('/services/fitbit/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.fitbit.com'])
 @auth_util.claims_required
 def redirect(claims):
@@ -93,11 +93,11 @@ def redirect(claims):
     service_creds = services.ServiceCredentials.update(
             user.key, SERVICE_NAME, creds)
 
-    return flask.redirect(config.backend_url + dest)
+    return flask.redirect(config.frontend_url + dest)
 
 
 def get_redirect_uri(dest):
-    return config.backend_url + '/fitbit/redirect?dest=' + dest
+    return config.frontend_url + '/services/fitbit/redirect?dest=' + dest
 
 
 def get_auth_url_response(dest):

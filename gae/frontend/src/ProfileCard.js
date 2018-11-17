@@ -29,7 +29,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import { backendConfig } from './Config';
+import { config } from './Config';
 
 const styles = {
   root: {
@@ -60,7 +60,7 @@ class ProfileCard extends Component {
   onConnectServices() {
     this.setState({connectActionPending: true});
     firebase.auth().currentUser.getIdToken().then((idToken) => {
-      fetch(backendConfig.backendHostUrl + '/create_session', {
+      fetch(config.frontendUrl + '/services/session', {
         /* Set header for the XMLHttpRequest to get data from the web server
          * associated with userIdToken */
         headers: {
@@ -70,7 +70,7 @@ class ProfileCard extends Component {
         credentials: 'include'
       }).then((response) => {
         if (response.status === 200) {
-          window.location.replace(backendConfig.backendHostUrl + '/signup');
+          window.location.replace(config.frontendUrl + '/services/signup');
         } else {
           console.log('Unable to create a session.', response);
         }

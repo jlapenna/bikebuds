@@ -15,12 +15,14 @@
 import json
 import os
 
+
 class ProdConfig(object):
     def __init__(self):
+        self.devserver_url = ''
         self.frontend_url = 'https://www.bikebuds.cc'
         self.api_url = 'https://api.bikebuds.cc'
         self.backend_url = 'https://backend.bikebuds.cc'
-        self.origins = [self.api_url, self.frontend_url, self.backend_url]
+        self.origins = [self.frontend_url, self.api_url, self.backend_url]
         self.fitbit_creds = json.load(open('lib/service_keys/fitbit.json'))
         self.strava_creds = json.load(open('lib/service_keys/strava.json'))
         self.withings_creds = json.load(open('lib/service_keys/withings.json'))
@@ -30,10 +32,12 @@ class ProdConfig(object):
 
 class LocalConfig(object):
     def __init__(self):
-        self.frontend_url = 'http://localhost:8080'
-        self.api_url = 'http://localhost:8081'
-        self.backend_url = 'http://localhost:8082'
-        self.origins = [self.api_url, self.frontend_url, self.backend_url]
+        self.devserver_url = 'http://localhost:8080'
+        self.frontend_url = 'http://localhost:8081'
+        self.api_url = 'http://localhost:8082'
+        self.backend_url = 'http://localhost:8083'
+        self.origins = [self.devserver_url, self.frontend_url, self.api_url,
+                self.backend_url]
         self.fitbit_creds = json.load(open('lib/service_keys/fitbit-local.json'))
         self.strava_creds = json.load(open('lib/service_keys/strava-local.json'))
         self.withings_creds = json.load(open('lib/service_keys/withings-local.json'))

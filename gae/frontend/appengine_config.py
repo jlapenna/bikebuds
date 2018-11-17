@@ -12,34 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python27
-api_version: 1
-service: default
-threadsafe: true
+# Configures the backend to use vendored libraries
+# https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27#vendoring
 
-libraries:
-- name: ssl
-  version: latest
+from google.appengine.ext import vendor
 
-handlers:
-- url: /services/.*
-  script: main.app
-  secure: always
-  redirect_http_response_code: 301
-- url: /
-  static_files: build/index.html
-  upload: build/index.html
-  secure: always
-  redirect_http_response_code: 301
-- url: /(.*)
-  static_files: build/\1
-  upload: build/(.*)
-  secure: always
-  redirect_http_response_code: 301
-
-env_variables:
-  # Firebase
-  FIREBASE_PROJECT_ID: 'bikebuds-app'
-
-  # Various
-  GAE_USE_SOCKETS_HTTPLIB : 'true'
+# Add any libraries installed in the "lib" folder.
+vendor.add('lib')
