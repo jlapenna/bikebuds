@@ -25,7 +25,7 @@ function main() {
   local backend_path="${repo_path}/gae/backend"
   local frontend_path="${repo_path}/gae/frontend"
 
-  local env_path=$(readlink -f "$HOME/standalone_env")
+  local env_path=$(readlink -f "${repo_path}/appengine_env")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;

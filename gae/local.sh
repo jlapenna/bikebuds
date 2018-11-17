@@ -21,7 +21,7 @@ source setup/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  local env_path=$(readlink -f "$HOME/appengine_env")
+  local env_path=$(readlink -f "${repo_path}/appengine_env")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;
@@ -37,7 +37,8 @@ function main() {
   popd
 
   dev_appserver.py \
-    --specified_service_ports=api:8081,backend:8082 \
+    --specified_service_ports=default:8081,api:8082,backend:8083 \
+    gae/frontend/app.yaml \
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;

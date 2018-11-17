@@ -18,7 +18,7 @@ function main() {
 
   local repo_path="$(get_repo_path)";
 
-  local env_path=$(readlink -f "${HOME}/appengine_env")
+  local env_path=$(readlink -f "${repo_path}/appengine_env")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;
@@ -31,10 +31,13 @@ function main() {
   local spec_path="${api_path}/${API}${VERSION}openapi.json"
   local discovery_path="${api_path}/${API}-${VERSION}.discovery"
   local jar_path="${tmp_path}/${API}/build/libs/${API}-${VERSION}-*-SNAPSHOT.jar"
-  local jar_dest="${repo_path}/android/app/libs/bikebuds.jar"
+  local jar_dest_dir="${repo_path}/android/app/libs"
+  local jar_dest="${jar_dest_dir}/bikebuds.jar"
 
   echo "Using virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
+
+  mkdir -p "${jar_dest_dir}" 2>&1 > /dev/null
 
   python "${api_path}/lib/endpoints/endpointscfg.py" get_openapi_spec main.BikebudsApi \
       -a "${api_path}" \

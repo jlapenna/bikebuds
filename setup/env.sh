@@ -16,7 +16,7 @@
 
 # Configures an environment to run the backend in.
 
-source base.sh
+source setup/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";
@@ -25,7 +25,7 @@ function main() {
   local backend_path="${repo_path}/gae/backend"
   local frontend_path="${repo_path}/gae/frontend"
 
-  local env_path=$(readlink -f "$HOME/appengine_env")
+  local env_path=$(readlink -f "${repo_path}/appengine_env")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;
@@ -36,6 +36,15 @@ function main() {
   echo "Setting up virtual environment at ${env_path}"
   virtualenv --python python2 "${env_path}"
   source "${env_path}/bin/activate"
+
+  echo ""
+  echo "Installing frontend dependencies."
+  rm -rf "${frontend_path}/lib"
+  pip install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
+
+  echo ""
+  echo "Copying over service keys to frontend."
+  cp -rf "${repo_path}/private/service_keys" "${frontend_path}/lib/"
 
   echo ""
   echo "Installing api dependencies."
