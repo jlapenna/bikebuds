@@ -74,12 +74,8 @@ function main() {
 
   pushd "${tmp_path}/${API}"
   gradle build
+  gradle install
   popd
-  cp -f ${jar_path} "${jar_dest}"  # unquoted src to preserve wildcard
-  if [[ "$?" != 0 || ! -e "${jar_dest}" ]]; then
-    echo "jar file not copied."
-    exit 1;
-  fi
 }
 
 main "$@"
