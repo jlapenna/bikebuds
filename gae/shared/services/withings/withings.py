@@ -18,7 +18,7 @@ import logging
 from google.appengine.ext import ndb
 
 from shared.datastore import services
-from shared.services.withings.datastore import Measure
+from shared.services.withings.datastore import Measure, MeasureMessage, create_message
 
 import nokia
 
@@ -26,7 +26,7 @@ import nokia
 class Synchronizer(object):
 
     def sync(self, user_key, service, service_creds):
-        client = self.create_client(user_key, service_creds)
+        client = create_client(user_key, service_creds)
         measures = client.get_measures(lastupdate=0, updatetime=0)
 
         @ndb.transactional
@@ -37,7 +37,7 @@ class Synchronizer(object):
         return True
 
 
-    def create_client(self, user_key, service_creds):
-        def refresh_callback(new_credentials):
-            services.ServiceCredentials.update(user_key, 'withings', new_credentials)
-        return nokia.NokiaApi(service_creds, refresh_cb=refresh_callback)
+def create_client(user_key, service_creds):
+    def refresh_callback(new_credentials):
+        services.ServiceCredentials.update(user_key, 'withings', new_credentials)
+    return nokia.NokiaApi(service_creds, refresh_cb=refresh_callback)

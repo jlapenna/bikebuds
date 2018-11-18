@@ -4,6 +4,20 @@
     "application/json"
   ],
   "definitions": {
+    "MainMeasuresResponse": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        },
+        "measure": {
+          "items": {
+            "$ref": "#/definitions/SharedServicesWithingsDatastoreMeasureMessage"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "MainProfileResponse": {
       "properties": {
         "created": {
@@ -28,14 +42,6 @@
       "properties": {},
       "type": "object"
     },
-    "MainResponse": {
-      "properties": {
-        "header": {
-          "$ref": "#/definitions/MainResponseHeader"
-        }
-      },
-      "type": "object"
-    },
     "MainResponseHeader": {
       "properties": {},
       "type": "object"
@@ -55,6 +61,92 @@
         "modified": {
           "format": "date-time",
           "type": "string"
+        },
+        "sync_date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_successful": {
+          "type": "boolean"
+        },
+        "syncing": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedServicesWithingsDatastoreMeasureMessage": {
+      "properties": {
+        "body_temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "bone_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "diastolic_blood_pressure": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_free_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_mass_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_ratio": {
+          "format": "double",
+          "type": "number"
+        },
+        "heart_pulse": {
+          "format": "double",
+          "type": "number"
+        },
+        "height": {
+          "format": "double",
+          "type": "number"
+        },
+        "hydration": {
+          "format": "double",
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "muscle_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "pulse_wave_velocity": {
+          "format": "double",
+          "type": "number"
+        },
+        "skin_temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "spo2": {
+          "format": "double",
+          "type": "number"
+        },
+        "systolic_blood_pressure": {
+          "format": "double",
+          "type": "number"
+        },
+        "temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
         }
       },
       "type": "object"
@@ -101,15 +193,24 @@
         ]
       }
     },
-    "/bikebuds/v1/get_api_key": {
-      "get": {
-        "operationId": "BikebudsApi_getApiKey",
-        "parameters": [],
+    "/bikebuds/v1/measures": {
+      "post": {
+        "operationId": "BikebudsApi_measures",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/MainResponse"
+              "$ref": "#/definitions/MainMeasuresResponse"
             }
           }
         },

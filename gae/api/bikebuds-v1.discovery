@@ -44,17 +44,6 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
-    "get_api_key": {
-      "httpMethod": "GET",
-      "id": "bikebuds.get_api_key",
-      "path": "get_api_key",
-      "response": {
-        "$ref": "MainResponse"
-      },
-      "scopes": [
-        "https://www.googleapis.com/auth/userinfo.email"
-      ]
-    },
     "get_profile": {
       "httpMethod": "POST",
       "id": "bikebuds.get_profile",
@@ -89,6 +78,21 @@
       },
       "response": {
         "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
+    "measures": {
+      "httpMethod": "POST",
+      "id": "bikebuds.measures",
+      "path": "measures",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainMeasuresResponse"
       },
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
@@ -168,6 +172,21 @@
   "protocol": "rest",
   "rootUrl": "http://localhost:8082/_ah/api/",
   "schemas": {
+    "MainMeasuresResponse": {
+      "id": "MainMeasuresResponse",
+      "properties": {
+        "header": {
+          "$ref": "MainResponseHeader"
+        },
+        "measure": {
+          "items": {
+            "$ref": "SharedServicesWithingsDatastoreMeasureMessage"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "MainProfileResponse": {
       "id": "MainProfileResponse",
       "properties": {
@@ -195,16 +214,6 @@
       "properties": {},
       "type": "object"
     },
-    "MainResponse": {
-      "description": "A proto Message that contains a simple string field.",
-      "id": "MainResponse",
-      "properties": {
-        "header": {
-          "$ref": "MainResponseHeader"
-        }
-      },
-      "type": "object"
-    },
     "MainResponseHeader": {
       "id": "MainResponseHeader",
       "properties": {},
@@ -226,6 +235,93 @@
         "modified": {
           "format": "date-time",
           "type": "string"
+        },
+        "sync_date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_successful": {
+          "type": "boolean"
+        },
+        "syncing": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedServicesWithingsDatastoreMeasureMessage": {
+      "id": "SharedServicesWithingsDatastoreMeasureMessage",
+      "properties": {
+        "body_temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "bone_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "diastolic_blood_pressure": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_free_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_mass_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "fat_ratio": {
+          "format": "double",
+          "type": "number"
+        },
+        "heart_pulse": {
+          "format": "double",
+          "type": "number"
+        },
+        "height": {
+          "format": "double",
+          "type": "number"
+        },
+        "hydration": {
+          "format": "double",
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "muscle_mass": {
+          "format": "double",
+          "type": "number"
+        },
+        "pulse_wave_velocity": {
+          "format": "double",
+          "type": "number"
+        },
+        "skin_temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "spo2": {
+          "format": "double",
+          "type": "number"
+        },
+        "systolic_blood_pressure": {
+          "format": "double",
+          "type": "number"
+        },
+        "temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
         }
       },
       "type": "object"

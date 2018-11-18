@@ -14,6 +14,9 @@
 
 from google.appengine.ext import ndb
 
+from endpoints import message_types
+from endpoints import messages
+
 import nokia 
 
 
@@ -59,3 +62,34 @@ class Measure(ndb.Model):
     @classmethod
     def fetch_lastupdate(cls, service_key):
         return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
+
+
+class MeasureMessage(messages.Message):
+    id = messages.StringField(1)
+    date = message_types.DateTimeField(2)
+
+    weight = messages.FloatField(3)  # 1
+    height = messages.FloatField(4)  # 4
+    fat_free_mass = messages.FloatField(5)  # 5
+    fat_ratio = messages.FloatField(6)  # 6
+    fat_mass_weight = messages.FloatField(7)  # 8
+    diastolic_blood_pressure = messages.FloatField(8)  # 9
+    systolic_blood_pressure = messages.FloatField(9)  # 10
+    heart_pulse = messages.FloatField(10)  # 11
+    temperature = messages.FloatField(11)  # 12
+    spo2 = messages.FloatField(12)  # 54
+    body_temperature = messages.FloatField(13)  # 71
+    skin_temperature = messages.FloatField(14)  # 72
+    muscle_mass = messages.FloatField(15)  # 76
+    hydration = messages.FloatField(16)  # 77
+    bone_mass = messages.FloatField(17)  # 88
+    pulse_wave_velocity = messages.FloatField(18)  # 91
+
+def create_message(measure):
+    attributes = dict()
+    for key, _ in nokia.NokiaMeasureGroup.MEASURE_TYPES:
+        value = getattr(measure, key, None)
+        if value is not None:
+            attributes[key] = value
+    measure = MeasureMessage(date=measure.date, **attributes)
+    return measure

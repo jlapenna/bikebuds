@@ -33,6 +33,7 @@ from endpoints import remote
 import auth_util
 from shared.datastore import services
 from shared.datastore import users
+from shared.services.withings import withings
 
 
 class RequestHeader(messages.Message):
@@ -50,6 +51,11 @@ class Request(messages.Message):
 class Response(messages.Message):
     """A proto Message that contains a simple string field."""
     header = messages.MessageField(ResponseHeader, 1)
+
+
+class MeasuresResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    measure = messages.MessageField(withings.MeasureMessage, 2, repeated=True)
 
 
 class ProfileResponse(messages.Message):
@@ -146,6 +152,26 @@ class BikebudsApi(remote.Service):
         return ServiceResponse(created=service.created,
                 modified=service.modified,
                 connected=True)
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request),
+        MeasuresResponse,
+        path='measures',
+        http_method='POST',
+        api_key_required=True)
+    def measures(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        service = services.Service.get(user.key, 'withings')
+        service_creds = services.ServiceCredentials.default(user.key, 'withings')
+        measures = withings.Measure.query()
+        proto_measures = []
+        for measure in measures:
+            proto_measures.append(withings.create_message(measure))
+
+        return MeasuresResponse(measure=proto_measures)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(2)),
