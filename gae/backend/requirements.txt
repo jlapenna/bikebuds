@@ -2,6 +2,7 @@ Flask
 pyjwt
 flask-cors
 google-auth
+google-endpoints
 requests
 requests-toolbelt
 
