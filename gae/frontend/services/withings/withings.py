@@ -27,7 +27,6 @@ import auth_util
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
-from shared.datastore.withings import Measure
 
 
 SERVICE_NAME = 'withings'
@@ -35,53 +34,6 @@ SERVICE_NAME = 'withings'
 module = flask.Blueprint(SERVICE_NAME, __name__,
         template_folder='templates',
         static_folder='static')
-
-
-@module.route('/services/withings/test', methods=['GET', 'POST'])
-@auth_util.claims_required
-def test(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return get_auth_url_response()
-    client = create_api_client(user.key, service_creds)
-
-    measures = client.get_measures(category=1)
-
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
-    query = Measure.latest_query(service_key, Measure.weight)
-    results = query.fetch(1)
-    return flask.make_response('OK', 200)
-
-
-@module.route('/services/withings/sync', methods=['GET', 'POST'])
-@auth_util.claims_required
-def sync(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return get_auth_url_response()
-
-    lastupdate = flask.request.args.get('lastupdate', None)
-
-    client = create_api_client(user.key, service_creds)
-
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
-    if lastupdate is None:
-        latest = Measure.fetch_lastupdate(service_key)
-        if len(latest) == 1:
-            lastupdate = latest[0].key.id()
-        else:
-            lastupdate = 0
-
-    measures = client.get_measures(lastupdate=lastupdate, category=1)
-
-    @ndb.transactional
-    def put_measures(measures, service_key):
-        for measure in measures:
-            Measure.to_measure(service_key, measure).put()
-    put_measures(measures, service_key)
-    return flask.make_response('OK', 200)
 
 
 @module.route('/services/withings/init', methods=['GET', 'POST'])
@@ -135,9 +87,3 @@ def get_auth_url_response(dest):
         return flask.jsonify({'authorize_url': auth.get_authorize_url()})
     else:
         return flask.redirect(auth.get_authorize_url())
-
-
-def create_api_client(user_key, service_creds):
-    def refresh_callback(new_credentials):
-        services.ServiceCredentials.update(user_key, SERVICE_NAME, new_credentials)
-    return nokia.NokiaApi(service_creds, refresh_cb=refresh_callback)

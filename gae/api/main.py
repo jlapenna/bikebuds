@@ -15,13 +15,15 @@
 """Bikebuds API."""
 
 import logging
-logging.getLogger('endpoints').setLevel(logging.DEBUG)
-logging.getLogger('endpoints_management').setLevel(logging.DEBUG)
+import datetime
 
 import google.auth.transport.requests
 import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
 HTTP_REQUEST = google.auth.transport.requests.Request()
+
+from google.appengine.api import taskqueue
+from google.appengine.ext import ndb
 
 import endpoints
 from endpoints import message_types
@@ -60,6 +62,9 @@ class ServiceResponse(messages.Message):
     created = message_types.DateTimeField(2)
     modified = message_types.DateTimeField(3)
     connected = messages.BooleanField(4)
+    syncing = messages.BooleanField(5)
+    sync_date = message_types.DateTimeField(6)
+    sync_successful = messages.BooleanField(7)
 
 
 @endpoints.api(
@@ -103,10 +108,44 @@ class BikebudsApi(remote.Service):
         logging.info('Getting %s service info.', request.id)
         service = services.Service.get(user.key, request.id)
         service_creds = services.ServiceCredentials.default(user.key, request.id)
-        response = ServiceResponse(created=service.created,
+        return ServiceResponse(created=service.created,
                 modified=service.modified,
+                syncing=service.syncing,
+                sync_date=service.sync_date,
+                sync_successful=service.sync_successful,
                 connected=service_creds is not None)
-        return response
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
+        ServiceResponse,
+        path='sync/{id}',
+        http_method='POST',
+        api_key_required=True)
+    def sync_service(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        logging.info('Getting %s service info.', request.id)
+        service = services.Service.get(user.key, request.id)
+
+        @ndb.transactional
+        def submit_sync():
+            service.syncing=True
+            service.sync_date=datetime.datetime.now()
+            service.sync_successful=None
+            service.put()
+            taskqueue.add(
+                    url='/tasks/service_sync/' + service.key.id(),
+                    target='backend',
+                    params={
+                        'user': user.key.urlsafe(),
+                        'service': service.key.urlsafe()},
+                    transactional=True)
+        submit_sync()
+        return ServiceResponse(created=service.created,
+                modified=service.modified,
+                connected=True)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(2)),
@@ -122,19 +161,9 @@ class BikebudsApi(remote.Service):
         logging.info('Getting %s service info.', request.id)
         service = services.Service.get(user.key, request.id)
         services.ServiceCredentials.get_key(service.key).delete()
-        response = ServiceResponse(created=service.created,
+        return ServiceResponse(created=service.created,
                 modified=service.modified,
                 connected=False)
-        return response
-
-    @endpoints.method(
-        message_types.VoidMessage,
-        Response,
-        http_method='GET',
-        api_key_required=True)
-    def get_api_key(self, request):
-        key, key_type = request.get_unrecognized_field_info('key')
-        return Response(content=key)
 
 
 api = endpoints.api_server([BikebudsApi])

@@ -25,6 +25,9 @@ class Service(ndb.Model):
     """Holds service info."""
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
+    syncing = ndb.BooleanProperty()
+    sync_date = ndb.DateTimeProperty()
+    sync_successful = ndb.BooleanProperty()
 
     @classmethod
     def get(cls, user_key, name):

@@ -93,6 +93,30 @@
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
       ]
+    },
+    "sync_service": {
+      "httpMethod": "POST",
+      "id": "bikebuds.sync_service",
+      "parameterOrder": [
+        "id"
+      ],
+      "parameters": {
+        "id": {
+          "location": "path",
+          "type": "string"
+        }
+      },
+      "path": "sync/{id}",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
     }
   },
   "name": "bikebuds",

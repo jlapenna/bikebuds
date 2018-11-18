@@ -64,7 +64,7 @@ class ServiceCard extends Component {
     createSession((response) => {
       if (response.status === 200) {
         window.location.replace(config.frontendUrl + '/services/' +
-          this.props.serviceName + '/init?dest=/frontend');
+          this.props.serviceName + '/init?dest=/services/frontend');
       } else {
         console.log('Unable to create a session.', response);
         this.setState({connectActionPending: false});
@@ -74,13 +74,21 @@ class ServiceCard extends Component {
 
   onSync() {
     this.setState({syncActionPending: true});
+    window.gapi.client.bikebuds.sync_service(
+      {'id': this.props.serviceName}).then((response) => {
+        this.updateServiceState(response);
+        this.setState({connectActionPending: false});
+      });
+    return;
   }
 
   updateServiceState(response) {
+    var sync_date = response.result.sync_successful
+        ? new Date(response.result.sync_date).toLocaleString() : null;
     this.setState({
       service: response.result,
       created: new Date(response.result.created).toLocaleDateString(),
-      modified: new Date(response.result.modified).toLocaleDateString(),
+      sync_date: sync_date,
       connected: response.result.connected,
     });
     console.log('ServiceCard.setState: service: ', response.result);
@@ -108,10 +116,10 @@ class ServiceCard extends Component {
                 justify="center"
                 alignItems="center">
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.service &&
-                <i>Updated {this.state.modified}</i>
+            {this.state.sync_date != null &&
+                <i>Last sync: {this.state.sync_date}</i>
             }
-            {!this.state.service &&
+            {!this.state.sync_date &&
                 <i>&#8203;</i>
             }
           </Grid>
