@@ -29,6 +29,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
+import Moment from 'react-moment';
+import moment from 'moment';
+
 import { config } from './Config';
 import { createSession } from './session_util';
 
@@ -77,9 +80,10 @@ class ProfileCard extends Component {
     if (this.props.gapiReady && this.state.profile === undefined) {
       console.log('ProfileCard.componentDidUpdate: user');
       window.gapi.client.bikebuds.get_profile().then((response) => {
-        this.setState({profile: response.result,
-                       created: new Date(response.result.created).toLocaleDateString(),
-                      });
+        this.setState({
+          profile: response.result,
+          created: moment.utc(response.result.created),
+        });
         console.log('ProfileCard.setState: profile: ', response.result);
       });
     }
@@ -99,7 +103,7 @@ class ProfileCard extends Component {
             </Avatar>
             <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
             {this.state.profile &&
-                <i>Joined {this.state.created}</i>
+                <i>Joined <Moment fromNow>{this.state.created}</Moment></i>
             }
             {!this.state.profile &&
                 <i>&#8203;</i>

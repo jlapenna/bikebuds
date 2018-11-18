@@ -25,6 +25,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
+import Moment from 'react-moment';
+import moment from 'moment';
+
 import { config } from './Config';
 import { createSession } from './session_util';
 
@@ -84,10 +87,10 @@ class ServiceCard extends Component {
 
   updateServiceState(response) {
     var sync_date = response.result.sync_successful
-        ? new Date(response.result.sync_date).toLocaleString() : null;
+      ? moment.utc(response.result.sync_date) : null;
     this.setState({
       service: response.result,
-      created: new Date(response.result.created).toLocaleDateString(),
+      created: moment.utc(response.result.created),
       sync_date: sync_date,
       connected: response.result.connected,
     });
@@ -117,7 +120,7 @@ class ServiceCard extends Component {
                 alignItems="center">
             <Typography variant="h5">{this.props.serviceName}</Typography>
             {this.state.sync_date != null &&
-                <i>Last sync: {this.state.sync_date}</i>
+                <i>Last sync: <Moment fromNow>{this.state.sync_date}</Moment></i>
             }
             {!this.state.sync_date &&
                 <i>&#8203;</i>
