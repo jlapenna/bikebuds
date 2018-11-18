@@ -25,6 +25,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
+import MeasuresChart from './MeasuresChart';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
@@ -70,6 +71,10 @@ class Main extends Component {
           style={{margin: 0, width: '100%'}}>
           <Grid item xs={12}>
             <ProfileCard firebaseUser={this.props.firebaseUser}
+              gapiReady={this.state.gapiReady} />
+          </Grid>
+          <Grid item xs={12}>
+            <MeasuresChart
               gapiReady={this.state.gapiReady} />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>

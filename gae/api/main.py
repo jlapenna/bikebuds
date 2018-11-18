@@ -55,7 +55,7 @@ class Response(messages.Message):
 
 class MeasuresResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
-    measure = messages.MessageField(withings.MeasureMessage, 2, repeated=True)
+    measures = messages.MessageField(withings.MeasureMessage, 2, repeated=True)
 
 
 class ProfileResponse(messages.Message):
@@ -166,12 +166,11 @@ class BikebudsApi(remote.Service):
         user = users.User.get(claims)
         service = services.Service.get(user.key, 'withings')
         service_creds = services.ServiceCredentials.default(user.key, 'withings')
-        measures = withings.Measure.query()
-        proto_measures = []
-        for measure in measures:
-            proto_measures.append(withings.create_message(measure))
 
-        return MeasuresResponse(measure=proto_measures)
+        response = MeasuresResponse()
+        for measure in withings.Measure.query():
+            response.measures.append(withings.create_message(measure))
+        return response
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(2)),
