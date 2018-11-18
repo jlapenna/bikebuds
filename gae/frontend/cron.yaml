@@ -1,0 +1,5 @@
+cron:
+- description: 'Daily Sync'
+  url: /tasks/sync
+  target: backend
+  schedule: every 24 hours
