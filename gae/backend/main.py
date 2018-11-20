@@ -72,6 +72,17 @@ def service_sync(service_name):
     service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
     service_creds = services.ServiceCredentials.get_key(service.key).get()
 
+    if service_creds is None:
+        logging.info('No service creds for this sync: %s %s',
+                str(user_key), str(service))
+        @ndb.transactional
+        def finish_sync():
+            service.syncing=False
+            service.sync_successful=False
+            service.put()
+        finish_sync()
+        return 'OK', 250
+
     synchronizer = withings.Synchronizer()
     try:
         result = synchronizer.sync(user_key, service, service_creds)
@@ -90,4 +101,4 @@ def service_sync(service_name):
         finish_sync()
         raise
 
-    return flask.make_response('OK', 200)
+    return 'OK', 200
