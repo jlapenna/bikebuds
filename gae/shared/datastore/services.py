@@ -23,6 +23,7 @@ from shared.datastore import users
 
 class Service(ndb.Model):
     """Holds service info."""
+    _use_memcache = False
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
     syncing = ndb.BooleanProperty()
@@ -48,6 +49,7 @@ class Service(ndb.Model):
 
 
 class ServiceCredentials(ndb.Expando):
+    _use_memcache = False
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
 

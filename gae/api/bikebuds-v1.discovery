@@ -9,7 +9,7 @@
     }
   },
   "basePath": "/_ah/api/bikebuds/v1/",
-  "baseUrl": "https://api.bikebuds.cc/_ah/api/bikebuds/v1/",
+  "baseUrl": "http://localhost:8082/_ah/api/bikebuds/v1/",
   "batchPath": "batch",
   "description": "This is an API",
   "discoveryVersion": "v1",
@@ -170,7 +170,7 @@
     }
   },
   "protocol": "rest",
-  "rootUrl": "https://api.bikebuds.cc/_ah/api/",
+  "rootUrl": "http://localhost:8082/_ah/api/",
   "schemas": {
     "MainMeasuresResponse": {
       "id": "MainMeasuresResponse",

@@ -73,8 +73,7 @@ def service_sync(service_name):
     service_creds = services.ServiceCredentials.get_key(service.key).get()
 
     if service_creds is None:
-        logging.info('No service creds for this sync: %s %s',
-                str(user_key), str(service))
+        logging.info('No service creds for this sync: %s', str(service))
         @ndb.transactional
         def finish_sync():
             service.syncing=False
