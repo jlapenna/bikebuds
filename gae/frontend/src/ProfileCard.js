@@ -37,6 +37,7 @@ import { createSession } from './session_util';
 
 const styles = {
   root: {
+    height:300,
   },
   avatar: {
     width: 128,

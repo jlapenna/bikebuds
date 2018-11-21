@@ -30,6 +30,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
 
 const styles = {
   root: {
+    height:300,
   },
 };
 
@@ -41,35 +42,40 @@ class MeasuresChart extends Component {
       syncActionPending: false,
       connectActionPending: false,
       intervalUnit: 'month',
-      intervalFormat: 'L',
-      earliestInterval: 1,
-      earliestUnit: 'years',
+      intervalFormat: "MMM 'YY",
+      earliestInterval: 12,
+      earliestUnit: 'months',
+      weightDomain: ["dataMin - 1", "dataMax + 1"],
+      fatDomain: ["dataMin - 1", "dataMax + 1"],
     }
   }
 
   updateMeasuresState = (response) => {
-    var syncDate = response.result.sync_successful
-      ? moment.utc(response.result.sync_date) : null;
-
     var preferredNextDate = moment.utc().endOf('day');
     var earliestDate = preferredNextDate.clone().subtract(
       this.state.earliestInterval, this.state.earliestUnit);
     var measures = [];
-    response.result.measures.reverse().forEach((measure) => {
-      var measureDate = moment.utc(measure.date).startOf('day');
-      if ((measureDate <= preferredNextDate) && (measureDate >= earliestDate)) {
-        measures.unshift(measure);
-        preferredNextDate = preferredNextDate.subtract(
-          1, 'seconds').startOf(this.state.intervalUnit);
+    for (var i = 0; i < response.result.measures.length; i++) {
+      var measure = response.result.measures[response.result.measures.length - 1 - i];
+      var measureDate = moment.utc(measure.date);
+      if (measureDate <= earliestDate) {
+        break;
       }
-    });
+      if (measureDate <= preferredNextDate) {
+        measures.unshift(measure);
+        preferredNextDate.subtract(1, 'seconds').startOf(this.state.intervalUnit);
+      }
+    };
+
+    var syncDate = response.result.sync_successful
+      ? moment.utc(response.result.sync_date) : null;
     this.setState({
       measures: measures,
       created: moment.utc(response.result.created),
       syncDate: syncDate,
       connected: response.result.connected,
     });
-    console.log('MeasuresChart.setState: measures: ', measures);
+    console.log('MeasuresChart.setState:', this.state);
   }
 
   /**
@@ -82,10 +88,6 @@ class MeasuresChart extends Component {
     }
   }
 
-  tickFormatterDate = (tickItem) => {
-    return moment.utc(tickItem).format(this.state.intervalFormat);
-  }
-
   renderCardContent() {
     if (this.state.measures === undefined) {
       return;
@@ -96,28 +98,55 @@ class MeasuresChart extends Component {
           direction="column"
           justify="center"
           alignItems="center">
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={this.state.measures}
-              margin={{ top: 5, right: 20, left: 10, bottom: 60 }}
+              margin={{ top: 12, right: 12, left: 12, bottom: 72 }}
             >
               <XAxis
                 dataKey="date"
-                tickFormatter={this.tickFormatterDate}
+                tickFormatter={
+                  (tick) => moment.utc(tick).format(this.state.intervalFormat)}
                 tick={{ position: "bottom", angle: -45 }}
                 textAnchor="end"
+                interval="preserveStartEnd"
+              />
+              <YAxis dataKey="weight" yAxisId={0}
+                name="Weight"
+                tickFormatter={(tick) => tick.toFixed(1)}
                 interval={0}
-                domain={this.state.domain} />
-              <YAxis dataKey="weight" yAxisId={0}>
+                domain={this.state.weightDomain}
+              >
                 <Label color="#03dac6" value="Weight" angle={-90} position="left" />
               </YAxis>
-              <YAxis dataKey="fat_ratio" yAxisId={1} orientation="right">
+              <YAxis dataKey="fat_ratio" yAxisId={1} orientation="right"
+                tickFormatter={(tick) => tick.toFixed(1)}
+                interval={0}
+                domain={this.state.fatDomain}
+              >
                 <Label value="Fat %" angle={-90} position="right" />
               </YAxis>
               <CartesianGrid stroke="#f5f5f5" />
-              <Tooltip />
-              <Line type="natural" connectNulls dataKey="weight" stroke="#03dac6" yAxisId={0} />
-              <Line type="monotone" connectNulls dataKey="fat_ratio" stroke="#ff4081" yAxisId={1} />
+              <Tooltip
+                formatter={(value) => value.toFixed(1)}
+                labelFormatter={(value) => moment.utc(value).format('LLL')}
+              />
+              <Line
+                dataKey="weight"
+                name="Weight"
+                type="natural"
+                yAxisId={0}
+                connectNulls
+                stroke="#03dac6"
+              />
+              <Line
+                dataKey="fat_ratio"
+                name="Fat %"
+                type="monotone"
+                yAxisId={1}
+                connectNulls
+                stroke="#ff4081"
+              />
             </LineChart>
           </ResponsiveContainer>
         </Grid>
