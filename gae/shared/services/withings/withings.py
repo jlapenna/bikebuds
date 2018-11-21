@@ -18,7 +18,7 @@ import logging
 from google.appengine.ext import ndb
 
 from shared.datastore import services
-from shared.services.withings.datastore import Measure, MeasureMessage, create_message
+from shared.datastore.measures import Measure
 
 import nokia
 
@@ -32,7 +32,7 @@ class Synchronizer(object):
         @ndb.transactional
         def put_measures():
             for measure in measures:
-                Measure.to_measure(service.key, measure).put()
+                Measure.from_withings(service.key, measure).put()
         put_measures()
         return True
 

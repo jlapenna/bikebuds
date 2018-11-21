@@ -31,9 +31,9 @@ from endpoints import messages
 from endpoints import remote
 
 import auth_util
+from shared.datastore.measures import Measure, MeasureMessage
 from shared.datastore import services
 from shared.datastore import users
-from shared.services.withings import withings
 
 
 class RequestHeader(messages.Message):
@@ -55,7 +55,7 @@ class Response(messages.Message):
 
 class MeasuresResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
-    measures = messages.MessageField(withings.MeasureMessage, 2, repeated=True)
+    measures = messages.MessageField(MeasureMessage, 2, repeated=True)
 
 
 class ProfileResponse(messages.Message):
@@ -168,8 +168,8 @@ class BikebudsApi(remote.Service):
         service_creds = services.ServiceCredentials.default(user.key, 'withings')
 
         response = MeasuresResponse()
-        for measure in withings.Measure.query():
-            response.measures.append(withings.create_message(measure))
+        for measure in Measure.query():
+            response.measures.append(Measure.to_message(measure))
         return response
 
     @endpoints.method(

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+import logging
+import time
+
 from google.appengine.ext import ndb
 
 from endpoints import message_types
@@ -42,16 +46,41 @@ class Measure(ndb.Model):
     pulse_wave_velocity = ndb.FloatProperty(indexed=False)  # 91
 
     @classmethod
-    def to_measure(cls, service_key, measure):
+    def from_withings(cls, service_key, measure):
         attributes = dict()
         for key, type_int in nokia.NokiaMeasureGroup.MEASURE_TYPES:
             value = measure.get_measure(type_int)
             if value is not None:
                 attributes[key] = value
-        measure = Measure(id=measure.date.timestamp,
+        measure = Measure(
+                id=measure.date.timestamp,
                 parent=service_key,
                 date=measure.date.datetime.replace(tzinfo=None),
                 **attributes)
+        return measure
+
+    @classmethod
+    def from_fitbit_time_series(cls, service_key, measure):
+        date = datetime.datetime.strptime(
+                measure['dateTime'], '%Y-%m-%d')
+        measure = Measure(
+                id=date.strftime('%s'),
+                parent=service_key,
+                date=date,
+                weight=float(measure['value']),
+                )
+        return measure
+
+    @classmethod
+    def from_fitbit_log(cls, service_key, measure):
+        date = datetime.datetime.strptime(
+                measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S')
+        measure = Measure(id=measure['logId'],
+                parent=service_key,
+                date=date,
+                weight=measure['weight'],
+                fat_ratio=measure['fat'],
+                )
         return measure
 
     @classmethod
@@ -62,6 +91,17 @@ class Measure(ndb.Model):
     @classmethod
     def fetch_lastupdate(cls, service_key):
         return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
+
+
+    @classmethod
+    def to_message(cls, measure):
+        attributes = dict()
+        for key, _ in nokia.NokiaMeasureGroup.MEASURE_TYPES:
+            value = getattr(measure, key, None)
+            if value is not None:
+                attributes[key] = value
+        measure = MeasureMessage(date=measure.date, **attributes)
+        return measure
 
 
 class MeasureMessage(messages.Message):
@@ -84,12 +124,3 @@ class MeasureMessage(messages.Message):
     hydration = messages.FloatField(16)  # 77
     bone_mass = messages.FloatField(17)  # 88
     pulse_wave_velocity = messages.FloatField(18)  # 91
-
-def create_message(measure):
-    attributes = dict()
-    for key, _ in nokia.NokiaMeasureGroup.MEASURE_TYPES:
-        value = getattr(measure, key, None)
-        if value is not None:
-            attributes[key] = value
-    measure = MeasureMessage(date=measure.date, **attributes)
-    return measure

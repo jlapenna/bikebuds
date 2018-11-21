@@ -31,6 +31,7 @@ from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
 from shared.services.withings import withings
+from shared.services.bbfitbit import bbfitbit
 
 # Flask setup
 app = flask.Flask(__name__)
@@ -64,7 +65,7 @@ def sync():
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync(service_name):
-    if service_name != 'withings':
+    if service_name == 'strava':
         logging.info('Cannot sync: %s', service_name)
         return flask.make_response('OK', 200)
 
@@ -82,7 +83,11 @@ def service_sync(service_name):
         finish_sync()
         return 'OK', 250
 
-    synchronizer = withings.Synchronizer()
+    if service_name == 'withings':
+        synchronizer = withings.Synchronizer()
+    elif service_name == 'fitbit':
+        synchronizer = bbfitbit.Synchronizer()
+
     try:
         result = synchronizer.sync(user_key, service, service_creds)
         @ndb.transactional

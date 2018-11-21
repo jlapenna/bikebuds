@@ -11,7 +11,7 @@
         },
         "measures": {
           "items": {
-            "$ref": "#/definitions/SharedServicesWithingsDatastoreMeasureMessage"
+            "$ref": "#/definitions/SharedDatastoreMeasuresMeasureMessage"
           },
           "type": "array"
         }
@@ -75,7 +75,7 @@
       },
       "type": "object"
     },
-    "SharedServicesWithingsDatastoreMeasureMessage": {
+    "SharedDatastoreMeasuresMeasureMessage": {
       "properties": {
         "body_temperature": {
           "format": "double",

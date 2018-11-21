@@ -34,36 +34,6 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
-@module.route('/services/fitbit/test', methods=['GET', 'POST'])
-@auth_util.claims_required
-def test(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return get_auth_url_response()
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
-
-    client = create_api_client(user.key, service_creds)
-    logging.info('result: ' + str(client.user_profile_get()))
-
-    return flask.make_response('OK', 200)
-
-
-@module.route('/services/fitbit/sync', methods=['GET', 'POST'])
-@auth_util.claims_required
-def sync(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return get_auth_url_response()
-    service_key = services.Service.get_key(user.key, SERVICE_NAME)
-
-    client = create_api_client(user.key, service_creds)
-    logging.info('result: ' + str(client.user_profile_get()))
-
-    return flask.make_response('OK', 200)
-
-
 @module.route('/services/fitbit/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
