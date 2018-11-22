@@ -39,26 +39,26 @@ app = flask.Flask(__name__)
 
 @app.route('/tasks/sync', methods=['GET'])
 def sync():
-    all_users = users.User.query()
-    for user in all_users:
-        user_services = services.Service.query(ancestor=user.key).fetch()
-        for service in user_services:
-            if service.syncing:
-                continue
-            @ndb.transactional
-            def submit_sync(user_key, service):
-                service.syncing=True
-                service.sync_date=datetime.datetime.now()
-                service.sync_successful=None
-                service.put()
-                task = taskqueue.add(
-                        url='/tasks/service_sync/' + service.key.id(),
-                        target='backend',
-                        params={
-                            'user': user_key.urlsafe(),
-                            'service': service.key.urlsafe()},
-                        transactional=True)
-            submit_sync(user.key, service)
+    user_services = services.Service.query(
+            services.Service.sync_enabled == True,
+            services.Service.syncing == False
+            ).fetch()
+    for service in user_services:
+        user_key = service.key.parent()
+        @ndb.transactional
+        def submit_sync(user_key, service):
+            service.syncing=True
+            service.sync_date=datetime.datetime.now()
+            service.sync_successful=None
+            service.put()
+            task = taskqueue.add(
+                    url='/tasks/service_sync/' + service.key.id(),
+                    target='backend',
+                    params={
+                        'user': user_key.urlsafe(),
+                        'service': service.key.urlsafe()},
+                    transactional=True)
+        submit_sync(user_key, service)
 
     return 'OK', 200
 
