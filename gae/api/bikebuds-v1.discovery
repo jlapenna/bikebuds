@@ -44,6 +44,17 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
+    "get_preferences": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_preferences",
+      "path": "preferences",
+      "response": {
+        "$ref": "MainPreferencesResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "get_profile": {
       "httpMethod": "POST",
       "id": "bikebuds.get_profile",
@@ -93,6 +104,21 @@
       },
       "response": {
         "$ref": "MainMeasuresResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
+    "set_preferences": {
+      "httpMethod": "POST",
+      "id": "bikebuds.set_preferences",
+      "path": "set_preferences",
+      "request": {
+        "$ref": "MainPreferencesRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainPreferencesResponse"
       },
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
@@ -183,6 +209,30 @@
             "$ref": "SharedDatastoreMeasuresMeasureMessage"
           },
           "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MainPreferencesRequest": {
+      "id": "MainPreferencesRequest",
+      "properties": {
+        "header": {
+          "$ref": "MainRequestHeader"
+        },
+        "preferences": {
+          "$ref": "SharedDatastoreUsersPreferences"
+        }
+      },
+      "type": "object"
+    },
+    "MainPreferencesResponse": {
+      "id": "MainPreferencesResponse",
+      "properties": {
+        "header": {
+          "$ref": "MainResponseHeader"
+        },
+        "preferences": {
+          "$ref": "SharedDatastoreUsersPreferences"
         }
       },
       "type": "object"
@@ -285,8 +335,7 @@
           "type": "number"
         },
         "height": {
-          "format": "double",
-          "type": "number"
+          "type": "string"
         },
         "hydration": {
           "format": "double",
@@ -322,6 +371,25 @@
         "weight": {
           "format": "double",
           "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreUsersPreferences": {
+      "id": "SharedDatastoreUsersPreferences",
+      "properties": {
+        "units": {
+          "enum": [
+            "UNKNOWN",
+            "IMPERIAL",
+            "METRIC"
+          ],
+          "enumDescriptions": [
+            "",
+            "",
+            ""
+          ],
+          "type": "string"
         }
       },
       "type": "object"

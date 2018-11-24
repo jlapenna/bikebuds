@@ -11,3 +11,4 @@ firebase-admin
 stravalib
 nokia
 fitbit
+measurement

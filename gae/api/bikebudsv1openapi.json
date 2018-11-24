@@ -18,6 +18,28 @@
       },
       "type": "object"
     },
+    "MainPreferencesRequest": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainRequestHeader"
+        },
+        "preferences": {
+          "$ref": "#/definitions/SharedDatastoreUsersPreferences"
+        }
+      },
+      "type": "object"
+    },
+    "MainPreferencesResponse": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        },
+        "preferences": {
+          "$ref": "#/definitions/SharedDatastoreUsersPreferences"
+        }
+      },
+      "type": "object"
+    },
     "MainProfileResponse": {
       "properties": {
         "created": {
@@ -110,8 +132,7 @@
           "type": "number"
         },
         "height": {
-          "format": "double",
-          "type": "number"
+          "type": "string"
         },
         "hydration": {
           "format": "double",
@@ -147,6 +168,19 @@
         "weight": {
           "format": "double",
           "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreUsersPreferences": {
+      "properties": {
+        "units": {
+          "enum": [
+            "UNKNOWN",
+            "IMPERIAL",
+            "METRIC"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -222,6 +256,26 @@
         ]
       }
     },
+    "/bikebuds/v1/preferences": {
+      "post": {
+        "operationId": "BikebudsApi_getPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainPreferencesResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
     "/bikebuds/v1/profile": {
       "post": {
         "operationId": "BikebudsApi_getProfile",
@@ -275,6 +329,35 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/MainServiceResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/set_preferences": {
+      "post": {
+        "operationId": "BikebudsApi_setPreferences",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainPreferencesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainPreferencesResponse"
             }
           }
         },

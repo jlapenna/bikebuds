@@ -15,6 +15,17 @@
 # Module supporting storing user info.
 
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import msgprop
+
+from endpoints import messages
+
+
+class Preferences(messages.Message):
+    class Unit(messages.Enum):
+        UNKNOWN = 0
+        IMPERIAL = 1
+        METRIC = 2
+    units = messages.EnumField(Unit, 1)
 
 
 class User(ndb.Model):
@@ -22,6 +33,7 @@ class User(ndb.Model):
     name = ndb.StringProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
+    preferences = msgprop.MessageProperty(Preferences)
 
     @classmethod
     def get(cls, claims):
@@ -30,3 +42,7 @@ class User(ndb.Model):
     @classmethod
     def get_key(cls, claims):
         return ndb.Key(User, claims['sub'])
+
+
+def default_preferences():
+    return Preferences(units=Preferences.Unit.IMPERIAL)

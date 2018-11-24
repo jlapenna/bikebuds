@@ -14,6 +14,7 @@
 
 import datetime
 import logging
+import math
 import time
 
 from google.appengine.ext import ndb
@@ -21,8 +22,11 @@ from google.appengine.ext import ndb
 from endpoints import message_types
 from endpoints import messages
 
+from measurement import measures
+
 import nokia 
 
+_KG_TO_POUNDS = 2.20462262185
 
 class Measure(ndb.Model):
     """Holds a measure."""
@@ -94,14 +98,37 @@ class Measure(ndb.Model):
 
 
     @classmethod
-    def to_message(cls, measure):
+    def to_message(cls, measure, to_imperial=True):
         attributes = dict()
         for key, _ in nokia.NokiaMeasureGroup.MEASURE_TYPES:
             value = getattr(measure, key, None)
-            if value is not None:
-                attributes[key] = value
+            if value is None:
+                continue
+            attributes[key] = cls._convert(key, value, to_imperial)
         measure = MeasureMessage(date=measure.date, **attributes)
         return measure
+    
+    @classmethod
+    def _convert(cls, key, value, to_imperial):
+        if to_imperial:
+            return cls._convert_imperial(key, value)
+        else:
+            return cls._convert_metric(key, value)
+    
+    @classmethod
+    def _convert_imperial(cls, key, value):
+        if key == 'weight':
+            return value * _KG_TO_POUNDS
+        if key == 'height':
+            height = measures.Distance(meter=value)
+            return '%s\'%s"' % (height.ft, math.modf(height.ft)[0] * 12)
+        return value
+    
+    @classmethod
+    def _convert_metric(cls, key, value):
+        if key == 'height':
+            return str(value)
+        return value
 
 
 class MeasureMessage(messages.Message):
@@ -109,7 +136,7 @@ class MeasureMessage(messages.Message):
     date = message_types.DateTimeField(2)
 
     weight = messages.FloatField(3)  # 1
-    height = messages.FloatField(4)  # 4
+    height = messages.StringField(4)  # 4
     fat_free_mass = messages.FloatField(5)  # 5
     fat_ratio = messages.FloatField(6)  # 6
     fat_mass_weight = messages.FloatField(7)  # 8

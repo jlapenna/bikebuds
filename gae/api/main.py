@@ -58,6 +58,16 @@ class MeasuresResponse(messages.Message):
     measures = messages.MessageField(MeasureMessage, 2, repeated=True)
 
 
+class PreferencesRequest(messages.Message):
+    header = messages.MessageField(RequestHeader, 1)
+    preferences = messages.MessageField(users.Preferences, 2)
+
+
+class PreferencesResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    preferences = messages.MessageField(users.Preferences, 2)
+
+
 class ProfileResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     created = message_types.DateTimeField(2)
@@ -71,6 +81,16 @@ class ServiceResponse(messages.Message):
     syncing = messages.BooleanField(5)
     sync_date = message_types.DateTimeField(6)
     sync_successful = messages.BooleanField(7)
+
+
+class UpdatePreferencesRequest(messages.Message):
+    header = messages.MessageField(RequestHeader, 1)
+    preferences = messages.MessageField(users.Preferences, 2)
+
+
+class UpdatePreferencesResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    preferences = messages.MessageField(users.Preferences, 2)
 
 
 @endpoints.api(
@@ -97,8 +117,36 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = users.User.get(claims)
-        response = ProfileResponse(created=user.created)
-        return response
+        return ProfileResponse(created=user.created)
+
+    @endpoints.method(
+        message_types.VoidMessage,
+        PreferencesResponse,
+        path='preferences',
+        http_method='POST',
+        api_key_required=True)
+    def get_preferences(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        preferences = user.preferences or users.default_preferences()
+        return PreferencesResponse(preferences=preferences)
+
+    @endpoints.method(
+        PreferencesRequest,
+        PreferencesResponse,
+        path='set_preferences',
+        http_method='POST',
+        api_key_required=True)
+    def set_preferences(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        user.preferences = request.preferences
+        user.put()
+        return PreferencesResponse(preferences=user.preferences)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(2)),
@@ -167,9 +215,12 @@ class BikebudsApi(remote.Service):
         service = services.Service.get(user.key, 'withings')
         service_creds = services.ServiceCredentials.default(user.key, 'withings')
 
+        to_imperial = user.preferences.units == users.Preferences.Unit.IMPERIAL
+
         response = MeasuresResponse()
         for measure in Measure.query():
-            response.measures.append(Measure.to_message(measure))
+            response.measures.append(Measure.to_message(measure,
+                to_imperial=to_imperial))
         return response
 
     @endpoints.method(
