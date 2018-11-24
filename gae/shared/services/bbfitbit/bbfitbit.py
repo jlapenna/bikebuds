@@ -29,8 +29,11 @@ class Synchronizer(object):
         client = create_client(user_key, service_creds)
         measures = client.time_series('body/weight', period='max')
 
-        for measure in measures['body-weight']:
-            Measure.from_fitbit_time_series(service.key, measure).put()
+        @ndb.transactional
+        def put_measures():
+            ndb.put_multi(Measure.from_fitbit_time_series(service.key, measure)
+                    for measure in measures['body-weight'])
+        put_measures()
         return True
 
     def sync_log(self, user_key, service, service_creds):

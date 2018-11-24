@@ -31,8 +31,8 @@ class Synchronizer(object):
 
         @ndb.transactional
         def put_measures():
-            for measure in measures:
-                Measure.from_withings(service.key, measure).put()
+            ndb.put_multi(Measure.from_withings(service.key, measure)
+                    for measure in measures)
         put_measures()
         return True
 
