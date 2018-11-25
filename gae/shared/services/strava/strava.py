@@ -1,0 +1,75 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import datetime
+import functools
+import logging
+
+from google.appengine.ext import ndb
+
+from shared.config import config
+from shared.datastore import services
+from shared.datastore.activities import Activity
+
+import stravalib
+from stravalib import exc
+
+
+class Synchronizer(object):
+
+    def sync(self, user_key, service, service_creds):
+        client = ClientWrapper(user_key, service_creds)
+        activities = [activity for activity in client.get_activities()]
+
+        @ndb.transactional
+        def put():
+            ndb.put_multi(Activity.from_strava(service.key, activity)
+                    for activity in activities)
+            return True
+        return put()
+
+
+def create_client(user_key, service_creds):
+    return ClientWrapper(user_key, service_creds)
+
+
+class ClientWrapper(object):
+    """Auto-refresh (once) access tokens on any request."""
+
+    def __init__(self, user_key, service_creds):
+        self._user_key = user_key
+        self._service_creds = service_creds
+        self._client = stravalib.client.Client(access_token=service_creds.access_token)
+
+    def __getattr__(self, attr):
+        func = getattr(self._client, attr)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except exc.AccessUnauthorized, e: 
+                logging.info("Token expired, refreshing.", e)
+                self._refresh_credentials()
+                return func(*args, **kwargs)
+            return func(*args, **kwargs)
+        return wrapper
+
+    def _refresh_credentials(self):
+        new_credentials = self._client.refresh_access_token(
+            client_id=config.strava_creds['client_id'],
+            client_secret=config.strava_creds['client_secret'],
+            refresh_token=self._service_creds.refresh_token)
+        self._service_creds = services.ServiceCredentials.update(
+                self._user_key, 'strava', dict(new_credentials))
+        self._client.access_token = self._service_creds.access_token

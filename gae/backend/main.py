@@ -32,6 +32,7 @@ from shared.datastore import services
 from shared.datastore import users
 from shared.services.withings import withings
 from shared.services.bbfitbit import bbfitbit
+from shared.services.strava import strava
 
 # Flask setup
 app = flask.Flask(__name__)
@@ -65,10 +66,6 @@ def sync():
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync(service_name):
-    if service_name == 'strava':
-        logging.info('Cannot sync: %s', service_name)
-        return flask.make_response('OK', 200)
-
     user_key = ndb.Key(urlsafe=flask.request.values.get('user'))
     service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
     service_creds = services.ServiceCredentials.get_key(service.key).get()
@@ -87,6 +84,8 @@ def service_sync(service_name):
         synchronizer = withings.Synchronizer()
     elif service_name == 'fitbit':
         synchronizer = bbfitbit.Synchronizer()
+    elif service_name == 'strava':
+        synchronizer = strava.Synchronizer()
 
     try:
         result = synchronizer.sync(user_key, service, service_creds)

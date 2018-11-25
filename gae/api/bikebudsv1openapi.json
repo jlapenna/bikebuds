@@ -4,6 +4,20 @@
     "application/json"
   ],
   "definitions": {
+    "MainActivitiesResponse": {
+      "properties": {
+        "activities": {
+          "items": {
+            "$ref": "#/definitions/SharedDatastoreActivitiesActivityMessage"
+          },
+          "type": "array"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainMeasuresResponse": {
       "properties": {
         "header": {
@@ -93,6 +107,29 @@
         },
         "syncing": {
           "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreActivitiesActivityMessage": {
+      "properties": {
+        "elapsed_time": {
+          "format": "int64",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "moving_time": {
+          "format": "int64",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "start_date": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "type": "object"
@@ -192,6 +229,35 @@
     "version": "v1"
   },
   "paths": {
+    "/bikebuds/v1/activities": {
+      "post": {
+        "operationId": "BikebudsApi_activities",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainActivitiesResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
     "/bikebuds/v1/disconnect/{id}": {
       "post": {
         "operationId": "BikebudsApi_disconnectService",

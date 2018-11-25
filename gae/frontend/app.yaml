@@ -18,6 +18,8 @@ service: default
 threadsafe: true
 
 libraries:
+- name: pycrypto
+  version: latest
 - name: ssl
   version: latest
 

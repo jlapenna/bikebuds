@@ -118,7 +118,7 @@ class Measure(ndb.Model):
     @classmethod
     def _convert_imperial(cls, key, value):
         if key == 'weight':
-            return value * _KG_TO_POUNDS
+            return measures.Weight(kg=value).lb
         if key == 'height':
             height = measures.Distance(meter=value)
             return '%s\'%s"' % (height.ft, math.modf(height.ft)[0] * 12)

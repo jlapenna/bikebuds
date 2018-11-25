@@ -32,6 +32,7 @@ from endpoints import remote
 
 import auth_util
 from shared.datastore.measures import Measure, MeasureMessage
+from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore import services
 from shared.datastore import users
 
@@ -51,6 +52,11 @@ class Request(messages.Message):
 class Response(messages.Message):
     """A proto Message that contains a simple string field."""
     header = messages.MessageField(ResponseHeader, 1)
+
+
+class ActivitiesResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    activities = messages.MessageField(ActivityMessage, 2, repeated=True)
 
 
 class MeasuresResponse(messages.Message):
@@ -221,6 +227,25 @@ class BikebudsApi(remote.Service):
         for measure in Measure.query():
             response.measures.append(Measure.to_message(measure,
                 to_imperial=to_imperial))
+        return response
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request),
+        ActivitiesResponse,
+        path='activities',
+        http_method='POST',
+        api_key_required=True)
+    def activities(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = users.User.get(claims)
+        to_imperial = user.preferences.units == users.Preferences.Unit.IMPERIAL
+
+        response = ActivitiesResponse()
+        for activity in Activity.query().order(-Activity.start_date):
+            response.activities.append(
+                    Activity.to_message(activity, to_imperial=to_imperial))
         return response
 
     @endpoints.method(

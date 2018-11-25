@@ -20,6 +20,21 @@
   "id": "bikebuds:v1",
   "kind": "discovery#restDescription",
   "methods": {
+    "activities": {
+      "httpMethod": "POST",
+      "id": "bikebuds.activities",
+      "path": "activities",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainActivitiesResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "disconnect_service": {
       "httpMethod": "POST",
       "id": "bikebuds.disconnect_service",
@@ -198,6 +213,21 @@
   "protocol": "rest",
   "rootUrl": "http://localhost:8082/_ah/api/",
   "schemas": {
+    "MainActivitiesResponse": {
+      "id": "MainActivitiesResponse",
+      "properties": {
+        "activities": {
+          "items": {
+            "$ref": "SharedDatastoreActivitiesActivityMessage"
+          },
+          "type": "array"
+        },
+        "header": {
+          "$ref": "MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainMeasuresResponse": {
       "id": "MainMeasuresResponse",
       "properties": {
@@ -295,6 +325,30 @@
         },
         "syncing": {
           "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreActivitiesActivityMessage": {
+      "id": "SharedDatastoreActivitiesActivityMessage",
+      "properties": {
+        "elapsed_time": {
+          "format": "int64",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "moving_time": {
+          "format": "int64",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "start_date": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "type": "object"

@@ -91,7 +91,7 @@ def get_auth_url_response(dest):
     url = client.authorization_url(
             client_id=config.strava_creds['client_id'],
             redirect_uri=get_redirect_uri(dest),
-            scope='read')
+            scope='activity:read_all')
 
     if flask.request.method == 'POST':
         return flask.jsonify({'redirect_url': url})
