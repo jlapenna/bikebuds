@@ -22,11 +22,15 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
+import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
 import Moment from 'react-moment';
 import moment from 'moment';
+import cloneDeepWith from 'lodash/cloneDeepWith';
 
 import { config } from './Config';
 import { createSession } from './session_util';
@@ -62,17 +66,17 @@ class ServiceCard extends Component {
           this.updateServiceState(response);
           this.setState({connectActionPending: false});
         });
-      return;
+    } else {
+      createSession((response) => {
+        if (response.status === 200) {
+          window.location.replace(config.frontendUrl + '/services/' +
+            this.props.serviceName + '/init?dest=/services/frontend');
+        } else {
+          console.log('Unable to create a session.', response);
+          this.setState({connectActionPending: false});
+        }
+      });
     }
-    createSession((response) => {
-      if (response.status === 200) {
-        window.location.replace(config.frontendUrl + '/services/' +
-          this.props.serviceName + '/init?dest=/services/frontend');
-      } else {
-        console.log('Unable to create a session.', response);
-        this.setState({connectActionPending: false});
-      }
-    });
   }
 
   onSync() {
@@ -83,6 +87,19 @@ class ServiceCard extends Component {
         this.setState({connectActionPending: false});
       });
     return;
+  }
+
+  onHandleChange = (event) => {
+    var checked = event.target.checked;
+    var newState = {service: cloneDeepWith(this.state.service)};
+    newState.service.sync_enabled = checked;
+
+    this.setState(newState);
+
+    window.gapi.client.bikebuds.update_service({
+      id: this.props.serviceName,
+      sync_enabled: event.target.checked 
+    }).then(this.updateServiceState);
   }
 
   updateServiceState(response) {
@@ -137,16 +154,29 @@ class ServiceCard extends Component {
     if (this.state.connected) {
       return (
         <CardActions>
-          <Button color="primary" variant="contained"
-            disabled={this.state.syncActionPending}
-            onClick={this.onSync}>Sync
-            {this.state.syncActionPending && <CircularProgress size={20} />}
-          </Button>
-          <Button color="secondary"
-            disabled={this.state.connectActionPending}
-            onClick={this.onConnect}>Disconnect
-            {this.state.connectActionPending && <CircularProgress size={20} />}
-          </Button>
+          <FormGroup row>
+            <Button color="primary" variant="contained"
+              disabled={this.state.syncActionPending}
+              onClick={this.onSync}>Sync
+              {this.state.syncActionPending && <CircularProgress size={20} />}
+            </Button>
+            <Button color="secondary"
+              disabled={this.state.connectActionPending}
+              onClick={this.onConnect}>
+                Disconnect
+                {this.state.connectActionPending && <CircularProgress size={20} />}
+            </Button>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.service.sync_enabled}
+                  onChange={this.onHandleChange}
+                  value="sync_enabled"
+                />
+              }
+              label="Enabled"
+            />
+          </FormGroup>
         </CardActions>
       )
     } else {

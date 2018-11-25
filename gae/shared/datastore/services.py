@@ -28,8 +28,8 @@ class Service(ndb.Model):
     modified = ndb.DateTimeProperty(auto_now=True)
     syncing = ndb.BooleanProperty()
     sync_date = ndb.DateTimeProperty()
-    sync_enabled = ndb.BooleanProperty(default=True)
     sync_successful = ndb.BooleanProperty()
+    sync_enabled = ndb.BooleanProperty()
 
     @classmethod
     def get(cls, user_key, name):

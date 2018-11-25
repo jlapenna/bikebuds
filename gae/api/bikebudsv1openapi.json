@@ -102,6 +102,9 @@
           "format": "date-time",
           "type": "string"
         },
+        "sync_enabled": {
+          "type": "boolean"
+        },
         "sync_successful": {
           "type": "boolean"
         },
@@ -118,6 +121,7 @@
           "type": "string"
         },
         "id": {
+          "format": "int64",
           "type": "string"
         },
         "moving_time": {
@@ -452,6 +456,46 @@
             "name": "id",
             "required": true,
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainServiceResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/update_service/{id}": {
+      "post": {
+        "operationId": "BikebudsApi_updateService",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "sync_enabled",
+            "type": "boolean"
           }
         ],
         "responses": {

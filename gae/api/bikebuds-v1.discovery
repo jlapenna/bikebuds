@@ -162,6 +162,34 @@
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
       ]
+    },
+    "update_service": {
+      "httpMethod": "POST",
+      "id": "bikebuds.update_service",
+      "parameterOrder": [
+        "id"
+      ],
+      "parameters": {
+        "id": {
+          "location": "path",
+          "type": "string"
+        },
+        "sync_enabled": {
+          "location": "query",
+          "type": "boolean"
+        }
+      },
+      "path": "update_service/{id}",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
     }
   },
   "name": "bikebuds",
@@ -320,6 +348,9 @@
           "format": "date-time",
           "type": "string"
         },
+        "sync_enabled": {
+          "type": "boolean"
+        },
         "sync_successful": {
           "type": "boolean"
         },
@@ -337,6 +368,7 @@
           "type": "string"
         },
         "id": {
+          "format": "int64",
           "type": "string"
         },
         "moving_time": {

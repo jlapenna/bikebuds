@@ -16,8 +16,6 @@
 
 import React, { Component } from 'react';
 
-import cloneDeepWith from 'lodash/cloneDeepWith';
-
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -28,6 +26,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 
+import cloneDeepWith from 'lodash/cloneDeepWith';
 
 const styles = theme => ({
   root: {
