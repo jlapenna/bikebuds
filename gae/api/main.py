@@ -14,6 +14,12 @@
 
 """Bikebuds API."""
 
+# Hide spurrious errors.
+import warnings
+import urllib3.contrib.appengine
+warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
+        urllib3.contrib.appengine.AppEnginePlatformWarning)
+
 import logging
 import datetime
 

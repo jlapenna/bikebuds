@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Hide spurrious errors.
+import warnings
+import urllib3.contrib.appengine
+warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
+        urllib3.contrib.appengine.AppEnginePlatformWarning)
+
 import datetime
 import json
 import logging
