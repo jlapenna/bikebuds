@@ -32,24 +32,13 @@
       },
       "type": "object"
     },
-    "MainPreferencesRequest": {
-      "properties": {
-        "header": {
-          "$ref": "#/definitions/MainRequestHeader"
-        },
-        "preferences": {
-          "$ref": "#/definitions/SharedDatastoreUsersPreferences"
-        }
-      },
-      "type": "object"
-    },
     "MainPreferencesResponse": {
       "properties": {
         "header": {
           "$ref": "#/definitions/MainResponseHeader"
         },
         "preferences": {
-          "$ref": "#/definitions/SharedDatastoreUsersPreferences"
+          "$ref": "#/definitions/SharedDatastoreUsersPreferencesMessage"
         }
       },
       "type": "object"
@@ -84,32 +73,33 @@
     },
     "MainServiceResponse": {
       "properties": {
-        "connected": {
-          "type": "boolean"
-        },
-        "created": {
-          "format": "date-time",
-          "type": "string"
-        },
         "header": {
           "$ref": "#/definitions/MainResponseHeader"
         },
-        "modified": {
-          "format": "date-time",
-          "type": "string"
+        "service": {
+          "$ref": "#/definitions/SharedDatastoreServicesServiceMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdatePreferencesRequest": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainRequestHeader"
         },
-        "sync_date": {
-          "format": "date-time",
-          "type": "string"
+        "preferences": {
+          "$ref": "#/definitions/SharedDatastoreUsersPreferencesMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdateServiceRequest": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainRequestHeader"
         },
-        "sync_enabled": {
-          "type": "boolean"
-        },
-        "sync_successful": {
-          "type": "boolean"
-        },
-        "syncing": {
-          "type": "boolean"
+        "service": {
+          "$ref": "#/definitions/SharedDatastoreServicesServiceMessage"
         }
       },
       "type": "object"
@@ -213,9 +203,42 @@
       },
       "type": "object"
     },
-    "SharedDatastoreUsersPreferences": {
+    "SharedDatastoreServicesServiceMessage": {
+      "properties": {
+        "created": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "credentials": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "modified": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_enabled": {
+          "type": "boolean"
+        },
+        "sync_successful": {
+          "type": "boolean"
+        },
+        "syncing": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreUsersPreferencesMessage": {
       "properties": {
         "units": {
+          "default": "IMPERIAL",
           "enum": [
             "UNKNOWN",
             "IMPERIAL",
@@ -235,7 +258,7 @@
   "paths": {
     "/bikebuds/v1/activities": {
       "post": {
-        "operationId": "BikebudsApi_activities",
+        "operationId": "BikebudsApi_getActivities",
         "parameters": [
           {
             "in": "body",
@@ -262,44 +285,9 @@
         ]
       }
     },
-    "/bikebuds/v1/disconnect/{id}": {
-      "post": {
-        "operationId": "BikebudsApi_disconnectService",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/MainRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A successful response",
-            "schema": {
-              "$ref": "#/definitions/MainServiceResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": [],
-            "firebase-dca327ad": []
-          }
-        ]
-      }
-    },
     "/bikebuds/v1/measures": {
       "post": {
-        "operationId": "BikebudsApi_measures",
+        "operationId": "BikebudsApi_getMeasures",
         "parameters": [
           {
             "in": "body",
@@ -329,7 +317,16 @@
     "/bikebuds/v1/preferences": {
       "post": {
         "operationId": "BikebudsApi_getPreferences",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A successful response",
@@ -410,24 +407,30 @@
         ]
       }
     },
-    "/bikebuds/v1/set_preferences": {
+    "/bikebuds/v1/service_disconnect/{id}": {
       "post": {
-        "operationId": "BikebudsApi_setPreferences",
+        "operationId": "BikebudsApi_disconnectService",
         "parameters": [
           {
             "in": "body",
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/MainPreferencesRequest"
+              "$ref": "#/definitions/MainRequest"
             }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "A successful response",
             "schema": {
-              "$ref": "#/definitions/MainPreferencesResponse"
+              "$ref": "#/definitions/MainServiceResponse"
             }
           }
         },
@@ -439,7 +442,7 @@
         ]
       }
     },
-    "/bikebuds/v1/sync/{id}": {
+    "/bikebuds/v1/service_sync/{id}": {
       "post": {
         "operationId": "BikebudsApi_syncService",
         "parameters": [
@@ -474,6 +477,35 @@
         ]
       }
     },
+    "/bikebuds/v1/update_preferences": {
+      "post": {
+        "operationId": "BikebudsApi_updatePreferences",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainUpdatePreferencesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainPreferencesResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
     "/bikebuds/v1/update_service/{id}": {
       "post": {
         "operationId": "BikebudsApi_updateService",
@@ -483,7 +515,7 @@
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/MainRequest"
+              "$ref": "#/definitions/MainUpdateServiceRequest"
             }
           },
           {
@@ -491,11 +523,6 @@
             "name": "id",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "sync_enabled",
-            "type": "boolean"
           }
         ],
         "responses": {

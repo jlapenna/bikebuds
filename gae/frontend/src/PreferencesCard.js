@@ -50,7 +50,7 @@ class PreferencesCard extends Component {
     var newState = {preferences: cloneDeepWith(this.state.preferences)};
     newState.preferences.units = event.target.value;
     this.setState(newState);
-    window.gapi.client.bikebuds.set_preferences(newState).then(this.updatePreferencesState);
+    window.gapi.client.bikebuds.update_preferences(newState).then(this.updatePreferencesState);
   }
 
   updatePreferencesState = (response) => {

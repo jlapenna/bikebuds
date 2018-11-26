@@ -33,8 +33,8 @@ from endpoints import remote
 import auth_util
 from shared.datastore.measures import Measure, MeasureMessage
 from shared.datastore.activities import Activity, ActivityMessage
-from shared.datastore import services
-from shared.datastore import users
+from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
+from shared.datastore.users import User, PreferencesMessage
 
 
 class RequestHeader(messages.Message):
@@ -64,14 +64,14 @@ class MeasuresResponse(messages.Message):
     measures = messages.MessageField(MeasureMessage, 2, repeated=True)
 
 
-class PreferencesRequest(messages.Message):
-    header = messages.MessageField(RequestHeader, 1)
-    preferences = messages.MessageField(users.Preferences, 2)
-
-
 class PreferencesResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
-    preferences = messages.MessageField(users.Preferences, 2)
+    preferences = messages.MessageField(PreferencesMessage, 2)
+
+
+class UpdatePreferencesRequest(messages.Message):
+    header = messages.MessageField(RequestHeader, 1)
+    preferences = messages.MessageField(PreferencesMessage, 2)
 
 
 class ProfileResponse(messages.Message):
@@ -81,23 +81,12 @@ class ProfileResponse(messages.Message):
 
 class ServiceResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
-    created = message_types.DateTimeField(2)
-    modified = message_types.DateTimeField(3)
-    connected = messages.BooleanField(4)
-    syncing = messages.BooleanField(5)
-    sync_date = message_types.DateTimeField(6)
-    sync_successful = messages.BooleanField(7)
-    sync_enabled = messages.BooleanField(8)
+    service = messages.MessageField(ServiceMessage, 2)
 
 
-class UpdatePreferencesRequest(messages.Message):
+class UpdateServiceRequest(messages.Message):
     header = messages.MessageField(RequestHeader, 1)
-    preferences = messages.MessageField(users.Preferences, 2)
-
-
-class UpdatePreferencesResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    preferences = messages.MessageField(users.Preferences, 2)
+    service = messages.MessageField(ServiceMessage, 2)
 
 
 @endpoints.api(
@@ -115,19 +104,47 @@ class BikebudsApi(remote.Service):
 
     @endpoints.method(
         endpoints.ResourceContainer(Request),
-        ProfileResponse,
-        path='profile',
+        ActivitiesResponse,
+        path='activities',
         http_method='POST',
         api_key_required=True)
-    def get_profile(self, request):
+    def get_activities(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
-        return ProfileResponse(created=user.created)
+        user = User.get(claims)
+        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
+
+        response = ActivitiesResponse(activities=[])
+        for activity in Activity.query().order(-Activity.start_date):
+            response.activities.append(
+                    Activity.to_message(activity, to_imperial=to_imperial))
+        return response
 
     @endpoints.method(
-        message_types.VoidMessage,
+        endpoints.ResourceContainer(Request),
+        MeasuresResponse,
+        path='measures',
+        http_method='POST',
+        api_key_required=True)
+    def get_measures(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = User.get(claims)
+        service = Service.get(user.key, 'withings')
+        service_creds = service.get_credentials()
+
+        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
+
+        response = MeasuresResponse(measures=[])
+        for measure in Measure.query():
+            response.measures.append(Measure.to_message(measure,
+                to_imperial=to_imperial))
+        return response
+
+    @endpoints.method(
+        Request,
         PreferencesResponse,
         path='preferences',
         http_method='POST',
@@ -136,27 +153,40 @@ class BikebudsApi(remote.Service):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
+        user = User.get(claims)
         preferences = user.preferences or users.default_preferences()
         return PreferencesResponse(preferences=preferences)
 
     @endpoints.method(
-        PreferencesRequest,
+        UpdatePreferencesRequest,
         PreferencesResponse,
-        path='set_preferences',
+        path='update_preferences',
         http_method='POST',
         api_key_required=True)
-    def set_preferences(self, request):
+    def update_preferences(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
+        user = User.get(claims)
         user.preferences = request.preferences
         user.put()
         return PreferencesResponse(preferences=user.preferences)
 
     @endpoints.method(
-        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
+        Request,
+        ProfileResponse,
+        path='profile',
+        http_method='POST',
+        api_key_required=True)
+    def get_profile(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = User.get(claims)
+        return ProfileResponse(created=user.created)
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request, id=messages.StringField(1)),
         ServiceResponse,
         path='service/{id}',
         http_method='POST',
@@ -165,30 +195,43 @@ class BikebudsApi(remote.Service):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
-        service = services.Service.get(user.key, request.id)
-        service_creds = services.ServiceCredentials.default(user.key, request.id)
-        return ServiceResponse(created=service.created,
-                modified=service.modified,
-                syncing=service.syncing,
-                sync_date=service.sync_date,
-                sync_successful=service.sync_successful,
-                sync_enabled=service.sync_enabled,
-                connected=service_creds is not None)
+        user = User.get(claims)
+        service = Service.get(user.key, request.id)
+        service_creds = service.get_credentials()
+        return ServiceResponse(service=Service.to_message(service))
 
     @endpoints.method(
-        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
+        endpoints.ResourceContainer(UpdateServiceRequest,
+            id=messages.StringField(1)),
         ServiceResponse,
-        path='sync/{id}',
+        path='update_service/{id}',
+        http_method='POST',
+        api_key_required=True)
+    def update_service(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = User.get(claims)
+        service = Service.get(user.key, request.id)
+        service_creds = service.get_credentials()
+        if request.service.sync_enabled is not None:
+            service.sync_enabled = request.service.sync_enabled
+            service.put()
+        return ServiceResponse(service=Service.to_message(service))
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request, id=messages.StringField(1)),
+        ServiceResponse,
+        path='service_sync/{id}',
         http_method='POST',
         api_key_required=True)
     def sync_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
+        user = User.get(claims)
         logging.info('Getting %s service info.', request.id)
-        service = services.Service.get(user.key, request.id)
+        service = Service.get(user.key, request.id)
 
         @ndb.transactional
         def submit_sync():
@@ -204,95 +247,23 @@ class BikebudsApi(remote.Service):
                         'service': service.key.urlsafe()},
                     transactional=True)
         submit_sync()
-        return ServiceResponse(
-                created=service.created,
-                modified=service.modified,
-                connected=True)
-
-    @endpoints.method(
-        endpoints.ResourceContainer(Request),
-        MeasuresResponse,
-        path='measures',
-        http_method='POST',
-        api_key_required=True)
-    def measures(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
-        service = services.Service.get(user.key, 'withings')
-        service_creds = services.ServiceCredentials.default(user.key, 'withings')
-
-        to_imperial = user.preferences.units == users.Preferences.Unit.IMPERIAL
-
-        response = MeasuresResponse()
-        for measure in Measure.query():
-            response.measures.append(Measure.to_message(measure,
-                to_imperial=to_imperial))
-        return response
-
-    @endpoints.method(
-        endpoints.ResourceContainer(Request),
-        ActivitiesResponse,
-        path='activities',
-        http_method='POST',
-        api_key_required=True)
-    def activities(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
-        to_imperial = user.preferences.units == users.Preferences.Unit.IMPERIAL
-
-        response = ActivitiesResponse()
-        for activity in Activity.query().order(-Activity.start_date):
-            response.activities.append(
-                    Activity.to_message(activity, to_imperial=to_imperial))
-        return response
-
-    @endpoints.method(
-        endpoints.ResourceContainer(Request,
-            id=messages.StringField(2),
-            sync_enabled=messages.BooleanField(3, default=None)),
-        ServiceResponse,
-        path='update_service/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def update_service(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
-        service = services.Service.get(user.key, request.id)
-        service_creds = services.ServiceCredentials.default(user.key, request.id)
-        if request.sync_enabled is not None:
-            service.sync_enabled = request.sync_enabled
-            service.put()
-        return ServiceResponse(created=service.created,
-                modified=service.modified,
-                syncing=service.syncing,
-                sync_date=service.sync_date,
-                sync_successful=service.sync_successful,
-                sync_enabled=service.sync_enabled,
-                connected=service_creds is not None)
+        return ServiceResponse(service=Service.to_message(service))
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(2)),
         ServiceResponse,
-        path='disconnect/{id}',
+        path='service_disconnect/{id}',
         http_method='POST',
         api_key_required=True)
     def disconnect_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = users.User.get(claims)
+        user = User.get(claims)
         logging.info('Getting %s service info.', request.id)
-        service = services.Service.get(user.key, request.id)
-        services.ServiceCredentials.get_key(service.key).delete()
-        return ServiceResponse(created=service.created,
-                modified=service.modified,
-                connected=False)
+        service = Service.get(user.key, request.id)
+        service.clear_credentials()
+        return ServiceResponse(service=Service.to_message(service))
 
 
 api = endpoints.api_server([BikebudsApi])

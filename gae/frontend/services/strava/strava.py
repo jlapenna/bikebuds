@@ -34,22 +34,6 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
-@module.route('/services/strava/test', methods=['GET', 'POST'])
-@auth_util.claims_required
-def test(claims):
-    user = users.User.get(claims)
-    service_creds = services.ServiceCredentials.default(user.key, SERVICE_NAME)
-    if service_creds is None:
-        return get_auth_url_response()
-
-    client = stravalib.client.Client(
-            access_token=service_creds.access_token)
-
-    athlete = client.get_athlete()
-    logging.info(str(athlete))
-    return flask.make_response('OK', 200)
-
-
 @module.route('/services/strava/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
@@ -76,8 +60,7 @@ def redirect(claims):
             client_secret=config.strava_creds['client_secret'],
             code=code)
 
-    services.ServiceCredentials.update(user.key, SERVICE_NAME,
-            dict(creds))
+    service_creds = service.update_credentials(dict(creds))
 
     return flask.redirect(config.frontend_url + dest)
 

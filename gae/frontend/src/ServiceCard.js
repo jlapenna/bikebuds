@@ -60,7 +60,7 @@ class ServiceCard extends Component {
 
   onConnect() {
     this.setState({connectActionPending: true});
-    if (this.state.connected !== undefined && this.state.connected) {
+    if (this.state.service.credentials !== undefined && this.state.service.credentials) {
       window.gapi.client.bikebuds.disconnect_service(
         {'id': this.props.serviceName}).then((response) => {
           this.updateServiceState(response);
@@ -98,18 +98,17 @@ class ServiceCard extends Component {
 
     window.gapi.client.bikebuds.update_service({
       id: this.props.serviceName,
-      sync_enabled: event.target.checked 
+      service: {sync_enabled: event.target.checked},
     }).then(this.updateServiceState);
   }
 
   updateServiceState(response) {
-    var sync_date = response.result.sync_successful
-      ? moment.utc(response.result.sync_date) : null;
+    response.result.service.sync_date = response.result.service.sync_successful
+      ? moment.utc(response.result.service.sync_date) : null;
+    response.result.service.created = moment.utc(response.result.created);
+    response.result.service.modified = moment.utc(response.result.modified);
     this.setState({
-      service: response.result,
-      created: moment.utc(response.result.created),
-      sync_date: sync_date,
-      connected: response.result.connected,
+      service: response.result.service,
     });
     console.log('ServiceCard.setState: service: ', response.result);
   }
@@ -136,10 +135,10 @@ class ServiceCard extends Component {
                 justify="center"
                 alignItems="center">
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.sync_date != null &&
-                <i>Last sync: <Moment fromNow>{this.state.sync_date}</Moment></i>
+            {this.state.service.sync_date != null &&
+                <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
             }
-            {!this.state.sync_date &&
+            {!this.state.service.sync_date &&
                 <i>&#8203;</i>
             }
           </Grid>
@@ -151,7 +150,7 @@ class ServiceCard extends Component {
     if (this.state.service === undefined) {
       return;
     }
-    if (this.state.connected) {
+    if (this.state.service.credentials) {
       return (
         <CardActions>
           <FormGroup row>
@@ -182,11 +181,14 @@ class ServiceCard extends Component {
     } else {
       return (
         <CardActions>
-          <Button color="primary" variant="contained"
-            disabled={this.state.connectActionPending}
-            onClick={this.onConnect}>Connect
-            {this.state.connectActionPending && <CircularProgress size={20} />}
-          </Button>
+          <FormGroup row>
+            <Button color="primary" variant="contained"
+              disabled={this.state.connectActionPending}
+              onClick={this.onConnect}>
+                Connect
+                {this.state.connectActionPending && <CircularProgress size={20} />}
+            </Button>
+          </FormGroup>
         </CardActions>
       )
     }

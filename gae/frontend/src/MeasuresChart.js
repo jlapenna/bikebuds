@@ -55,7 +55,8 @@ class MeasuresChart extends Component {
     var earliestDate = preferredNextDate.clone().subtract(
       this.state.earliestInterval, this.state.earliestUnit);
     var measures = [];
-    for (var i = 0; i < response.result.measures.length; i++) {
+    var result_measures = response.result.measures || [];
+    for (var i = 0; i < result_measures.length; i++) {
       var measure = response.result.measures[response.result.measures.length - 1 - i];
       var measureDate = moment.utc(measure.date);
       if (measureDate <= earliestDate) {
@@ -67,13 +68,8 @@ class MeasuresChart extends Component {
       }
     };
 
-    var syncDate = response.result.sync_successful
-      ? moment.utc(response.result.sync_date) : null;
     this.setState({
       measures: measures,
-      created: moment.utc(response.result.created),
-      syncDate: syncDate,
-      connected: response.result.connected,
     });
     console.log('MeasuresChart.setState:', this.state);
   }
@@ -84,12 +80,12 @@ class MeasuresChart extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresChart.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.measures === undefined) {
-      window.gapi.client.bikebuds.measures().then(this.updateMeasuresState);
+      window.gapi.client.bikebuds.get_measures().then(this.updateMeasuresState);
     }
   }
 
   renderCardContent() {
-    if (this.state.measures === undefined) {
+    if (this.state.measures === undefined || this.state.measures.length === 0) {
       return;
     }
     return (

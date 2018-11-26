@@ -60,8 +60,7 @@ def redirect(claims):
             redirect_uri=get_redirect_uri(dest))
     creds = auth_client.fetch_access_token(code)
 
-    service_creds = services.ServiceCredentials.update(
-            user.key, SERVICE_NAME, creds)
+    service_creds = service.update_credentials(creds)
 
     return flask.redirect(config.frontend_url + dest)
 
@@ -80,16 +79,3 @@ def get_auth_url_response(dest):
         return flask.jsonify({'authorize_url': url})
     else:
         return flask.redirect(url)
-
-
-def create_api_client(user_key, service_creds):
-    def refresh_callback(new_credentials):
-        services.ServiceCredentials.update(user_key, SERVICE_NAME, new_credentials)
-    return fitbit.Fitbit(
-            config.fitbit_creds['client_id'],
-            config.fitbit_creds['client_secret'],
-            access_token=service_creds.access_token,
-            refresh_token=service_creds.refresh_token,
-            expires_at=service_creds.expires_at,
-            redirect_uri=get_redirect_uri('frontend'),
-            refresh_cb=refresh_callback)

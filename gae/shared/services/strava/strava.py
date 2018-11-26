@@ -27,9 +27,8 @@ from stravalib import exc
 
 
 class Synchronizer(object):
-
-    def sync(self, user_key, service, service_creds):
-        client = ClientWrapper(user_key, service_creds)
+    def sync(self, service):
+        client = create_client(service)
         activities = [activity for activity in client.get_activities()]
 
         @ndb.transactional
@@ -40,17 +39,11 @@ class Synchronizer(object):
         return put()
 
 
-def create_client(user_key, service_creds):
-    return ClientWrapper(user_key, service_creds)
-
-
 class ClientWrapper(object):
     """Auto-refresh (once) access tokens on any request."""
-
-    def __init__(self, user_key, service_creds):
-        self._user_key = user_key
-        self._service_creds = service_creds
-        self._client = stravalib.client.Client(access_token=service_creds.access_token)
+    def __init__(self, service):
+        self._service = service
+        self._client = stravalib.client.Client(access_token=service.get_credentials().access_token)
 
     def __getattr__(self, attr):
         func = getattr(self._client, attr)
@@ -69,7 +62,10 @@ class ClientWrapper(object):
         new_credentials = self._client.refresh_access_token(
             client_id=config.strava_creds['client_id'],
             client_secret=config.strava_creds['client_secret'],
-            refresh_token=self._service_creds.refresh_token)
-        self._service_creds = services.ServiceCredentials.update(
-                self._user_key, 'strava', dict(new_credentials))
+            refresh_token=self._service.get_credentials().refresh_token)
+        self._service.update_credentials(dict(new_credentials))
         self._client.access_token = self._service_creds.access_token
+
+
+def create_client(service):
+    return ClientWrapper(service)

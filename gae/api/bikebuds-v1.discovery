@@ -20,21 +20,6 @@
   "id": "bikebuds:v1",
   "kind": "discovery#restDescription",
   "methods": {
-    "activities": {
-      "httpMethod": "POST",
-      "id": "bikebuds.activities",
-      "path": "activities",
-      "request": {
-        "$ref": "MainRequest",
-        "parameterName": "resource"
-      },
-      "response": {
-        "$ref": "MainActivitiesResponse"
-      },
-      "scopes": [
-        "https://www.googleapis.com/auth/userinfo.email"
-      ]
-    },
     "disconnect_service": {
       "httpMethod": "POST",
       "id": "bikebuds.disconnect_service",
@@ -47,7 +32,7 @@
           "type": "string"
         }
       },
-      "path": "disconnect/{id}",
+      "path": "service_disconnect/{id}",
       "request": {
         "$ref": "MainRequest",
         "parameterName": "resource"
@@ -59,10 +44,44 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
+    "get_activities": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_activities",
+      "path": "activities",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainActivitiesResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
+    "get_measures": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_measures",
+      "path": "measures",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainMeasuresResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "get_preferences": {
       "httpMethod": "POST",
       "id": "bikebuds.get_preferences",
       "path": "preferences",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
       "response": {
         "$ref": "MainPreferencesResponse"
       },
@@ -109,36 +128,6 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
-    "measures": {
-      "httpMethod": "POST",
-      "id": "bikebuds.measures",
-      "path": "measures",
-      "request": {
-        "$ref": "MainRequest",
-        "parameterName": "resource"
-      },
-      "response": {
-        "$ref": "MainMeasuresResponse"
-      },
-      "scopes": [
-        "https://www.googleapis.com/auth/userinfo.email"
-      ]
-    },
-    "set_preferences": {
-      "httpMethod": "POST",
-      "id": "bikebuds.set_preferences",
-      "path": "set_preferences",
-      "request": {
-        "$ref": "MainPreferencesRequest",
-        "parameterName": "resource"
-      },
-      "response": {
-        "$ref": "MainPreferencesResponse"
-      },
-      "scopes": [
-        "https://www.googleapis.com/auth/userinfo.email"
-      ]
-    },
     "sync_service": {
       "httpMethod": "POST",
       "id": "bikebuds.sync_service",
@@ -151,13 +140,28 @@
           "type": "string"
         }
       },
-      "path": "sync/{id}",
+      "path": "service_sync/{id}",
       "request": {
         "$ref": "MainRequest",
         "parameterName": "resource"
       },
       "response": {
         "$ref": "MainServiceResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
+    "update_preferences": {
+      "httpMethod": "POST",
+      "id": "bikebuds.update_preferences",
+      "path": "update_preferences",
+      "request": {
+        "$ref": "MainUpdatePreferencesRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainPreferencesResponse"
       },
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
@@ -173,15 +177,11 @@
         "id": {
           "location": "path",
           "type": "string"
-        },
-        "sync_enabled": {
-          "location": "query",
-          "type": "boolean"
         }
       },
       "path": "update_service/{id}",
       "request": {
-        "$ref": "MainRequest",
+        "$ref": "MainUpdateServiceRequest",
         "parameterName": "resource"
       },
       "response": {
@@ -271,18 +271,6 @@
       },
       "type": "object"
     },
-    "MainPreferencesRequest": {
-      "id": "MainPreferencesRequest",
-      "properties": {
-        "header": {
-          "$ref": "MainRequestHeader"
-        },
-        "preferences": {
-          "$ref": "SharedDatastoreUsersPreferences"
-        }
-      },
-      "type": "object"
-    },
     "MainPreferencesResponse": {
       "id": "MainPreferencesResponse",
       "properties": {
@@ -290,7 +278,7 @@
           "$ref": "MainResponseHeader"
         },
         "preferences": {
-          "$ref": "SharedDatastoreUsersPreferences"
+          "$ref": "SharedDatastoreUsersPreferencesMessage"
         }
       },
       "type": "object"
@@ -330,32 +318,35 @@
     "MainServiceResponse": {
       "id": "MainServiceResponse",
       "properties": {
-        "connected": {
-          "type": "boolean"
-        },
-        "created": {
-          "format": "date-time",
-          "type": "string"
-        },
         "header": {
           "$ref": "MainResponseHeader"
         },
-        "modified": {
-          "format": "date-time",
-          "type": "string"
+        "service": {
+          "$ref": "SharedDatastoreServicesServiceMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdatePreferencesRequest": {
+      "id": "MainUpdatePreferencesRequest",
+      "properties": {
+        "header": {
+          "$ref": "MainRequestHeader"
         },
-        "sync_date": {
-          "format": "date-time",
-          "type": "string"
+        "preferences": {
+          "$ref": "SharedDatastoreUsersPreferencesMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdateServiceRequest": {
+      "id": "MainUpdateServiceRequest",
+      "properties": {
+        "header": {
+          "$ref": "MainRequestHeader"
         },
-        "sync_enabled": {
-          "type": "boolean"
-        },
-        "sync_successful": {
-          "type": "boolean"
-        },
-        "syncing": {
-          "type": "boolean"
+        "service": {
+          "$ref": "SharedDatastoreServicesServiceMessage"
         }
       },
       "type": "object"
@@ -461,10 +452,44 @@
       },
       "type": "object"
     },
-    "SharedDatastoreUsersPreferences": {
-      "id": "SharedDatastoreUsersPreferences",
+    "SharedDatastoreServicesServiceMessage": {
+      "id": "SharedDatastoreServicesServiceMessage",
+      "properties": {
+        "created": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "credentials": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "modified": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_date": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sync_enabled": {
+          "type": "boolean"
+        },
+        "sync_successful": {
+          "type": "boolean"
+        },
+        "syncing": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreUsersPreferencesMessage": {
+      "id": "SharedDatastoreUsersPreferencesMessage",
       "properties": {
         "units": {
+          "default": "IMPERIAL",
           "enum": [
             "UNKNOWN",
             "IMPERIAL",

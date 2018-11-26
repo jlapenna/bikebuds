@@ -20,12 +20,17 @@ from google.appengine.ext.ndb import msgprop
 from endpoints import messages
 
 
-class Preferences(messages.Message):
+class PreferencesMessage(messages.Message):
     class Unit(messages.Enum):
         UNKNOWN = 0
         IMPERIAL = 1
         METRIC = 2
-    units = messages.EnumField(Unit, 1)
+    units = messages.EnumField(Unit, 1,
+            default=Unit.IMPERIAL)
+
+
+def default_preferences():
+    return PreferencesMessage(units=PreferencesMessage.Unit.IMPERIAL)
 
 
 class User(ndb.Model):
@@ -33,7 +38,8 @@ class User(ndb.Model):
     name = ndb.StringProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
-    preferences = msgprop.MessageProperty(Preferences)
+    preferences = msgprop.MessageProperty(PreferencesMessage,
+            default=default_preferences())
 
     @classmethod
     def get(cls, claims):
@@ -42,7 +48,3 @@ class User(ndb.Model):
     @classmethod
     def get_key(cls, claims):
         return ndb.Key(User, claims['sub'])
-
-
-def default_preferences():
-    return Preferences(units=Preferences.Unit.IMPERIAL)

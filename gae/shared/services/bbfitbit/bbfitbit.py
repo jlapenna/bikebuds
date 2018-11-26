@@ -25,8 +25,8 @@ from shared.datastore.measures import Measure, MeasureMessage
 
 
 class Synchronizer(object):
-    def sync(self, user_key, service, service_creds):
-        client = create_client(user_key, service_creds)
+    def sync(self, service):
+        client = create_client(service)
         measures = client.time_series('body/weight', period='max')
 
         @ndb.transactional
@@ -36,8 +36,8 @@ class Synchronizer(object):
         put_measures()
         return True
 
-    def sync_log(self, user_key, service, service_creds):
-        client = create_client(user_key, service_creds)
+    def sync_log(self, user_key, service):
+        client = create_client(user_key, service.get_credentials())
         measures = client.get_bodyweight('body/weight', period='max')
 
         for measure in measures['weight']:
@@ -45,15 +45,15 @@ class Synchronizer(object):
         return True
 
 
-def create_client(user_key, service_creds):
+def create_client(service):
     def refresh_callback(new_credentials):
-        services.ServiceCredentials.update(user_key, 'fitbit', new_credentials)
+        service.update_credentials(new_credentials)
     return fitbit.Fitbit(
             config.fitbit_creds['client_id'],
             config.fitbit_creds['client_secret'],
-            access_token=service_creds.access_token,
-            refresh_token=service_creds.refresh_token,
-            expires_at=service_creds.expires_at,
+            access_token=service.get_credentials().access_token,
+            refresh_token=service.get_credentials().refresh_token,
+            expires_at=service.get_credentials().expires_at,
             redirect_uri=get_redirect_uri('frontend'),
             refresh_cb=refresh_callback,
             system=fitbit.Fitbit.METRIC)

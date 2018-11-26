@@ -69,8 +69,7 @@ def redirect(claims):
             client_id=creds.client_id,
             consumer_secret=creds.consumer_secret)
 
-    service_creds = services.ServiceCredentials.update(user.key, SERVICE_NAME,
-        creds_dict)
+    service_creds = service.update_credentials(creds_dict)
 
     return flask.redirect(config.frontend_url + dest)
 

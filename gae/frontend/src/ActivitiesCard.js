@@ -43,7 +43,7 @@ class ActivitiesCard extends Component {
 
   updateActivitiesState = (response) => {
     this.setState({
-      activities: response.result.activities,
+      activities: response.result.activities || [],
     });
     console.log('ActivitiesCard.setState: service: ', response.result);
   }
@@ -54,7 +54,8 @@ class ActivitiesCard extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ActivitiesCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.activities === undefined) {
-      window.gapi.client.bikebuds.activities().then(this.updateActivitiesState);
+      console.log('ActivitiesCard.componentDidUpdate', 'prevState', prevState, 'newState', this.state)
+      window.gapi.client.bikebuds.get_activities().then(this.updateActivitiesState);
     }
   }
 

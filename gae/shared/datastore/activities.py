@@ -37,8 +37,8 @@ class Activity(ndb.Model):
                 parent=service_key,
                 name=activity.name,
                 start_date=start_date,
-                moving_time=activity.moving_time,
-                elapsed_time=activity.elapsed_time)
+                moving_time=activity.moving_time.seconds,
+                elapsed_time=activity.elapsed_time.seconds)
 
     @classmethod
     def to_message(cls, activity, to_imperial=True):

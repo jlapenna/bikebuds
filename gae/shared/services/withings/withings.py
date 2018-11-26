@@ -24,9 +24,8 @@ import nokia
 
 
 class Synchronizer(object):
-
-    def sync(self, user_key, service, service_creds):
-        client = create_client(user_key, service_creds)
+    def sync(self, service):
+        client = create_client(service)
         measures = client.get_measures(lastupdate=0, updatetime=0)
 
         @ndb.transactional
@@ -37,7 +36,8 @@ class Synchronizer(object):
         return True
 
 
-def create_client(user_key, service_creds):
+def create_client(service):
     def refresh_callback(new_credentials):
-        services.ServiceCredentials.update(user_key, 'withings', new_credentials)
-    return nokia.NokiaApi(service_creds, refresh_cb=refresh_callback)
+        service.update_credentials(new_credentials)
+    return nokia.NokiaApi(service.get_credentials(),
+            refresh_cb=refresh_callback)

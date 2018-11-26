@@ -96,13 +96,14 @@ def signup(claims):
     user_services = services.Service.query(ancestor=user.key).fetch()
     user_services_dict = dict(((service.key.id(), service) for service in user_services))
     logging.info('user services: %s', user_services_dict)
-    for service_name in SERVICE_NAMES:
+    for service in user_services:
+        service_name = service.key.id()
         redirect_url = config.frontend_url + '/services/' + service_name + '/init?dest=/services/signup'
         if service_name not in user_services_dict:
             # We haven't initialized this service yet. Lets do it.
             logging.info('No %s, starting flow.', service_name)
             return flask.redirect(redirect_url)
-        service_creds = services.ServiceCredentials.default(user.key, service_name)
+        service_creds = service.get_credentials()
         if not service_creds:
             logging.info('No %s credentials, starting flow.', service_name)
             return flask.redirect(redirect_url)

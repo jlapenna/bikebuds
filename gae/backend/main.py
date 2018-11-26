@@ -68,7 +68,7 @@ def sync():
 def service_sync(service_name):
     user_key = ndb.Key(urlsafe=flask.request.values.get('user'))
     service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
-    service_creds = services.ServiceCredentials.get_key(service.key).get()
+    service_creds = service.get_credentials()
 
     if service_creds is None:
         logging.info('No service creds for this sync: %s', str(service))
@@ -88,7 +88,7 @@ def service_sync(service_name):
         synchronizer = strava.Synchronizer()
 
     try:
-        result = synchronizer.sync(user_key, service, service_creds)
+        result = synchronizer.sync(service)
         @ndb.transactional
         def finish_sync():
             service.syncing=False
