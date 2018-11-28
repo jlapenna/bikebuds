@@ -61,6 +61,8 @@ function main() {
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
+  git push --force production master
+
   # Then restore everything
   git clean -fd
   git reset --hard HEAD
