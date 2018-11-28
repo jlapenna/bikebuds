@@ -5,6 +5,7 @@
   "homepage": "https://bikebuds.cc",
   "dependencies": {
     "@material-ui/core": "^3.5.1",
+    "@material-ui/icons": "^3.0.1",
     "ajv": "6.0.0",
     "firebase": "^5.5.8",
     "lodash.clonedeepwith": "^4.5.0",
