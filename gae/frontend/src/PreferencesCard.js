@@ -32,10 +32,6 @@ const styles = theme => ({
   root: {
     height:300,
   },
-  avatar: {
-    width: 128,
-    height: 128,
-  },
 });
 
 class PreferencesCard extends Component {
@@ -57,6 +53,13 @@ class PreferencesCard extends Component {
       this.setState({
         preferences: response.result.preferences,
       });
+  }
+
+  /**
+   * @inheritDoc
+   */
+  componentDidMount() {
+    this.setState({});
   }
 
   /**

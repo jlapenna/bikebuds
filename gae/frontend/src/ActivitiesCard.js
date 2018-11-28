@@ -40,12 +40,18 @@ class ActivitiesCard extends Component {
     }
   }
 
-
   updateActivitiesState = (response) => {
     this.setState({
       activities: response.result.activities || [],
     });
     console.log('ActivitiesCard.setState: service: ', response.result);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  componentDidMount() {
+    this.setState({});
   }
 
   /**
@@ -66,7 +72,7 @@ class ActivitiesCard extends Component {
     return (
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
-          <List className={this.props.classes.list}>
+          <List>
             {this.state.activities.map((activity, index) => {
               return <ActivityItem key={index} activity={activity} />
             })

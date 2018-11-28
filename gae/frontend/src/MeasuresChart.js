@@ -77,6 +77,13 @@ class MeasuresChart extends Component {
   /**
    * @inheritDoc
    */
+  componentDidMount() {
+    this.setState({});
+  }
+
+  /**
+   * @inheritDoc
+   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresChart.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.measures === undefined) {

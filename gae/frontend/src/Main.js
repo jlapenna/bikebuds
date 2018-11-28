@@ -16,6 +16,8 @@
 
 import React, { Component } from 'react';
 
+import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
+
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -33,11 +35,13 @@ import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
-import MeasuresChart from './MeasuresChart';
 import ActivitiesCard from './ActivitiesCard';
+import Home from './Home';
+import MeasuresChart from './MeasuresChart';
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
+import Settings from './Settings';
 
 
 const drawerWidth = 240;
@@ -45,6 +49,9 @@ const drawerWidth = 240;
 const styles = theme => ({
   root: {
     display: 'flex',
+  },
+  drawerPaper: {
+    width: drawerWidth,
   },
   drawer: {
     [theme.breakpoints.up('sm')]: {
@@ -65,12 +72,12 @@ const styles = theme => ({
     },
   },
   toolbar: theme.mixins.toolbar,
-  drawerPaper: {
-    width: drawerWidth,
-  },
   content: {
     flexGrow: 1,
     padding: theme.spacing.unit * 3,
+  },
+  active: {
+    backgroundColor: theme.palette.action.selected
   },
 });
 
@@ -82,16 +89,14 @@ class Main extends Component {
       isSignedIn: undefined,
       gapiReady: false,
     };
-    this.onGapiReady = this.onGapiReady.bind(this);
   }
 
   onDrawerToggle = () => {
     this.setState(state => ({ mobileOpen: !state.mobileOpen }));
   };
 
-  onGapiReady() {
+  onGapiReady = () => {
     this.setState({gapiReady: true});
-    console.log('App: gapiReady');
   }
 
   render() {
@@ -102,45 +107,40 @@ class Main extends Component {
         <div className={classes.toolbar} />
         <Divider />
         <List>
+          <ListItem button key="Home" component={NavLink}
+            to="/" exact activeClassName={classes.active}>
+            <ListItemText>Home</ListItemText>
+          </ListItem>
+          <ListItem button key="All" component={NavLink}
+            to="/all" exact activeClassName={classes.active}>
+            <ListItemText>All</ListItemText>
+          </ListItem>
+          <ListItem button key="Settings" component={NavLink}
+            to="/settings" exact activeClassName={classes.active}>
+            <ListItemText>Settings</ListItemText>
+          </ListItem>
         </List>
       </div>
     );
 
     const mainContent = (
-      <Grid container spacing={24}
-        style={{margin: 0, width: '100%'}}>
-        <Grid item xs={12} sm={12} md={6}>
-          <ProfileCard firebaseUser={this.props.firebaseUser}
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <PreferencesCard firebaseUser={this.props.firebaseUser}
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <ActivitiesCard
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <MeasuresChart
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="fitbit"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="strava"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="withings"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-      </Grid>
+      <React.Fragment>
+        <Route path="/" exact
+          render={() => <Home
+            firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady}
+          />} />
+        <Route path="/settings" exact
+          render={() => <Settings
+            firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady}
+          />} />
+        <Route path="/all" exact component={this.renderAll} />
+      </React.Fragment>
     );
 
     return (
+      <Router>
       <div className={classes.root}>
         <AppBar className={classes.appBar} position="fixed">
           <Toolbar>
@@ -189,8 +189,45 @@ class Main extends Component {
         </main>
         <GapiWrapper onReady={this.onGapiReady} />
       </div>
+      </Router>
     );
   };
+
+  renderAll = () => {
+    return (
+      <Grid container spacing={24}
+        style={{margin: 0, width: '100%'}}>
+        <Grid item xs={12} sm={12} md={6}>
+          <ProfileCard firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={12} md={6}>
+          <PreferencesCard firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={12} md={6}>
+          <ActivitiesCard
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={12} md={6}>
+          <MeasuresChart
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <ServiceCard serviceName="fitbit"
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <ServiceCard serviceName="strava"
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <ServiceCard serviceName="withings"
+            gapiReady={this.state.gapiReady} />
+        </Grid>
+      </Grid>
+    );
+  }
 }
 
 export default withStyles(styles, {withTheme: true})(Main);

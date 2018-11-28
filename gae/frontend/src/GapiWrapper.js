@@ -39,7 +39,6 @@ class GapiWrapper extends Component {
   /** Load the gapi client after the library is loaded. */
   onGapiLoaded() {
     window.gapi.load('client', () => {
-      console.log('GapiWrapper.onClientLoaded', window.gapi.client);
       this.setState({clientLoaded: true});
     });
   }
@@ -48,8 +47,6 @@ class GapiWrapper extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    console.log('GapiWrapper.componentDidMount');
-
     // Listen for sign-in, sign-out
     this.unregisterAuthObserver = firebase.auth().onAuthStateChanged((user) => {
       user.getIdToken(true).then((idToken) => {
@@ -75,7 +72,6 @@ class GapiWrapper extends Component {
    * @inheritDoc
    */
   componentWillUnmount() {
-    console.log('GapiWrapper: componentWillUnmount');
     this.unregisterAuthObserver();
   };
 
@@ -83,7 +79,6 @@ class GapiWrapper extends Component {
    * @inheritDoc
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('GapiWrapper.componentDidUpdate', prevState, this.state);
     if ((this.state.clientLoaded !== prevState.clientLoaded)
       || (this.state.bikebudsDiscovery !== prevState.bikebudsDiscovery)) {
       if (this.state.clientLoaded
@@ -102,7 +97,6 @@ class GapiWrapper extends Component {
         window.gapi.client.setToken(this.state.authDict);
         window.gapi.client.setApiKey(config.apiKey);
         this.setState({bikebudsReady: true});
-        console.log('GapiWrapper: Ready');
         this.props.onReady();
       };
     };

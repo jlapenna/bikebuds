@@ -116,9 +116,17 @@ class ServiceCard extends Component {
   /**
    * @inheritDoc
    */
+  componentDidMount() {
+    this.setState({});
+  }
+
+  /**
+   * @inheritDoc
+   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ServiceCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.service === undefined) {
+      console.log('ServiceCard.componentDidUpdate: gapiReady and no state');
       window.gapi.client.bikebuds.get_service(
         {'id': this.props.serviceName}).then(this.updateServiceState);
     }
