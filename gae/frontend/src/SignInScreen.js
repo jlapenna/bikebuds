@@ -99,7 +99,7 @@ class SignInScreen extends Component {
     }
     return (
       <div>
-        <img className={classes.logo} alt="bikebuds logo" src="icon.png" />
+        <img className={classes.logo} alt="Bikebuds Logo" src="logo-round.svg" />
         <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
       </div>
     );
