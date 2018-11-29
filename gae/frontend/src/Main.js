@@ -106,7 +106,7 @@ class Main extends Component {
       <div>
         <div className={classes.toolbar} />
         <Divider />
-        <List>
+        <List onClick={() => this.setState({mobileOpen: false})}>
           <ListItem button key="Home" component={NavLink}
             to="/" exact activeClassName={classes.active}>
             <ListItemText>Home</ListItemText>
