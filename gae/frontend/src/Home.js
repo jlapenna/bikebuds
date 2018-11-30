@@ -19,18 +19,32 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 
 import ActivitiesCard from './ActivitiesCard';
-import MeasuresChart from './MeasuresChart';
+import MeasuresCard from './MeasuresCard';
 
 class Home extends Component {
   render() {
     return (
       <div>
         <Grid container spacing={24}>
-          <Grid item xs={12} sm={12}>
-            <MeasuresChart
-              gapiReady={this.props.gapiReady} />
+          <Grid item xs={12}>
+            <MeasuresCard gapiReady={this.props.gapiReady}
+              title="Daily"
+              intervalUnit="d" intervalFormat="MMM D" intervalCount="365"
+            />
           </Grid>
-          <Grid item xs={12} sm={3}>
+          <Grid item xs={12}>
+            <MeasuresCard gapiReady={this.props.gapiReady}
+              title="Weekly"
+              intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <MeasuresCard gapiReady={this.props.gapiReady}
+              title="Yearly"
+              intervalUnit="Y" intervalFormat="'YY" intervalCount="10"
+            />
+          </Grid>
+          <Grid item xs={12}>
             <ActivitiesCard
               gapiReady={this.props.gapiReady} />
           </Grid>
