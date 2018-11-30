@@ -12,20 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Hide spurrious errors.
-import warnings
-import urllib3.contrib.appengine
-warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
-        urllib3.contrib.appengine.AppEnginePlatformWarning)
+from shared import monkeypatch
 
 import datetime
 import logging
 import sys
-
-import google.auth.transport.requests
-import requests_toolbelt.adapters.appengine
-requests_toolbelt.adapters.appengine.monkeypatch()
-HTTP_REQUEST = google.auth.transport.requests.Request()
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
