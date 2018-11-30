@@ -20,6 +20,7 @@ warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
 
 import datetime
 import logging
+import sys
 
 import google.auth.transport.requests
 import requests_toolbelt.adapters.appengine
@@ -42,6 +43,10 @@ from shared.services.strava import strava
 
 # Flask setup
 app = flask.Flask(__name__)
+
+
+class SyncException(Exception):
+    pass
 
 
 @app.route('/tasks/sync', methods=['GET'])
@@ -101,13 +106,15 @@ def service_sync(service_name):
             service.sync_successful=True
             service.put()
         finish_sync()
-    except:
+    except Exception, e:
         @ndb.transactional
         def finish_sync():
             service.syncing=False
             service.sync_successful=False
             service.put()
         finish_sync()
-        raise
+        msg = 'Unable to sync: %s using %s -> %s' % (
+                service, service.get_credentials(), sys.exc_info()[1])
+        raise SyncException, SyncException(msg), sys.exc_info()[2]
 
     return 'OK', 200
