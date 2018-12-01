@@ -15,6 +15,7 @@
 import datetime
 import functools
 import logging
+import time
 
 from google.appengine.ext import ndb
 
@@ -29,6 +30,8 @@ from stravalib import exc
 class Synchronizer(object):
     def sync(self, service):
         client = create_client(service)
+        client.ensure_access()
+
         activities = [activity for activity in client.get_activities()]
 
         @ndb.transactional
@@ -44,6 +47,16 @@ class ClientWrapper(object):
     def __init__(self, service):
         self._service = service
         self._client = stravalib.client.Client(access_token=service.get_credentials().access_token)
+
+    def ensure_access(self):
+        """Ensure that an access token is good for at least another 60 seconds."""
+        now = time.time()
+        expires_around = self._service.get_credentials().expires_at - 60
+        if time.time() > expires_around:
+            seconds_ago = now - expires_around
+            logging.info('Access expired %s ago; fetching a new one.',
+                    seconds_ago)
+            self._refresh_credentials()
 
     def __getattr__(self, attr):
         func = getattr(self._client, attr)

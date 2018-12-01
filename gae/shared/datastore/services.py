@@ -31,7 +31,7 @@ class Service(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
     credentials = ndb.KeyProperty()
-    syncing = ndb.BooleanProperty()
+    syncing = ndb.BooleanProperty(default=False)
     sync_date = ndb.DateTimeProperty()
     sync_successful = ndb.BooleanProperty()
     sync_enabled = ndb.BooleanProperty(default=True)
@@ -106,7 +106,8 @@ class ServiceCredentials(ndb.Expando):
         service_creds = service.get_credentials()
         if service_creds is None:
             updated = True
-            service_creds = ServiceCredentials(id='default', parent=service.key)
+            service_creds = ServiceCredentials(
+                    id=service.key.id(), parent=service.key)
         for k, v in new_credentials.iteritems():
             updated = True
             setattr(service_creds, k, v)
