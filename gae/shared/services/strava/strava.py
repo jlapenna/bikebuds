@@ -29,7 +29,7 @@ from stravalib import exc
 
 class Synchronizer(object):
     def sync(self, service):
-        client = create_client(service)
+        client = ClientWrapper(service)
         client.ensure_access()
 
         activities = [activity for activity in client.get_activities()]
@@ -46,7 +46,8 @@ class ClientWrapper(object):
     """Auto-refresh (once) access tokens on any request."""
     def __init__(self, service):
         self._service = service
-        self._client = stravalib.client.Client(access_token=service.get_credentials().access_token)
+        self._client = stravalib.client.Client(
+                access_token=service.get_credentials().access_token)
 
     def ensure_access(self):
         """Ensure that an access token is good for at least another 60 seconds."""
@@ -77,8 +78,4 @@ class ClientWrapper(object):
             client_secret=config.strava_creds['client_secret'],
             refresh_token=self._service.get_credentials().refresh_token)
         self._service.update_credentials(dict(new_credentials))
-        self._client.access_token = self._service_creds.access_token
-
-
-def create_client(service):
-    return ClientWrapper(service)
+        self._client.access_token = self._service.get_credentials().access_token
