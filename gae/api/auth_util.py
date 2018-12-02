@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Helper library for authentication.
-
-import functools
+"""Helper library for authentication."""
 
 # Use the App Engine Requests adapter. This makes sure that Requests uses
 # URLFetch. This needs to be ordered the way it is, for some reason.

@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import google.auth.transport.requests
-import requests_toolbelt.adapters.appengine
-requests_toolbelt.adapters.appengine.monkeypatch()
-HTTP_REQUEST = google.auth.transport.requests.Request()
-
-# Hide spurrious errors.
+# Hide innocuous errors.
 import warnings
 import urllib3.contrib.appengine
 warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
         urllib3.contrib.appengine.AppEnginePlatformWarning)
 warnings.filterwarnings('ignore',
         'The oauth2client.contrib.multistore_file module has been deprecated')
+
+# Ensure that the requests library uses url fetch for its network base.
+# https://cloud.google.com/appengine/docs/standard/python/issue-requests#Python_Quotas_and_limits
+import google.auth.transport.requests
+import requests_toolbelt.adapters.appengine
+requests_toolbelt.adapters.appengine.monkeypatch()
