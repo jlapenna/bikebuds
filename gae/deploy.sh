@@ -29,10 +29,11 @@ function main() {
   fi
   source "${env_path}/bin/activate"
 
+  local date="$(date)";
   # First, commit all the code outstanding into a temporary commit for
   # safe-keeping.
   git add .
-  git commit --allow-empty -a -m"Deploy Commit: $(date)";
+  git commit --allow-empty -a -m"Deploy Commit: ${date}";
   local committed="$?";
 
   ./gae/update_api.sh
@@ -55,6 +56,12 @@ function main() {
     cp -r "gae/shared" "gae/${service}/"
   done;
 
+  # In order to include /lib/ in our uploaded source, we need to manipulate the
+  # gae gitignore to strip it right before upload
+  sed -i '/\/lib/d' gae/.gitignore
+  git add .
+  git commit --allow-empty -a -m"Deploy Lib: ${date}";
+
   # Then, deploy everything.
   yes|gcloud app deploy \
     gae/frontend/cron.yaml \
@@ -64,11 +71,10 @@ function main() {
   git push --force production master
 
   # Then restore everything
-  git clean -fd
-  git reset --hard HEAD
+  git reset --hard HEAD^
 
   # And reset the state of the client to before the deploy-commit.
-  if [ "$committed" -eq 0 ]; then
+  if [ "${committed}" -eq 0 ]; then
     git reset HEAD~
   fi;
 }
