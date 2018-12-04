@@ -16,6 +16,9 @@
 
 import React, { Component } from 'react';
 
+import { Redirect, BrowserRouter as Router, Route, Switch,
+    } from "react-router-dom";
+
 import firebase from 'firebase/app';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -65,17 +68,42 @@ class App extends Component {
       return (
         <MuiThemeProvider theme={theme}>
           <CssBaseline />
-          <Main firebaseUser={this.state.firebaseUser}/>
-        </MuiThemeProvider>
-      );
-    } else {
-      return (
-        <MuiThemeProvider theme={theme}>
-          <CssBaseline />
-          <SignInScreen />
+          <Router>
+            <Switch>
+              <Route path="/app">
+                <Redirect to="/" />
+              </Route>
+              <Route path="/signin">
+                <Redirect to="/" />
+              </Route>
+              <Route>
+                <Main firebaseUser={this.state.firebaseUser}/>
+              </Route>
+            </Switch>
+          </Router>
         </MuiThemeProvider>
       );
     }
-  };
+
+    // Not signed in.
+    return (
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Switch>
+            <Route path="/app">
+              <Redirect to="/"/>
+            </Route>
+            <Route path="/signin">
+              <SignInScreen />
+            </Route>
+            <Route>
+              <Redirect to="/signin"/>
+            </Route>
+          </Switch>
+        </Router>
+      </MuiThemeProvider>
+    );
+  }
 }
 export default App;

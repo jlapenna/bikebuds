@@ -16,7 +16,8 @@
 
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
+import { NavLink, Redirect, BrowserRouter as Router, Route, Switch,
+    } from "react-router-dom";
 
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -124,7 +125,7 @@ class Main extends Component {
     );
 
     const mainContent = (
-      <React.Fragment>
+      <Switch>
         <Route path="/" exact
           render={() => <Home
             firebaseUser={this.props.firebaseUser}
@@ -135,8 +136,12 @@ class Main extends Component {
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
           />} />
-        <Route path="/all" exact component={this.renderAll} />
-      </React.Fragment>
+        <Route path="/all" exact
+          component={this.renderAll} />
+        <Route>
+          <Redirect to="/" />
+        </Route>
+      </Switch>
     );
 
     return (

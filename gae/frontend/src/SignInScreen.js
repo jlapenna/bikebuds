@@ -22,6 +22,8 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
+import logoRound from './logo-round.svg';
+
 
 const styles = {
   logo: {
@@ -99,7 +101,7 @@ class SignInScreen extends Component {
     }
     return (
       <div>
-        <img className={classes.logo} alt="Bikebuds Logo" src="logo-round.svg" />
+        <img className={classes.logo} alt="Bikebuds Logo" src={logoRound} />
         <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
       </div>
     );
