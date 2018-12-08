@@ -31,6 +31,10 @@ function main() {
   source "${env_path}/bin/activate"
 
   ./gae/update_api.sh local;
+  if [[ "$?" != 0 ]]; then
+    echo "Unable to update API."
+    exit 1;
+  fi
 
   pushd gae/frontend;
   BROWSER=none npm start &
