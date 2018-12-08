@@ -50,9 +50,9 @@ def sync():
         user_key = service.key.parent()
         @ndb.transactional
         def submit_sync(user_key, service):
-            service.syncing=True
-            service.sync_date=datetime.datetime.now()
-            service.sync_successful=None
+            service.syncing = True
+            service.sync_date = datetime.datetime.now()
+            service.sync_successful = None
             service.put()
             task = taskqueue.add(
                     url='/tasks/service_sync/' + service.key.id(),
@@ -72,16 +72,6 @@ def service_sync(service_name):
     service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
     service_creds = service.get_credentials()
 
-    if service_creds is None:
-        logging.info('No service creds for this sync: %s', str(service))
-        @ndb.transactional
-        def finish_sync():
-            service.syncing=False
-            service.sync_successful=False
-            service.put()
-        finish_sync()
-        return 'OK', 250
-
     if service_name == 'withings':
         synchronizer = withings.Synchronizer()
     elif service_name == 'fitbit':
@@ -89,23 +79,26 @@ def service_sync(service_name):
     elif service_name == 'strava':
         synchronizer = strava.Synchronizer()
 
+    sync_successful = False
     try:
-        result = synchronizer.sync(service)
-        @ndb.transactional
-        def finish_sync():
-            service.syncing=False
-            service.sync_successful=True
-            service.put()
-        finish_sync()
+        if service_creds is None:
+            logging.info('No service creds for this sync: %s', str(service))
+            return 'OK', 250
+        elif synchronizer is None:
+            logging.info('No synchronizer for this sync: %s', str(service))
+            return 'OK', 251
+        else:
+            result = synchronizer.sync(service)
+            return 'OK', 200
     except Exception, e:
-        @ndb.transactional
-        def finish_sync():
-            service.syncing=False
-            service.sync_successful=False
-            service.put()
-        finish_sync()
         msg = 'Unable to sync: %s using %s -> %s' % (
                 service, service.get_credentials(), sys.exc_info()[1])
         raise SyncException, SyncException(msg), sys.exc_info()[2]
+    finally:
+        @ndb.transactional
+        def finish_sync():
+            service.syncing = False
+            service.sync_successful = sync_successful
+            service.put()
+        finish_sync()
 
-    return 'OK', 200
