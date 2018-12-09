@@ -59,21 +59,6 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
-    "get_measures": {
-      "httpMethod": "POST",
-      "id": "bikebuds.get_measures",
-      "path": "measures",
-      "request": {
-        "$ref": "MainRequest",
-        "parameterName": "resource"
-      },
-      "response": {
-        "$ref": "MainMeasuresResponse"
-      },
-      "scopes": [
-        "https://www.googleapis.com/auth/userinfo.email"
-      ]
-    },
     "get_preferences": {
       "httpMethod": "POST",
       "id": "bikebuds.get_preferences",
@@ -99,6 +84,21 @@
       },
       "response": {
         "$ref": "MainProfileResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
+    "get_series": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_series",
+      "path": "series",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainSeriesResponse"
       },
       "scopes": [
         "https://www.googleapis.com/auth/userinfo.email"
@@ -256,21 +256,6 @@
       },
       "type": "object"
     },
-    "MainMeasuresResponse": {
-      "id": "MainMeasuresResponse",
-      "properties": {
-        "header": {
-          "$ref": "MainResponseHeader"
-        },
-        "measures": {
-          "items": {
-            "$ref": "SharedDatastoreMeasuresMeasureMessage"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    },
     "MainPreferencesResponse": {
       "id": "MainPreferencesResponse",
       "properties": {
@@ -313,6 +298,18 @@
     "MainResponseHeader": {
       "id": "MainResponseHeader",
       "properties": {},
+      "type": "object"
+    },
+    "MainSeriesResponse": {
+      "id": "MainSeriesResponse",
+      "properties": {
+        "header": {
+          "$ref": "MainResponseHeader"
+        },
+        "series": {
+          "$ref": "SharedDatastoreMeasuresSeriesMessage"
+        }
+      },
       "type": "object"
     },
     "MainServiceResponse": {
@@ -448,6 +445,24 @@
         "weight": {
           "format": "double",
           "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreMeasuresSeriesMessage": {
+      "id": "SharedDatastoreMeasuresSeriesMessage",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "measures": {
+          "items": {
+            "$ref": "SharedDatastoreMeasuresMeasureMessage"
+          },
+          "type": "array"
+        },
+        "service": {
+          "type": "string"
         }
       },
       "type": "object"

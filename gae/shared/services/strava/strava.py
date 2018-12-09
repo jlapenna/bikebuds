@@ -38,7 +38,6 @@ class Synchronizer(object):
         def put():
             ndb.put_multi(Activity.from_strava(service.key, activity)
                     for activity in activities)
-            return True
         return put()
 
 

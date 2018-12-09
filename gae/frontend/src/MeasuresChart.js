@@ -45,10 +45,14 @@ class MeasuresChart extends Component {
     var preferredNextDate = moment.utc().endOf('day');
     var earliestDate = preferredNextDate.clone().subtract(
       this.props.intervalCount, this.props.intervalUnit);
+    if (response.result.series === undefined) {
+      console.log('MeasuresChart.updateMeasuresState: no series:', response);
+      return;
+    }
     var measures = [];
-    var result_measures = response.result.measures || [];
-    for (var i = 0; i < result_measures.length; i++) {
-      var measure = response.result.measures[response.result.measures.length - 1 - i];
+    var series_measures = response.result.series.measures || [];
+    for (var i = 0; i < series_measures.length; i++) {
+      var measure = series_measures[series_measures.length - 1 - i];
       var measureDate = moment.utc(measure.date);
       if (measureDate <= earliestDate) {
         break;
@@ -62,7 +66,7 @@ class MeasuresChart extends Component {
     this.setState({
       measures: measures,
     });
-    console.log('MeasuresChart.setState:', this.state);
+    console.log('MeasuresChart.updateMeasuresState:', this.state);
   }
 
   /**
@@ -78,7 +82,7 @@ class MeasuresChart extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresChart.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.measures === undefined) {
-      window.gapi.client.bikebuds.get_measures().then(this.updateMeasuresState);
+      window.gapi.client.bikebuds.get_series().then(this.updateMeasuresState);
     }
   }
 

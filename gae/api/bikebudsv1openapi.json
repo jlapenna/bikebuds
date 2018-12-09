@@ -18,20 +18,6 @@
       },
       "type": "object"
     },
-    "MainMeasuresResponse": {
-      "properties": {
-        "header": {
-          "$ref": "#/definitions/MainResponseHeader"
-        },
-        "measures": {
-          "items": {
-            "$ref": "#/definitions/SharedDatastoreMeasuresMeasureMessage"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    },
     "MainPreferencesResponse": {
       "properties": {
         "header": {
@@ -69,6 +55,17 @@
     },
     "MainResponseHeader": {
       "properties": {},
+      "type": "object"
+    },
+    "MainSeriesResponse": {
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        },
+        "series": {
+          "$ref": "#/definitions/SharedDatastoreMeasuresSeriesMessage"
+        }
+      },
       "type": "object"
     },
     "MainServiceResponse": {
@@ -203,6 +200,23 @@
       },
       "type": "object"
     },
+    "SharedDatastoreMeasuresSeriesMessage": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "measures": {
+          "items": {
+            "$ref": "#/definitions/SharedDatastoreMeasuresMeasureMessage"
+          },
+          "type": "array"
+        },
+        "service": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "SharedDatastoreServicesServiceMessage": {
       "properties": {
         "created": {
@@ -285,35 +299,6 @@
         ]
       }
     },
-    "/bikebuds/v1/measures": {
-      "post": {
-        "operationId": "BikebudsApi_getMeasures",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/MainRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A successful response",
-            "schema": {
-              "$ref": "#/definitions/MainMeasuresResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": [],
-            "firebase-dca327ad": []
-          }
-        ]
-      }
-    },
     "/bikebuds/v1/preferences": {
       "post": {
         "operationId": "BikebudsApi_getPreferences",
@@ -361,6 +346,35 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/MainProfileResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/series": {
+      "post": {
+        "operationId": "BikebudsApi_getSeries",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainSeriesResponse"
             }
           }
         },

@@ -18,7 +18,7 @@ import logging
 from google.appengine.ext import ndb
 
 from shared.datastore import services
-from shared.datastore.measures import Measure
+from shared.datastore.measures import Measure, Series
 
 import nokia
 
@@ -29,11 +29,9 @@ class Synchronizer(object):
         measures = client.get_measures(lastupdate=0, updatetime=0)
 
         @ndb.transactional
-        def put_measures():
-            ndb.put_multi(Measure.from_withings(service.key, measure)
-                    for measure in measures)
-        put_measures()
-        return True
+        def put_series():
+            Series.from_withings(service.key, measures).put()
+        put_series()
 
 
 def create_client(service):

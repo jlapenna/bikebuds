@@ -28,7 +28,7 @@ from endpoints import messages
 from endpoints import remote
 
 import auth_util
-from shared.datastore.measures import Measure, MeasureMessage
+from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
 from shared.datastore.users import User, PreferencesMessage
@@ -59,6 +59,11 @@ class ActivitiesResponse(messages.Message):
 class MeasuresResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     measures = messages.MessageField(MeasureMessage, 2, repeated=True)
+
+
+class SeriesResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    series = messages.MessageField(SeriesMessage, 2)
 
 
 class PreferencesResponse(messages.Message):
@@ -120,11 +125,11 @@ class BikebudsApi(remote.Service):
 
     @endpoints.method(
         endpoints.ResourceContainer(Request),
-        MeasuresResponse,
-        path='measures',
+        SeriesResponse,
+        path='series',
         http_method='POST',
         api_key_required=True)
-    def get_measures(self, request):
+    def get_series(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
@@ -132,13 +137,13 @@ class BikebudsApi(remote.Service):
         service = Service.get(user.key, 'withings')
         service_creds = service.get_credentials()
 
-        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
+        to_imperial = (user.preferences.units ==
+                PreferencesMessage.Unit.IMPERIAL)
 
-        response = MeasuresResponse(measures=[])
-        for measure in Measure.query():
-            response.measures.append(Measure.to_message(measure,
-                to_imperial=to_imperial))
-        return response
+        result = ndb.Key(Series, "default", parent=service.key).get()
+        if result is None:
+            return SeriesResponse(id="default")
+        return SeriesResponse(series=Series.to_message(result, to_imperial))
 
     @endpoints.method(
         Request,

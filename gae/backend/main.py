@@ -88,7 +88,7 @@ def service_sync(service_name):
             logging.info('No synchronizer for this sync: %s', str(service))
             return 'OK', 251
         else:
-            result = synchronizer.sync(service)
+            synchronizer.sync(service)
             return 'OK', 200
     except Exception, e:
         msg = 'Unable to sync: %s using %s -> %s' % (

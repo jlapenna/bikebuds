@@ -96,7 +96,6 @@ class Measure(ndb.Model):
     def fetch_lastupdate(cls, service_key):
         return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
 
-
     @classmethod
     def to_message(cls, measure, to_imperial=True):
         attributes = dict()
@@ -151,3 +150,38 @@ class MeasureMessage(messages.Message):
     hydration = messages.FloatField(16)  # 77
     bone_mass = messages.FloatField(17)  # 88
     pulse_wave_velocity = messages.FloatField(18)  # 91
+
+
+class Series(ndb.Model):
+    """Holds a series of measures."""
+    measures = ndb.StructuredProperty(Measure, repeated=True)
+
+    @classmethod
+    def from_withings(cls, service_key, measures, id="default"):
+        measures = [Measure.from_withings(service_key, measure)
+                for measure in measures]
+        return Series(parent=service_key, id=id, measures=measures)
+
+    @classmethod
+    def from_fitbit_time_series(cls, service_key, measures, id="default"):
+        measures = [Measure.from_fitbit_time_series(service_key, measure)
+                for measure in measures]
+        return Series(parent=service_key, id=id, measures=measures)
+
+    @classmethod
+    def from_fitbit_log(cls, service_key, measures, id="default"):
+        measures = [Measure.from_fitbit_log(service_key, measure)
+                for measure in measures]
+        return Series(parent=service_key, id=id, measures=measures)
+
+    @classmethod
+    def to_message(cls, series, to_imperial=True):
+        measures = [Measure.to_message(measure, to_imperial=to_imperial)
+                for measure in series.measures]
+        return SeriesMessage(id=series.key.id(), measures=measures)
+
+
+class SeriesMessage(messages.Message):
+    service = messages.StringField(1)
+    id = messages.StringField(2)
+    measures = messages.MessageField(MeasureMessage, 3, repeated=True)

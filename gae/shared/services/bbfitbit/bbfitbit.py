@@ -21,7 +21,7 @@ import fitbit
 
 from shared.config import config
 from shared.datastore import services
-from shared.datastore.measures import Measure, MeasureMessage
+from shared.datastore.measures import Measure, Series, SeriesMessage
 
 
 class Synchronizer(object):
@@ -30,11 +30,10 @@ class Synchronizer(object):
         measures = client.time_series('body/weight', period='max')
 
         @ndb.transactional
-        def put_measures():
-            ndb.put_multi(Measure.from_fitbit_time_series(service.key, measure)
-                    for measure in measures['body-weight'])
-        put_measures()
-        return True
+        def put_series():
+            Series.from_fitbit_time_series(service.key,
+                    measures['body-weight']).put()
+        put_series()
 
     def sync_log(self, user_key, service):
         client = create_client(user_key, service.get_credentials())
