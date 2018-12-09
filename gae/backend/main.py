@@ -28,6 +28,8 @@ import nokia
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
+from shared.datastore.admin import DatastoreState
+from shared.datastore.measures import Measure
 from shared.services.withings import withings
 from shared.services.bbfitbit import bbfitbit
 from shared.services.strava import strava
@@ -38,6 +40,21 @@ app = flask.Flask(__name__)
 
 class SyncException(Exception):
     pass
+
+
+@app.route('/tasks/cleanup', methods=['GET'])
+def cleanup():
+    result = DatastoreState.query().fetch(1)
+    if len(result) == 0:
+        datastore_state = DatastoreState()
+    else:
+        datastore_state = result[0]
+
+    if datastore_state.version < 1:
+        ndb.delete_multi(Measure.query().fetch(keys_only=True))
+        datastore_state.version = 1
+
+    datastore_state.put()
 
 
 @app.route('/tasks/sync', methods=['GET'])
