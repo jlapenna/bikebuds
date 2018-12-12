@@ -142,7 +142,7 @@ class BikebudsApi(remote.Service):
 
         result = ndb.Key(Series, "default", parent=service.key).get()
         if result is None:
-            return SeriesResponse(id="default")
+            return SeriesResponse()
         return SeriesResponse(series=Series.to_message(result, to_imperial))
 
     @endpoints.method(
