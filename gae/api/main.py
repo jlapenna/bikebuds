@@ -130,19 +130,25 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_series(self, request):
+        logging.info('Beginning auth')
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.info('Beginning claims')
         claims = auth_util.verify_claims_from_header(self.request_state)
+        logging.info('Finished claims')
         user = User.get(claims)
+        logging.info('Finished user')
         service = Service.get(user.key, 'withings')
         service_creds = service.get_credentials()
 
         to_imperial = (user.preferences.units ==
                 PreferencesMessage.Unit.IMPERIAL)
 
+        logging.info('Beginning series')
         result = ndb.Key(Series, "default", parent=service.key).get()
         if result is None:
             return SeriesResponse()
+        logging.info('Finished series')
         return SeriesResponse(series=Series.to_message(result, to_imperial))
 
     @endpoints.method(
