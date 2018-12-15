@@ -18,6 +18,8 @@
 
 source setup/base.sh
 
+VERSION=10000
+
 function main() {
   local repo_path="$(get_repo_path)";
   local services="frontend api backend";
@@ -62,7 +64,7 @@ function main() {
   git commit --allow-empty -a -m"Include lib: ${date}";
 
   # Then, deploy everything.
-  yes|gcloud app deploy \
+  yes|gcloud app deploy -v ${VERSION} \
     gae/frontend/cron.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
