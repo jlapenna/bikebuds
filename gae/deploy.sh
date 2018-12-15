@@ -33,8 +33,7 @@ function main() {
   # First, commit all the code outstanding into a temporary commit for
   # safe-keeping.
   git add .
-  git commit --allow-empty -a -m"Deploy Commit: ${date}";
-  local committed="$?";
+  git commit --allow-empty -a -m"Working Set: ${date}";
 
   ./gae/update_api.sh
 
@@ -60,7 +59,7 @@ function main() {
   # gae gitignore to strip it right before upload
   sed -i '/\/lib/d' gae/.gitignore
   git add .
-  git commit --allow-empty -a -m"Deploy Lib: ${date}";
+  git commit --allow-empty -a -m"Include lib: ${date}";
 
   # Then, deploy everything.
   yes|gcloud app deploy \
@@ -70,13 +69,15 @@ function main() {
 
   git push --force production master
 
-  # Then restore everything
-  git reset --hard HEAD^
+  # Break apart the include lib commit.
+  git reset HEAD~
 
-  # And reset the state of the client to before the deploy-commit.
-  if [ "${committed}" -eq 0 ]; then
-    git reset HEAD~
-  fi;
+  # And then check that out, effectively reverting to the working set.
+  git checkout .
+
+  # Finally break apart the working set commit, back to where we started before
+  # the deploy script.
+  git reset HEAD~
 }
 
 main "$@"
