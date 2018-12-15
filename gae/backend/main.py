@@ -56,6 +56,8 @@ def cleanup():
 
     datastore_state.put()
 
+    return 'OK', 200
+
 
 @app.route('/tasks/sync', methods=['GET'])
 def sync():

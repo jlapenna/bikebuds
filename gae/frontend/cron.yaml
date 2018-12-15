@@ -3,3 +3,8 @@ cron:
   url: /tasks/sync
   target: backend
   schedule: every 24 hours
+
+- description: 'Daily Cleanup'
+  url: /tasks/cleanup
+  target: backend
+  schedule: every 24 hours
