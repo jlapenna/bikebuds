@@ -19,6 +19,8 @@ from google.appengine.ext import ndb
 
 class DatastoreState(ndb.Model):
     """Holds user info."""
+    _use_memcache = False
+
     name = ndb.StringProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)

@@ -29,7 +29,7 @@ from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
 from shared.datastore.admin import DatastoreState
-from shared.datastore.measures import Measure
+from shared.datastore.measures import Measure, Series
 from shared.services.withings import withings
 from shared.services.bbfitbit import bbfitbit
 from shared.services.strava import strava
@@ -42,6 +42,13 @@ class SyncException(Exception):
     pass
 
 
+def _do_cleanup(version, datastore_state, cleanup_fn):
+    if datastore_state.version < version:
+        cleanup_fn()
+        datastore_state.version = version
+    datastore_state.put()
+
+
 @app.route('/tasks/cleanup', methods=['GET'])
 def cleanup():
     result = DatastoreState.query().fetch(1)
@@ -50,11 +57,13 @@ def cleanup():
     else:
         datastore_state = result[0]
 
-    if datastore_state.version < 1:
+    def cleanup():
         ndb.delete_multi(Measure.query().fetch(keys_only=True))
-        datastore_state.version = 1
+    _do_cleanup(1, datastore_state, cleanup)
 
-    datastore_state.put()
+    def cleanup():
+        ndb.delete_multi(Series.query().fetch(keys_only=True))
+    _do_cleanup(2, datastore_state, cleanup)
 
     return 'OK', 200
 

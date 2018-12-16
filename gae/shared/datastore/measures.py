@@ -104,8 +104,7 @@ class Measure(ndb.Model):
             if value is None:
                 continue
             attributes[key] = cls._convert(key, value, to_imperial)
-        measure = MeasureMessage(date=measure.date, **attributes)
-        return measure
+        return MeasureMessage(date=measure.date, **attributes)
     
     @classmethod
     def _convert(cls, key, value, to_imperial):
@@ -154,7 +153,7 @@ class MeasureMessage(messages.Message):
 
 class Series(ndb.Model):
     """Holds a series of measures."""
-    measures = ndb.StructuredProperty(Measure, repeated=True)
+    measures = ndb.LocalStructuredProperty(Measure, repeated=True)
 
     @classmethod
     def from_withings(cls, service_key, measures, id="default"):
@@ -177,7 +176,7 @@ class Series(ndb.Model):
     @classmethod
     def to_message(cls, series, to_imperial=True):
         measures = [Measure.to_message(measure, to_imperial=to_imperial)
-                for measure in series.measures]
+                for measure in series.measures if measure is not None]
         return SeriesMessage(id=series.key.id(), measures=measures)
 
 
