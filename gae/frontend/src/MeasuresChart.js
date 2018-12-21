@@ -128,6 +128,7 @@ class MeasuresChart extends Component {
             name="Weight"
             yAxisId={0}
             connectNulls
+            isAnimationActive={false}
             stroke="#03dac6"
           />
           <Line
@@ -136,6 +137,7 @@ class MeasuresChart extends Component {
             type="monotone"
             yAxisId={1}
             connectNulls
+            isAnimationActive={false}
             stroke="#ff4081"
           />
         </LineChart>

@@ -62,8 +62,8 @@ class Home extends Component {
             <MeasuresCard
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
-              title="Yearly"
-              intervalUnit="Y" intervalFormat="'YY" intervalCount="10"
+              title="All Time"
+              intervalUnit="M" intervalFormat="MMM 'YY" intervalCount="120"
             />
           </Grid>
           <Grid item xs={12}>
