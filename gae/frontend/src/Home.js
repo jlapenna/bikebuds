@@ -20,26 +20,48 @@ import Grid from '@material-ui/core/Grid';
 
 import ActivitiesCard from './ActivitiesCard';
 import MeasuresCard from './MeasuresCard';
+import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
+
+  onMeasuresReady = (measures) => {
+    console.log('Home.onMeasuresReady', measures);
+    this.setState({measures: measures});
+  }
+
   render() {
+    console.log(this.state.measures);
     return (
       <div>
+        <MeasuresWrapper
+          gapiReady={this.props.gapiReady}
+          onMeasuresReady={this.onMeasuresReady}
+        />
         <Grid container spacing={24}>
           <Grid item xs={12}>
-            <MeasuresCard gapiReady={this.props.gapiReady}
+            <MeasuresCard
+              gapiReady={this.props.gapiReady}
+              measures={this.state.measures}
               title="Daily"
               intervalUnit="d" intervalFormat="MMM D" intervalCount="365"
             />
           </Grid>
           <Grid item xs={12}>
-            <MeasuresCard gapiReady={this.props.gapiReady}
+            <MeasuresCard
+              gapiReady={this.props.gapiReady}
+              measures={this.state.measures}
               title="Weekly"
               intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
             />
           </Grid>
           <Grid item xs={12}>
-            <MeasuresCard gapiReady={this.props.gapiReady}
+            <MeasuresCard
+              gapiReady={this.props.gapiReady}
+              measures={this.state.measures}
               title="Yearly"
               intervalUnit="Y" intervalFormat="'YY" intervalCount="10"
             />

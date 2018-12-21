@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -50,10 +51,13 @@ class MeasuresCard extends Component {
   };
 }
 
+
 MeasuresCard.defaultProps = {
     intervalUnit: 'M',
     intervalCount: 12,
     intervalFormat: "MMM 'YY",
 }
-
+MeasuresCard.propTypes = {
+  measures: PropTypes.array,
+}
 export default withStyles(styles)(MeasuresCard);

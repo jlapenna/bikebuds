@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -41,18 +42,13 @@ class MeasuresChart extends Component {
     }
   }
 
-  updateMeasuresState = (response) => {
+  processMeasures = (newMeasures) => {
     var preferredNextDate = moment.utc().endOf('day');
     var earliestDate = preferredNextDate.clone().subtract(
       this.props.intervalCount, this.props.intervalUnit);
-    if (response.result.series === undefined) {
-      console.log('MeasuresChart.updateMeasuresState: no series:', response);
-      return;
-    }
     var measures = [];
-    var series_measures = response.result.series.measures || [];
-    for (var i = 0; i < series_measures.length; i++) {
-      var measure = series_measures[series_measures.length - 1 - i];
+    for (var i = 0; i < newMeasures.length; i++) {
+      var measure = newMeasures[newMeasures.length - 1 - i];
       var measureDate = moment.utc(measure.date);
       if (measureDate <= earliestDate) {
         break;
@@ -66,13 +62,14 @@ class MeasuresChart extends Component {
     this.setState({
       measures: measures,
     });
-    console.log('MeasuresChart.updateMeasuresState:', this.state);
+    console.log('MeasuresChart.processMeasures:', this.state);
   }
 
   /**
    * @inheritDoc
    */
   componentDidMount() {
+    // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
@@ -81,13 +78,14 @@ class MeasuresChart extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresChart.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.measures === undefined) {
-      window.gapi.client.bikebuds.get_series().then(this.updateMeasuresState);
+    if (this.state.measures === undefined && this.props.measures) {
+      this.processMeasures(this.props.measures);
     }
   }
 
   render() {
     if (this.state.measures === undefined || this.state.measures.length === 0) {
+      console.log('MeasuresChart.render: no measures');
       return null;
     }
     return (
@@ -146,10 +144,13 @@ class MeasuresChart extends Component {
   }
 }
 
+
 MeasuresChart.defaultProps = {
     intervalUnit: 'M',
     intervalCount: 12,
     intervalFormat: "MMM 'YY",
 }
-
+MeasuresChart.propTypes = {
+  measures: PropTypes.array,
+}
 export default withStyles(styles)(MeasuresChart);
