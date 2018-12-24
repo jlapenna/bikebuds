@@ -163,7 +163,7 @@ class ServiceCard extends Component {
         <CardActions>
           <FormGroup row>
             <Button color="primary" variant="contained"
-              disabled={this.state.syncActionPending}
+              disabled={this.state.syncActionPending || !this.state.service.sync_enabled}
               onClick={this.onSync}>Sync
               {this.state.syncActionPending && <CircularProgress size={20} />}
             </Button>
