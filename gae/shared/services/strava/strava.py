@@ -17,6 +17,7 @@ import functools
 import logging
 import time
 
+from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 
 from shared.config import config
@@ -32,13 +33,28 @@ class Synchronizer(object):
         client = ClientWrapper(service)
         client.ensure_access()
 
-        activities = [activity for activity in client.get_activities()]
+        activities = []
+        for activity in client.get_activities():
+            if activity.type != 'Ride':
+                continue
+            # Use this to fill in description, calories and embed_token.
+            # This is not worth the cost...
+            #if activity.id == '1997254642'):
+            #    deferred.defer(self.sync_activity, service, activity.id)
+            activities.append(activity)
 
         @ndb.transactional
         def put():
             ndb.put_multi(Activity.from_strava(service.key, activity)
                     for activity in activities)
         return put()
+
+    def sync_activity(self, service, activity_id):
+        client = ClientWrapper(service)
+        client.ensure_access()
+
+        activity = client.get_activity(activity_id)
+        return Activity.from_strava(service.key, activity).put()
 
 
 class ClientWrapper(object):

@@ -36,9 +36,10 @@ import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
-import ActivitiesCard from './ActivitiesCard';
+import ActivityListCard from './ActivityListCard';
 import Home from './Home';
-import MeasuresChart from './MeasuresChart';
+import MeasuresCard from './MeasuresCard';
+import MeasuresWrapper from './MeasuresWrapper';
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
@@ -98,6 +99,11 @@ class Main extends Component {
 
   onGapiReady = () => {
     this.setState({gapiReady: true});
+  }
+
+  onMeasuresReady = (measures) => {
+    console.log('Main.onMeasuresReady', measures);
+    this.setState({measures: measures});
   }
 
   render() {
@@ -211,12 +217,20 @@ class Main extends Component {
             gapiReady={this.state.gapiReady} />
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <ActivitiesCard
+          <ActivityListCard
             gapiReady={this.state.gapiReady} />
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <MeasuresChart
-            gapiReady={this.state.gapiReady} />
+          <MeasuresWrapper
+            gapiReady={this.state.gapiReady}
+            onMeasuresReady={this.onMeasuresReady}
+          />
+          <MeasuresCard
+              gapiReady={this.state.gapiReady}
+              measures={this.state.measures}
+              title="Weekly"
+              intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
+            />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <ServiceCard serviceName="fitbit"

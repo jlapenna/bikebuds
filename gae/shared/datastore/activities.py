@@ -15,30 +15,141 @@
 import dateutil.parser
 import logging
 import pytz
+import sys
 
 from google.appengine.ext import ndb
 
 from endpoints import message_types
 from endpoints import messages
 
+from measurement import measures
+
+
+class PolylineMap(ndb.Model):
+    polyline = ndb.StringProperty(indexed=False)
+    summary_polyline = ndb.StringProperty(indexed=False)
+
+    @classmethod
+    def to_message(cls, polyline_map):
+        attributes = {}
+        for key in cls._properties:
+            value = getattr(polyline_map, key, None)
+            if value is None:
+                continue
+            try:
+                attributes[key] = value
+            except Exception, e:
+                msg = 'Unable to convert: %s (%s) -> %s' % (
+                        key, value, sys.exc_info()[1])
+                raise Exception, Exception(msg), sys.exc_info()[2]
+        return PolylineMapMessage(**attributes)
+
 
 class Activity(ndb.Model):
-    name = ndb.StringProperty()
-    start_date = ndb.DateTimeProperty()
+    # id = string
+    name = ndb.StringProperty(indexed=False)
+    distance = ndb.FloatProperty(indexed=False)
     moving_time = ndb.IntegerProperty(indexed=False)
     elapsed_time = ndb.IntegerProperty(indexed=False)
+    total_elevation_gain = ndb.FloatProperty(indexed=False)
+    elev_high = ndb.FloatProperty(indexed=False)
+    elev_low = ndb.FloatProperty(indexed=False)
+    activity_type = ndb.StringProperty(indexed=False)
+    start_date = ndb.DateTimeProperty(indexed=True)
+    start_date_local = ndb.DateTimeProperty(indexed=False)
+    timezone = ndb.StringProperty(indexed=False)
+    start_latlng = ndb.GeoPtProperty(indexed=False)
+    end_latlng = ndb.GeoPtProperty(indexed=False)
+    achievement_count = ndb.IntegerProperty(indexed=False)
+    kudos_count = ndb.IntegerProperty(indexed=False)
+    comment_count = ndb.IntegerProperty(indexed=False)
+    athlete_count = ndb.IntegerProperty(indexed=False)
+    photo_count = ndb.IntegerProperty(indexed=False)
+    total_photo_count = ndb.IntegerProperty(indexed=False)
+    map = ndb.LocalStructuredProperty(PolylineMap, indexed=False)
+    trainer = ndb.BooleanProperty(indexed=False)
+    commute = ndb.BooleanProperty(indexed=False)
+    manual = ndb.BooleanProperty(indexed=False)
+    private = ndb.BooleanProperty(indexed=False)
+    flagged = ndb.BooleanProperty(indexed=False)
+    workout_type = ndb.StringProperty(indexed=False)
+    average_speed = ndb.FloatProperty(indexed=False) # meters / second
+    max_speed = ndb.FloatProperty(indexed=False)
+    has_kudoed = ndb.BooleanProperty(indexed=False)
+    gear_id = ndb.StringProperty(indexed=False)
+    kilojoules = ndb.FloatProperty(indexed=False)
+    average_watts = ndb.FloatProperty(indexed=False)
+    device_watts = ndb.BooleanProperty(indexed=False)
+    max_watts = ndb.IntegerProperty(indexed=False)
+    weighted_average_watts = ndb.IntegerProperty(indexed=False)
+
+    # DetailedActivity
+    calories = ndb.FloatProperty(indexed=False)
+    description = ndb.StringProperty(indexed=False)
+    embed_token = ndb.StringProperty(indexed=False)
 
     @classmethod
     def from_strava(cls, service_key, activity):
-        start_date = activity.start_date.astimezone(pytz.UTC).replace(
-                tzinfo=None)
-        return Activity(
-                id=activity.id,
-                parent=service_key,
-                name=activity.name,
-                start_date=start_date,
-                moving_time=activity.moving_time.seconds,
-                elapsed_time=activity.elapsed_time.seconds)
+        start_date = activity.start_date.astimezone(
+                pytz.UTC).replace(tzinfo=None)
+        start_date_local = activity.start_date.replace(tzinfo=None)
+        start_latlng = None
+        if activity.start_latlng is not None:
+            start_latlng = ndb.GeoPt(
+                    activity.start_latlng.lat, activity.start_latlng.lon)
+        end_latlng = None
+        if activity.end_latlng is not None:
+            end_latlng = ndb.GeoPt(
+                    activity.end_latlng.lat, activity.end_latlng.lon)
+        try:
+            return Activity(
+                    id=activity.id,
+                    parent=service_key,
+                    distance=activity.distance.num,
+                    moving_time=activity.moving_time.seconds,
+                    elapsed_time=activity.elapsed_time.seconds,
+                    total_elevation_gain=activity.total_elevation_gain.num,
+                    elev_high=activity.elev_high,
+                    elev_low=activity.elev_low,
+                    activity_type=activity.type,
+                    name=activity.name,
+                    start_date=start_date,
+                    start_date_local=start_date_local,
+                    timezone=str(activity.timezone),
+                    start_latlng=start_latlng,
+                    end_latlng=end_latlng,
+                    achievement_count=activity.achievement_count,
+                    kudos_count=activity.kudos_count,
+                    comment_count=activity.comment_count,
+                    athlete_count=activity.athlete_count,
+                    photo_count=activity.photo_count,
+                    total_photo_count=activity.total_photo_count,
+                    map = PolylineMap(id=activity.map.id,
+                        polyline=activity.map.polyline,
+                        summary_polyline=activity.map.summary_polyline),
+                    trainer=activity.trainer,
+                    commute=activity.commute,
+                    manual=activity.manual,
+                    private=activity.private,
+                    flagged=activity.flagged,
+                    workout_type=activity.workout_type,
+                    average_speed=activity.average_speed.num,
+                    max_speed=activity.max_speed.num,
+                    has_kudoed=activity.has_kudoed,
+                    gear_id=activity.gear_id,
+                    kilojoules=activity.kilojoules,
+                    average_watts=activity.average_watts,
+                    device_watts=activity.device_watts,
+                    max_watts=activity.max_watts,
+                    weighted_average_watts=activity.weighted_average_watts,
+
+                    # DetailedActivity
+                    calories=activity.calories,
+                    description=activity.description,
+                    embed_token=activity.embed_token
+                    )
+        except Exception, e:
+            raise
 
     @classmethod
     def to_message(cls, activity, to_imperial=True):
@@ -47,31 +158,85 @@ class Activity(ndb.Model):
             value = getattr(activity, key, None)
             if value is None:
                 continue
-            attributes[key] = cls._convert(key, value, to_imperial)
+            try:
+                attributes[key] = cls._convert(key, value, to_imperial)
+            except Exception, e:
+                msg = 'Unable to convert: %s (%s) -> %s' % (
+                        key, value, sys.exc_info()[1])
+                raise Exception, Exception(msg), sys.exc_info()[2]
         return ActivityMessage(id=activity.key.id(), **attributes)
     
     @classmethod
     def _convert(cls, key, value, to_imperial):
-        if to_imperial:
-            return cls._convert_imperial(key, value)
-        else:
-            return cls._convert_metric(key, value)
-    
-    @classmethod
-    def _convert_imperial(cls, key, value):
         if key == 'distance':
-            return measures.Distance(meter=value).mi
+            if to_imperial:
+                return measures.Distance(meter=value).ft
+            else:
+                return value
+        if key == 'start_latlng':
+            return GeoPtMessage(
+                    latitude=value.lat,
+                    longitude=value.lon)
+        if key == 'end_latlng':
+            return GeoPtMessage(
+                    latitude=value.lat,
+                    longitude=value.lon)
+        if key == 'map':
+            return PolylineMap.to_message(value)
         return value
-    
-    @classmethod
-    def _convert_metric(cls, key, value):
-        return value
+
+
+class GeoPtMessage(messages.Message):
+    latitude = messages.FloatField(1)
+    longitude = messages.FloatField(2)
+
+
+class PolylineMapMessage(messages.Message):
+    id = messages.StringField(1)
+    polyline = messages.StringField(2)
+    summary_polyline = messages.StringField(3)
 
 
 class ActivityMessage(messages.Message):
     id = messages.IntegerField(1)
 
     name = messages.StringField(2)
-    start_date = message_types.DateTimeField(3)
+    distance = messages.FloatField(3)
     moving_time = messages.IntegerField(4)
     elapsed_time = messages.IntegerField(5)
+    total_elevation_gain = messages.FloatField(6)
+    elev_high = messages.FloatField(7)
+    elev_low = messages.FloatField(8)
+    activity_type = messages.StringField(9)
+    start_date = message_types.DateTimeField(10)
+    start_date_local = message_types.DateTimeField(11)
+    timezone = messages.StringField(12)
+    start_latlng = messages.MessageField(GeoPtMessage, 13)
+    end_latlng = messages.MessageField(GeoPtMessage, 14)
+    achievement_count = messages.IntegerField(15)
+    kudos_count = messages.IntegerField(16)
+    comment_count = messages.IntegerField(17)
+    athlete_count = messages.IntegerField(18)
+    photo_count = messages.IntegerField(19)
+    total_photo_count = messages.IntegerField(20)
+    map = messages.MessageField(PolylineMapMessage, 21)
+    trainer = messages.BooleanField(22)
+    commute = messages.BooleanField(23)
+    manual = messages.BooleanField(24)
+    private = messages.BooleanField(25)
+    flagged = messages.BooleanField(26)
+    workout_type = messages.StringField(27)
+    average_speed = messages.FloatField(28)
+    max_speed = messages.FloatField(29)
+    has_kudoed = messages.BooleanField(30)
+    gear_id = messages.StringField(31)
+    kilojoules = messages.FloatField(32)
+    average_watts = messages.FloatField(33)
+    device_watts = messages.BooleanField(34)
+    max_watts = messages.IntegerField(35)
+    weighted_average_watts = messages.IntegerField(36)
+
+    # DetailedActivity
+    calories = messages.FloatField(37)
+    description = messages.StringField(38)
+    embed_token = messages.StringField(39)

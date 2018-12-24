@@ -19,23 +19,38 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
-import ActivityItem from './ActivityItem';
+import ActivityDetail from './ActivityDetail';
 
 const styles = {
   root: {
-    height: 300,
-    overflow: "auto"
+    "min-height": "500px",
   },
+  content: {
+    "min-height": "500px",
+  },
+  grid: {
+    "min-height": "500px",
+  },
+  list: {
+    "min-height": "500px",
+    overflow: "auto",
+  }
 };
 
 class ActivityListCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      fetched: false,
       activities: undefined,
+      selectedActivity: undefined,
+      selectedIndex: undefined,
 
     }
   }
@@ -45,6 +60,15 @@ class ActivityListCard extends Component {
       activities: response.result.activities || [],
     });
     console.log('ActivityListCard.setState: service: ', response.result);
+  }
+
+  onListItemClick = (index, activity) => {
+    console.log('ActivityListCard.onListItemClick', activity);
+    this.setState({
+      selectedActivity: activity,
+      selectedIndex: index,
+    });
+    console.log('ActivityListCard.onListItemClick', this.state.activity);
   }
 
   /**
@@ -58,9 +82,10 @@ class ActivityListCard extends Component {
    * @inheritDoc
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ActivityListCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.activities === undefined) {
-      console.log('ActivityListCard.componentDidUpdate', 'prevState', prevState, 'newState', this.state)
+    if (this.props.gapiReady
+      && !this.state.fetched
+      && this.state.activities === undefined) {
+      this.setState({fetched: true});
       window.gapi.client.bikebuds.get_activities().then(this.updateActivitiesState);
     }
   }
@@ -72,12 +97,26 @@ class ActivityListCard extends Component {
     return (
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
-          <List>
-            {this.state.activities.map((activity, index) => {
-              return <ActivityItem key={index} activity={activity} />
-            })
-          }
-          </List>
+          <Grid className={this.props.classes.grid} container spacing={24}>
+            <Grid item xs={4}>
+              <List className={this.props.classes.list}>
+                {this.state.activities.map((activity, index) => {
+                  return (
+                    <ListItem
+                      key={index}
+                      onClick={this.onListItemClick.bind(this, index, activity)}
+                      selected={this.state.selectedIndex === index}
+                    >
+                      <ListItemText>{activity.name}</ListItemText>
+                    </ListItem>)
+                })
+              }
+              </List>
+            </Grid>
+            <Grid item xs={8}>
+              <ActivityDetail activity={this.state.selectedActivity} />
+            </Grid>
+          </Grid>
         </CardContent>
     )
   };

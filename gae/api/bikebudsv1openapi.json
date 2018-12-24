@@ -103,11 +103,96 @@
     },
     "SharedDatastoreActivitiesActivityMessage": {
       "properties": {
+        "achievement_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "activity_type": {
+          "type": "string"
+        },
+        "athlete_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "average_speed": {
+          "format": "double",
+          "type": "number"
+        },
+        "average_watts": {
+          "format": "double",
+          "type": "number"
+        },
+        "calories": {
+          "format": "double",
+          "type": "number"
+        },
+        "comment_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "commute": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "device_watts": {
+          "type": "boolean"
+        },
+        "distance": {
+          "format": "double",
+          "type": "number"
+        },
         "elapsed_time": {
           "format": "int64",
           "type": "string"
         },
+        "elev_high": {
+          "format": "double",
+          "type": "number"
+        },
+        "elev_low": {
+          "format": "double",
+          "type": "number"
+        },
+        "embed_token": {
+          "type": "string"
+        },
+        "end_latlng": {
+          "$ref": "#/definitions/SharedDatastoreActivitiesGeoPtMessage"
+        },
+        "flagged": {
+          "type": "boolean"
+        },
+        "gear_id": {
+          "type": "string"
+        },
+        "has_kudoed": {
+          "type": "boolean"
+        },
         "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "kilojoules": {
+          "format": "double",
+          "type": "number"
+        },
+        "kudos_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "manual": {
+          "type": "boolean"
+        },
+        "map": {
+          "$ref": "#/definitions/SharedDatastoreActivitiesPolylineMapMessage"
+        },
+        "max_speed": {
+          "format": "double",
+          "type": "number"
+        },
+        "max_watts": {
           "format": "int64",
           "type": "string"
         },
@@ -118,8 +203,70 @@
         "name": {
           "type": "string"
         },
+        "photo_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "private": {
+          "type": "boolean"
+        },
         "start_date": {
           "format": "date-time",
+          "type": "string"
+        },
+        "start_date_local": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "start_latlng": {
+          "$ref": "#/definitions/SharedDatastoreActivitiesGeoPtMessage"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "total_elevation_gain": {
+          "format": "double",
+          "type": "number"
+        },
+        "total_photo_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "trainer": {
+          "type": "boolean"
+        },
+        "weighted_average_watts": {
+          "format": "int64",
+          "type": "string"
+        },
+        "workout_type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreActivitiesGeoPtMessage": {
+      "properties": {
+        "latitude": {
+          "format": "double",
+          "type": "number"
+        },
+        "longitude": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreActivitiesPolylineMapMessage": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "polyline": {
+          "type": "string"
+        },
+        "summary_polyline": {
           "type": "string"
         }
       },

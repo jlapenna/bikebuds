@@ -15,6 +15,7 @@
 import datetime
 import logging
 import math
+import sys
 import time
 
 from google.appengine.ext import ndb
@@ -103,29 +104,27 @@ class Measure(ndb.Model):
             value = getattr(measure, key, None)
             if value is None:
                 continue
-            attributes[key] = cls._convert(key, value, to_imperial)
+            try:
+                attributes[key] = cls._convert(key, value, to_imperial)
+            except Exception, e:
+                msg = 'Unable to convert: %s (%s) -> %s' % (
+                        key, value, sys.exc_info()[1])
+                raise Exception, Exception(msg), sys.exc_info()[2]
         return MeasureMessage(date=measure.date, **attributes)
     
     @classmethod
     def _convert(cls, key, value, to_imperial):
-        if to_imperial:
-            return cls._convert_imperial(key, value)
-        else:
-            return cls._convert_metric(key, value)
-    
-    @classmethod
-    def _convert_imperial(cls, key, value):
         if key == 'weight':
-            return measures.Weight(kg=value).lb
+            if to_imperial:
+                return measures.Weight(kg=value).lb
+            else:
+                return value
         if key == 'height':
-            height = measures.Distance(meter=value)
-            return '%s\'%s"' % (height.ft, math.modf(height.ft)[0] * 12)
-        return value
-    
-    @classmethod
-    def _convert_metric(cls, key, value):
-        if key == 'height':
-            return str(value)
+            if to_imperial:
+                height = measures.Distance(meter=value)
+                return '%s\'%s"' % (height.ft, math.modf(height.ft)[0] * 12)
+            else:
+                return str(value)
         return value
 
 

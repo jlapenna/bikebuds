@@ -18,7 +18,7 @@ import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
-import ActivitiesCard from './ActivitiesCard';
+import ActivityListCard from './ActivityListCard';
 import MeasuresCard from './MeasuresCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
@@ -34,7 +34,6 @@ class Home extends Component {
   }
 
   render() {
-    console.log(this.state.measures);
     return (
       <div>
         <MeasuresWrapper
@@ -42,6 +41,10 @@ class Home extends Component {
           onMeasuresReady={this.onMeasuresReady}
         />
         <Grid container spacing={24}>
+          <Grid item xs={12}>
+            <ActivityListCard
+              gapiReady={this.props.gapiReady} />
+          </Grid>
           <Grid item xs={12}>
             <MeasuresCard
               gapiReady={this.props.gapiReady}
@@ -65,10 +68,6 @@ class Home extends Component {
               title="All Time"
               intervalUnit="M" intervalFormat="MMM 'YY" intervalCount="120"
             />
-          </Grid>
-          <Grid item xs={12}>
-            <ActivitiesCard
-              gapiReady={this.props.gapiReady} />
           </Grid>
         </Grid>
       </div>

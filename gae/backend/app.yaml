@@ -17,6 +17,9 @@ api_version: 1
 service: backend
 threadsafe: true
 
+builtins:
+- deferred: on
+
 libraries:
 - name: pycrypto
   version: latest
@@ -29,6 +32,10 @@ handlers:
   login: admin
   secure: always
   redirect_http_response_code: 301
+
+- url: /_ah/queue/deferred
+  script: google.appengine.ext.deferred.deferred.application
+  login: admin
 
 env_variables:
   # Firebase

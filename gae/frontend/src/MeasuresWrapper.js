@@ -22,6 +22,7 @@ class MeasuresWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      fetched: false,
       measures: undefined,
     }
   }
@@ -52,7 +53,10 @@ class MeasuresWrapper extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.measures === undefined) {
+    if (this.props.gapiReady
+      && !this.state.fetched
+      && this.state.measures === undefined) {
+      this.setState({fetched: true});
       window.gapi.client.bikebuds.get_series().then(this.updateMeasuresState);
     }
   }
