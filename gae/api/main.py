@@ -138,14 +138,12 @@ class BikebudsApi(remote.Service):
         logging.info('Finished claims')
         user = User.get(claims)
         logging.info('Finished user')
-        service = Service.get(user.key, 'withings')
-        service_creds = service.get_credentials()
 
         to_imperial = (user.preferences.units ==
                 PreferencesMessage.Unit.IMPERIAL)
 
         logging.info('Beginning series')
-        result = ndb.Key(Series, "default", parent=service.key).get()
+        result = Series.get_default(Service.get_key(user.key, 'withings'))
         if result is None:
             return SeriesResponse()
         logging.info('Finished series')

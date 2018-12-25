@@ -178,6 +178,10 @@ class Series(ndb.Model):
                 for measure in series.measures if measure is not None]
         return SeriesMessage(id=series.key.id(), measures=measures)
 
+    @classmethod
+    def get_default(cls, service_key):
+        return ndb.Key(Series, "default", parent=service_key).get()
+
 
 class SeriesMessage(messages.Message):
     service = messages.StringField(1)
