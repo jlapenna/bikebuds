@@ -29,16 +29,16 @@ import ActivityDetail from './ActivityDetail';
 
 const styles = {
   root: {
-    "min-height": "500px",
+    "height": "500px",
   },
   content: {
-    "min-height": "500px",
+    "height": "500px",
   },
   grid: {
-    "min-height": "500px",
+    "height": "500px",
   },
   list: {
-    "min-height": "500px",
+    "height": "500px",
     overflow: "auto",
   }
 };

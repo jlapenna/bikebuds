@@ -21,6 +21,8 @@ import sys
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
+from urllib3.exceptions import TimeoutError
+
 import flask
 
 import nokia
@@ -125,6 +127,11 @@ def service_sync(service_name):
         else:
             synchronizer.sync(service)
             return 'OK', 200
+    except TimeoutError, e:
+        logging.debug('Unable to sync: %s using %s -> %s' % (
+                service, service.get_credentials(), sys.exc_info()[1]))
+        msg = 'DeadlineExceeded for: %s' % (service_name,)
+        raise SyncException(msg)
     except Exception, e:
         msg = 'Unable to sync: %s using %s -> %s' % (
                 service, service.get_credentials(), sys.exc_info()[1])
