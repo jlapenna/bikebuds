@@ -30,6 +30,7 @@ from endpoints import remote
 import auth_util
 from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
+from shared.datastore.athletes import Athlete, AthleteMessage
 from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
 from shared.datastore.users import User, PreferencesMessage
 
@@ -79,6 +80,7 @@ class UpdatePreferencesRequest(messages.Message):
 class ProfileResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     created = message_types.DateTimeField(2)
+    athlete = messages.MessageField(AthleteMessage, 3)
 
 
 class ServiceResponse(messages.Message):
@@ -189,7 +191,13 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = User.get(claims)
-        return ProfileResponse(created=user.created)
+        athlete = Athlete.get_private(Service.get_key(user.key, 'strava'))
+        logging.info(athlete)
+        if athlete is not None:
+            athlete_message = Athlete.to_message(athlete)
+        else:
+            athlete_message = None
+        return ProfileResponse(created=user.created, athlete=athlete_message)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(1)),

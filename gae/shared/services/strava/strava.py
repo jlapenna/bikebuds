@@ -23,13 +23,20 @@ from google.appengine.ext import ndb
 from shared.config import config
 from shared.datastore import services
 from shared.datastore.activities import Activity
+from shared.datastore.athletes import Athlete
+from shared.datastore.clubs import Club
 
 import stravalib
 from stravalib import exc
 
 
 class Synchronizer(object):
+
     def sync(self, service):
+        self.sync_athlete(service)
+        self.sync_activities(service)
+
+    def sync_activities(self, service):
         client = ClientWrapper(service)
         client.ensure_access()
 
@@ -52,9 +59,21 @@ class Synchronizer(object):
     def sync_activity(self, service, activity_id):
         client = ClientWrapper(service)
         client.ensure_access()
-
         activity = client.get_activity(activity_id)
         return Activity.from_strava(service.key, activity).put()
+
+    def sync_athlete(self, service):
+        client = ClientWrapper(service)
+        client.ensure_access()
+        athlete = client.get_athlete()
+        Athlete.from_strava(service.key, athlete).put()
+
+    def sync_club(self, service, club_id):
+        client = ClientWrapper(service)
+        client.ensure_access()
+        club = client.get_club(club_id)
+        # clubs do not have an ancestor, they're a cross-user entity.
+        return Club.from_strava(None, club).put()
 
 
 class ClientWrapper(object):

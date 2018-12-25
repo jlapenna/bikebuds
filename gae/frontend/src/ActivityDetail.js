@@ -63,6 +63,5 @@ class ActivityDetail extends Component {
 
 ActivityDetail.propTypes = {
   activity: PropTypes.object,
-
 }
 export default withStyles(styles)(ActivityDetail);

@@ -179,8 +179,8 @@ class Series(ndb.Model):
         return SeriesMessage(id=series.key.id(), measures=measures)
 
     @classmethod
-    def get_default(cls, service_key):
-        return ndb.Key(Series, "default", parent=service_key).get()
+    def get_default(cls, parent):
+        return ndb.Key(cls, "default", parent=parent).get()
 
 
 class SeriesMessage(messages.Message):

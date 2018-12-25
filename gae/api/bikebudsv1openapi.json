@@ -31,6 +31,9 @@
     },
     "MainProfileResponse": {
       "properties": {
+        "athlete": {
+          "$ref": "#/definitions/SharedDatastoreAthletesAthleteMessage"
+        },
         "created": {
           "format": "date-time",
           "type": "string"
@@ -268,6 +271,145 @@
         },
         "summary_polyline": {
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreAthletesAthleteMessage": {
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "clubs": {
+          "items": {
+            "$ref": "#/definitions/SharedDatastoreClubsClubMessage"
+          },
+          "type": "array"
+        },
+        "country": {
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "follower": {
+          "type": "string"
+        },
+        "follower_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "friend": {
+          "type": "string"
+        },
+        "friend_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "ftp": {
+          "type": "string"
+        },
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "measurement_preference": {
+          "type": "string"
+        },
+        "mutual_friend_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "premium": {
+          "type": "boolean"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "profile_medium": {
+          "type": "string"
+        },
+        "resource_state": {
+          "format": "int64",
+          "type": "string"
+        },
+        "sex": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreClubsClubMessage": {
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "club_id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "cover_photo": {
+          "type": "string"
+        },
+        "cover_photo_small": {
+          "type": "string"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "member_count": {
+          "format": "int64",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "private": {
+          "type": "boolean"
+        },
+        "profile_medium": {
+          "type": "string"
+        },
+        "resource_state": {
+          "format": "int64",
+          "type": "string"
+        },
+        "sport_type": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
         }
       },
       "type": "object"

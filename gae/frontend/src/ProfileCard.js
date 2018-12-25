@@ -29,11 +29,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import Moment from 'react-moment';
-import moment from 'moment';
-
 import { config } from './Config';
 import { createSession } from './session_util';
+import ClubAvatar from './ClubAvatar';
 
 const styles = {
   root: {
@@ -42,7 +40,10 @@ const styles = {
   avatar: {
     width: 128,
     height: 128,
-  }
+  },
+  clubContainer: {
+    "min-height": 56,
+  },
 };
 
 class ProfileCard extends Component {
@@ -83,11 +84,28 @@ class ProfileCard extends Component {
       window.gapi.client.bikebuds.get_profile().then((response) => {
         this.setState({
           profile: response.result,
-          created: moment.utc(response.result.created),
         });
         console.log('ProfileCard.setState: profile: ', response.result);
       });
     }
+  }
+
+  renderClubs() {
+    if (!this.state.profile || !this.state.profile.athlete) {
+      return null;
+    }
+    return (
+      <React.Fragment>
+        {this.state.profile.athlete.clubs.map((club, index) => {
+          return (
+            <Grid item key={index}>
+              <ClubAvatar club={club} />
+            </Grid>
+          );
+        })
+        }
+      </React.Fragment>
+    );
   }
 
   render() {
@@ -95,20 +113,24 @@ class ProfileCard extends Component {
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
           <Grid container
-                direction="column"
+            direction="column"
+            justify="center"
+            alignItems="center">
+            <Grid item>
+              <Avatar className={this.props.classes.avatar}
+                alt={this.props.firebaseUser.displayName}
+                src={this.props.firebaseUser.photoURL}>
+              </Avatar>
+              <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
+            </Grid>
+            <Grid item>
+              <Grid className={this.props.classes.clubContainer} container
                 justify="center"
-                alignItems="center">
-            <Avatar className={this.props.classes.avatar}
-                    alt={this.props.firebaseUser.displayName}
-                    src={this.props.firebaseUser.photoURL}>
-            </Avatar>
-            <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
-            {this.state.profile &&
-                <i>Joined <Moment fromNow>{this.state.created}</Moment></i>
-            }
-            {!this.state.profile &&
-                <i>&#8203;</i>
-            }
+                alignItems="center"
+              >
+                {this.renderClubs()}
+              </Grid>
+            </Grid>
           </Grid>
         </CardContent>
         <CardActions>
@@ -118,7 +140,7 @@ class ProfileCard extends Component {
             {this.state.connectActionPending && <CircularProgress size={20} />}
           </Button>
           <Button color="secondary"
-              onClick={this.onSignOut}>Sign-out</Button>
+            onClick={this.onSignOut}>Sign-out</Button>
         </CardActions>
       </Card>
     );
