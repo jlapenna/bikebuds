@@ -192,7 +192,6 @@ class BikebudsApi(remote.Service):
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = User.get(claims)
         athlete = Athlete.get_private(Service.get_key(user.key, 'strava'))
-        logging.info(athlete)
         if athlete is not None:
             athlete_message = Athlete.to_message(athlete)
         else:
