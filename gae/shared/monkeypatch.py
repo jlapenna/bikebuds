@@ -20,8 +20,12 @@ warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
 warnings.filterwarnings('ignore',
         'The oauth2client.contrib.multistore_file module has been deprecated')
 
-# Ensure that the requests library uses url fetch for its network base.
+# Ensure that the requests library uses urlfetch for its network base.
 # https://cloud.google.com/appengine/docs/standard/python/issue-requests#Python_Quotas_and_limits
 import google.auth.transport.requests
 import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
+
+# Increase the request timeout, strava can take a while.
+from google.appengine.api import urlfetch
+urlfetch.set_default_fetch_deadline(30)
