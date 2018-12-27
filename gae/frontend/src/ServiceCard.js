@@ -93,6 +93,9 @@ class ServiceCard extends Component {
   }
 
   onHandleChange = (event) => {
+    if (!this.state.service) {
+      return;
+    }
     var checked = event.target.checked;
     var newState = {service: cloneDeepWith(this.state.service)};
     newState.service.sync_enabled = checked;
@@ -136,9 +139,6 @@ class ServiceCard extends Component {
   }
 
   renderCardContent() {
-    if (this.state.service === undefined) {
-      return;
-    }
     return (
         <CardContent className={this.props.classes.content}>
           <Grid container
@@ -147,10 +147,10 @@ class ServiceCard extends Component {
                 alignItems="center">
             <Grid className={this.props.classes.cardContentItem} item>
               <Typography variant="h5">{this.props.serviceName}</Typography>
-              {this.state.service.sync_date != null &&
+              {(this.state.service && this.state.service.sync_date != null) &&
                   <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
               }
-              {!this.state.service.sync_date &&
+              {(!this.state.service || !this.state.service.sync_date) &&
                   <i>&#8203;</i>
               }
             </Grid>
@@ -158,7 +158,8 @@ class ServiceCard extends Component {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={this.state.service.sync_enabled}
+                    checked={this.state.service !== undefined
+                        && this.state.service.sync_enabled}
                     onChange={this.onHandleChange}
                     value="sync_enabled"
                   />
@@ -172,37 +173,27 @@ class ServiceCard extends Component {
   };
 
   renderCardActions() {
-    if (this.state.service === undefined) {
-      return;
-    }
-    if (this.state.service.credentials) {
-      return (
-        <CardActions>
-          <Button color="primary" variant="contained"
-            disabled={this.state.syncActionPending || !this.state.service.sync_enabled}
-            onClick={this.onSync}>Sync
-            {this.state.syncActionPending && <CircularProgress size={20} />}
-          </Button>
-          <Button color="secondary"
-            disabled={this.state.connectActionPending}
-            onClick={this.onConnect}>
-              Disconnect
-              {this.state.connectActionPending && <CircularProgress size={20} />}
-          </Button>
-        </CardActions>
-      )
+    var connectText;
+    if (this.state.service === undefined || !this.state.service.credentials) {
+      connectText = "Connect";
     } else {
-      return (
-        <CardActions>
-          <Button color="primary" variant="contained"
-            disabled={this.state.connectActionPending}
-            onClick={this.onConnect}>
-              Connect
-              {this.state.connectActionPending && <CircularProgress size={20} />}
-          </Button>
-        </CardActions>
-      )
+      connectText = "Disconnect";
     }
+    return (
+      <CardActions>
+        <Button color="primary" variant="contained"
+          disabled={this.state.syncActionPending || this.state.service === undefined || !this.state.service.credentials}
+          onClick={this.onSync}>Sync
+          {this.state.syncActionPending && <CircularProgress size={20} />}
+        </Button>
+        <Button color="secondary"
+          disabled={this.state.connectActionPending || this.state.service === undefined}
+          onClick={this.onConnect}>
+            {connectText}
+            {this.state.connectActionPending && <CircularProgress size={20} />}
+        </Button>
+      </CardActions>
+    )
   }
 
   render() {
