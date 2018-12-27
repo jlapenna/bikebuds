@@ -31,7 +31,11 @@ import cloneDeepWith from 'lodash/cloneDeepWith';
 const styles = theme => ({
   root: {
     "min-height": "200px",
-  }
+  },
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
 });
 
 class PreferencesCard extends Component {
@@ -43,8 +47,15 @@ class PreferencesCard extends Component {
   }
 
   onHandleChange = (event) => {
+    if (!this.state.preferences) {
+      return;
+    }
     var newState = {preferences: cloneDeepWith(this.state.preferences)};
-    newState.preferences.units = event.target.value;
+    if (event.target.name === 'units') {
+      newState.preferences.units = event.target.value;
+    } else if (event.target.name === 'weight_service') {
+      newState.preferences.weight_service = event.target.value;
+    }
     this.setState(newState);
     window.gapi.client.bikebuds.update_preferences(newState).then(this.updatePreferencesState);
   }
@@ -73,23 +84,44 @@ class PreferencesCard extends Component {
   }
 
   renderCardContent() {
+    if (this.state.preferences) {
+      var units = this.state.preferences.units;
+      var weight_service = this.state.preferences.weight_service;
+    }
     return (
       <CardContent className={this.props.classes.content}>
-        <FormControl component="fieldset" className={this.props.classes.formControl}>
-          <Typography variant="h5">Unit</Typography>
-          {this.state.preferences &&
-              <RadioGroup
-                aria-label="Measurement System"
-                name="units"
-                className={this.props.classes.group}
-                value={this.state.preferences.units}
-                onChange={this.onHandleChange}
-              >
-                <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
-                <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
-              </RadioGroup>
-          }
-        </FormControl>
+        <div className={this.props.classes.container}>
+          <FormControl component="fieldset" className={this.props.classes.formControl}
+            disabled={!this.state.preferences}
+          >
+            <Typography variant="h5">Unit</Typography>
+            <RadioGroup
+              aria-label="Measurement System"
+              name="units"
+              className={this.props.classes.group}
+              value={units}
+              onChange={this.onHandleChange}
+            >
+              <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
+              <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
+            </RadioGroup>
+          </FormControl>
+          <FormControl component="fieldset" className={this.props.classes.formControl}
+            disabled={!this.state.preferences}
+          >
+            <Typography variant="h5">Weight Service</Typography>
+            <RadioGroup
+              aria-label="Measurement System"
+              name="weight_service"
+              className={this.props.classes.group}
+              value={weight_service}
+              onChange={this.onHandleChange}
+            >
+              <FormControlLabel value="FITBIT" control={<Radio />} label="Fitbit" />
+              <FormControlLabel value="WITHINGS" control={<Radio />} label="Withings" />
+            </RadioGroup>
+          </FormControl>
+        </div>
       </CardContent>
     )
   };

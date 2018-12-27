@@ -25,12 +25,18 @@ class PreferencesMessage(messages.Message):
         UNKNOWN = 0
         IMPERIAL = 1
         METRIC = 2
-    units = messages.EnumField(Unit, 1,
-            default=Unit.IMPERIAL)
+    units = messages.EnumField(Unit, 1, default=Unit.UNKNOWN)
+    class WeightService(messages.Enum):
+        UNKNOWN = 0
+        WITHINGS = 1
+        FITBIT = 2
+    weight_service = messages.EnumField(WeightService, 2,
+            default=WeightService.UNKNOWN)
 
 
 def default_preferences():
-    return PreferencesMessage(units=PreferencesMessage.Unit.IMPERIAL)
+    return PreferencesMessage(units=PreferencesMessage.Unit.IMPERIAL,
+            weight_service=PreferencesMessage.WeightService.WITHINGS)
 
 
 class User(ndb.Model):

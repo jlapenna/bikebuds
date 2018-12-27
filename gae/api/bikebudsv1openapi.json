@@ -541,11 +541,20 @@
     "SharedDatastoreUsersPreferencesMessage": {
       "properties": {
         "units": {
-          "default": "IMPERIAL",
+          "default": "UNKNOWN",
           "enum": [
             "UNKNOWN",
             "IMPERIAL",
             "METRIC"
+          ],
+          "type": "string"
+        },
+        "weight_service": {
+          "default": "UNKNOWN",
+          "enum": [
+            "UNKNOWN",
+            "WITHINGS",
+            "FITBIT"
           ],
           "type": "string"
         }

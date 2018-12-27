@@ -57,11 +57,6 @@ class ActivitiesResponse(messages.Message):
     activities = messages.MessageField(ActivityMessage, 2, repeated=True)
 
 
-class MeasuresResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    measures = messages.MessageField(MeasureMessage, 2, repeated=True)
-
-
 class SeriesResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     series = messages.MessageField(SeriesMessage, 2)
@@ -144,8 +139,17 @@ class BikebudsApi(remote.Service):
         to_imperial = (user.preferences.units ==
                 PreferencesMessage.Unit.IMPERIAL)
 
+        if (user.preferences.weight_service ==
+                PreferencesMessage.WeightService.WITHINGS):
+            weight_service = 'withings'
+        elif (user.preferences.weight_service ==
+                PreferencesMessage.WeightService.FITBIT):
+            weight_service = 'fitbit'
+        else:
+            weight_service = 'withings'
+
         logging.info('Beginning series')
-        result = Series.get_default(Service.get_key(user.key, 'withings'))
+        result = Series.get_default(Service.get_key(user.key, weight_service))
         if result is None:
             return SeriesResponse()
         logging.info('Finished series')
@@ -162,8 +166,7 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = User.get(claims)
-        preferences = user.preferences or users.default_preferences()
-        return PreferencesResponse(preferences=preferences)
+        return PreferencesResponse(preferences=user.preferences)
 
     @endpoints.method(
         UpdatePreferencesRequest,

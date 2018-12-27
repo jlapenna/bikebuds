@@ -176,7 +176,9 @@ class Series(ndb.Model):
     def to_message(cls, series, to_imperial=True):
         measures = [Measure.to_message(measure, to_imperial=to_imperial)
                 for measure in series.measures if measure is not None]
-        return SeriesMessage(id=series.key.id(), measures=measures)
+        return SeriesMessage(
+                service=series.key.parent().id(), id=series.key.id(),
+                measures=measures)
 
     @classmethod
     def get_default(cls, parent):
