@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import cc.bikebuds.api.bikebuds.Bikebuds;
+import cc.bikebuds.api.bikebuds.BikebudsRequestInitializer;
 import cc.bikebuds.api.bikebuds.model.MainProfileResponse;
 import cc.bikebuds.api.bikebuds.model.MainRequest;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
@@ -110,27 +111,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull final Task<GetTokenResult> task) {
                 String token = task.isSuccessful() ? task.getResult().getToken() : null;
-                AuthenticatedHttpRequestInitializer httpRequestInitializer =
-                        token != null ? new AuthenticatedHttpRequestInitializer(token) : null;
-                Bikebuds.Builder builder = new Bikebuds.Builder(new NetHttpTransport(),
-                        JacksonFactory.getDefaultInstance(), httpRequestInitializer)
-                        .setApplicationName("Bikebuds")
-                        .setRootUrl(getResources().getString(R.string.api_url) + "/_ah/api/");
-                asyncGetUser(builder.build());
+                AuthenticatedRequestInitializer initializer = new AuthenticatedRequestInitializer(
+                        getString(R.string.google_api_key), token);
+                Bikebuds.Builder builder = new Bikebuds.Builder(
+                        new NetHttpTransport(),
+                        JacksonFactory.getDefaultInstance(),
+                        initializer
+                );
+                builder.setBikebudsRequestInitializer(initializer);
+                builder.setApplicationName("Bikebuds");
+                builder.setRootUrl(getResources().getString(R.string.api_url) + "/_ah/api/");
+
+                asyncGetProfile(builder.build());
             }
         });
     }
 
-    private void asyncGetUser(final Bikebuds bikebuds) {
+    private void asyncGetProfile(final Bikebuds bikebuds) {
         CompletableFuture.runAsync(() -> {
             try {
                 final Bikebuds.GetProfile request = bikebuds.getProfile(new MainRequest());
-                Log.d(TAG, "GetUser Request: " + request);
                 MainProfileResponse response = request.execute();
-                Log.d(TAG, "GetUser Response content: " + response.getCreated());
-                //  editText.setText(response.getCreated().toString());
+                Log.d(TAG, "GetProfile Response content: " + response.getCreated());
             } catch (IOException e) {
-                Log.d(TAG, "GetUser Unable to execute: ", e);
+                Log.d(TAG, "GetProfile Unable to execute: ", e);
             }
         });
     }
@@ -168,18 +172,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signInFailed(IdpResponse resultCode) {
-        Log.d(TAG, "signInFailed");
+        Log.d(TAG, "signInFailed: " + resultCode);
     }
 
-    private static class AuthenticatedHttpRequestInitializer implements HttpRequestInitializer {
+    private static class AuthenticatedRequestInitializer extends
+            BikebudsRequestInitializer implements HttpRequestInitializer {
         private final String token;
 
-        public AuthenticatedHttpRequestInitializer(String token) {
+        public AuthenticatedRequestInitializer(String key, String token) {
+            super(key);
             this.token = token;
         }
 
         @Override
         public void initialize(HttpRequest request) throws IOException {
+            if (this.token == null) {
+                return;
+            }
             HttpHeaders headers = request.getHeaders();
             if (headers == null) {
                 headers = new HttpHeaders();

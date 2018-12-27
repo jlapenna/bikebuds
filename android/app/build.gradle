@@ -7,8 +7,8 @@ android {
         minSdkVersion 24
         targetSdkVersion 28
         //noinspection HighAppVersionCode
-        versionCode 2018111500
-        versionName "2018111500"
+        versionCode 2018122701
+        versionName "2018122701"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -16,6 +16,7 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile 'proguard-rules-api-client.pro'
+            proguardFile 'proguard-rules-firebase.pro'
         }
     }
     packagingOptions {
@@ -44,7 +45,7 @@ dependencies {
     implementation 'androidx.cursoradapter:cursoradapter:1.0.0'
     implementation 'androidx.browser:browser:1.0.0'
     implementation 'androidx.customview:customview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha01'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'androidx.documentfile:documentfile:1.0.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.0.0'
     implementation 'androidx.interpolator:interpolator:1.0.0'
@@ -53,11 +54,11 @@ dependencies {
     implementation 'androidx.print:print:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.slidingpanelayout:slidingpanelayout:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
-    implementation 'androidx.core:core:1.1.0-alpha01'
+    implementation 'androidx.annotation:annotation:1.0.1'
+    implementation 'androidx.core:core:1.1.0-alpha03'
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
-    implementation 'androidx.fragment:fragment:1.1.0-alpha01'
+    implementation 'androidx.fragment:fragment:1.1.0-alpha03'
     implementation 'androidx.media:media:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
@@ -65,14 +66,14 @@ dependencies {
     implementation 'androidx.transition:transition:1.0.1'
     implementation "com.android.support:versionedparcelable:${supportLibraryVersion}"
     implementation 'androidx.viewpager:viewpager:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    implementation 'com.google.firebase:firebase-core:16.0.4'
-    implementation 'com.google.firebase:firebase-auth:16.0.4'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-auth:16.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.1.0'
-    implementation 'com.google.firebase:firebase-messaging:17.3.3'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
 
     implementation 'com.google.android.material:material:1.0.0'
 
@@ -98,7 +99,11 @@ dependencies {
     }
 
     // The Library itself.
-    implementation ('cc.bikebuds.api:bikebuds:v1-1.25.0-SNAPSHOT')
+    implementation ('cc.bikebuds.api:bikebuds:v1-1.25.0-SNAPSHOT') {
+    }
+
+    // Various dependencies.
+    implementation 'com.google.guava:guava:27.0.1-android'
 }
 
 apply plugin: 'com.google.gms.google-services'

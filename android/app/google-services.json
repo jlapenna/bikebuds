@@ -15,29 +15,21 @@
       },
       "oauth_client": [
         {
-          "client_id": "294988021695-1fe7mphu8bvsce3mb8mt2rp73nf3ak6r.apps.googleusercontent.com",
+          "client_id": "294988021695-1vhjlhodc93koigp87l4mdr8e6mcd4rm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "cc.bikebuds",
-            "certificate_hash": "edb9318d79ffb45ecc8a013cca8aaaf18e3e775c"
+            "certificate_hash": "d11007a083142e833e94f9768359b25c8c26c4e7"
           }
         },
         {
-          "client_id": "294988021695-kro101i7h5996jmk4avgm996mdsos3fv.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "cc.bikebuds",
-            "certificate_hash": "8ad9cf00147b7d4fe17bfc27decdc552d0af99b3"
-          }
-        },
-        {
-          "client_id": "294988021695-f95fhsgmgp6tta74qdhd1gtnaitnbjam.apps.googleusercontent.com",
+          "client_id": "294988021695-ig6caq2he7mg493s423mhi26r12r3c77.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU"
+          "current_key": "AIzaSyCJH5ALd58r6hIiUluKhKpmig8IPTUgznI"
         }
       ],
       "services": {
@@ -48,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "294988021695-f95fhsgmgp6tta74qdhd1gtnaitnbjam.apps.googleusercontent.com",
+              "client_id": "294988021695-fkromgkt3nhocpjp6f8r8vfujkdf75bn.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -61,4 +53,3 @@
   ],
   "configuration_version": "1"
 }
-
