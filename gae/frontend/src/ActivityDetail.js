@@ -19,6 +19,10 @@ import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
 
+import { withScriptjs, withGoogleMap, GoogleMap, Polyline } from 'react-google-maps'
+
+import { config } from './Config'
+
 const styles = {
   root: {
     min_height: "500px",
@@ -30,32 +34,118 @@ const styles = {
   },
 };
 
+/*
+      path={[
+        { lat: props.activity.start_latlng.latitude, lng: props.activity.start_latlng.longitude },
+        { lat: props.activity.end_latlng.latitude, lng: props.activity.end_latlng.longitude }
+      ]}
+*/
+
+const googleMapURL = "https://maps.googleapis.com/maps/api/js?key="
+  + config.mapsApiKey
+  + "&v=3.exp&libraries=geometry,drawing,places";
+
+
+/*
+const MyMapComponent = withScriptjs(withGoogleMap((props) =>
+  <GoogleMap
+    defaultZoom={10}
+  >
+    <Polyline
+      path={window.google.maps.geometry.encoding.decodePath(props.activity.map.summary_polyline)}
+      visible
+      options={{
+        strokeColor: '#00ffff',
+        strokeOpacity: 1,
+        strokeWeight: 2,
+      }}
+    />
+  </GoogleMap>
+))
+*/
+
+const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
+  const {onMapMounted, ...otherProps} = props;
+  return <GoogleMap {...otherProps} ref={c => {
+    onMapMounted && onMapMounted(c)
+  }}>{props.children}</GoogleMap>
+}));
+
+
+class MyMap extends React.Component {
+
+  state = {
+    mapMounted: false,
+  };
+
+  _mapRef = null;
+
+  _handleMapMounted = (c) => {
+    if (!c || this._mapRef) return;
+    this._mapRef = c;
+
+    this.setState({
+      mapMounted: true
+    });
+  };
+
+  /**
+   * @inheritDoc
+   */
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (!this.state.mapMounted || !this.props.activity) {
+      return;
+    }
+    if (this.state.mapMounted !== prevState.mapMounted
+        || this.props.activity !== prevProps.activity) {
+      var decodedPolyline = [];
+      if (this.props.activity.map.summary_polyline) {
+        decodedPolyline = window.google.maps.geometry.encoding.decodePath(
+          this.props.activity.map.summary_polyline)
+      }
+
+      var bounds = new window.google.maps.LatLngBounds();
+      decodedPolyline.forEach((point) => {
+        bounds.extend(point);
+      });
+      this._mapRef.fitBounds(bounds);
+
+      this.setState({
+        decodedPolyline: decodedPolyline,
+        bounds: bounds
+      });
+    }
+  }
+
+  render() {
+    return (
+      <GoogleMapsWrapper
+        googleMapURL={googleMapURL}
+        loadingElement={<div style={{height: `100%`}}/>}
+        containerElement={<div style={{height: `100%`}}/>}
+        mapElement={<div style={{height: `100%`}}/>}
+        defaultZoom={10}
+        onMapMounted={this._handleMapMounted}
+      >
+        <Polyline
+          path={this.state.decodedPolyline}
+          visible
+          options={{
+            strokeColor: '#00ffff',
+            strokeOpacity: 1,
+            strokeWeight: 2,
+          }}
+        />
+      </GoogleMapsWrapper>
+    )
+  }
+}
+
 class ActivityDetail extends Component {
 
   render() {
-    if (this.props.activity === undefined) {
-      return (
-        <div>&#8203;</div>
-      );
-    }
-
-    if (!this.props.activity.embed_token) {
-      return (
-        <div>{this.props.activity.name}</div>
-      );
-    }
-
-    var embed_url = 'https://www.strava.com/activities/'
-      + this.props.activity.id
-      + '/embed/'    
-      + this.props.activity.embed_token;
-
     return (
-      <div className={this.props.classes.root}>
-        <iframe className={this.props.classes.iframe}
-          src={embed_url}
-          title={this.props.activity.name} />
-      </div>
+      <MyMap activity={this.props.activity} />
     );
   };
 }

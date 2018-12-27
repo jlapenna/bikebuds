@@ -20,6 +20,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -95,7 +96,7 @@ class ActivityListCard extends Component {
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
           <Grid className={this.props.classes.contentGridElement} container spacing={24}>
-            <Grid className={this.props.classes.contentGridElement} item xs={4}>
+            <Grid className={this.props.classes.contentGridElement} item xs={12} lg={4}>
               <List>
                 {this.state.activities.map((activity, index) => {
                   return (
@@ -110,7 +111,7 @@ class ActivityListCard extends Component {
               }
               </List>
             </Grid>
-            <Grid className={this.props.classes.contentGridElement} item xs={8}>
+            <Grid className={this.props.classes.contentGridElement} item xs={false} lg={8}>
               <ActivityDetail activity={this.state.selectedActivity} />
             </Grid>
           </Grid>
