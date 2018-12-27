@@ -20,6 +20,11 @@ warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
 warnings.filterwarnings('ignore',
         'The oauth2client.contrib.multistore_file module has been deprecated')
 
+# Hide spammy stravalib debugging
+import logging
+logging.getLogger('stravalib.model.Activity').setLevel(logging.WARN)
+logging.getLogger('stravalib.model.Athlete').setLevel(logging.WARN)
+
 # Ensure that the requests library uses urlfetch for its network base.
 # https://cloud.google.com/appengine/docs/standard/python/issue-requests#Python_Quotas_and_limits
 import google.auth.transport.requests
