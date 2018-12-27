@@ -92,8 +92,6 @@ class ActivityListCard extends Component {
       return;
     }
     return (
-        <CardContent className={this.props.classes.content}>
-          <Typography variant="h5">Activities</Typography>
           <Grid className={this.props.classes.contentGridElement} container spacing={24}>
             <Grid className={this.props.classes.contentGridElement} item xs={12} lg={4}>
               <List>
@@ -114,14 +112,16 @@ class ActivityListCard extends Component {
               <ActivityDetail activity={this.state.selectedActivity} />
             </Grid>
           </Grid>
-        </CardContent>
     )
   };
 
   render() {
     return (
       <Card className={this.props.classes.root}>
-        {this.renderCardContent()}
+        <CardContent className={this.props.classes.content}>
+          <Typography variant="h5">Activities</Typography>
+          {this.renderCardContent()}
+        </CardContent>
       </Card>
     );
   };
