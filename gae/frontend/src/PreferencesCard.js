@@ -25,13 +25,14 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
 const styles = theme => ({
   root: {
-    height:300,
-  },
+    "min-height": "200px",
+  }
 });
 
 class PreferencesCard extends Component {
@@ -73,25 +74,24 @@ class PreferencesCard extends Component {
   }
 
   renderCardContent() {
-    if (this.state.preferences === undefined) {
-      return;
-    }
     return (
-        <CardContent className={this.props.classes.content}>
-          <FormControl component="fieldset" className={this.props.classes.formControl}>
-            <FormLabel component="legend">Unit</FormLabel>
-            <RadioGroup
-              aria-label="Measurement System"
-              name="units"
-              className={this.props.classes.group}
-              value={this.state.preferences.units}
-              onChange={this.onHandleChange}
-            >
-              <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
-              <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
-            </RadioGroup>
-          </FormControl>
-        </CardContent>
+      <CardContent className={this.props.classes.content}>
+        <FormControl component="fieldset" className={this.props.classes.formControl}>
+          <Typography variant="h5">Unit</Typography>
+          {this.state.preferences &&
+              <RadioGroup
+                aria-label="Measurement System"
+                name="units"
+                className={this.props.classes.group}
+                value={this.state.preferences.units}
+                onChange={this.onHandleChange}
+              >
+                <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
+                <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
+              </RadioGroup>
+          }
+        </FormControl>
+      </CardContent>
     )
   };
 

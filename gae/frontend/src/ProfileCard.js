@@ -114,7 +114,7 @@ class ProfileCard extends Component {
         <CardContent className={this.props.classes.content}>
           <Grid container
             direction="column"
-            justify="center"
+            justify="space-evenly"
             alignItems="center">
             <Grid item>
               <Avatar className={this.props.classes.avatar}
@@ -125,7 +125,8 @@ class ProfileCard extends Component {
             </Grid>
             <Grid item>
               <Grid className={this.props.classes.clubContainer} container
-                justify="center"
+                direction="row"
+                justify="space-evenly"
                 alignItems="center"
               >
                 {this.renderClubs()}

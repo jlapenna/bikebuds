@@ -26,7 +26,9 @@ class Settings extends Component {
   render() {
     return (
       <div>
-        <Grid container spacing={24}>
+        <Grid container spacing={24}
+          justify="space-evenly"
+          alignItems="center">
           <Grid item xs={12} sm={12}>
             <ProfileCard firebaseUser={this.props.firebaseUser}
               gapiReady={this.props.gapiReady} />

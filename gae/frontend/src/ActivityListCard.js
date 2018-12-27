@@ -34,13 +34,10 @@ const styles = {
   content: {
     "height": "500px",
   },
-  grid: {
-    "height": "500px",
-  },
-  list: {
-    "height": "500px",
+  contentGridElement: {
+    "height": "100%",
     overflow: "auto",
-  }
+  },
 };
 
 class ActivityListCard extends Component {
@@ -97,9 +94,9 @@ class ActivityListCard extends Component {
     return (
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
-          <Grid className={this.props.classes.grid} container spacing={24}>
-            <Grid item xs={4}>
-              <List className={this.props.classes.list}>
+          <Grid className={this.props.classes.contentGridElement} container spacing={24}>
+            <Grid className={this.props.classes.contentGridElement} item xs={4}>
+              <List>
                 {this.state.activities.map((activity, index) => {
                   return (
                     <ListItem
@@ -113,7 +110,7 @@ class ActivityListCard extends Component {
               }
               </List>
             </Grid>
-            <Grid item xs={8}>
+            <Grid className={this.props.classes.contentGridElement} item xs={8}>
               <ActivityDetail activity={this.state.selectedActivity} />
             </Grid>
           </Grid>

@@ -45,7 +45,7 @@ class Home extends Component {
             <ActivityListCard
               gapiReady={this.props.gapiReady} />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <MeasuresCard
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
@@ -53,7 +53,7 @@ class Home extends Component {
               intervalUnit="d" intervalFormat="MMM D" intervalCount="365"
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <MeasuresCard
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
@@ -61,7 +61,7 @@ class Home extends Component {
               intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <MeasuresCard
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}

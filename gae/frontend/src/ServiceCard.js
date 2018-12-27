@@ -37,6 +37,10 @@ import { createSession } from './session_util';
 
 const styles = {
   root: {
+    "min-height": "200px",
+  },
+  cardContentItem: {
+    width: "100%",
   },
   avatar: {
     width: 60,
@@ -142,13 +146,27 @@ class ServiceCard extends Component {
                 direction="column"
                 justify="center"
                 alignItems="center">
-            <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.service.sync_date != null &&
-                <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
-            }
-            {!this.state.service.sync_date &&
-                <i>&#8203;</i>
-            }
+            <Grid className={this.props.classes.cardContentItem} item>
+              <Typography variant="h5">{this.props.serviceName}</Typography>
+              {this.state.service.sync_date != null &&
+                  <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
+              }
+              {!this.state.service.sync_date &&
+                  <i>&#8203;</i>
+              }
+            </Grid>
+            <Grid className={this.props.classes.cardContentItem} item>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={this.state.service.sync_enabled}
+                    onChange={this.onHandleChange}
+                    value="sync_enabled"
+                  />
+                }
+                label="Enabled"
+              />
+            </Grid>
           </Grid>
         </CardContent>
     )
@@ -161,42 +179,28 @@ class ServiceCard extends Component {
     if (this.state.service.credentials) {
       return (
         <CardActions>
-          <FormGroup row>
-            <Button color="primary" variant="contained"
-              disabled={this.state.syncActionPending || !this.state.service.sync_enabled}
-              onClick={this.onSync}>Sync
-              {this.state.syncActionPending && <CircularProgress size={20} />}
-            </Button>
-            <Button color="secondary"
-              disabled={this.state.connectActionPending}
-              onClick={this.onConnect}>
-                Disconnect
-                {this.state.connectActionPending && <CircularProgress size={20} />}
-            </Button>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={this.state.service.sync_enabled}
-                  onChange={this.onHandleChange}
-                  value="sync_enabled"
-                />
-              }
-              label="Enabled"
-            />
-          </FormGroup>
+          <Button color="primary" variant="contained"
+            disabled={this.state.syncActionPending || !this.state.service.sync_enabled}
+            onClick={this.onSync}>Sync
+            {this.state.syncActionPending && <CircularProgress size={20} />}
+          </Button>
+          <Button color="secondary"
+            disabled={this.state.connectActionPending}
+            onClick={this.onConnect}>
+              Disconnect
+              {this.state.connectActionPending && <CircularProgress size={20} />}
+          </Button>
         </CardActions>
       )
     } else {
       return (
         <CardActions>
-          <FormGroup row>
-            <Button color="primary" variant="contained"
-              disabled={this.state.connectActionPending}
-              onClick={this.onConnect}>
-                Connect
-                {this.state.connectActionPending && <CircularProgress size={20} />}
-            </Button>
-          </FormGroup>
+          <Button color="primary" variant="contained"
+            disabled={this.state.connectActionPending}
+            onClick={this.onConnect}>
+              Connect
+              {this.state.connectActionPending && <CircularProgress size={20} />}
+          </Button>
         </CardActions>
       )
     }
