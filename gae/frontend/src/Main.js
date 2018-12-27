@@ -25,7 +25,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
-import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -36,13 +35,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
-import ActivityListCard from './ActivityListCard';
 import Home from './Home';
-import MeasuresCard from './MeasuresCard';
-import MeasuresWrapper from './MeasuresWrapper';
-import PreferencesCard from './PreferencesCard';
-import ProfileCard from './ProfileCard';
-import ServiceCard from './ServiceCard';
 import Settings from './Settings';
 
 
@@ -118,10 +111,6 @@ class Main extends Component {
             to="/" exact activeClassName={classes.active}>
             <ListItemText>Home</ListItemText>
           </ListItem>
-          <ListItem button key="All" component={NavLink}
-            to="/all" exact activeClassName={classes.active}>
-            <ListItemText>All</ListItemText>
-          </ListItem>
           <ListItem button key="Settings" component={NavLink}
             to="/settings" exact activeClassName={classes.active}>
             <ListItemText>Settings</ListItemText>
@@ -142,8 +131,6 @@ class Main extends Component {
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
           />} />
-        <Route path="/all" exact
-          component={this.renderAll} />
         <Route>
           <Redirect to="/" />
         </Route>
@@ -203,50 +190,6 @@ class Main extends Component {
       </Router>
     );
   };
-
-  renderAll = () => {
-    return (
-      <Grid container spacing={24}
-        style={{margin: 0, width: '100%'}}>
-        <Grid item xs={12} sm={12} md={6}>
-          <ProfileCard firebaseUser={this.props.firebaseUser}
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <PreferencesCard firebaseUser={this.props.firebaseUser}
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <ActivityListCard
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <MeasuresWrapper
-            gapiReady={this.state.gapiReady}
-            onMeasuresReady={this.onMeasuresReady}
-          />
-          <MeasuresCard
-              gapiReady={this.state.gapiReady}
-              measures={this.state.measures}
-              title="Weekly"
-              intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
-            />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="fitbit"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="strava"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard serviceName="withings"
-            gapiReady={this.state.gapiReady} />
-        </Grid>
-      </Grid>
-    );
-  }
 }
 
 export default withStyles(styles, {withTheme: true})(Main);
