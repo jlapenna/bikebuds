@@ -131,9 +131,9 @@ class MyMap extends React.Component {
           path={this.state.decodedPolyline}
           visible
           options={{
-            strokeColor: '#00ffff',
+            strokeColor: '#ff4081',
             strokeOpacity: 1,
-            strokeWeight: 2,
+            strokeWeight: 3,
           }}
         />
       </GoogleMapsWrapper>
