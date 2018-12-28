@@ -166,3 +166,9 @@ IMPORTANT NOTES:
 
    Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
    Donating to EFF:                    https://eff.org/donate-le
+
+"Server key (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/settings/cloudmessaging/android:cc.bikebuds
+"Web General Key" -> https://console.firebase.google.com/u/0/project/bikebuds-app/settings/general/android:cc.bikebuds
+"Web client (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProvidera Web SDK
+"Android Client (App Signing Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
+"Android Client (Upload Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
