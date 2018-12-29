@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import dateutil.parser
+import hashlib
 import logging
 import pytz
 import sys
@@ -24,25 +26,21 @@ from endpoints import messages
 
 from measurement import measures
 
+from shared.datastore import message_util
 
 class PolylineMap(ndb.Model):
     polyline = ndb.StringProperty(indexed=False)
     summary_polyline = ndb.StringProperty(indexed=False)
 
     @classmethod
-    def to_message(cls, polyline_map):
-        attributes = {}
-        for key in cls._properties:
-            value = getattr(polyline_map, key, None)
-            if value is None:
-                continue
-            try:
-                attributes[key] = value
-            except Exception, e:
-                msg = 'Unable to convert: %s (%s) -> %s' % (
-                        key, value, sys.exc_info()[1])
-                raise Exception, Exception(msg), sys.exc_info()[2]
-        return PolylineMapMessage(**attributes)
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                PolylineMapMessage, entity,
+                cls._to_message, *args, **kwargs)
+
+    @classmethod
+    def _to_message(cls, key, value, *args, **kwargs):
+        return value
 
 
 class Activity(ndb.Model):
@@ -88,6 +86,9 @@ class Activity(ndb.Model):
     description = ndb.StringProperty(indexed=False)
     embed_token = ndb.StringProperty(indexed=False)
 
+    # Hacks
+    activity_hash = ndb.StringProperty(indexed=True)
+
     @classmethod
     def from_strava(cls, service_key, activity):
         start_date = activity.start_date.astimezone(
@@ -101,6 +102,15 @@ class Activity(ndb.Model):
         if activity.end_latlng is not None:
             end_latlng = ndb.GeoPt(
                     activity.end_latlng.lat, activity.end_latlng.lon)
+
+        hash_string = '-'.join((
+                "{0:.0f}".format(activity.distance.num),
+                "{0:.0f}".format(activity.moving_time.seconds),
+                "{0:.0f}".format(activity.elapsed_time.seconds),
+                "{0:.0f}".format((start_date - datetime.datetime(
+                    1970, 1, 1, tzinfo=None)).total_seconds()),
+                ))
+        activity_hash = hashlib.md5(hash_string.encode()).hexdigest()
         try:
             return Activity(
                     id=activity.id,
@@ -146,28 +156,22 @@ class Activity(ndb.Model):
                     # DetailedActivity
                     calories=activity.calories,
                     description=activity.description,
-                    embed_token=activity.embed_token
+                    embed_token=activity.embed_token,
+
+                    # Hacks
+                    activity_hash=activity_hash
                     )
         except Exception, e:
             raise
 
     @classmethod
-    def to_message(cls, activity, to_imperial=True):
-        attributes = {}
-        for key in cls._properties:
-            value = getattr(activity, key, None)
-            if value is None:
-                continue
-            try:
-                attributes[key] = cls._convert(key, value, to_imperial)
-            except Exception, e:
-                msg = 'Unable to convert: %s (%s) -> %s' % (
-                        key, value, sys.exc_info()[1])
-                raise Exception, Exception(msg), sys.exc_info()[2]
-        return ActivityMessage(id=activity.key.id(), **attributes)
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                ActivityMessage, entity,
+                cls._to_message, *args, **kwargs)
     
     @classmethod
-    def _convert(cls, key, value, to_imperial):
+    def _to_message(cls, key, value, to_imperial, *args, **kwargs):
         if key == 'distance':
             if to_imperial:
                 return measures.Distance(meter=value).ft
@@ -192,7 +196,6 @@ class GeoPtMessage(messages.Message):
 
 
 class PolylineMapMessage(messages.Message):
-    id = messages.StringField(1)
     polyline = messages.StringField(2)
     summary_polyline = messages.StringField(3)
 
@@ -240,3 +243,6 @@ class ActivityMessage(messages.Message):
     calories = messages.FloatField(37)
     description = messages.StringField(38)
     embed_token = messages.StringField(39)
+
+    # Hacks
+    activity_hash = messages.StringField(40)

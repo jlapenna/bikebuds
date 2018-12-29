@@ -18,6 +18,17 @@
       },
       "type": "object"
     },
+    "MainClubResponse": {
+      "properties": {
+        "club": {
+          "$ref": "#/definitions/SharedDatastoreClubsClubMessage"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainPreferencesResponse": {
       "properties": {
         "header": {
@@ -108,6 +119,9 @@
       "properties": {
         "achievement_count": {
           "format": "int64",
+          "type": "string"
+        },
+        "activity_hash": {
           "type": "string"
         },
         "activity_type": {
@@ -263,9 +277,6 @@
     },
     "SharedDatastoreActivitiesPolylineMapMessage": {
       "properties": {
-        "id": {
-          "type": "string"
-        },
         "polyline": {
           "type": "string"
         },
@@ -282,7 +293,7 @@
         },
         "clubs": {
           "items": {
-            "$ref": "#/definitions/SharedDatastoreClubsClubMessage"
+            "$ref": "#/definitions/SharedDatastoreAthletesClubRefMessage"
           },
           "type": "array"
         },
@@ -357,13 +368,48 @@
       },
       "type": "object"
     },
+    "SharedDatastoreAthletesClubRefMessage": {
+      "properties": {
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "profile_medium": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreClubsAthleteRefMessage": {
+      "properties": {
+        "firstname": {
+          "type": "string"
+        },
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "profile_medium": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "SharedDatastoreClubsClubMessage": {
       "properties": {
         "city": {
-          "type": "string"
-        },
-        "club_id": {
-          "format": "int64",
           "type": "string"
         },
         "country": {
@@ -385,6 +431,12 @@
         "member_count": {
           "format": "int64",
           "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/definitions/SharedDatastoreClubsAthleteRefMessage"
+          },
+          "type": "array"
         },
         "name": {
           "type": "string"
@@ -499,9 +551,6 @@
             "$ref": "#/definitions/SharedDatastoreMeasuresMeasureMessage"
           },
           "type": "array"
-        },
-        "service": {
-          "type": "string"
         }
       },
       "type": "object"
@@ -586,6 +635,41 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/MainActivitiesResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/club/{id}": {
+      "post": {
+        "operationId": "BikebudsApi_getClub",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainClubResponse"
             }
           }
         },

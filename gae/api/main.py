@@ -31,6 +31,7 @@ import auth_util
 from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore.athletes import Athlete, AthleteMessage
+from shared.datastore.clubs import Club, ClubMessage
 from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
 from shared.datastore.users import User, PreferencesMessage
 
@@ -55,6 +56,11 @@ class Response(messages.Message):
 class ActivitiesResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     activities = messages.MessageField(ActivityMessage, 2, repeated=True)
+
+
+class ClubResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    club = messages.MessageField(ClubMessage, 2)
 
 
 class SeriesResponse(messages.Message):
@@ -119,6 +125,25 @@ class BikebudsApi(remote.Service):
             response.activities.append(
                     Activity.to_message(activity, to_imperial=to_imperial))
         return response
+
+    @endpoints.method(
+        endpoints.ResourceContainer(Request, id=messages.StringField(1)),
+        ClubResponse,
+        path='club/{id}',
+        http_method='POST',
+        api_key_required=True)
+    def get_club(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = User.get(claims)
+        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
+
+        club = ndb.Key(Club, int(request.id)).get()
+
+        if club is None:
+            return ClubResponse()
+        return ClubResponse(club=Club.to_message(club, to_imperial=to_imperial))
 
     @endpoints.method(
         endpoints.ResourceContainer(Request),

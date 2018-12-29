@@ -25,6 +25,34 @@ from endpoints import messages
 from measurement import measures
 
 from shared.datastore.clubs import Club, ClubMessage
+from shared.datastore import message_util
+
+
+class ClubRef(ndb.Model):
+    key = ndb.KeyProperty(indexed=True)
+    name = ndb.StringProperty(indexed=False)
+    profile_medium = ndb.StringProperty(indexed=False)
+    url = ndb.StringProperty(indexed=False)
+
+    @classmethod
+    def from_strava(cls, club):
+        return cls(
+                key=ndb.Key(cls, club.id),
+                name=club.name,
+                profile_medium=club.profile_medium,
+                url=club.url)
+
+    @classmethod
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                ClubRefMessage, entity,
+                cls._to_message, *args, **kwargs)
+    
+    @classmethod
+    def _to_message(cls, key, value, *args, **kwargs):
+        if key == 'key':
+            return None
+        return value
 
 
 class Athlete(ndb.Model):
@@ -50,7 +78,7 @@ class Athlete(ndb.Model):
     measurement_preference = ndb.StringProperty(indexed=False)
     ftp = ndb.StringProperty(indexed=False)
     weight = ndb.FloatProperty(indexed=False)
-    clubs = ndb.StructuredProperty(Club, indexed=True, repeated=True)
+    clubs = ndb.StructuredProperty(ClubRef, indexed=True, repeated=True)
     # bikes = [SummaryGear, ...]
     # shoes = [SummaryGear, ...]
 
@@ -58,13 +86,12 @@ class Athlete(ndb.Model):
     def from_strava(cls, service_key, athlete):
         clubs = []
         if athlete.clubs is not None:
-            clubs = [Club.from_strava(service_key, club)
-                     for club in athlete.clubs]
+            clubs = [ClubRef.from_strava(club) for club in athlete.clubs]
         if athlete.weight is None:
             weight = None
         else:
             weight = athlete.weight.num
-        return Athlete(
+        return cls(
                 id=athlete.id,
                 parent=service_key,
                 resource_state=athlete.resource_state,
@@ -93,25 +120,15 @@ class Athlete(ndb.Model):
                 clubs=clubs)
 
     @classmethod
-    def to_message(cls, athlete, to_imperial=True):
-        attributes = {}
-        for key in cls._properties:
-            value = getattr(athlete, key, None)
-            if value is None:
-                continue
-            try:
-                attributes[key] = cls._convert(key, value, to_imperial)
-            except Exception, e:
-                msg = 'Unable to convert: %s (%s) -> %s' % (
-                        key, value, sys.exc_info()[1])
-                raise Exception, Exception(msg), sys.exc_info()[2]
-        return AthleteMessage(id=athlete.key.id(), **attributes)
-    
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                AthleteMessage, entity,
+                cls._to_message, *args, **kwargs)
+
     @classmethod
-    def _convert(cls, key, value, to_imperial):
+    def _to_message(cls, key, value, *args, **kwargs):
         if key == 'clubs':
-            clubs = []
-            return [Club.to_message(club, to_imperial=to_imperial)
+            return [ClubRef.to_message(club)
                     for club in value]
         return value
 
@@ -122,6 +139,13 @@ class Athlete(ndb.Model):
             return None
         else:
             return athletes[0]
+
+
+class ClubRefMessage(messages.Message):
+    id = messages.IntegerField(1)
+    name = messages.StringField(2)
+    profile_medium = messages.StringField(3)
+    url = messages.StringField(4)
 
 
 class AthleteMessage(messages.Message):
@@ -147,4 +171,4 @@ class AthleteMessage(messages.Message):
     measurement_preference = messages.StringField(20)
     ftp = messages.StringField(21)
     weight = messages.FloatField(22)
-    clubs = messages.MessageField(ClubMessage, 23, repeated=True)
+    clubs = messages.MessageField(ClubRefMessage, 23, repeated=True)

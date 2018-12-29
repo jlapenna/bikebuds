@@ -121,6 +121,8 @@ class ProfileCard extends Component {
                 alt={this.props.firebaseUser.displayName}
                 src={this.props.firebaseUser.photoURL}>
               </Avatar>
+            </Grid>
+            <Grid item>
               <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
             </Grid>
             <Grid item>

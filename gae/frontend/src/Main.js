@@ -35,6 +35,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import GapiWrapper from './GapiWrapper';
 
+import Club from './Club';
 import Home from './Home';
 import Settings from './Settings';
 
@@ -121,16 +122,25 @@ class Main extends Component {
 
     const mainContent = (
       <Switch>
+        <Route path="/club/:club_id"
+          render={(thinger) => <Club
+            firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady}
+            clubId={Number(thinger.match.params.club_id)}
+          />}
+        />
         <Route path="/" exact
           render={() => <Home
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
-          />} />
+          />}
+        />
         <Route path="/settings" exact
           render={() => <Settings
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
-          />} />
+          />}
+        />
         <Route>
           <Redirect to="/" />
         </Route>

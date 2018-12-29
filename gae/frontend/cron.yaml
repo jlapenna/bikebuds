@@ -8,3 +8,9 @@ cron:
   url: /tasks/cleanup
   target: backend
   schedule: every 24 hours
+
+- description: 'Yearly Process'
+  url: /tasks/process
+  target: backend
+  schedule: 1 of jan 12:00
+

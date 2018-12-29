@@ -27,6 +27,8 @@ from measurement import measures
 
 import nokia 
 
+from shared.datastore import message_util
+
 _KG_TO_POUNDS = 2.20462262185
 
 class Measure(ndb.Model):
@@ -98,22 +100,13 @@ class Measure(ndb.Model):
         return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
 
     @classmethod
-    def to_message(cls, measure, to_imperial=True):
-        attributes = dict()
-        for key, _ in nokia.NokiaMeasureGroup.MEASURE_TYPES:
-            value = getattr(measure, key, None)
-            if value is None:
-                continue
-            try:
-                attributes[key] = cls._convert(key, value, to_imperial)
-            except Exception, e:
-                msg = 'Unable to convert: %s (%s) -> %s' % (
-                        key, value, sys.exc_info()[1])
-                raise Exception, Exception(msg), sys.exc_info()[2]
-        return MeasureMessage(date=measure.date, **attributes)
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                MeasureMessage, entity,
+                cls._to_message, *args, **kwargs)
     
     @classmethod
-    def _convert(cls, key, value, to_imperial):
+    def _to_message(cls, key, value, to_imperial):
         if key == 'weight':
             if to_imperial:
                 return measures.Weight(kg=value).lb
@@ -173,12 +166,17 @@ class Series(ndb.Model):
         return Series(parent=service_key, id=id, measures=measures)
 
     @classmethod
-    def to_message(cls, series, to_imperial=True):
-        measures = [Measure.to_message(measure, to_imperial=to_imperial)
-                for measure in series.measures if measure is not None]
-        return SeriesMessage(
-                service=series.key.parent().id(), id=series.key.id(),
-                measures=measures)
+    def to_message(cls, entity, *args, **kwargs):
+        return message_util.to_message(
+                SeriesMessage, entity,
+                cls._to_message, *args, **kwargs)
+
+    @classmethod
+    def _to_message(cls, key, value, to_imperial):
+        if key == 'measures':
+            return [Measure.to_message(measure, to_imperial=to_imperial)
+                    for measure in value]
+        return value
 
     @classmethod
     def get_default(cls, parent):
@@ -186,6 +184,5 @@ class Series(ndb.Model):
 
 
 class SeriesMessage(messages.Message):
-    service = messages.StringField(1)
-    id = messages.StringField(2)
-    measures = messages.MessageField(MeasureMessage, 3, repeated=True)
+    id = messages.StringField(1)
+    measures = messages.MessageField(MeasureMessage, 2, repeated=True)

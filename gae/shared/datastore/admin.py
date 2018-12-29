@@ -25,3 +25,13 @@ class DatastoreState(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
     version = ndb.IntegerProperty()
+
+
+class SyncState(ndb.Model):
+    """Holds overall sync state."""
+    _use_memcache = False
+
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    modified = ndb.DateTimeProperty(auto_now=True)
+    total_tasks = ndb.IntegerProperty(indexed=False)
+    completed_tasks = ndb.IntegerProperty(indexed=False)

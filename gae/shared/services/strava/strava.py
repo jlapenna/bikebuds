@@ -23,20 +23,30 @@ from google.appengine.ext import ndb
 from shared.config import config
 from shared.datastore import services
 from shared.datastore.activities import Activity
-from shared.datastore.athletes import Athlete
-from shared.datastore.clubs import Club
+from shared.datastore.athletes import Athlete, ClubRef
+from shared.datastore.clubs import Club, AthleteRef
 
 import stravalib
 from stravalib import exc
 
+ALLOWED_CLUBS = [
+        255027, # bikebuds
+        493078, # bbtest
+]
 
-class Synchronizer(object):
+
+class AthleteSynchronizer(object):
 
     def sync(self, service):
-        self.sync_athlete(service)
-        self.sync_activities(service)
+        client = ClientWrapper(service)
+        client.ensure_access()
+        athlete = client.get_athlete()
+        return Athlete.from_strava(service.key, athlete).put()
 
-    def sync_activities(self, service):
+
+class ActivitiesSynchronizer(object):
+
+    def sync(self, service):
         client = ClientWrapper(service)
         client.ensure_access()
 
@@ -44,10 +54,6 @@ class Synchronizer(object):
         for activity in client.get_activities():
             if activity.type != 'Ride':
                 continue
-            # Use this to fill in description, calories and embed_token.
-            # This is not worth the cost...
-            #if activity.id == '1997254642'):
-            #    deferred.defer(self.sync_activity, service, activity.id)
             activities.append(activity)
 
         @ndb.transactional
@@ -56,24 +62,55 @@ class Synchronizer(object):
                     for activity in activities)
         return put()
 
-    def sync_activity(self, service, activity_id):
+    def _sync_activity(self, service, activity_id):
+        """Gets additional info: description, calories and embed_token."""
         client = ClientWrapper(service)
         client.ensure_access()
         activity = client.get_activity(activity_id)
         return Activity.from_strava(service.key, activity).put()
 
-    def sync_athlete(self, service):
-        client = ClientWrapper(service)
-        client.ensure_access()
-        athlete = client.get_athlete()
-        Athlete.from_strava(service.key, athlete).put()
 
-    def sync_club(self, service, club_id):
+class ClubsSynchronizer(object):
+    """Syncs all clubs an athlete is an admin or member of."""
+
+    def sync(self, service):
         client = ClientWrapper(service)
         client.ensure_access()
-        club = client.get_club(club_id)
-        # clubs do not have an ancestor, they're a cross-user entity.
-        return Club.from_strava(None, club).put()
+
+        athlete = Athlete.get_private(service.key)
+        for club_ref in athlete.clubs:
+            # For now, only sync allowe clubs, bikebuds and test.
+            if club_ref.key.id() not in ALLOWED_CLUBS:
+                logging.info('Skipping club: %s', club_ref.key.id())
+                continue
+
+            logging.info('Fetching club: %s', club_ref.key.id())
+            club_result = client.get_club(club_ref.key.id())
+            club_entity = Club.from_strava(club_result)
+
+            if (not club_result.private
+                    or club_result.admin
+                    or club_result.owner
+                    or club_result.membership == 'member'):
+                logging.info('Putting club: %s', club_entity.key.id())
+                club_entity.put()
+
+
+class ClubsMembersProcessor(object):
+    """Syncs all clubs an athlete is an admin or member of."""
+
+    def sync(self):
+        clubs_to_put = []
+        for club in Club.query():
+            if club.key.id() not in ALLOWED_CLUBS:
+                continue
+            logging.info('Joining club: %s', club.key.id())
+            club.members = [
+                    AthleteRef.from_entity(athlete_entity)
+                    for athlete_entity in Athlete.query(
+                        Athlete.clubs.key == ndb.Key(ClubRef, club.key.id()))]
+            clubs_to_put.append(club)
+        ndb.put_multi(clubs_to_put)
 
 
 class ClientWrapper(object):

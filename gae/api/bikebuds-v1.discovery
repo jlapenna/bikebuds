@@ -59,6 +59,30 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
+    "get_club": {
+      "httpMethod": "POST",
+      "id": "bikebuds.get_club",
+      "parameterOrder": [
+        "id"
+      ],
+      "parameters": {
+        "id": {
+          "location": "path",
+          "type": "string"
+        }
+      },
+      "path": "club/{id}",
+      "request": {
+        "$ref": "MainRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainClubResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "get_preferences": {
       "httpMethod": "POST",
       "id": "bikebuds.get_preferences",
@@ -256,6 +280,18 @@
       },
       "type": "object"
     },
+    "MainClubResponse": {
+      "id": "MainClubResponse",
+      "properties": {
+        "club": {
+          "$ref": "SharedDatastoreClubsClubMessage"
+        },
+        "header": {
+          "$ref": "MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainPreferencesResponse": {
       "id": "MainPreferencesResponse",
       "properties": {
@@ -356,6 +392,9 @@
       "properties": {
         "achievement_count": {
           "format": "int64",
+          "type": "string"
+        },
+        "activity_hash": {
           "type": "string"
         },
         "activity_type": {
@@ -513,9 +552,6 @@
     "SharedDatastoreActivitiesPolylineMapMessage": {
       "id": "SharedDatastoreActivitiesPolylineMapMessage",
       "properties": {
-        "id": {
-          "type": "string"
-        },
         "polyline": {
           "type": "string"
         },
@@ -533,7 +569,7 @@
         },
         "clubs": {
           "items": {
-            "$ref": "SharedDatastoreClubsClubMessage"
+            "$ref": "SharedDatastoreAthletesClubRefMessage"
           },
           "type": "array"
         },
@@ -608,14 +644,51 @@
       },
       "type": "object"
     },
+    "SharedDatastoreAthletesClubRefMessage": {
+      "id": "SharedDatastoreAthletesClubRefMessage",
+      "properties": {
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "profile_medium": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreClubsAthleteRefMessage": {
+      "id": "SharedDatastoreClubsAthleteRefMessage",
+      "properties": {
+        "firstname": {
+          "type": "string"
+        },
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "profile_medium": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "SharedDatastoreClubsClubMessage": {
       "id": "SharedDatastoreClubsClubMessage",
       "properties": {
         "city": {
-          "type": "string"
-        },
-        "club_id": {
-          "format": "int64",
           "type": "string"
         },
         "country": {
@@ -637,6 +710,12 @@
         "member_count": {
           "format": "int64",
           "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "SharedDatastoreClubsAthleteRefMessage"
+          },
+          "type": "array"
         },
         "name": {
           "type": "string"
@@ -753,9 +832,6 @@
             "$ref": "SharedDatastoreMeasuresMeasureMessage"
           },
           "type": "array"
-        },
-        "service": {
-          "type": "string"
         }
       },
       "type": "object"

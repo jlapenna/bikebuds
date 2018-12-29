@@ -24,8 +24,8 @@ import IconButton from '@material-ui/core/IconButton';
 
 const styles = {
   avatar: {
-    "max-width": 32,
     "max-height": 32,
+    "max-width": 32,
     width: "auto",
     height: "auto",
   },
@@ -33,7 +33,7 @@ const styles = {
 
 class ClubAvatar extends Component {
   render() {
-    var url = "https://www.strava.com/clubs/" + this.props.club.url;
+    var url = "/club/" + this.props.club.id;
     return (
       <IconButton alt={this.props.club.name} href={url}>
       <Avatar className={this.props.classes.avatar}
