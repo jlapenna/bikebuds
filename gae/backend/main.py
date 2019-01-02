@@ -91,33 +91,37 @@ def cleanup():
 
 @app.route('/tasks/sync', methods=['GET'])
 def sync():
-    state = SyncState()
-    state_key = state.put()
-
     user_services = services.Service.query(
             services.Service.sync_enabled == True,
             services.Service.syncing == False
             ).fetch()
-    tasks = []
-    for service in user_services:
-        user_key = service.key.parent()
-        tasks.append(
-                taskqueue.Task(
-                    url='/tasks/service_sync/' + service.key.id(),
-                    target='backend',
-                    params={
-                        'state': state_key.urlsafe(),
-                        'user': user_key.urlsafe(),
-                        'service': service.key.urlsafe()
-                        }
-                    )
-                )
-    state.completed_tasks = 0
-    state.total_tasks = len(tasks)
-    state.put()
+    @ndb.transactional
+    def submit_sync():
+        state = SyncState(completed_tasks=0)
+        state_key = state.put()
 
-    for task in tasks:
-        task.add()
+        tasks = []
+        for service in user_services:
+            user_key = service.key.parent()
+            service.syncing = True
+
+            tasks.append(
+                    taskqueue.Task(
+                        url='/tasks/service_sync/' + service.key.id(),
+                        target='backend',
+                        params={
+                            'state': state_key.urlsafe(),
+                            'user': user_key.urlsafe(),
+                            'service': service.key.urlsafe()
+                            }
+                        )
+                    )
+        state.total_tasks = len(tasks)
+        state.put()
+
+        for task in tasks:
+            task.add()
+    submit_sync()
 
     return 'OK', 200
 
@@ -138,58 +142,69 @@ def service_sync(service_name):
         _do_sync(service, service_creds, strava.ActivitiesSynchronizer())
         _do_sync(service, service_creds, strava.ClubsSynchronizer())
 
-    complete = False
-    @ndb.transactional
+    @ndb.transactional(xg=True)
     def update_state():
         state = state_key.get()
         state.completed_tasks += 1
+        state.put()
+
+        service.syncing = False
+        service.sync_successful = True
+        service.put()
+
         logging.info('Incrementing completed tasks for %s', state)
         if state.completed_tasks == state.total_tasks:
             logging.info('Completed all pending tasks for %s', state)
             taskqueue.add(
-                url='/tasks/process',
-                target='backend',
-                params={},
-                transactional=True
-                )
-        state.put()
+                    url='/tasks/process',
+                    target='backend',
+                    params={
+                        'state': state_key.urlsafe(),
+                        },
+                    transactional=True)
     update_state()
 
     return 'OK', 200
 
 
 def _do_sync(service, service_creds, synchronizer, check_creds=True):
-    sync_successful = False
+    if check_creds and service_creds is None:
+        logging.info('No creds: %s/%s', service.key, synchronizer)
+        return 'OK', 250
+
+    sync_name = synchronizer.__class__.__name__
     try:
-        if check_creds and service_creds is None:
-            logging.info('No creds: %s/%s', service.key, synchronizer)
-            return 'OK', 250
-        elif synchronizer is None:
-            logging.info('No synchronizer: %s', service.key)
-            return 'OK', 251
-        else:
-            logging.info('Synchronizer starting: %s', str(synchronizer))
-            synchronizer.sync(service)
-            logging.info('Synchronizer completed: %s', str(synchronizer))
-            return 'OK', 200
+        logging.info('Synchronizer starting: %s', sync_name)
+        synchronizer.sync(service)
+        sync_successful = True
+        logging.info('Synchronizer completed: %s', sync_name)
+        return 'OK', 200
     except TimeoutError, e:
-        logging.debug('Unable to sync: %s/%s (using %s) -> %s' % (
-                service.key, synchronizer, service.get_credentials(),
-                sys.exc_info()[1]))
-        msg = 'DeadlineExceeded for: %s/%s' % (service.key, synchronizer)
+        logging.debug('%s for %s/%s (creds: %s), Originally: %s',
+                sys.exc_info()[0].__name__,
+                service.key,
+                sync_name,
+                service.get_credentials(),
+                sys.exc_info()[1]
+                )
+        msg = 'DeadlineExceeded for %s/%s' % (
+                service.key.id(),
+                sync_name
+                )
         raise SyncException(msg)
     except Exception, e:
-        msg = 'Unable to sync: %s/%s (using %s) -> %s (%s)' % (
-                service.key, synchronizer, service.get_credentials(),
-                sys.exc_info()[1], sys.exc_info()[0])
+        logging.debug('%s for %s/%s (creds: %s), Originally: %s',
+            sys.exc_info()[0].__name__,
+            service.key,
+            sync_name,
+            service.get_credentials(),
+            sys.exc_info()[1]
+            )
+        msg = '%s for %s/%s' % (
+                sys.exc_info()[0].__name__,
+                service.key.id(),
+                sync_name)
         raise SyncException, SyncException(msg), sys.exc_info()[2]
-    finally:
-        @ndb.transactional
-        def finish_sync():
-            service.syncing = False
-            service.sync_successful = sync_successful
-            service.put()
-        finish_sync()
 
 
 @app.route('/tasks/process', methods=['GET', 'POST'])
@@ -200,16 +215,27 @@ def process():
 
 
 def _do_process(processor):
+    processor_name = processor.__class__.__name__
     try:
-        logging.info('Processor starting: %s', str(processor))
+        logging.info('Processor starting: %s', processor_name)
         processor.sync()
-        logging.info('Processor completed: %s', str(processor))
+        logging.info('Processor completed: %s', processor_name)
     except TimeoutError, e:
-        logging.debug('Unable to process: %s -> %s' % (
-                processor, sys.exc_info()[1]))
-        msg = 'DeadlineExceeded for: %s' % (processor,)
+        logging.debug('Unable to process: %s -> %s',
+            processor_name,
+            sys.exc_info()[1]
+            )
+        msg = 'DeadlineExceeded for: %s' % (
+            processor_name,
+            )
         raise SyncException(msg)
     except Exception, e:
-        msg = 'Unable to process: %s -> %s (%s)' % (
-                processor, sys.exc_info()[1], sys.exc_info()[0])
+        logging.debug('%s for %s, Originally: %s',
+            sys.exc_info()[0].__name__,
+            processor_name,
+            sys.exc_info()[1]
+            )
+        msg = '%s for %s/%s' % (
+                sys.exc_info()[0].__name__,
+                processor_name)
         raise SyncException, SyncException(msg), sys.exc_info()[2]

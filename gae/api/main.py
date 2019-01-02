@@ -28,6 +28,7 @@ from endpoints import messages
 from endpoints import remote
 
 import auth_util
+from shared.datastore.admin import SyncState
 from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore.athletes import Athlete, AthleteMessage
@@ -274,20 +275,23 @@ class BikebudsApi(remote.Service):
         logging.info('Getting %s service info.', request.id)
         service = Service.get(user.key, request.id)
 
-        @ndb.transactional
+        @ndb.transactional(xg=True)
         def submit_sync():
+            state_key = SyncState(completed_tasks=0, total_tasks=1).put()
+
             service.syncing=True
             service.sync_date=datetime.datetime.now()
-            service.sync_successful=None
             service.put()
             taskqueue.add(
                     url='/tasks/service_sync/' + service.key.id(),
                     target='backend',
                     params={
+                        'state': state_key.urlsafe(),
                         'user': user.key.urlsafe(),
                         'service': service.key.urlsafe()},
                     transactional=True)
         submit_sync()
+
         return ServiceResponse(service=Service.to_message(service))
 
     @endpoints.method(
