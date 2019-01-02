@@ -77,6 +77,13 @@ class ProfileCard extends Component {
   /**
    * @inheritDoc
    */
+  componentDidMount() {
+    this.setState({});
+  }
+
+  /**
+   * @inheritDoc
+   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ProfileCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.profile === undefined) {
