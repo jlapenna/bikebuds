@@ -179,7 +179,10 @@ class BikebudsApi(remote.Service):
         if result is None:
             return SeriesResponse()
         logging.info('Finished series')
-        return SeriesResponse(series=Series.to_message(result, to_imperial))
+        try:
+            return SeriesResponse(series=Series.to_message(result, to_imperial))
+        finally:
+            logging.info('Finished request')
 
     @endpoints.method(
         Request,

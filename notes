@@ -172,3 +172,8 @@ IMPORTANT NOTES:
 "Web client (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProvidera Web SDK
 "Android Client (App Signing Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
 "Android Client (Upload Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
+
+# Stackdriver
+https://cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces
+https://cloud.google.com/trace/docs/reference/v1/rest/v1/projects/patchTraces?apix_params=%7B%22projectId%22%3A%22bikebuds-app%22%2C%22prettyPrint%22%3Atrue%2C%22resource%22%3A%7B%22traces%22%3A%5B%7B%22spans%22%3A%5B%7B%22name%22%3A%22NAME%22%2C%22startTime%22%3A%222019-01-03T00%3A03%3A39.008000Z%22%2C%22endTime%22%3A%222019-01-03T00%3A03%3A40.008000Z%22%2C%22kind%22%3A%22SPAN_KIND_UNSPECIFIED%22%2C%22spanId%22%3A555555%7D%5D%2C%22projectId%22%3A%22bikebuds-app%22%2C%22traceId%22%3A%220254be7320a2d41e9d1667ed55491413%22%7D%5D%7D%7D
+https://cloud.google.com/trace/docs/reference/
