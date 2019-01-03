@@ -135,7 +135,7 @@ class Athlete(ndb.Model):
     @classmethod
     def get_private(cls, service_key):
         athletes = Athlete.query(ancestor=service_key).fetch(1)
-        if athletes is None:
+        if athletes is None or len(athletes) == 0:
             return None
         else:
             return athletes[0]
