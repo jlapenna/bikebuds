@@ -122,7 +122,7 @@ class BikebudsApi(remote.Service):
         to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
 
         response = ActivitiesResponse(activities=[])
-        for activity in Activity.query().order(-Activity.start_date):
+        for activity in Activity.query(ancestor=user.key).order(-Activity.start_date):
             response.activities.append(
                     Activity.to_message(activity, to_imperial=to_imperial))
         return response
