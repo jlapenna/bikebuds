@@ -66,6 +66,7 @@ function main() {
   # Then, deploy everything.
   yes|gcloud app deploy -v ${VERSION} \
     gae/frontend/cron.yaml \
+    gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
