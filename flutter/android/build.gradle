@@ -8,6 +8,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        // Firebase: https://firebase.google.com/docs/flutter/setup
+        classpath 'com.google.gms:google-services:3.2.1' // Google Services plugin
     }
 }
 

@@ -85,3 +85,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+// Firebase: https://firebase.google.com/docs/flutter/setup
+apply plugin: 'com.google.gms.google-services' // Gradle plugin
