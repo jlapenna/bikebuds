@@ -16,6 +16,8 @@
 
 import React, { Component } from 'react';
 
+import { Link } from "react-router-dom";
+
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
@@ -25,12 +27,10 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import { config } from './Config';
-import { createSession } from './session_util';
 import ClubAvatar from './ClubAvatar';
 
 const styles = {
@@ -50,7 +50,6 @@ class ProfileCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      profile: undefined,
       connectActionPending: false,
     }
     this.onSignOut = this.onSignOut.bind(this);
@@ -64,14 +63,7 @@ class ProfileCard extends Component {
   };
 
   onConnectServices() {
-    this.setState({connectActionPending: true});
-    createSession((response) => {
-      if (response.status === 200) {
-        window.location.replace(config.frontendUrl + '/services/signup');
-      } else {
-        console.log('Unable to create a session.', response);
-      }
-    });
+    window.location.replace(config.frontendUrl + '/signup');
   };
 
   /**
@@ -81,29 +73,13 @@ class ProfileCard extends Component {
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ProfileCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.profile === undefined) {
-      console.log('ProfileCard.componentDidUpdate: user');
-      window.gapi.client.bikebuds.get_profile().then((response) => {
-        this.setState({
-          profile: response.result,
-        });
-        console.log('ProfileCard.setState: profile: ', response.result);
-      });
-    }
-  }
-
   renderClubs() {
-    if (!this.state.profile || !this.state.profile.athlete) {
+    if (!this.props.profile || !this.props.profile.athlete) {
       return null;
     }
     return (
       <React.Fragment>
-        {this.state.profile.athlete.clubs.map((club, index) => {
+        {this.props.profile.athlete.clubs.map((club, index) => {
           return (
             <Grid item key={index}>
               <ClubAvatar club={club} />
@@ -145,9 +121,10 @@ class ProfileCard extends Component {
         </CardContent>
         <CardActions>
           <Button color="primary" variant="contained"
-            disabled={this.state.connectActionPending}
-            onClick={this.onConnectServices}>Connect Services
-            {this.state.connectActionPending && <CircularProgress size={20} />}
+            component={Link}
+            to="/signup"
+            disabled={this.state.connectActionPending}>
+            Connect Services
           </Button>
           <Button color="secondary"
             onClick={this.onSignOut}>Sign-out</Button>

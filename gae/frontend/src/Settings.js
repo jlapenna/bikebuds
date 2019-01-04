@@ -30,8 +30,11 @@ class Settings extends Component {
           justify="space-evenly"
           alignItems="center">
           <Grid item xs={12} sm={12}>
-            <ProfileCard firebaseUser={this.props.firebaseUser}
-              gapiReady={this.props.gapiReady} />
+            <ProfileCard
+              firebaseUser={this.props.firebaseUser}
+              gapiReady={this.props.gapiReady}
+              profile={this.props.profile}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <PreferencesCard firebaseUser={this.props.firebaseUser}
