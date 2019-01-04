@@ -28,23 +28,26 @@ import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import GapiWrapper from './GapiWrapper';
-
 import Club from './Club';
+import GapiWrapper from './GapiWrapper';
 import Home from './Home';
+import ProfileWrapper from './ProfileWrapper';
 import Settings from './Settings';
+import Signup from './Signup';
 
 
 const drawerWidth = 240;
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: 'flex',
+    height: '100%',
   },
   drawerPaper: {
     width: drawerWidth,
@@ -82,7 +85,7 @@ class Main extends Component {
     super(props);
     this.state = {
       mobileOpen: false,
-      isSignedIn: undefined,
+      isSignedUp: true,
       gapiReady: false,
     };
   }
@@ -100,27 +103,42 @@ class Main extends Component {
     this.setState({measures: measures});
   }
 
-  render() {
-    const { classes, theme } = this.props;
+  onProfileReady = (profile) => {
+    console.log('Main.onProfileReady', profile);
+    this.setState({
+      profile: profile
+    });
+  }
 
-    const drawerContent = (
-      <div>
-        <div className={classes.toolbar} />
+  renderDrawerContent() {
+    if (this.state.profile === undefined) {
+      return null;
+    }
+
+    return ( 
+      <React.Fragment>
+        <div className={this.props.classes.toolbar} />
         <Divider />
         <List onClick={() => this.setState({mobileOpen: false})}>
           <ListItem button key="Home" component={NavLink}
-            to="/" exact activeClassName={classes.active}>
+            to="/" exact activeClassName={this.props.classes.active}>
             <ListItemText>Home</ListItemText>
           </ListItem>
           <ListItem button key="Settings" component={NavLink}
-            to="/settings" exact activeClassName={classes.active}>
+            to="/settings" exact activeClassName={this.props.classes.active}>
             <ListItemText>Settings</ListItemText>
           </ListItem>
         </List>
-      </div>
+      </React.Fragment>
     );
+  }
 
-    const mainContent = (
+  renderMainContent() {
+    if (this.state.profile === undefined) {
+      return null;
+    }
+
+    return (
       <Switch>
         <Route path="/club/:club_id"
           render={(thinger) => <Club
@@ -139,6 +157,13 @@ class Main extends Component {
           render={() => <Settings
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
+            profile={this.state.profile}
+          />}
+        />
+        <Route path="/signup" exact
+          render={() => <Signup
+            firebaseUser={this.props.firebaseUser}
+            gapiReady={this.state.gapiReady}
           />}
         />
         <Route>
@@ -146,54 +171,63 @@ class Main extends Component {
         </Route>
       </Switch>
     );
+  }
 
+  render() {
     return (
       <Router>
-      <div className={classes.root}>
-        <AppBar className={classes.appBar} position="fixed">
+      <div className={this.props.classes.root}>
+        <GapiWrapper onReady={this.onGapiReady} />
+        <ProfileWrapper
+          firebaseUser={this.props.firebaseUser}
+          gapiReady={this.state.gapiReady}
+          onProfileReady={this.onProfileReady}
+        />
+        <AppBar className={this.props.classes.appBar} position="fixed">
           <Toolbar>
-            <IconButton className={classes.menuButton} 
+            <IconButton className={this.props.classes.menuButton} 
               onClick={this.onDrawerToggle}
               color="inherit"
               aria-label="Menu">
               <MenuIcon />
             </IconButton>
-            <Typography className={classes.grow} variant="h6" color="inherit">Bikebuds</Typography>
+            <Typography className={this.props.classes.grow} variant="h6" color="inherit">Bikebuds</Typography>
           </Toolbar>
+          {this.state.profile === undefined && <LinearProgress />}
         </AppBar>
-        <nav className={classes.drawer}>
+        <nav className={this.props.classes.drawer}>
           <Hidden smUp implementation="css">
             <Drawer
               container={this.props.container}
               variant="temporary"
-              anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+              anchor={this.props.theme.direction === 'rtl' ? 'right' : 'left'}
               open={this.state.mobileOpen}
               onClose={this.onDrawerToggle}
               classes={{
-                paper: classes.drawerPaper,
+                paper: this.props.classes.drawerPaper,
               }}
               ModalProps={{
                 keepMounted: true, // Better open performance on mobile.
               }}
             >
-              {drawerContent}
+              {this.renderDrawerContent()}
             </Drawer>
           </Hidden>
           <Hidden xsDown implementation="css">
             <Drawer
               classes={{
-                paper: classes.drawerPaper,
+                paper: this.props.classes.drawerPaper,
               }}
               variant="permanent"
               open
             >
-              {drawerContent}
+              {this.renderDrawerContent()}
             </Drawer>
           </Hidden>
         </nav>
-        <main className={classes.content}>
-          <div className={classes.toolbar} />
-          {mainContent}
+        <main className={this.props.classes.content}>
+          <div className={this.props.classes.toolbar} />
+          {this.renderMainContent()}
         </main>
         <GapiWrapper onReady={this.onGapiReady} />
       </div>
