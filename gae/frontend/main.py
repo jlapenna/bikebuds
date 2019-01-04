@@ -56,9 +56,10 @@ SERVICE_NAMES = (
         )
 
 
-@app.route('/services/frontend', methods=['GET'])
-def frontend():
-    return flask.redirect(config.devserver_url)
+@app.route('/services/redirect', methods=['GET'])
+def redirect():
+    dest = flask.request.args.get('dest', '')
+    return flask.redirect(config.devserver_url + dest)
 
 
 @app.route('/services/session', methods=['POST'])

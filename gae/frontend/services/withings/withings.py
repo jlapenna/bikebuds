@@ -71,7 +71,7 @@ def redirect(claims):
 
     service_creds = service.update_credentials(creds_dict)
 
-    return flask.redirect(config.frontend_url + dest)
+    return flask.redirect('/services/redirect?dest=' + dest)
 
 
 def get_callback_uri(dest):

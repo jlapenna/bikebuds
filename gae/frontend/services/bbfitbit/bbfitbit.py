@@ -62,7 +62,7 @@ def redirect(claims):
 
     service_creds = service.update_credentials(creds)
 
-    return flask.redirect(config.frontend_url + dest)
+    return flask.redirect('/services/redirect?dest=' + dest)
 
 
 def get_redirect_uri(dest):
