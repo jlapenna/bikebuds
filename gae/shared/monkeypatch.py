@@ -17,8 +17,10 @@ import warnings
 import urllib3.contrib.appengine
 warnings.filterwarnings('ignore', r'urllib3 is using URLFetch',
         urllib3.contrib.appengine.AppEnginePlatformWarning)
-warnings.filterwarnings('ignore',
-        'The oauth2client.contrib.multistore_file module has been deprecated')
+
+# Hide spammy oauth2client warnings.
+import logging
+logging.getLogger('oauth2client.contrib.multistore_file').setLevel(logging.ERROR)
 
 # Hide spammy stravalib debugging
 import logging
