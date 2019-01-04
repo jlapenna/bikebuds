@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { Link } from "react-router-dom";
+
 import { withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
@@ -32,10 +34,15 @@ const styles = {
 };
 
 class ClubAvatar extends Component {
+
   render() {
     var url = "/club/" + this.props.club.id;
     return (
-      <IconButton alt={this.props.club.name} href={url}>
+      <IconButton
+        component={Link}
+        to={url}
+        alt={this.props.club.name}
+      >
       <Avatar className={this.props.classes.avatar}
         alt={this.props.club.name}
         src={this.props.club.profile_medium}>

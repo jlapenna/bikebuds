@@ -54,13 +54,11 @@ class Club extends Component {
 
   updateClubState = (response) => {
     console.log('ClubWrapper.updateClubState:', response);
-    var club = [];
     if (response.result.club !== undefined) {
-      club = response.result.club;
+      this.setState({
+        club: response.result.club,
+      });
     }
-    this.setState({
-      club: club,
-    });
   }
 
   /**
@@ -86,7 +84,7 @@ class Club extends Component {
   }
 
   render() {
-    if (!this.state.club) {
+    if (this.state.club === undefined) {
       return null;
     }
     return (
@@ -110,7 +108,7 @@ class Club extends Component {
               <Typography variant="h5">{this.state.club.name}</Typography>
             </Grid>
             <Grid item>
-              <Grid className={this.props.classes.clubContainer} container
+              <Grid container className={this.props.classes.clubContainer}
                 direction="row"
                 justify="space-evenly"
                 alignItems="center"
@@ -123,12 +121,12 @@ class Club extends Component {
                         <Avatar
                           alt={member.firstname}
                           src={member.profile_medium} />
-                          <Typography>{member.firstname} {member.lastname}</Typography>
+                        <Typography>{member.firstname} {member.lastname}</Typography>
                       </Button>
                     </Grid>
                   );
                 })
-              }
+                }
               </Grid>
             </Grid>
           </Grid>
