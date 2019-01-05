@@ -24,6 +24,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:googleapis_auth/auth_io.dart';
 
 void main() => runApp(MyApp());
 
@@ -110,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var googleServicesJson = await _googleServicesJson;
     String key = googleServicesJson['client'][0]['api_key'][0]['current_key'];
     var token = await user.getIdToken(refresh: true);
-    _api = BikebudsApi(FirebaseHttpClient(key, token));
+    _api = BikebudsApi(FirebaseHttpClient(token, clientViaApiKey(key)));
 
     if (!_loadingAthlete) {
       _loadingAthlete = true;

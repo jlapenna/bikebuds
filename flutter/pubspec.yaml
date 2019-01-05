@@ -37,6 +37,7 @@ dependencies:
   firebase_auth: ^0.6.6
   google_sign_in: ^3.2.4
   firebase_messaging: ^2.1.0
+  googleapis_auth: ^0.2.6
 
 
   # Bikebuds API
