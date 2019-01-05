@@ -34,7 +34,7 @@ from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore.athletes import Athlete, AthleteMessage
 from shared.datastore.clubs import Club, ClubMessage
 from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
-from shared.datastore.users import User, PreferencesMessage
+from shared.datastore.users import User, PreferencesMessage, ClientMessage, ClientStore
 
 
 class RequestHeader(messages.Message):
@@ -57,6 +57,16 @@ class Response(messages.Message):
 class ActivitiesResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     activities = messages.MessageField(ActivityMessage, 2, repeated=True)
+
+
+class UpdateClientRequest(messages.Message):
+    header = messages.MessageField(RequestHeader, 1)
+    client = messages.MessageField(ClientMessage, 2)
+
+
+class ClientResponse(messages.Message):
+    header = messages.MessageField(ResponseHeader, 1)
+    client = messages.MessageField(ClientMessage, 2)
 
 
 class ClubResponse(messages.Message):
@@ -126,6 +136,20 @@ class BikebudsApi(remote.Service):
             response.activities.append(
                     Activity.to_message(activity, to_imperial=to_imperial))
         return response
+
+    @endpoints.method(
+        UpdateClientRequest,
+        ClientResponse,
+        path='update_client',
+        http_method='POST',
+        api_key_required=True)
+    def update_client(self, request):
+        if not endpoints.get_current_user():
+            raise endpoints.UnauthorizedException('Unable to identify user.')
+        claims = auth_util.verify_claims_from_header(self.request_state)
+        user = User.get(claims)
+        client_store = ClientStore.update(user.key, request.client)
+        return ClientResponse(client=client_store.client)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(1)),

@@ -38,16 +38,16 @@ class Service(ndb.Model):
 
     @classmethod
     def get(cls, user_key, name):
-        service_key = Service.get_key(user_key, name)
+        service_key = cls.get_key(user_key, name)
         service = service_key.get()
         if service is None:
-            service = Service(key=service_key)
+            service = cls(key=service_key)
             r = service.put()
         return service
 
     @classmethod
     def get_key(cls, user_key, name):
-        return ndb.Key(Service, name, parent=user_key)
+        return ndb.Key(cls, name, parent=user_key)
 
     @classmethod
     def to_message(cls, service):

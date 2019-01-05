@@ -176,6 +176,21 @@
         "https://www.googleapis.com/auth/userinfo.email"
       ]
     },
+    "update_client": {
+      "httpMethod": "POST",
+      "id": "bikebuds.update_client",
+      "path": "update_client",
+      "request": {
+        "$ref": "MainUpdateClientRequest",
+        "parameterName": "resource"
+      },
+      "response": {
+        "$ref": "MainClientResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    },
     "update_preferences": {
       "httpMethod": "POST",
       "id": "bikebuds.update_preferences",
@@ -280,6 +295,18 @@
       },
       "type": "object"
     },
+    "MainClientResponse": {
+      "id": "MainClientResponse",
+      "properties": {
+        "client": {
+          "$ref": "SharedDatastoreUsersClientMessage"
+        },
+        "header": {
+          "$ref": "MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainClubResponse": {
       "id": "MainClubResponse",
       "properties": {
@@ -359,6 +386,18 @@
         },
         "service": {
           "$ref": "SharedDatastoreServicesServiceMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdateClientRequest": {
+      "id": "MainUpdateClientRequest",
+      "properties": {
+        "client": {
+          "$ref": "SharedDatastoreUsersClientMessage"
+        },
+        "header": {
+          "$ref": "MainRequestHeader"
         }
       },
       "type": "object"
@@ -865,6 +904,15 @@
         },
         "syncing": {
           "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreUsersClientMessage": {
+      "id": "SharedDatastoreUsersClientMessage",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       },
       "type": "object"

@@ -54,3 +54,25 @@ class User(ndb.Model):
     @classmethod
     def get_key(cls, claims):
         return ndb.Key(User, claims['sub'])
+
+
+class ClientMessage(messages.Message):
+    id = messages.StringField(1)
+
+
+class ClientStore(ndb.Model):
+    """Holds client info."""
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    modified = ndb.DateTimeProperty(auto_now=True)
+    client = msgprop.MessageProperty(ClientMessage)
+
+    @classmethod
+    def update(cls, user_key, client_message):
+        client_key = cls.get_key(user_key, client_message.id)
+        client_store = cls(key=client_key, client=client_message)
+        client_store.put()
+        return client_store
+
+    @classmethod
+    def get_key(cls, user_key, client_id):
+        return ndb.Key(cls, client_id, parent=user_key)

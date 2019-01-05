@@ -18,6 +18,17 @@
       },
       "type": "object"
     },
+    "MainClientResponse": {
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/SharedDatastoreUsersClientMessage"
+        },
+        "header": {
+          "$ref": "#/definitions/MainResponseHeader"
+        }
+      },
+      "type": "object"
+    },
     "MainClubResponse": {
       "properties": {
         "club": {
@@ -89,6 +100,17 @@
         },
         "service": {
           "$ref": "#/definitions/SharedDatastoreServicesServiceMessage"
+        }
+      },
+      "type": "object"
+    },
+    "MainUpdateClientRequest": {
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/SharedDatastoreUsersClientMessage"
+        },
+        "header": {
+          "$ref": "#/definitions/MainRequestHeader"
         }
       },
       "type": "object"
@@ -587,6 +609,14 @@
       },
       "type": "object"
     },
+    "SharedDatastoreUsersClientMessage": {
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "SharedDatastoreUsersPreferencesMessage": {
       "properties": {
         "units": {
@@ -862,6 +892,35 @@
             "description": "A successful response",
             "schema": {
               "$ref": "#/definitions/MainServiceResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": [],
+            "firebase-dca327ad": []
+          }
+        ]
+      }
+    },
+    "/bikebuds/v1/update_client": {
+      "post": {
+        "operationId": "BikebudsApi_updateClient",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MainUpdateClientRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "schema": {
+              "$ref": "#/definitions/MainClientResponse"
             }
           }
         },

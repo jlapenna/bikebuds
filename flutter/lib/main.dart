@@ -64,11 +64,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Future<dynamic> _googleServicesJson;
   StreamSubscription<FirebaseUser> _listener;
+  Future<String> _firebaseClientToken;
 
   FirebaseUser _firebaseUser;
   BikebudsApi _api;
   var _loadingAthlete = false;
   SharedDatastoreAthletesAthleteMessage _athlete;
+  var _clientUpdated = false;
+  SharedDatastoreUsersClientMessage _client;
 
   _HomeScreenState();
 
@@ -78,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _googleServicesJson = _loadGoogleServicesJson();
     _listener = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
 
+    _firebaseClientToken = _firebaseMessaging.getToken();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
@@ -89,10 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
         print('on launch $message');
       },
     );
-
-    _firebaseMessaging.getToken().then((token) {
-      print('on token $token');
-    });
   }
 
   Future<dynamic> _loadGoogleServicesJson() async {
@@ -121,6 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       });
     }
+
+    if (!_clientUpdated) {
+      _clientUpdated = true;
+
+      var request = MainUpdateClientRequest()
+        ..client = (SharedDatastoreUsersClientMessage()
+          ..id = (await _firebaseClientToken));
+      print('request: ' + request.toJson().toString());
+      _api.updateClient(request).then((response) {
+        setState(() {
+          _client = response.client;
+        });
+      });
+    }
   }
 
   @override
@@ -134,6 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
     String name = _firebaseUser == null
         ? "Unexpected..."
         : (_firebaseUser?.displayName ?? _firebaseUser?.email);
+    var registered =
+        (_client?.id != null) ? "Client registered" : "Not registered.";
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -146,7 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? Text("Photo")
                 : Image.network(_athlete?.profile),
             Text(name),
-            Text(_athlete?.city ?? ""),
+            Text(_athlete?.city ?? "Profile not available"),
+            Text(registered),
           ],
         ),
       ),

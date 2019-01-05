@@ -87,7 +87,6 @@ function main() {
   echo "Building the dart library."
   local tmp_dart_path="$(mktemp -d)"
   cp "$discovery_path" "$tmp_dart_path/bikebuds.discovery.json"
-  echo "Did you remove the non-required path condition?"
   dart "${disc_gen_path}/bin/generate.dart" \
       package \
       -i "${tmp_dart_path}" \
