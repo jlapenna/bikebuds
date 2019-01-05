@@ -1,13 +1,33 @@
-import 'dart:async';
+/**
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:bikebuds/firebase_http_client.dart';
+import 'package:bikebuds/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:bikebuds_api/bikebuds/v1.dart';
 
 void main() => runApp(MyApp());
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -19,70 +39,81 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(0xFF03dac6),
         accentColor: Color(0xFFff4081),
       ),
-      home: MyHomePage(title: 'Bikebuds'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(_auth, _googleSignIn, title: 'Bikebuds'),
+        '/home': (context) => HomeScreen(title: 'Bikebuds'),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeScreenState extends State<HomeScreen> {
+  Future<dynamic> _googleServicesJson;
   StreamSubscription<FirebaseUser> _listener;
-  bool _loading = true;
-  FirebaseUser _currentUser;
+
+  FirebaseUser _firebaseUser;
+  BikebudsApi _api;
+  var _loadingAthlete = false;
+  SharedDatastoreAthletesAthleteMessage _athlete;
+
+  _HomeScreenState();
 
   @override
   void initState() {
     super.initState();
-    _initListener();
-    _signIn();
+    _googleServicesJson = _loadGoogleServicesJson();
+    _listener = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _listener?.cancel();
+  Future<dynamic> _loadGoogleServicesJson() async {
+    return json.decode(await DefaultAssetBundle.of(context)
+        .loadString("android/app/google-services.json"));
   }
 
-  void _signIn() async {
-    try {
-      var googleUser = await _googleSignIn.signIn();
-      var googleAuth = await googleUser.authentication;
-      await _auth.signInWithGoogle(
-          idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
-      print("Completed signing in.");
-    } catch (e) {
-      print("Failed signing in.");
-    } finally {
-      setState(() {
-        _loading = false;
+  void _onAuthStateChanged(user) async {
+    print("Auth State Changed: " + user?.toString());
+    setState(() {
+      _firebaseUser = user;
+    });
+
+    // We don't setState for the API because it alone isn't enough to
+    // trigger a rebuild.
+    var googleServicesJson = await _googleServicesJson;
+    String key = googleServicesJson['client'][0]['api_key'][0]['current_key'];
+    var token = await user.getIdToken(refresh: true);
+    _api = BikebudsApi(FirebaseHttpClient(key, token));
+
+    if (!_loadingAthlete) {
+      _loadingAthlete = true;
+      _api.getProfile(MainRequest()).then((response) {
+        setState(() {
+          _athlete = response.athlete;
+        });
       });
     }
   }
 
-  void _initListener() async {
-    _listener = _auth.onAuthStateChanged.listen((FirebaseUser user) {
-      print("Listener Event: " + user.toString());
-      setState(() {
-        _currentUser = user;
-      });
-    });
+  @override
+  void dispose() {
+    _listener?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    String toDisplay = _loading
-        ? "Signing in..."
-        : (_currentUser == null
-            ? "Sign in Failed"
-            : (_currentUser?.displayName ?? _currentUser));
+    String name = _firebaseUser == null
+        ? "Unexpected..."
+        : (_firebaseUser?.displayName ?? _firebaseUser?.email);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -91,7 +122,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Text(toDisplay),
+            Image.network(_athlete?.profile ?? ""),
+            Text(name),
+            Text(_athlete?.city ?? ""),
           ],
         ),
       ),
