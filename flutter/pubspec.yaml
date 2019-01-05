@@ -36,6 +36,8 @@ dependencies:
   # https://pub.dartlang.org/packages/firebase_auth
   firebase_auth: ^0.6.6
   google_sign_in: ^3.2.4
+  firebase_messaging: ^2.1.0
+
 
   # Bikebuds API
   bikebuds_api:

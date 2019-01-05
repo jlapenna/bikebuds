@@ -21,6 +21,7 @@ import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
 
@@ -28,6 +29,7 @@ void main() => runApp(MyApp());
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
+final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -41,7 +43,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashScreen(_auth, _googleSignIn, title: 'Bikebuds'),
+        '/': (context) => SplashScreen(_auth, _googleSignIn, _firebaseMessaging,
+            title: 'Bikebuds'),
         '/home': (context) => HomeScreen(title: 'Bikebuds'),
       },
     );
@@ -73,6 +76,22 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _googleServicesJson = _loadGoogleServicesJson();
     _listener = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+
+    _firebaseMessaging.getToken().then((token) {
+      print('on token $token');
+    });
   }
 
   Future<dynamic> _loadGoogleServicesJson() async {
@@ -81,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onAuthStateChanged(user) async {
-    print("Auth State Changed: " + user?.toString());
+    print("Auth State Changed: $user");
     setState(() {
       _firebaseUser = user;
     });
@@ -122,7 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.network(_athlete?.profile ?? ""),
+            _athlete?.profile == null
+                ? Text("Photo")
+                : Image.network(_athlete?.profile),
             Text(name),
             Text(_athlete?.city ?? ""),
           ],

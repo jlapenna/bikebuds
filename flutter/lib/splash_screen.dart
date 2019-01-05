@@ -20,8 +20,10 @@ import 'package:flutter/material.dart';
 class SplashScreen extends StatefulWidget {
   final auth;
   final googleSignIn;
+  final firebaseMessaging;
 
-  SplashScreen(this.auth, this.googleSignIn, {Key key, this.title})
+  SplashScreen(this.auth, this.googleSignIn, this.firebaseMessaging,
+      {Key key, this.title})
       : super(key: key);
 
   final String title;
@@ -34,12 +36,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    print("Initing");
 
     widget.auth.onAuthStateChanged
         .firstWhere((user) => user != null)
         .then((FirebaseUser user) async {
-      print("Navigating");
+      widget.firebaseMessaging.requestNotificationPermissions();
       Navigator.pushReplacementNamed(context, "/home");
     });
     _signIn();
