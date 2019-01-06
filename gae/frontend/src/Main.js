@@ -35,6 +35,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 
 import Club from './Club';
+import FcmWrapper from './FcmWrapper';
 import GapiWrapper from './GapiWrapper';
 import Home from './Home';
 import ProfileWrapper from './ProfileWrapper';
@@ -110,6 +111,10 @@ class Main extends Component {
     });
   }
 
+  onFcmMessage = (payload) => {
+    console.log('Main.onFcmMessage', payload);
+  }
+
   renderDrawerContent() {
     if (this.state.profile === undefined) {
       return null;
@@ -182,6 +187,10 @@ class Main extends Component {
           firebaseUser={this.props.firebaseUser}
           gapiReady={this.state.gapiReady}
           onProfileReady={this.onProfileReady}
+        />
+        <FcmWrapper
+          gapiReady={this.state.gapiReady}
+          onMessage={this.onFcmMessage}
         />
         <AppBar className={this.props.classes.appBar} position="fixed">
           <Toolbar>

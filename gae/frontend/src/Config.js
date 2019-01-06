@@ -22,6 +22,7 @@ export const config = {
     projectId: "bikebuds-app",
     storageBucket: "bikebuds-app.appspot.com",
     messagingSenderId: "294988021695",
+    vapidKey: "BJhh1vC_dqRl-Q9zN3Eldtc7hPsSzBMnNavSGgU-gIO8kj_sh5MD127Q3tbHY5mlIe79kUvxKPNY9RHY4917Ktg",
 
     devserverUrl: (process.env.NODE_ENV === "development")
       ? "http://localhost:8081"
