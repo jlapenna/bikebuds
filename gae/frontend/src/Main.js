@@ -229,7 +229,6 @@ class Main extends Component {
           <div className={this.props.classes.toolbar} />
           {this.renderMainContent()}
         </main>
-        <GapiWrapper onReady={this.onGapiReady} />
       </div>
       </Router>
     );
