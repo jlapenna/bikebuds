@@ -60,8 +60,8 @@ function main() {
   # In order to include /lib/ in our uploaded source, we need to manipulate the
   # gae gitignore to strip it right before upload
   sed -i '/\/lib/d' gae/.gitignore
-  git add .
-  git commit --allow-empty -a -m"Include lib: ${date}";
+  git add . >/dev/null
+  git commit --allow-empty -a -m"Include lib: ${date}" >/dev/null
 
   # Then, deploy everything.
   yes|gcloud app deploy -v ${VERSION} \
@@ -70,7 +70,7 @@ function main() {
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
-  git push --force production master
+  #git push --force production master
 
   # Break apart the include lib commit.
   git reset HEAD~
