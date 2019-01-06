@@ -25,7 +25,7 @@ from flask_cors import cross_origin
 
 from firebase_admin import auth
 
-import auth_util
+from shared import auth_util
 
 from shared.config import config
 from shared.datastore import services
@@ -76,31 +76,3 @@ def create_session(claims):
     except auth.AuthError, e:
         logging.error(e)
         return flask.abort(401, 'Failed to create a session cookie')
-
-
-@app.route('/services/signup', methods=['GET'])
-@auth_util.claims_required
-def signup(claims):
-    """Redirect users through auth flows for services.
-
-    Redirects to /SERVICE/init, which redirects to an auth url on the service's
-    frontend, the service will redirect back to /SERVICE/redirect.
-    """
-    user = users.User.get(claims)
-
-    user_services = services.Service.query(ancestor=user.key).fetch()
-    user_services_dict = dict(((service.key.id(), service) for service in user_services))
-    logging.info('user services: %s', user_services_dict)
-    for service in user_services:
-        service_name = service.key.id()
-        redirect_url = config.frontend_url + '/services/' + service_name + '/init?dest=/services/signup'
-        if service_name not in user_services_dict:
-            # We haven't initialized this service yet. Lets do it.
-            logging.info('No %s, starting flow.', service_name)
-            return flask.redirect(redirect_url)
-        service_creds = service.get_credentials()
-        if not service_creds:
-            logging.info('No %s credentials, starting flow.', service_name)
-            return flask.redirect(redirect_url)
-        # TODO: Check if the service creds are valid.
-    return flask.redirect(config.devserver_url)

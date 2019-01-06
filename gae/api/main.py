@@ -30,7 +30,7 @@ from endpoints import remote
 
 from firebase_admin import messaging
 
-import auth_util
+from shared import auth_util
 from shared.datastore.admin import SyncState
 from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage

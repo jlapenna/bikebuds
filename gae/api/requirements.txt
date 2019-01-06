@@ -1,6 +1,7 @@
 google-endpoints
 google-endpoints-api-management
 
+Flask
 requests
 requests-toolbelt
 google-auth

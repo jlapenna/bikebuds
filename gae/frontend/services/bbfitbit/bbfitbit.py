@@ -21,7 +21,7 @@ from flask_cors import cross_origin
 
 import fitbit
 
-import auth_util
+from shared import auth_util
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
