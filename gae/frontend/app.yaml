@@ -28,6 +28,14 @@ handlers:
   script: main.app
   secure: always
   redirect_http_response_code: 301
+- url: /services/(.*)/(.*)
+  script: main.app
+  secure: always
+  redirect_http_response_code: 301
+- url: /services/(.*)/(.*)/(.*)
+  script: main.app
+  secure: always
+  redirect_http_response_code: 301
 - url: /(.*\.(json|js|ico))$
   static_files: build/\1
   upload: build/.*\.(json|js|ico)$

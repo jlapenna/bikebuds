@@ -76,6 +76,9 @@ class App extends Component {
               <Route path="/signin">
                 <Redirect to="/" />
               </Route>
+              <Route path="/services">
+                <div>Misconfigured.</div>
+              </Route>
               <Route>
                 <Main firebaseUser={this.state.firebaseUser}/>
               </Route>
@@ -97,8 +100,8 @@ class App extends Component {
             <Route path="/signin">
               <SignInScreen />
             </Route>
-            <Route>
-              <Redirect to="/signin"/>
+            <Route path="/services">
+              <div>Misconfigured.</div>
             </Route>
           </Switch>
         </Router>
