@@ -196,3 +196,20 @@ edit lib/src/dart_resources.dart, removing if condition only keeping if contents
 """
 cp ../../code/bikebuds/gae/api/bikebuds-v1.discovery ~/disc/bikebuds.json
 dart bin/generate.dart package  -i ../../disc/ -o ../../code/bikebuds/generated/bikebuds_api --package-name=bikebuds_api
+
+
+# FCM python notes
+https://firebase.google.com/docs/cloud-messaging/admin/errors
+exception.code is dashed string version of above.
+
+        message = messaging.Message(
+            data={},
+            token=client_store.client.id + "adfasdfa",
+        )
+
+        try:
+            response = messaging.send(message)
+	    message_id = response[1] # eg 'projects/bikebuds-app/messages/0:1546730789539629%e4196d51f9fd7ecd'
+            logging.debug('Successfully sent message:', response)
+        except messaging.ApiCallError, e:
+            logging.info('Error: %s', e);

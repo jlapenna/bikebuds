@@ -33,14 +33,6 @@ from services.bbfitbit import bbfitbit as fitbit
 from services.strava import strava
 from services.withings import withings
 
-# Firebase admin setup
-import firebase_admin
-from firebase_admin import auth
-from firebase_admin import credentials
-FIREBASE_ADMIN_CREDS = credentials.Certificate(
-        'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json')
-firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
-
 # Flask setup
 app = flask.Flask(__name__)
 app.register_blueprint(fitbit.module)

@@ -36,3 +36,15 @@ requests_toolbelt.adapters.appengine.monkeypatch()
 # Increase the request timeout, strava can take a while.
 from google.appengine.api import urlfetch
 urlfetch.set_default_fetch_deadline(30)
+
+# Firebase admin setup
+import firebase_admin
+from firebase_admin import auth
+from firebase_admin import credentials
+
+try:
+    FIREBASE_ADMIN_CREDS = credentials.Certificate(
+            'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json')
+    firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
+except IOError, e:
+    logging.warn('Unable to find admin credentials for firebase. This is probably a bug.');

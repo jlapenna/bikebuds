@@ -20,12 +20,15 @@ import logging
 import datetime
 
 from google.appengine.api import taskqueue
+from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 
 import endpoints
 from endpoints import message_types
 from endpoints import messages
 from endpoints import remote
+
+from firebase_admin import messaging
 
 import auth_util
 from shared.datastore.admin import SyncState
@@ -147,8 +150,15 @@ class BikebudsApi(remote.Service):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
+
+        if request.client.id is None:
+            return 400
+
         user = User.get(claims)
         client_store = ClientStore.update(user.key, request.client)
+
+        deferred.defer(ack_fcm_update, client_store.client.id)
+
         return ClientResponse(client=client_store.client)
 
     @endpoints.method(
@@ -337,5 +347,16 @@ class BikebudsApi(remote.Service):
         service.clear_credentials()
         return ServiceResponse(service=Service.to_message(service))
 
+
+def ack_fcm_update(token):
+    message = messaging.Message(
+            data={'state': 'updated'},
+            token=token,
+            )
+    try:
+        response = messaging.send(message)
+        logging.debug('Successfully sent message: %s', response)
+    except messaging.ApiCallError, e:
+        logging.info('Error: %s', e);
 
 api = endpoints.api_server([BikebudsApi])

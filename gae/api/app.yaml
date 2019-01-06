@@ -6,6 +6,9 @@ instance_class: b4
 basic_scaling:
   max_instances: 8
 
+builtins:
+- deferred: on
+
 libraries:
 - name: pycrypto
   version: latest
@@ -13,6 +16,10 @@ libraries:
   version: latest
 
 handlers:
+- url: /_ah/queue/deferred
+  script: google.appengine.ext.deferred.deferred.application
+  login: admin
+
 - url: /_ah/api/.*
   script: main.api
 
