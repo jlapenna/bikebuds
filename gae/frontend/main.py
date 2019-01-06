@@ -23,6 +23,8 @@ import flask
 import flask_cors
 from flask_cors import cross_origin
 
+from firebase_admin import auth
+
 import auth_util
 
 from shared.config import config
@@ -59,7 +61,6 @@ def redirect():
 @auth_util.claims_required
 def create_session(claims):
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
-    firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 
     try:
@@ -85,7 +86,6 @@ def signup(claims):
     Redirects to /SERVICE/init, which redirects to an auth url on the service's
     frontend, the service will redirect back to /SERVICE/redirect.
     """
-    firebase_user = auth.get_user(claims['sub'])
     user = users.User.get(claims)
 
     user_services = services.Service.query(ancestor=user.key).fetch()
