@@ -4,20 +4,20 @@
   "private": true,
   "homepage": "https://bikebuds.cc/",
   "dependencies": {
-    "@material-ui/core": "^3.5.1",
+    "@material-ui/core": "^3.8.1",
     "@material-ui/icons": "^3.0.1",
     "ajv": "6.0.0",
-    "firebase": "^5.5.8",
+    "firebase": "^5.7.2",
     "lodash.clonedeepwith": "^4.5.0",
-    "moment": "^2.22.2",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "moment": "^2.23.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "react-firebaseui": "^3.1.2",
     "react-google-maps": "^9.4.5",
-    "react-moment": "^0.8.3",
+    "react-moment": "^0.8.4",
     "react-router-dom": "^4.3.1",
     "react-scripts": "^2.1.3",
-    "recharts": "^1.4.1"
+    "recharts": "^1.4.2"
   },
   "repository": "github:jlapenna/bikebuds",
   "scripts": {
