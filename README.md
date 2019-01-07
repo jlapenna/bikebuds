@@ -49,9 +49,58 @@ Uses Official Material Components, firebase libraries and play services.
 From the root directory:
 
 ```
-./setup/dev.sh  # Installs pre-res
+./setup/dev.sh  # Installs pre-reqs
 # Ensure you have the proper service keys in private/service_keys
 ./setup/env.sh  # Sets up 
+```
+
+### Private files
+
+bikebuds/private should exist with the following files, which you'll need to
+generate for yourself.
+
+```
+private
+├── debug.keystore
+├── prod.jks
+└── service_keys
+    ├── bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json
+    ├── fitbit.json
+    ├── fitbit-local.json
+    ├── strava.json
+    ├── strava-local.json
+    ├── withings.json
+    └── withings-local.json
+```
+
+#### fitbit.json
+```
+{
+  "admin_account": "user@domain",
+  "client_id": "XXX",
+  "client_secret": "YYY",
+  "callback_url": "http://localhost:8082/fitbit/redirect",
+  "authorization_uri": "https://www.fitbit.com/oauth2/authorize",
+  "access_token_request_uri": "https://api.fitbit.com/oauth2/token"
+}
+```
+
+#### strava.json
+```
+{
+  "client_id": "XXX",
+  "client_secret": "YYY",
+  "access_token": "ZZZ"
+}
+```
+
+#### withings.json
+```
+{
+  "admin_account": "user@domain",
+  "client_id": "XXX",
+  "client_secret": "YYY",
+}
 ```
 
 ### Local backends
