@@ -94,14 +94,14 @@ class App extends Component {
         <CssBaseline />
         <Router>
           <Switch>
-            <Route path="/app">
-              <Redirect to="/"/>
-            </Route>
             <Route path="/signin">
               <SignInScreen />
             </Route>
             <Route path="/services">
               <div>Misconfigured.</div>
+            </Route>
+            <Route path="/">
+              <Redirect to="/signin" />
             </Route>
           </Switch>
         </Router>
