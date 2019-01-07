@@ -16,7 +16,7 @@
 
 export const config = {
     apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
-    authDomain: "bikebuds-app.firebaseapp.com",
+    authDomain: "auth.bikebuds.cc",
     databaseURL: "https://bikebuds-app.firebaseio.com",
     mapsApiKey: "AIzaSyDYL7pYdE2y0ctSok8BXAYONfe-Y1Xf4gg",
     projectId: "bikebuds-app",
