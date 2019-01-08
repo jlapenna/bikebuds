@@ -93,7 +93,7 @@ class ActivityListCard extends Component {
     }
     return (
           <Grid className={this.props.classes.contentGridElement} container spacing={24}>
-            <Grid className={this.props.classes.contentGridElement} item xs={12} lg={4}>
+            <Grid className={this.props.classes.contentGridElement} item xs={12} sm={4} lg={4}>
               <List>
                 {this.state.activities.map((activity, index) => {
                   return (
@@ -108,7 +108,7 @@ class ActivityListCard extends Component {
               }
               </List>
             </Grid>
-            <Grid className={this.props.classes.contentGridElement} item xs={false} lg={8}>
+            <Grid className={this.props.classes.contentGridElement} item xs={false} sm={8} lg={8}>
               <ActivityDetail activity={this.state.selectedActivity} />
             </Grid>
           </Grid>

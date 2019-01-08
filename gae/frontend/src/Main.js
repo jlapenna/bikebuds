@@ -54,20 +54,20 @@ const styles = (theme) => ({
     width: drawerWidth,
   },
   drawer: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       width: drawerWidth,
       flexShrink: 0,
     },
   },
   appBar: {
     marginLeft: drawerWidth,
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       width: `calc(100% - ${drawerWidth}px)`,
     },
   },
   menuButton: {
     marginRight: 20,
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       display: 'none',
     },
   },
@@ -205,7 +205,7 @@ class Main extends Component {
           {this.state.profile === undefined && <LinearProgress />}
         </AppBar>
         <nav className={this.props.classes.drawer}>
-          <Hidden smUp implementation="css">
+          <Hidden mdUp implementation="css">
             <Drawer
               container={this.props.container}
               variant="temporary"
@@ -222,7 +222,7 @@ class Main extends Component {
               {this.renderDrawerContent()}
             </Drawer>
           </Hidden>
-          <Hidden xsDown implementation="css">
+          <Hidden smDown implementation="css">
             <Drawer
               classes={{
                 paper: this.props.classes.drawerPaper,
