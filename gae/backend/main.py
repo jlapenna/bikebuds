@@ -191,7 +191,7 @@ def _do_sync(service, service_creds, synchronizer, check_creds=True):
                 service.key.id(),
                 sync_name
                 )
-        raise SyncException(msg)
+        return 'Sync Failed', 503
     except Exception, e:
         logging.debug('%s for %s/%s (creds: %s), Originally: %s',
             sys.exc_info()[0].__name__,
