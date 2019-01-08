@@ -119,7 +119,7 @@ class ClientWrapper(object):
         self._service = service
         self._client = stravalib.client.Client(
                 access_token=service.get_credentials().access_token,
-                rate_limit_requests=False)
+                rate_limiter=(lambda x=None: None))
 
     def ensure_access(self):
         """Ensure that an access token is good for at least another 60 seconds."""
