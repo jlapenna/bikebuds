@@ -152,7 +152,7 @@ class BikebudsApi(remote.Service):
         claims = auth_util.verify_claims_from_header(self.request_state)
 
         if request.client.id is None:
-            return 400
+            raise endpoints.BadRequestException('No client ID provided.')
 
         user = User.get(claims)
         client_store = ClientStore.update(user.key, request.client)
