@@ -119,6 +119,9 @@ class Main extends Component {
     if (this.state.profile === undefined) {
       return null;
     }
+    if (!this.state.profile.signup_complete) {
+      return null;
+    }
 
     return ( 
       <React.Fragment>
@@ -141,6 +144,21 @@ class Main extends Component {
   renderMainContent() {
     if (this.state.profile === undefined) {
       return null;
+    }
+    if (!this.state.profile.signup_complete) {
+      return (
+        <Switch>
+          <Route path="/signup" exact
+            render={() => <Signup
+              firebaseUser={this.props.firebaseUser}
+              gapiReady={this.state.gapiReady}
+            />}
+          />
+          <Route>
+            <Redirect to="/signup" />
+          </Route>
+        </Switch>
+      );
     }
 
     return (

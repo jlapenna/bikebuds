@@ -62,6 +62,9 @@
         },
         "header": {
           "$ref": "#/definitions/MainResponseHeader"
+        },
+        "signup_complete": {
+          "type": "boolean"
         }
       },
       "type": "object"

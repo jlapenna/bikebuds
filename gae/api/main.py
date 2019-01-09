@@ -96,6 +96,7 @@ class ProfileResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     created = message_types.DateTimeField(2)
     athlete = messages.MessageField(AthleteMessage, 3)
+    signup_complete = messages.BooleanField(4)
 
 
 class ServiceResponse(messages.Message):
@@ -257,12 +258,18 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = User.get(claims)
-        athlete = Athlete.get_private(Service.get_key(user.key, 'strava'))
-        if athlete is not None:
-            athlete_message = Athlete.to_message(athlete)
-        else:
-            athlete_message = None
-        return ProfileResponse(created=user.created, athlete=athlete_message)
+
+        strava = Service.get(user.key, 'strava')
+        strava_connected = strava.credentials is not None
+        
+        athlete_message = None
+        if strava_connected:
+            athlete = Athlete.get_private(strava.key)
+            if athlete is not None:
+                athlete_message = Athlete.to_message(athlete)
+
+        return ProfileResponse(created=user.created, athlete=athlete_message,
+                signup_complete=strava_connected)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request, id=messages.StringField(1)),

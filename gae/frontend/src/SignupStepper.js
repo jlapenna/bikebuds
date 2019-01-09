@@ -105,7 +105,7 @@ class SignupStepper extends React.Component {
             <div>Connect your account, we will use your activities and profile.</div>
           );
         },
-        isOptional: true,
+        isOptional: false,
         serviceName: 'strava',
         buttonLabel: 'Connect',
       },

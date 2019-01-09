@@ -343,6 +343,9 @@
         },
         "header": {
           "$ref": "MainResponseHeader"
+        },
+        "signup_complete": {
+          "type": "boolean"
         }
       },
       "type": "object"
