@@ -244,6 +244,7 @@ It was third party cookies. so I set up a firebase custom domain:
 * https://console.developers.google.com/apis/credentials/oauthclient/294988021695-ig6caq2he7mg493s423mhi26r12r3c77.apps.googleusercontent.com?project=bikebuds-app
 
 # Querying the API on localhost.
+
 1. Assuming you have the api up and running via `gae/local.sh`
 2. Open http://localhost:8080, make sure you're signed in and open the network inspector.
 3. Reload the page

@@ -42,7 +42,35 @@ Python Cloud Endpoints Frameworks v2.
 
 Uses Official Material Components, firebase libraries and play services.
 
+### Flutter
+
+(Replaces Android app)
+
+Uses Official Flutter components and firebase libraries.
+
 ## Development
+
+Most details below assume you're using a linux machine for development.
+
+### Dependencies
+
+bikebuds development requires:
+
+* gCloud CLI
+  * https://cloud.google.com/sdk/gcloud/
+* AppEngine SDK
+  * https://cloud.google.com/appengine/downloads (For python)
+* NPM
+  * https://www.npmjs.com/get-npm
+* Flutter SDK
+  * https://flutter.io/docs/get-started/install
+* Python 2.x
+  * https://www.python.org/downloads/ (See "Specific Releases").
+* PIP 2.x
+  * https://pypi.org/project/pip/
+* virtualenv
+  * https://virtualenv.pypa.io/en/latest/
+
 
 ### Setup
 
@@ -58,6 +86,9 @@ From the root directory:
 
 bikebuds/private should exist with the following files, which you'll need to
 generate for yourself.
+
+Note: A private git repo for admins only can be found at:
+https://source.developers.google.com/p/bikebuds-app/r/private
 
 ```
 private
@@ -103,7 +134,7 @@ private
 }
 ```
 
-### Local backends
+### Running Local Backend & Frontend Services
 
 ```
 ./gae/local.sh
@@ -111,24 +142,25 @@ private
 
 You should be able to visit localhost:8080 to see the frontend.
 
+Note: localhost:8081 also serves the frontend, but it will serve the latest 
+production npm build of the react app. You probably dont' want this.
+
 ### API Updates
 
-If you add a new API method (or you're starting android dev), be sure to call
-update_api:
+Whenever you add a new API method or modify its signature, be sure to generate
+new API specs:
 
 ```
 ./gae/update_api.sh local
 ```
 
-### Local android development
+### Local flutter development
 
-Build a client jar (do this once or when changing the api) and set-up port
-forwards (do this every time you plug in your device)..
+Set up port-forwards on your android device so the flutter app can talk to the
+local backend.
 
 ```
-./gae/update_api.sh local
-./android/local.sh
-# Launch your APK.
+./setup/android.sh
 ```
 
 ## Production
@@ -137,5 +169,4 @@ If you're not jlapenna@ you can stop reading. ;)
 
 ```
 ./gae/deploy.sh
-git checkout .
 ```

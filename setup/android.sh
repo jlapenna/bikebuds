@@ -1,5 +1,5 @@
 #!/bin/bash
-# Connect to a local instance, rewriting code for local development.
+# Configures a device for development with a local backend.
 
 function main() {
   local serial_device="${1}";
