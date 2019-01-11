@@ -42,7 +42,8 @@ class PreferencesCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      preferences: undefined,
+      preferences: {},
+      preferencesFetched: undefined,
     }
   }
 
@@ -61,8 +62,10 @@ class PreferencesCard extends Component {
   }
 
   updatePreferencesState = (response) => {
+    console.log('PreferencesCard.updatePreferenceState', response);
       this.setState({
         preferences: response.result.preferences,
+        preferencesFetched: true,
       });
   }
 
@@ -78,15 +81,20 @@ class PreferencesCard extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('PreferencesCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.preferences === undefined) {
+    if (this.props.gapiReady && this.state.preferencesFetched === undefined) {
+      this.setState({
+        preferencesFetched: false,
+      });
       window.gapi.client.bikebuds.get_preferences().then(this.updatePreferencesState);
     }
   }
 
   renderCardContent() {
-    if (this.state.preferences) {
-      var units = this.state.preferences.units;
-      var weight_service = this.state.preferences.weight_service;
+    if (!this.state.preferencesFetched) {
+      // If we render the radio group, before we have values for it, once its
+      // fetched, the selected state doesn't update, so we can't render until
+      // we've fetched it.
+      return null;
     }
     return (
       <CardContent className={this.props.classes.content}>
@@ -96,10 +104,10 @@ class PreferencesCard extends Component {
           >
             <Typography variant="h5">Unit</Typography>
             <RadioGroup
-              aria-label="Measurement System"
+              aria-label="Measurement Units"
               name="units"
               className={this.props.classes.group}
-              value={units}
+              value={this.state.preferences.units}
               onChange={this.onHandleChange}
             >
               <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
@@ -111,10 +119,10 @@ class PreferencesCard extends Component {
           >
             <Typography variant="h5">Weight Service</Typography>
             <RadioGroup
-              aria-label="Measurement System"
+              aria-label="Weight Service"
               name="weight_service"
               className={this.props.classes.group}
-              value={weight_service}
+              value={this.state.preferences.weight_service}
               onChange={this.onHandleChange}
             >
               <FormControlLabel value="FITBIT" control={<Radio />} label="Fitbit" />
