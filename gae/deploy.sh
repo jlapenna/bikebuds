@@ -22,14 +22,10 @@ VERSION=10000
 
 function main() {
   local repo_path="$(get_repo_path)";
-  local services="frontend api backend";
 
-  local env_path=$(readlink -f "${repo_path}/appengine_env")
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to locate the virtual environment."
-    exit 1;
-  fi
-  source "${env_path}/bin/activate"
+  activate_env
+
+  local services="frontend api backend";
 
   local date="$(date)";
   # First, commit all the code outstanding into a temporary commit for

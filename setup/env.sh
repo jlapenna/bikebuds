@@ -21,28 +21,16 @@ source setup/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
+  activate_env
+
   local api_path="${repo_path}/gae/api"
   local backend_path="${repo_path}/gae/backend"
   local frontend_path="${repo_path}/gae/frontend"
 
-  local env_path=$(readlink -f "${repo_path}/appengine_env")
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to locate the virtual environment."
-    exit 1;
-  fi
-
-  echo "Setting up virtual environment at ${env_path}"
-  virtualenv --python python2 "${env_path}" 2>&1 > /dev/null
-  source "${env_path}/bin/activate"
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to setup virtual environment."
-    exit 2;
-  fi
-
   echo ""
   echo "Installing frontend dependencies."
   rm -rf "${frontend_path}/lib"
-  pip install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
+  pip2 install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
 
   echo ""
   echo "Copying over service keys to frontend."
@@ -51,7 +39,7 @@ function main() {
   echo ""
   echo "Installing api dependencies."
   rm -rf "${api_path}/lib"
-  pip install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
+  pip2 install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
 
   echo ""
   echo "Copying over service keys to api."
@@ -60,7 +48,7 @@ function main() {
   echo ""
   echo "Installing backend dependencies."
   rm -rf "${backend_path}/lib"
-  pip install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
+  pip2 install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
 
   echo ""
   echo "Copying over service keys to backend."
