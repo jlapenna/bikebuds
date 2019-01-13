@@ -172,10 +172,26 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
 
-        club = ndb.Key(Club, int(request.id)).get()
-
-        if club is None:
+        user_key = User.get_key(claims)
+        strava_key = Service.get_key(user_key, 'strava')
+        athlete = Athlete.get_private(strava_key)
+        if athlete is None:
             return ClubResponse()
+            raise endpoints.BadRequestException('Incomplete user.')
+
+        club = ndb.Key(Club, int(request.id)).get()
+        if club is None:
+            raise endpoints.BadRequestException('No such club.')
+
+        is_member = False
+        for member in club.members:
+            logging.info('%s vs %s', member.key.id(), athlete.key.id())
+            if member.key.id() == athlete.key.id():
+                is_member = True
+                break
+        if not is_member:
+            raise endpoints.UnauthorizedException('No access to club.')
+
         return ClubResponse(club=Club.to_message(club))
 
     @endpoints.method(
