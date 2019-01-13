@@ -243,7 +243,7 @@ class SignupStepper extends React.Component {
           <div className={classes.stepContent}>
             {stepContent}
           </div>
-          <Hidden smUp implementation="css">
+          <Hidden smUp>
             {activeStep.isOptional && (
               <Button
                 disabled={connectPending}
@@ -257,7 +257,7 @@ class SignupStepper extends React.Component {
           </Hidden>
         </div>
         <div className={classes.stepFooter}>
-          <Hidden xsDown implementation="css">
+          <Hidden xsDown>
             <Stepper
               alternativeLabel
               activeStep={activeStepIndex}
@@ -265,7 +265,7 @@ class SignupStepper extends React.Component {
               {this.renderSteps()}
             </Stepper>
           </Hidden>
-          <Hidden smUp implementation="css">
+          <Hidden smUp>
             <MobileStepper
               variant="progress"
               steps={steps.length}
@@ -301,7 +301,7 @@ class SignupStepper extends React.Component {
               {this.renderSteps()}
             </MobileStepper>
           </Hidden>
-          <Hidden xsDown implementation="css">
+          <Hidden xsDown>
             <Button
               disabled={connectPending || this.state.activeStepIndex === 0}
               onClick={this.handleBack}

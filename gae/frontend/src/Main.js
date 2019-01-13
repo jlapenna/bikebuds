@@ -19,7 +19,6 @@ import React, { Component } from 'react';
 import { NavLink, Redirect, BrowserRouter as Router, Route, Switch,
     } from "react-router-dom";
 
-import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -233,7 +232,7 @@ class Main extends Component {
           {this.state.profile === undefined && <LinearProgress />}
         </AppBar>
         <nav className={this.props.classes.drawer}>
-          <Hidden mdUp implementation="css">
+          <Hidden mdUp>
             <Drawer
               container={this.props.container}
               variant="temporary"
@@ -250,7 +249,7 @@ class Main extends Component {
               {this.renderDrawerContent()}
             </Drawer>
           </Hidden>
-          <Hidden smDown implementation="css">
+          <Hidden smDown>
             <Drawer
               classes={{
                 paper: this.props.classes.drawerPaper,

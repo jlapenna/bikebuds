@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
+import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 
 import { withScriptjs, withGoogleMap, BicyclingLayer, GoogleMap,
@@ -176,10 +177,12 @@ class ActivityDetail extends Component {
               <Typography variant="subtitle1">Moving Time</Typography>
               <Typography variant="h4">{duration}</Typography>
             </div>
+            <Hidden mdDown>
             <div className={this.props.classes.activitySummaryItem}>
               <Typography variant="subtitle1">Calories</Typography>
               <Typography variant="h4">{this.props.activity.kilojoules}</Typography>
             </div>
+            </Hidden>
           </div>
         </div>
         <ActivityMap activity={this.props.activity} />
