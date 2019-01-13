@@ -58,6 +58,7 @@ MeasuresCard.defaultProps = {
     intervalFormat: "MMM 'YY",
 }
 MeasuresCard.propTypes = {
+  profile: PropTypes.object.isRequired,
   measures: PropTypes.array,
 }
 export default withStyles(styles)(MeasuresCard);

@@ -172,6 +172,7 @@ class Main extends Component {
         />
         <Route path="/" exact
           render={() => <Home
+            profile={this.state.profile}
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
           />}

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
@@ -37,16 +38,19 @@ class Home extends Component {
     return (
       <div>
         <MeasuresWrapper
+          profile={this.props.profile}
           gapiReady={this.props.gapiReady}
           onMeasuresReady={this.onMeasuresReady}
         />
         <Grid container spacing={24}>
           <Grid item xs={12}>
             <ActivityListCard
+              profile={this.props.profile}
               gapiReady={this.props.gapiReady} />
           </Grid>
           <Grid item xs={12} md={6}>
             <MeasuresCard
+              profile={this.props.profile}
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
               title="Daily"
@@ -55,6 +59,7 @@ class Home extends Component {
           </Grid>
           <Grid item xs={12} md={6}>
             <MeasuresCard
+              profile={this.props.profile}
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
               title="Weekly"
@@ -63,6 +68,7 @@ class Home extends Component {
           </Grid>
           <Grid item xs={12} md={6}>
             <MeasuresCard
+              profile={this.props.profile}
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
               title="All Time"
@@ -75,4 +81,8 @@ class Home extends Component {
   }
 }
 
+Home.propTypes = {
+  profile: PropTypes.object.isRequired,
+  gapiReady: PropTypes.bool.isRequired,
+}
 export default Home;

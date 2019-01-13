@@ -153,6 +153,7 @@ MeasuresChart.defaultProps = {
     intervalFormat: "MMM 'YY",
 }
 MeasuresChart.propTypes = {
+  profile: PropTypes.object.isRequired,
   measures: PropTypes.array,
 }
 export default withStyles(styles)(MeasuresChart);
