@@ -344,6 +344,9 @@
         "header": {
           "$ref": "MainResponseHeader"
         },
+        "preferences": {
+          "$ref": "SharedDatastoreUsersPreferencesMessage"
+        },
         "signup_complete": {
           "type": "boolean"
         }

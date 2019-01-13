@@ -95,8 +95,9 @@ class UpdatePreferencesRequest(messages.Message):
 class ProfileResponse(messages.Message):
     header = messages.MessageField(ResponseHeader, 1)
     created = message_types.DateTimeField(2)
-    athlete = messages.MessageField(AthleteMessage, 3)
-    signup_complete = messages.BooleanField(4)
+    preferences = messages.MessageField(PreferencesMessage, 3)
+    athlete = messages.MessageField(AthleteMessage, 4)
+    signup_complete = messages.BooleanField(5)
 
 
 class ServiceResponse(messages.Message):
@@ -261,7 +262,10 @@ class BikebudsApi(remote.Service):
             if athlete is not None:
                 athlete_message = Athlete.to_message(athlete)
 
-        return ProfileResponse(created=user.created, athlete=athlete_message,
+        return ProfileResponse(
+                created=user.created,
+                preferences=user.preferences,
+                athlete=athlete_message,
                 signup_complete=strava_connected)
 
     @endpoints.method(
