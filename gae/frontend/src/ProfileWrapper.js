@@ -28,7 +28,7 @@ class ProfileWrapper extends Component {
     super(props);
     this.state = {
       fetched: false,
-      profile: undefined,
+      profile: props.profile,
     }
   }
 
@@ -68,10 +68,15 @@ class ProfileWrapper extends Component {
    * @inheritDoc
    */
   render() {
+    console.log('ProfileWrapper.render', this.state.profile);
     return (
       <div className="ProfileWrapper" />
     );
   };
 }
 
+
+ProfileWrapper.propTypes = {
+  profile: PropTypes.object,
+}
 export default ProfileWrapper;

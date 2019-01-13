@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
@@ -23,6 +24,12 @@ import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
+
+  handlePreferencesChanged = (preferences) => {
+    console.log('Settings.handlePreferencesChanged', preferences);
+    this.props.onPreferencesChanged(preferences);
+  };
+
   render() {
     return (
       <div>
@@ -37,8 +44,12 @@ class Settings extends Component {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <PreferencesCard firebaseUser={this.props.firebaseUser}
-              gapiReady={this.props.gapiReady} />
+            <PreferencesCard
+              firebaseUser={this.props.firebaseUser}
+              gapiReady={this.props.gapiReady}
+              onPreferencesChanged={this.handlePreferencesChanged}
+              preferences={this.props.profile.preferences}
+              />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ServiceCard serviceName="fitbit"
@@ -58,4 +69,7 @@ class Settings extends Component {
   }
 }
 
+Settings.propTypes = {
+  onPreferencesChanged: PropTypes.func.isRequired,
+}
 export default Settings;

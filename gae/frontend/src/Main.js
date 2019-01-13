@@ -104,6 +104,14 @@ class Main extends Component {
     this.setState({measures: measures});
   }
 
+  onPreferencesChanged = (preferences) => {
+    console.log('Main.onPreferencesChanged', preferences);
+    this.setState((state, props) => {
+      state.profile.preferences = preferences;
+      return {profile: state.profile};
+    });
+  }
+
   onProfileReady = (profile) => {
     console.log('Main.onProfileReady', profile);
     this.setState({
@@ -181,6 +189,7 @@ class Main extends Component {
           render={() => <Settings
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
+            onPreferencesChanged={this.onPreferencesChanged}
             profile={this.state.profile}
           />}
         />
@@ -206,6 +215,7 @@ class Main extends Component {
           firebaseUser={this.props.firebaseUser}
           gapiReady={this.state.gapiReady}
           onProfileReady={this.onProfileReady}
+          profile={this.state.profile}
         />
         <FcmWrapper
           gapiReady={this.state.gapiReady}

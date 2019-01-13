@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -42,15 +43,11 @@ class PreferencesCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      preferences: {},
-      preferencesFetched: undefined,
+      preferences: props.preferences,
     }
   }
 
   onHandleChange = (event) => {
-    if (!this.state.preferences) {
-      return;
-    }
     var newState = {preferences: cloneDeepWith(this.state.preferences)};
     if (event.target.name === 'units') {
       newState.preferences.units = event.target.value;
@@ -63,10 +60,11 @@ class PreferencesCard extends Component {
 
   updatePreferencesState = (response) => {
     console.log('PreferencesCard.updatePreferenceState', response);
-      this.setState({
-        preferences: response.result.preferences,
-        preferencesFetched: true,
-      });
+    this.setState({
+      preferences: response.result.preferences,
+      preferencesFetched: true,
+    });
+    this.props.onPreferencesChanged(response.result.preferences);
   }
 
   /**
@@ -76,26 +74,8 @@ class PreferencesCard extends Component {
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('PreferencesCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.preferencesFetched === undefined) {
-      this.setState({
-        preferencesFetched: false,
-      });
-      window.gapi.client.bikebuds.get_preferences().then(this.updatePreferencesState);
-    }
-  }
-
   renderCardContent() {
-    if (!this.state.preferencesFetched) {
-      // If we render the radio group, before we have values for it, once its
-      // fetched, the selected state doesn't update, so we can't render until
-      // we've fetched it.
-      return null;
-    }
+    console.log('PreferencesCard.renderCardContent', this.state.preferences);
     return (
       <CardContent className={this.props.classes.content}>
         <div className={this.props.classes.container}>
@@ -145,4 +125,8 @@ class PreferencesCard extends Component {
   };
 }
 
+PreferencesCard.propTypes = {
+  preferences: PropTypes.object.isRequired,
+  onPreferencesChanged: PropTypes.func.isRequired,
+}
 export default withStyles(styles)(PreferencesCard);
