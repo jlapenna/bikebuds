@@ -17,7 +17,6 @@
 import moment from 'moment';
 import convert from 'convert-units';
 
-
 export function readableDuration(seconds, profile) {
   return moment.duration(Number(seconds), 'seconds').format('hh:mm:ss');
 }
@@ -32,5 +31,13 @@ export function readableSpeed(meters_per_second, profile) {
     return convert(speed).from('km').to('mi').toFixed(2);
   } else {
     return speed.toFixed(2);
+  }
+}
+
+export function readableWeight(kg, profile) {
+  if (profile.preferences.units === 'IMPERIAL') {
+    return Number(convert(kg).from('kg').to('lb').toFixed(1));
+  } else {
+    return Number(kg.toFixed(1));
   }
 }

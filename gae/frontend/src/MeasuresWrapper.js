@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { readableWeight } from './convert';
+
 
 class MeasuresWrapper extends Component {
   constructor(props) {
@@ -33,6 +35,12 @@ class MeasuresWrapper extends Component {
     if (response.result.series !== undefined
       && response.result.series.measures !== undefined) {
       measures = response.result.series.measures;
+    }
+    for (var measure in measures) {
+      if (measures[measure].weight !== undefined) {
+        measures[measure].weight = readableWeight(
+            measures[measure].weight, this.props.profile);
+      }
     }
     this.setState({
       measures: measures,
@@ -73,5 +81,6 @@ class MeasuresWrapper extends Component {
 
 MeasuresWrapper.propTypes = {
   onMeasuresReady: PropTypes.func.isRequired,
+  profile: PropTypes.object.isRequired,
 }
 export default MeasuresWrapper;

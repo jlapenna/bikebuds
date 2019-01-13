@@ -206,6 +206,7 @@ class BikebudsApi(remote.Service):
         logging.info('Beginning series')
         result = Series.get_default(Service.get_key(user.key, weight_service))
         if result is None:
+            logging.info('Finished request (no result)')
             return SeriesResponse()
         logging.info('Finished series')
         try:
