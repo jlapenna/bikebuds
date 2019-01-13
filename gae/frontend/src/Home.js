@@ -43,35 +43,26 @@ class Home extends Component {
           onMeasuresReady={this.onMeasuresReady}
         />
         <Grid container spacing={24}>
-          <Grid item xs={12}>
+          <Grid item xs={12} lg={8}>
             <ActivityListCard
               profile={this.props.profile}
               gapiReady={this.props.gapiReady} />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} lg={4}>
             <MeasuresCard
               profile={this.props.profile}
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
-              title="Daily"
-              intervalUnit="d" intervalFormat="MMM D" intervalCount="365"
+              title="Weight"
+              intervalUnit="d" intervalFormat="MMM D" intervalCount="30"
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <MeasuresCard
               profile={this.props.profile}
               gapiReady={this.props.gapiReady}
               measures={this.state.measures}
-              title="Weekly"
-              intervalUnit="w" intervalFormat="MMM D" intervalCount="52"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <MeasuresCard
-              profile={this.props.profile}
-              gapiReady={this.props.gapiReady}
-              measures={this.state.measures}
-              title="All Time"
+              title="Historical Weight"
               intervalUnit="M" intervalFormat="MMM 'YY" intervalCount="120"
             />
           </Grid>

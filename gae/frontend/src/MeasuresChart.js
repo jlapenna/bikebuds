@@ -28,7 +28,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
 
 const styles = {
   root: {
-    height:300,
+    "height": "400px",
   },
 };
 
@@ -89,7 +89,7 @@ class MeasuresChart extends Component {
       return null;
     }
     return (
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={400}>
         <LineChart
           data={this.state.measures}
           margin={{ top: 12, right: 12, left: 12, bottom: 96 }}

@@ -26,7 +26,7 @@ import MeasuresChart from './MeasuresChart';
 
 const styles = {
   root: {
-    height:300,
+    "height": "400px",
   },
 };
 
