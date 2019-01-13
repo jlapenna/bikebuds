@@ -23,9 +23,8 @@ import Typography from '@material-ui/core/Typography';
 import { withScriptjs, withGoogleMap, BicyclingLayer, GoogleMap,
   Polyline } from 'react-google-maps'
 
-import moment from 'moment';
-
-import { config } from './Config'
+import { config } from './Config';
+import { readableDistance, readableDuration, readableSpeed } from './convert';
 
 /*
   path={[
@@ -158,19 +157,20 @@ const ActivityMap = withStyles(styles)(_ActivityMap);
 class ActivityDetail extends Component {
 
   render() {
-    const duration = moment.duration(
-      Number(this.props.activity.moving_time), 'seconds').format('hh:mm:ss');
+    const distance = readableDistance(this.props.activity.distance);
+    const duration = readableDuration(this.props.activity.moving_time);
+    const average_speed = readableSpeed(this.props.activity.average_speed, this.props.profile);
     return (
       <div className={this.props.classes.root}>
         <div className={this.props.classes.activityRow}>
           <div className={this.props.classes.activitySummary}>
             <div className={this.props.classes.activitySummaryItem}>
               <Typography variant="subtitle1">Distance</Typography>
-              <Typography variant="h4">{this.props.activity.distance}</Typography>
+              <Typography variant="h4">{distance}</Typography>
             </div>
             <div className={this.props.classes.activitySummaryItem}>
               <Typography variant="subtitle1">Speed</Typography>
-              <Typography variant="h4">{this.props.activity.average_speed}</Typography>
+              <Typography variant="h4">{average_speed}</Typography>
             </div>
             <div className={this.props.classes.activitySummaryItem}>
               <Typography variant="subtitle1">Moving Time</Typography>
@@ -190,6 +190,7 @@ class ActivityDetail extends Component {
 
 
 ActivityDetail.propTypes = {
+  profile: PropTypes.object.isRequired,
   activity: PropTypes.object,
 }
 export default withStyles(styles)(ActivityDetail);

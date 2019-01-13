@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -115,7 +116,7 @@ class ActivityListCard extends Component {
               </List>
             </Grid>
             <Grid className={this.props.classes.contentGridElement} item xs={false} sm={8} lg={8}>
-              <ActivityDetail activity={this.state.selectedActivity} />
+              <ActivityDetail profile={this.props.profile} activity={this.state.selectedActivity} />
             </Grid>
           </Grid>
     )
@@ -133,4 +134,8 @@ class ActivityListCard extends Component {
   };
 }
 
+
+ActivityListCard.propTypes = {
+  profile: PropTypes.object.isRequired,
+}
 export default withStyles(styles)(ActivityListCard);
