@@ -133,12 +133,10 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
         user = User.get(claims)
-        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
 
         response = ActivitiesResponse(activities=[])
         for activity in Activity.query(ancestor=user.key).order(-Activity.start_date):
-            response.activities.append(
-                    Activity.to_message(activity, to_imperial=to_imperial))
+            response.activities.append(Activity.to_message(activity))
         return response
 
     @endpoints.method(
@@ -172,14 +170,12 @@ class BikebudsApi(remote.Service):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
-        user = User.get(claims)
-        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
 
         club = ndb.Key(Club, int(request.id)).get()
 
         if club is None:
             return ClubResponse()
-        return ClubResponse(club=Club.to_message(club, to_imperial=to_imperial))
+        return ClubResponse(club=Club.to_message(club))
 
     @endpoints.method(
         endpoints.ResourceContainer(Request),
@@ -197,9 +193,6 @@ class BikebudsApi(remote.Service):
         user = User.get(claims)
         logging.info('Finished user')
 
-        to_imperial = (user.preferences.units ==
-                PreferencesMessage.Unit.IMPERIAL)
-
         if (user.preferences.weight_service ==
                 PreferencesMessage.WeightService.WITHINGS):
             weight_service = 'withings'
@@ -215,7 +208,7 @@ class BikebudsApi(remote.Service):
             return SeriesResponse()
         logging.info('Finished series')
         try:
-            return SeriesResponse(series=Series.to_message(result, to_imperial))
+            return SeriesResponse(series=Series.to_message(result))
         finally:
             logging.info('Finished request')
 

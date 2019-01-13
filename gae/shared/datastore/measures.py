@@ -106,18 +106,7 @@ class Measure(ndb.Model):
                 cls._to_message, *args, **kwargs)
     
     @classmethod
-    def _to_message(cls, key, value, to_imperial):
-        if key == 'weight':
-            if to_imperial:
-                return measures.Weight(kg=value).lb
-            else:
-                return value
-        if key == 'height':
-            if to_imperial:
-                height = measures.Distance(meter=value)
-                return '%s\'%s"' % (height.ft, math.modf(height.ft)[0] * 12)
-            else:
-                return str(value)
+    def _to_message(cls, key, value):
         return value
 
 
@@ -126,7 +115,7 @@ class MeasureMessage(messages.Message):
     date = message_types.DateTimeField(2)
 
     weight = messages.FloatField(3)  # 1
-    height = messages.StringField(4)  # 4
+    height = messages.FloatField(4)  # 4
     fat_free_mass = messages.FloatField(5)  # 5
     fat_ratio = messages.FloatField(6)  # 6
     fat_mass_weight = messages.FloatField(7)  # 8
@@ -172,10 +161,9 @@ class Series(ndb.Model):
                 cls._to_message, *args, **kwargs)
 
     @classmethod
-    def _to_message(cls, key, value, to_imperial):
+    def _to_message(cls, key, value):
         if key == 'measures':
-            return [Measure.to_message(measure, to_imperial=to_imperial)
-                    for measure in value]
+            return [Measure.to_message(measure) for measure in value]
         return value
 
     @classmethod

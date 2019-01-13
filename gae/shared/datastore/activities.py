@@ -171,12 +171,7 @@ class Activity(ndb.Model):
                 cls._to_message, *args, **kwargs)
     
     @classmethod
-    def _to_message(cls, key, value, to_imperial, *args, **kwargs):
-        if key == 'distance':
-            if to_imperial:
-                return measures.Distance(meter=value).ft
-            else:
-                return value
+    def _to_message(cls, key, value, *args, **kwargs):
         if key == 'start_latlng':
             return GeoPtMessage(
                     latitude=value.lat,
