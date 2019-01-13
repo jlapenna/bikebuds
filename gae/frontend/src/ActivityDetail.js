@@ -18,51 +18,61 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 
-import { withScriptjs, withGoogleMap, GoogleMap, Polyline } from 'react-google-maps'
+import { withScriptjs, withGoogleMap, BicyclingLayer, GoogleMap,
+  Polyline } from 'react-google-maps'
+
+import moment from 'moment';
 
 import { config } from './Config'
 
-const styles = {
-  root: {
-    min_height: "500px",
-  },
-  iframe: {
-    height: "450px",
-    width: "590px",
-    border: "0",
-  },
-};
-
 /*
-      path={[
-        { lat: props.activity.start_latlng.latitude, lng: props.activity.start_latlng.longitude },
-        { lat: props.activity.end_latlng.latitude, lng: props.activity.end_latlng.longitude }
-      ]}
+  path={[
+    { lat: props.activity.start_latlng.latitude, lng: props.activity.start_latlng.longitude },
+    { lat: props.activity.end_latlng.latitude, lng: props.activity.end_latlng.longitude }
+  ]}
 */
 
 const googleMapURL = "https://maps.googleapis.com/maps/api/js?key="
   + config.mapsApiKey
   + "&v=3.exp&libraries=geometry,drawing,places";
 
-
-/*
-const MyMapComponent = withScriptjs(withGoogleMap((props) =>
-  <GoogleMap
-    defaultZoom={10}
-  >
-    <Polyline
-      path={window.google.maps.geometry.encoding.decodePath(props.activity.map.summary_polyline)}
-      visible
-      options={{
-        strokeColor: '#00ffff',
-        strokeOpacity: 1,
-        strokeWeight: 2,
-      }}
-    />
-  </GoogleMap>
-))
-*/
+const styles = {
+  root: {
+    height: "100%",
+    width: "100%",
+    overflow: "visible",
+    display: "flex",
+    "flex-direction": "column",
+    "align-items": "center",
+  },
+  containerElement: {
+    "min-height": "200px",
+    height: "100%",
+    width: "100%",
+    flex: "1"
+  },
+  mapElement: {
+    height: "100%",
+    width: "100%",
+  },
+  loadingElement: {
+    height: "100%",
+    width: "100%",
+  },
+  activityRow: {
+    width: "100%",
+  },
+  activitySummary: {
+    width: "100%",
+    display: "flex",
+    "align-items": "stretch",
+  },
+  activitySummaryItem: {
+    width: "100%",
+  },
+};
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   const {onMapMounted, ...otherProps} = props;
@@ -72,7 +82,7 @@ const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
 }));
 
 
-class MyMap extends React.Component {
+class _ActivityMap extends Component {
 
   state = {
     mapMounted: false,
@@ -118,12 +128,13 @@ class MyMap extends React.Component {
   }
 
   render() {
+    console.log('ActivityMap.render', this.props);
     return (
       <GoogleMapsWrapper
         googleMapURL={googleMapURL}
-        loadingElement={<div style={{height: `100%`}}/>}
-        containerElement={<div style={{height: `100%`}}/>}
-        mapElement={<div style={{height: `100%`}}/>}
+        loadingElement={<div className={this.props.classes.loadingElement} />}
+        containerElement={<div className={this.props.classes.containerElement} />}
+        mapElement={<div className={this.props.classes.mapElement} />}
         defaultZoom={10}
         onMapMounted={this._handleMapMounted}
       >
@@ -136,16 +147,43 @@ class MyMap extends React.Component {
             strokeWeight: 3,
           }}
         />
+        <BicyclingLayer autoUpdate />
       </GoogleMapsWrapper>
     )
   }
 }
+const ActivityMap = withStyles(styles)(_ActivityMap);
+
 
 class ActivityDetail extends Component {
 
   render() {
+    const duration = moment.duration(
+      Number(this.props.activity.moving_time), 'seconds').format('hh:mm:ss');
     return (
-      <MyMap activity={this.props.activity} />
+      <div className={this.props.classes.root}>
+        <div className={this.props.classes.activityRow}>
+          <div className={this.props.classes.activitySummary}>
+            <div className={this.props.classes.activitySummaryItem}>
+              <Typography variant="subtitle1">Distance</Typography>
+              <Typography variant="h4">{this.props.activity.distance}</Typography>
+            </div>
+            <div className={this.props.classes.activitySummaryItem}>
+              <Typography variant="subtitle1">Speed</Typography>
+              <Typography variant="h4">{this.props.activity.average_speed}</Typography>
+            </div>
+            <div className={this.props.classes.activitySummaryItem}>
+              <Typography variant="subtitle1">Moving Time</Typography>
+              <Typography variant="h4">{duration}</Typography>
+            </div>
+            <div className={this.props.classes.activitySummaryItem}>
+              <Typography variant="subtitle1">Calories</Typography>
+              <Typography variant="h4">{this.props.activity.kilojoules}</Typography>
+            </div>
+          </div>
+        </div>
+        <ActivityMap activity={this.props.activity} />
+      </div>
     );
   };
 }

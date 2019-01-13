@@ -29,10 +29,10 @@ import ActivityDetail from './ActivityDetail';
 
 const styles = {
   root: {
-    "height": "500px",
+    "height": "400px",
   },
   content: {
-    "height": "500px",
+    "height": "400px",
   },
   contentGridElement: {
     "height": "100%",
@@ -53,19 +53,25 @@ class ActivityListCard extends Component {
   }
 
   updateActivitiesState = (response) => {
+    var activities = response.result.activities || [];
+
+    if (activities.length > 0) {
+      var selectedActivity = activities[0];
+      var selectedindex = 0;
+    }
+
     this.setState({
-      activities: response.result.activities || [],
+      activities: activities,
+      selectedActivity: selectedActivity,
+      selectedIndex: selectedindex,
     });
-    console.log('ActivityListCard.setState: service: ', response.result);
   }
 
   onListItemClick = (index, activity) => {
-    console.log('ActivityListCard.onListItemClick', activity);
     this.setState({
       selectedActivity: activity,
       selectedIndex: index,
     });
-    console.log('ActivityListCard.onListItemClick', this.state.activity);
   }
 
   /**
