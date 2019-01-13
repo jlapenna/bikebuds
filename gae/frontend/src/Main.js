@@ -60,9 +60,9 @@ const styles = (theme) => ({
     },
   },
   appBar: {
-    marginLeft: drawerWidth,
     [theme.breakpoints.up('md')]: {
-      width: `calc(100% - ${drawerWidth}px)`,
+      width: '100%',
+      zIndex: theme.zIndex.drawer + 1,
     },
   },
   menuButton: {
@@ -134,7 +134,6 @@ class Main extends Component {
     return ( 
       <React.Fragment>
         <div className={this.props.classes.toolbar} />
-        <Divider />
         <List onClick={() => this.setState({mobileOpen: false})}>
           <ListItem button key="Home" component={NavLink}
             to="/" exact activeClassName={this.props.classes.active}>

@@ -529,7 +529,8 @@
           "type": "number"
         },
         "height": {
-          "type": "string"
+          "format": "double",
+          "type": "number"
         },
         "hydration": {
           "format": "double",
