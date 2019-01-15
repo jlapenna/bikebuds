@@ -158,6 +158,15 @@ const ActivityMap = withStyles(styles)(_ActivityMap);
 class ActivityDetail extends Component {
 
   render() {
+    if (this.props.activity === undefined) {
+      return (
+        <div className={this.props.classes.root}>
+          <div className={this.props.classes.activityRow} />
+          <ActivityMap activity={this.props.activity} />
+        </div>
+      );
+    }
+
     const distance = readableDistance(this.props.activity.distance);
     const duration = readableDuration(this.props.activity.moving_time);
     const average_speed = readableSpeed(this.props.activity.average_speed, this.props.profile);
