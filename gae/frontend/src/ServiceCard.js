@@ -158,6 +158,9 @@ class ServiceCard extends Component {
               <FormControlLabel
                 control={
                   <Switch
+                    disabled={this.state.syncActionPending
+                        || this.state.service === undefined
+                        || !this.state.service.credentials}
                     checked={this.state.service !== undefined
                         && this.state.service.sync_enabled}
                     onChange={this.onHandleChange}
