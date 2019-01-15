@@ -176,7 +176,6 @@ class BikebudsApi(remote.Service):
         strava_key = Service.get_key(user_key, 'strava')
         athlete = Athlete.get_private(strava_key)
         if athlete is None:
-            return ClubResponse()
             raise endpoints.BadRequestException('Incomplete user.')
 
         club = ndb.Key(Club, int(request.id)).get()

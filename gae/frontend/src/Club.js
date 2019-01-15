@@ -49,16 +49,22 @@ class Club extends Component {
     this.state = {
       fetched: false,
       club: undefined,
+      error: undefined,
     }
   }
 
   updateClubState = (response) => {
     console.log('ClubWrapper.updateClubState:', response);
-    if (response.result.club !== undefined) {
+    if (response.status === 400) {
       this.setState({
-        club: response.result.club,
+        club: null,
+        error: response.statusText,
       });
+      return;
     }
+    this.setState({
+      club: response.result.club,
+    });
   }
 
   /**
@@ -78,14 +84,20 @@ class Club extends Component {
       && !this.state.fetched
       && this.state.club === undefined) {
       this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_club(
-          {id: this.props.clubId}).then(this.updateClubState);
+      window.gapi.client.bikebuds.get_club({id: this.props.clubId}
+          ).then(this.updateClubState, this.updateClubState);
     }
   }
 
   render() {
     if (this.state.club === undefined) {
       return null;
+    } else if (this.state.club === null) {
+      return (
+        <React.Fragment>
+          {this.state.error}
+        </React.Fragment>
+      );
     }
     return (
       <Card className={this.props.classes.root}>
