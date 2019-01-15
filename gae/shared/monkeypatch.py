@@ -26,6 +26,7 @@ logging.getLogger('oauth2client.contrib.multistore_file').setLevel(logging.ERROR
 import logging
 logging.getLogger('stravalib.model.Activity').setLevel(logging.WARN)
 logging.getLogger('stravalib.model.Athlete').setLevel(logging.WARN)
+logging.getLogger('stravalib.model.Club').setLevel(logging.WARN)
 
 # Ensure that the requests library uses urlfetch for its network base.
 # https://cloud.google.com/appengine/docs/standard/python/issue-requests#Python_Quotas_and_limits

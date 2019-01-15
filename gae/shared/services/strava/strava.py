@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import datetime
 import functools
 import logging
+import random
 import time
 
 from google.appengine.ext import deferred
@@ -25,6 +27,7 @@ from shared.datastore import services
 from shared.datastore.activities import Activity
 from shared.datastore.athletes import Athlete, ClubRef
 from shared.datastore.clubs import Club, AthleteRef
+from shared.datastore.services import Service
 
 import stravalib
 from stravalib import exc
@@ -111,6 +114,41 @@ class ClubsMembersProcessor(object):
                         Athlete.clubs.key == ndb.Key(ClubRef, club.key.id()))]
             clubs_to_put.append(club)
         ndb.put_multi(clubs_to_put)
+
+
+class ClubActivitiesSharedSynchronizer(object):
+    """Syncs all club activities."""
+
+    def sync(self):
+        athletes = Athlete.query().fetch()
+        club_to_users = collections.defaultdict(lambda: set())
+        for athlete in athletes:
+            for club in athlete.clubs:
+                club_to_users[club.key.id()].add(athlete.key.id())
+        for club_id, members in club_to_users.iteritems():
+            athletes = (
+                    Athlete.query(
+                        Athlete.strava_id.IN(members))
+                    .order(Athlete.strava_id)
+                    .fetch(keys_only=True)
+                    )
+            service_keys = [athlete.parent() for athlete in athletes]
+            services = Service.query(Service.key.IN(service_keys),
+                    Service.credentials != None).fetch()
+            if len(services) == 0:
+                logging.warn('No creds to sync club %s. Unexpected.', club_id)
+            random.shuffle(services)
+
+            # Just use the first creds for now.
+            service = services[0]
+            client = ClientWrapper(service)
+            activities = client.get_club_activities(club_id)
+
+            @ndb.transactional
+            def put():
+                ndb.put_multi(Activity.from_strava(ndb.Key(Club, club_id), activity)
+                        for activity in activities)
+            put()
 
 
 class ClientWrapper(object):
