@@ -235,7 +235,7 @@ def _do_process(processor):
             processor_name,
             sys.exc_info()[1]
             )
-        msg = '%s for %s/%s' % (
+        msg = '%s for %s' % (
                 sys.exc_info()[0].__name__,
                 processor_name)
         raise SyncException, SyncException(msg), sys.exc_info()[2]
