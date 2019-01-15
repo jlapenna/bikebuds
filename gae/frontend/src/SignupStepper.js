@@ -214,9 +214,6 @@ class SignupStepper extends React.Component {
     return this.state.steps.map((step, index) => {
       const props = {};
       const labelProps = {};
-      if (step.isOptional) {
-        labelProps.optional = <Typography variant="caption">Optional</Typography>;
-      }
       return (
         <Step key={step.label} {...props}>
           <StepLabel {...labelProps}>{step.label}</StepLabel>
