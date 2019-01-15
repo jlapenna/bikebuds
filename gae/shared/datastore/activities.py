@@ -89,80 +89,97 @@ class Activity(ndb.Model):
     # Hacks
     activity_hash = ndb.StringProperty(indexed=True)
 
+    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
+
     @classmethod
-    def from_strava(cls, service_key, activity):
-        start_date = activity.start_date.astimezone(
-                pytz.UTC).replace(tzinfo=None)
-        start_date_local = activity.start_date.replace(tzinfo=None)
+    def from_strava(cls, parent_key, activity):
+        start_date = None
+        if activity.start_date is not None:
+            start_date = activity.start_date.astimezone(
+                    pytz.UTC).replace(tzinfo=None)
+
+        start_date_local = None
+        if activity.start_date_local is not None:
+            start_date_local = activity.start_date.replace(tzinfo=None)
+
         start_latlng = None
         if activity.start_latlng is not None:
             start_latlng = ndb.GeoPt(
                     activity.start_latlng.lat, activity.start_latlng.lon)
+
         end_latlng = None
         if activity.end_latlng is not None:
             end_latlng = ndb.GeoPt(
                     activity.end_latlng.lat, activity.end_latlng.lon)
 
+        map_entity = None
+        if activity.map is not None:
+            map_entity = PolylineMap(id=activity.map.id,
+                polyline=activity.map.polyline,
+                summary_polyline=activity.map.summary_polyline)
+
+        average_speed = None
+        if activity.average_speed is not None:
+            average_speed = activity.average_speed.num
+
+        max_speed = None
+        if activity.max_speed is not None:
+            max_speed = activity.max_speed.num
+
         hash_string = '-'.join((
-                "{0:.0f}".format(activity.distance.num),
+                activity.name.encode('ascii', 'ignore'),
                 "{0:.0f}".format(activity.moving_time.seconds),
                 "{0:.0f}".format(activity.elapsed_time.seconds),
-                "{0:.0f}".format((start_date - datetime.datetime(
-                    1970, 1, 1, tzinfo=None)).total_seconds()),
+                "{0:.0f}".format(activity.distance.num)
                 ))
         activity_hash = hashlib.md5(hash_string.encode()).hexdigest()
-        try:
-            return Activity(
-                    id=activity.id,
-                    parent=service_key,
-                    distance=activity.distance.num,
-                    moving_time=activity.moving_time.seconds,
-                    elapsed_time=activity.elapsed_time.seconds,
-                    total_elevation_gain=activity.total_elevation_gain.num,
-                    elev_high=activity.elev_high,
-                    elev_low=activity.elev_low,
-                    activity_type=activity.type,
-                    name=activity.name,
-                    start_date=start_date,
-                    start_date_local=start_date_local,
-                    timezone=str(activity.timezone),
-                    start_latlng=start_latlng,
-                    end_latlng=end_latlng,
-                    achievement_count=activity.achievement_count,
-                    kudos_count=activity.kudos_count,
-                    comment_count=activity.comment_count,
-                    athlete_count=activity.athlete_count,
-                    photo_count=activity.photo_count,
-                    total_photo_count=activity.total_photo_count,
-                    map = PolylineMap(id=activity.map.id,
-                        polyline=activity.map.polyline,
-                        summary_polyline=activity.map.summary_polyline),
-                    trainer=activity.trainer,
-                    commute=activity.commute,
-                    manual=activity.manual,
-                    private=activity.private,
-                    flagged=activity.flagged,
-                    workout_type=activity.workout_type,
-                    average_speed=activity.average_speed.num,
-                    max_speed=activity.max_speed.num,
-                    has_kudoed=activity.has_kudoed,
-                    gear_id=activity.gear_id,
-                    kilojoules=activity.kilojoules,
-                    average_watts=activity.average_watts,
-                    device_watts=activity.device_watts,
-                    max_watts=activity.max_watts,
-                    weighted_average_watts=activity.weighted_average_watts,
+        return Activity(
+                id=activity.id,
+                parent=parent_key,
+                name=activity.name,
+                distance=activity.distance.num,
+                moving_time=activity.moving_time.seconds,
+                elapsed_time=activity.elapsed_time.seconds,
+                total_elevation_gain=activity.total_elevation_gain.num,
+                elev_high=activity.elev_high,
+                elev_low=activity.elev_low,
+                activity_type=activity.type,
+                start_date=start_date,
+                start_date_local=start_date_local,
+                timezone=str(activity.timezone),
+                start_latlng=start_latlng,
+                end_latlng=end_latlng,
+                achievement_count=activity.achievement_count,
+                kudos_count=activity.kudos_count,
+                comment_count=activity.comment_count,
+                athlete_count=activity.athlete_count,
+                photo_count=activity.photo_count,
+                total_photo_count=activity.total_photo_count,
+                map = map_entity,
+                trainer=activity.trainer,
+                commute=activity.commute,
+                manual=activity.manual,
+                private=activity.private,
+                flagged=activity.flagged,
+                workout_type=activity.workout_type,
+                average_speed=average_speed,
+                max_speed=max_speed,
+                has_kudoed=activity.has_kudoed,
+                gear_id=activity.gear_id,
+                kilojoules=activity.kilojoules,
+                average_watts=activity.average_watts,
+                device_watts=activity.device_watts,
+                max_watts=activity.max_watts,
+                weighted_average_watts=activity.weighted_average_watts,
 
-                    # DetailedActivity
-                    calories=activity.calories,
-                    description=activity.description,
-                    embed_token=activity.embed_token,
+                # DetailedActivity
+                calories=activity.calories,
+                description=activity.description,
+                embed_token=activity.embed_token,
 
-                    # Hacks
-                    activity_hash=activity_hash
-                    )
-        except Exception, e:
-            raise
+                # Hacks
+                activity_hash=activity_hash
+                )
 
     @classmethod
     def to_message(cls, entity, *args, **kwargs):
@@ -172,6 +189,8 @@ class Activity(ndb.Model):
     
     @classmethod
     def _to_message(cls, key, value, *args, **kwargs):
+        if key == 'strava_id':
+            return None
         if key == 'start_latlng':
             return GeoPtMessage(
                     latitude=value.lat,
