@@ -32,11 +32,6 @@ from shared.datastore.services import Service
 import stravalib
 from stravalib import exc
 
-ALLOWED_CLUBS = [
-        255027, # bikebuds
-        493078, # bbtest
-]
-
 
 class AthleteSynchronizer(object):
 
@@ -82,11 +77,6 @@ class ClubsSynchronizer(object):
 
         athlete = Athlete.get_private(service.key)
         for club_ref in athlete.clubs:
-            # For now, only sync allowe clubs, bikebuds and test.
-            if club_ref.key.id() not in ALLOWED_CLUBS:
-                logging.info('Skipping club: %s', club_ref.key.id())
-                continue
-
             logging.info('Fetching club: %s', club_ref.key.id())
             club_result = client.get_club(club_ref.key.id())
             club_entity = Club.from_strava(club_result)
@@ -105,8 +95,6 @@ class ClubsMembersProcessor(object):
     def sync(self):
         clubs_to_put = []
         for club in Club.query():
-            if club.key.id() not in ALLOWED_CLUBS:
-                continue
             logging.info('Joining club: %s', club.key.id())
             club.members = [
                     AthleteRef.from_entity(athlete_entity)
