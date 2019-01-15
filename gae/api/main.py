@@ -175,28 +175,27 @@ class BikebudsApi(remote.Service):
             raise endpoints.UnauthorizedException('Unable to identify user.')
         claims = auth_util.verify_claims_from_header(self.request_state)
 
-        club = ndb.Key(Club, request.id).get()
-        if club is None:
+        club_entity = ndb.Key(Club, request.id).get()
+        if club_entity is None:
             raise endpoints.BadRequestException('No such club.')
 
         user_key = User.get_key(claims)
         strava_key = Service.get_key(user_key, 'strava')
-        athlete = Athlete.get_private(strava_key)
-        if athlete is None:
+        athlete_entity = Athlete.get_private(strava_key)
+        if athlete_entity is None:
             raise endpoints.BadRequestException('Incomplete user.')
 
-        for member in club.members:
-            logging.debug('%s vs %s', member.key.id(), athlete.key.id())
-            if member.key.id() == athlete.key.id():
+        for member in club_entity.club.members:
+            logging.debug('%s vs %s', member.id, athlete_entity.key.id())
+            if member.id == athlete_entity.key.id():
                 break
         else:
             raise endpoints.UnauthorizedException('No access to club.')
 
         activities = []
-        #if request.activities:
-        if True:
+        if request.activities:
             two_weeks = datetime.datetime.now() - datetime.timedelta(days=14)
-            members = [member.key.id() for member in club.members]
+            members = [member.key.id() for member in club_entity.club.members]
             logging.debug('%s: %s', two_weeks, members)
             activity_query = Activity.query(
                     Activity.athlete_id.IN(members),
@@ -205,7 +204,7 @@ class BikebudsApi(remote.Service):
             activities = [Activity.to_message(a)
                     for a in activity_query.fetch()]
 
-        return ClubResponse(club=Club.to_message(club), activities=activities)
+        return ClubResponse(club=club_entity.club, activities=activities)
 
     @endpoints.method(
         endpoints.ResourceContainer(Request),
@@ -233,13 +232,17 @@ class BikebudsApi(remote.Service):
             weight_service = 'withings'
 
         logging.info('Beginning series')
-        result = Series.get_default(Service.get_key(user.key, weight_service))
-        if result is None:
+        series_entity = Series.get_default(Service.get_key(user.key, weight_service))
+        if series_entity is None or series_entity.series is None:
             logging.info('Finished request (no result)')
             return SeriesResponse()
         logging.info('Finished series')
+
+        for m in series_entity.series.measures:
+            logging.debug(m)
+
         try:
-            return SeriesResponse(series=Series.to_message(result))
+            return SeriesResponse(series=series_entity.series)
         finally:
             logging.info('Finished request')
 
@@ -288,9 +291,9 @@ class BikebudsApi(remote.Service):
         
         athlete_message = None
         if strava_connected:
-            athlete = Athlete.get_private(strava.key)
-            if athlete is not None:
-                athlete_message = Athlete.to_message(athlete)
+            athlete_entity = Athlete.get_private(strava.key)
+            if athlete_entity is not None:
+                athlete_message = athlete_entity.athlete
 
         return ProfileResponse(
                 created=user.created,

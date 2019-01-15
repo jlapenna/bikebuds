@@ -32,7 +32,7 @@ from shared.datastore import services
 from shared.datastore.admin import DatastoreState, SyncState
 from shared.datastore.athletes import Athlete
 from shared.datastore.clubs import Club
-from shared.datastore.measures import Measure, Series
+from shared.datastore.measures import Series
 from shared.datastore.services import Service
 from shared.services.withings import withings
 from shared.services.bbfitbit import bbfitbit
@@ -66,25 +66,10 @@ def cleanup():
         datastore_state = result[0]
 
     def cleanup():
-        ndb.delete_multi(Measure.query().fetch(keys_only=True))
-    _do_cleanup(1, datastore_state, cleanup)
-
-    def cleanup():
-        ndb.delete_multi(Series.query().fetch(keys_only=True))
-    _do_cleanup(2, datastore_state, cleanup)
-
-    def cleanup():
-        for service in Service.query().fetch():
-            if service.key.id() == 'strava':
-                service.clear_credentials()
-    _do_cleanup(3, datastore_state, cleanup)
-
-    def cleanup():
-        ndb.delete_multi(Measure.query().fetch(keys_only=True))
         ndb.delete_multi(Series.query().fetch(keys_only=True))
         ndb.delete_multi(Athlete.query().fetch(keys_only=True))
         ndb.delete_multi(Club.query().fetch(keys_only=True))
-    _do_cleanup(4, datastore_state, cleanup)
+    _do_cleanup(6, datastore_state, cleanup)
 
     return 'OK', 200
 

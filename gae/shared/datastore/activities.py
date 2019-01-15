@@ -45,6 +45,9 @@ class PolylineMap(ndb.Model):
 
 class Activity(ndb.Model):
     # id = string
+    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
+    athlete_id = ndb.IntegerProperty(indexed=True)
+
     name = ndb.StringProperty(indexed=False)
     distance = ndb.FloatProperty(indexed=False)
     moving_time = ndb.IntegerProperty(indexed=False)
@@ -87,9 +90,7 @@ class Activity(ndb.Model):
     embed_token = ndb.StringProperty(indexed=False)
 
     # Hacks
-    activity_hash = ndb.StringProperty(indexed=True)
-
-    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
+    activity_hash = ndb.StringProperty(indexed=False)
 
     @classmethod
     def from_strava(cls, parent_key, activity):
@@ -135,6 +136,7 @@ class Activity(ndb.Model):
         activity_hash = hashlib.md5(hash_string.encode()).hexdigest()
         return Activity(
                 id=activity.id,
+                athlete_id=activity.athlete.id,
                 parent=parent_key,
                 name=activity.name,
                 distance=activity.distance.num,
@@ -215,48 +217,49 @@ class PolylineMapMessage(messages.Message):
 
 
 class ActivityMessage(messages.Message):
-    id = messages.IntegerField(1)
+    id = messages.IntegerField(1)  # Also strava_id
+    athlete_id = messages.IntegerField(2)
 
-    name = messages.StringField(2)
-    distance = messages.FloatField(3)
-    moving_time = messages.IntegerField(4)
-    elapsed_time = messages.IntegerField(5)
-    total_elevation_gain = messages.FloatField(6)
-    elev_high = messages.FloatField(7)
-    elev_low = messages.FloatField(8)
-    activity_type = messages.StringField(9)
-    start_date = message_types.DateTimeField(10)
-    start_date_local = message_types.DateTimeField(11)
-    timezone = messages.StringField(12)
-    start_latlng = messages.MessageField(GeoPtMessage, 13)
-    end_latlng = messages.MessageField(GeoPtMessage, 14)
-    achievement_count = messages.IntegerField(15)
-    kudos_count = messages.IntegerField(16)
-    comment_count = messages.IntegerField(17)
-    athlete_count = messages.IntegerField(18)
-    photo_count = messages.IntegerField(19)
-    total_photo_count = messages.IntegerField(20)
-    map = messages.MessageField(PolylineMapMessage, 21)
-    trainer = messages.BooleanField(22)
-    commute = messages.BooleanField(23)
-    manual = messages.BooleanField(24)
-    private = messages.BooleanField(25)
-    flagged = messages.BooleanField(26)
-    workout_type = messages.StringField(27)
-    average_speed = messages.FloatField(28)
-    max_speed = messages.FloatField(29)
-    has_kudoed = messages.BooleanField(30)
-    gear_id = messages.StringField(31)
-    kilojoules = messages.FloatField(32)
-    average_watts = messages.FloatField(33)
-    device_watts = messages.BooleanField(34)
-    max_watts = messages.IntegerField(35)
-    weighted_average_watts = messages.IntegerField(36)
+    name = messages.StringField(3)
+    distance = messages.FloatField(4)
+    moving_time = messages.IntegerField(5)
+    elapsed_time = messages.IntegerField(6)
+    total_elevation_gain = messages.FloatField(7)
+    elev_high = messages.FloatField(8)
+    elev_low = messages.FloatField(9)
+    activity_type = messages.StringField(10)
+    start_date = message_types.DateTimeField(11)
+    start_date_local = message_types.DateTimeField(12)
+    timezone = messages.StringField(13)
+    start_latlng = messages.MessageField(GeoPtMessage, 14)
+    end_latlng = messages.MessageField(GeoPtMessage, 15)
+    achievement_count = messages.IntegerField(16)
+    kudos_count = messages.IntegerField(17)
+    comment_count = messages.IntegerField(18)
+    athlete_count = messages.IntegerField(19)
+    photo_count = messages.IntegerField(20)
+    total_photo_count = messages.IntegerField(21)
+    map = messages.MessageField(PolylineMapMessage, 22)
+    trainer = messages.BooleanField(23)
+    commute = messages.BooleanField(24)
+    manual = messages.BooleanField(25)
+    private = messages.BooleanField(26)
+    flagged = messages.BooleanField(27)
+    workout_type = messages.StringField(28)
+    average_speed = messages.FloatField(29)
+    max_speed = messages.FloatField(30)
+    has_kudoed = messages.BooleanField(31)
+    gear_id = messages.StringField(32)
+    kilojoules = messages.FloatField(33)
+    average_watts = messages.FloatField(34)
+    device_watts = messages.BooleanField(35)
+    max_watts = messages.IntegerField(36)
+    weighted_average_watts = messages.IntegerField(37)
 
     # DetailedActivity
-    calories = messages.FloatField(37)
-    description = messages.StringField(38)
-    embed_token = messages.StringField(39)
+    calories = messages.FloatField(38)
+    description = messages.StringField(39)
+    embed_token = messages.StringField(40)
 
     # Hacks
-    activity_hash = messages.StringField(40)
+    activity_hash = messages.StringField(41)

@@ -12,94 +12,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import dateutil.parser
-import logging
 import pytz
-import sys
 
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import msgprop
 
 from endpoints import message_types
 from endpoints import messages
 
-from measurement import measures
-
-from shared.datastore.clubs import Club, ClubMessage
+from shared.datastore.club_ref import ClubRef, ClubRefMessage
 from shared.datastore import message_util
 
 
-class ClubRef(ndb.Model):
-    key = ndb.KeyProperty(indexed=True)
-    name = ndb.StringProperty(indexed=False)
-    profile_medium = ndb.StringProperty(indexed=False)
-    url = ndb.StringProperty(indexed=False)
-    admin = ndb.BooleanProperty(indexed=True)
-    owner = ndb.BooleanProperty(indexed=True)
+class AthleteMessage(messages.Message):
+    id = messages.IntegerField(1)
 
-    @classmethod
-    def from_strava(cls, club):
-        return cls(
-                key=ndb.Key(cls, club.id),
-                name=club.name,
-                profile_medium=club.profile_medium,
-                url=club.url,
-                admin=club.admin,
-                owner=club.owner)
-
-    @classmethod
-    def to_message(cls, entity, *args, **kwargs):
-        return message_util.to_message(
-                ClubRefMessage, entity,
-                cls._to_message, *args, **kwargs)
-    
-    @classmethod
-    def _to_message(cls, key, value, *args, **kwargs):
-        if key == 'key':
-            return None
-        return value
+    resource_state = messages.IntegerField(2)
+    firstname = messages.StringField(3)
+    lastname = messages.StringField(4)
+    profile_medium = messages.StringField(5)
+    profile = messages.StringField(6)
+    city = messages.StringField(7)
+    state = messages.StringField(8)
+    country = messages.StringField(9)
+    sex = messages.StringField(10)
+    friend = messages.StringField(11)
+    follower = messages.StringField(12)
+    premium = messages.BooleanField(13)
+    #summit = messages.BooleanField(14)  # Not returned by stravalib
+    created_at = message_types.DateTimeField(15)
+    updated_at = message_types.DateTimeField(16)
+    follower_count = messages.IntegerField(17)
+    friend_count = messages.IntegerField(18)
+    mutual_friend_count = messages.IntegerField(19)
+    measurement_preference = messages.StringField(20)
+    ftp = messages.StringField(21)
+    weight = messages.FloatField(22)
+    clubs = messages.MessageField(ClubRefMessage, 23, repeated=True)
 
 
 class Athlete(ndb.Model):
     # id = string
-    resource_state = ndb.IntegerProperty(indexed=False)
-    firstname = ndb.StringProperty(indexed=False)
-    lastname = ndb.StringProperty(indexed=False)
-    profile_medium = ndb.StringProperty(indexed=False)
-    profile = ndb.StringProperty(indexed=False)
-    city = ndb.StringProperty(indexed=False)
-    state = ndb.StringProperty(indexed=False)
-    country = ndb.StringProperty(indexed=False)
-    sex = ndb.StringProperty(indexed=False)
-    friend = ndb.StringProperty(indexed=False)
-    follower = ndb.StringProperty(indexed=False)
-    premium = ndb.BooleanProperty(indexed=False)
-    #summit = ndb.BooleanProperty(indexed=False)  # Not returned by stravalib
-    created_at = ndb.DateTimeProperty(indexed=False)
-    updated_at = ndb.DateTimeProperty(indexed=False)
-    follower_count = ndb.IntegerProperty(indexed=False)
-    friend_count = ndb.IntegerProperty(indexed=False)
-    mutual_friend_count = ndb.IntegerProperty(indexed=False)
-    measurement_preference = ndb.StringProperty(indexed=False)
-    ftp = ndb.StringProperty(indexed=False)
-    weight = ndb.FloatProperty(indexed=False)
-    clubs = ndb.StructuredProperty(ClubRef, indexed=True, repeated=True)
-    # bikes = [SummaryGear, ...]
-    # shoes = [SummaryGear, ...]
-
-    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
+    athlete = msgprop.MessageProperty(AthleteMessage, indexed_fields=['id', 'clubs.id'])
 
     @classmethod
-    def from_strava(cls, service_key, athlete):
+    def entity_from_strava(cls, service_key, athlete):
+        athlete_message = cls.message_from_strava(athlete)
+        return cls(id=athlete.id, parent=service_key,
+                athlete=athlete_message)
+
+    @classmethod
+    def message_from_strava(cls, athlete):
+        weight = None
+        if athlete.weight is not None:
+            weight = athlete.weight.num
+
         clubs = []
         if athlete.clubs is not None:
             clubs = [ClubRef.from_strava(club) for club in athlete.clubs]
-        if athlete.weight is None:
-            weight = None
-        else:
-            weight = athlete.weight.num
-        return cls(
+
+        return AthleteMessage(
                 id=athlete.id,
-                parent=service_key,
                 resource_state=athlete.resource_state,
                 firstname=athlete.firstname,
                 lastname=athlete.lastname,
@@ -126,59 +99,9 @@ class Athlete(ndb.Model):
                 clubs=clubs)
 
     @classmethod
-    def to_message(cls, entity, *args, **kwargs):
-        return message_util.to_message(
-                AthleteMessage, entity,
-                cls._to_message, *args, **kwargs)
-
-    @classmethod
-    def _to_message(cls, key, value, *args, **kwargs):
-        if key == 'strava_id':
-            return None
-        if key == 'clubs':
-            return [ClubRef.to_message(club)
-                    for club in value]
-        return value
-
-    @classmethod
     def get_private(cls, service_key):
         athletes = Athlete.query(ancestor=service_key).fetch(1)
         if athletes is None or len(athletes) == 0:
             return None
         else:
             return athletes[0]
-
-
-class ClubRefMessage(messages.Message):
-    id = messages.IntegerField(1)
-    name = messages.StringField(2)
-    profile_medium = messages.StringField(3)
-    url = messages.StringField(4)
-    admin = messages.BooleanField(5)
-    owner = messages.BooleanField(6)
-
-
-class AthleteMessage(messages.Message):
-    id = messages.IntegerField(1)
-    resource_state = messages.IntegerField(2)
-    firstname = messages.StringField(3)
-    lastname = messages.StringField(4)
-    profile_medium = messages.StringField(5)
-    profile = messages.StringField(6)
-    city = messages.StringField(7)
-    state = messages.StringField(8)
-    country = messages.StringField(9)
-    sex = messages.StringField(10)
-    friend = messages.StringField(11)
-    follower = messages.StringField(12)
-    premium = messages.BooleanField(13)
-    #summit = messages.BooleanField(14)  # Not returned by stravalib
-    created_at = message_types.DateTimeField(15)
-    updated_at = message_types.DateTimeField(16)
-    follower_count = messages.IntegerField(17)
-    friend_count = messages.IntegerField(18)
-    mutual_friend_count = messages.IntegerField(19)
-    measurement_preference = messages.StringField(20)
-    ftp = messages.StringField(21)
-    weight = messages.FloatField(22)
-    clubs = messages.MessageField(ClubRefMessage, 23, repeated=True)

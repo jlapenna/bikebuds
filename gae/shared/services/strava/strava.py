@@ -39,7 +39,7 @@ class AthleteSynchronizer(object):
         client = ClientWrapper(service)
         client.ensure_access()
         athlete = client.get_athlete()
-        return Athlete.from_strava(service.key, athlete).put()
+        return Athlete.entity_from_strava(service.key, athlete).put()
 
 
 class ActivitiesSynchronizer(object):
@@ -75,11 +75,11 @@ class ClubsSynchronizer(object):
         client = ClientWrapper(service)
         client.ensure_access()
 
-        athlete = Athlete.get_private(service.key)
-        for club_ref in athlete.clubs:
-            logging.info('Fetching club: %s', club_ref.key.id())
-            club_result = client.get_club(club_ref.key.id())
-            club_entity = Club.from_strava(club_result)
+        athlete_entity = Athlete.get_private(service.key)
+        for club_ref in athlete_entity.athlete.clubs:
+            logging.info('Fetching club: %s', club_ref.id)
+            club_result = client.get_club(club_ref.id)
+            club_entity = Club.entity_from_strava(club_result)
 
             if (not club_result.private
                     or club_result.admin
@@ -94,13 +94,14 @@ class ClubsMembersProcessor(object):
 
     def sync(self):
         clubs_to_put = []
-        for club in Club.query():
-            logging.info('Joining club: %s', club.key.id())
-            club.members = [
-                    AthleteRef.from_entity(athlete_entity)
-                    for athlete_entity in Athlete.query(
-                        Athlete.clubs.key == ndb.Key(ClubRef, club.key.id()))]
-            clubs_to_put.append(club)
+        for club_entity in Club.query():
+            logging.info('Joining club: %s', club_entity.key.id())
+            athletes_query = Athlete.query(
+                        Athlete.athlete.clubs.id == club_entity.key.id())
+            club_entity.club.members = [
+                    AthleteRef.from_strava(athlete_entity.athlete)
+                    for athlete_entity in athletes_query.fetch()]
+            clubs_to_put.append(club_entity)
         ndb.put_multi(clubs_to_put)
 
 
@@ -108,33 +109,34 @@ class ClubActivitiesSharedSynchronizer(object):
     """Syncs all club activities."""
 
     def sync(self):
-        athletes = Athlete.query().fetch()
+        athlete_entities = Athlete.query().fetch()
         club_to_users = collections.defaultdict(lambda: set())
-        for athlete in athletes:
-            for club in athlete.clubs:
-                club_to_users[club.key.id()].add(athlete.key.id())
+        for athlete_entity in athlete_entities:
+            for club in athlete_entity.athlete.clubs:
+                club_to_users[club.key.id()].add(athlete_entity.key.id())
         for club_id, members in club_to_users.iteritems():
-            athletes = (
+            athlete_entities = (
                     Athlete.query(
                         Athlete.strava_id.IN(members))
                     .order(Athlete.strava_id)
                     .fetch(keys_only=True)
                     )
-            service_keys = [athlete.parent() for athlete in athletes]
-            services = Service.query(Service.key.IN(service_keys),
+            service_keys = [athlete_entity.parent()
+                    for athlete_entity in athlete_entities]
+            service_entities = Service.query(Service.key.IN(service_entity_keys),
                     Service.credentials != None).fetch()
-            if len(services) == 0:
+            if len(service_entities) == 0:
                 logging.warn('No creds to sync club %s. Unexpected.', club_id)
-            random.shuffle(services)
+            random.shuffle(service_entities)
 
             # Just use the first creds for now.
-            service = services[0]
-            client = ClientWrapper(service)
+            service_entity = service_entities[0]
+            client = ClientWrapper(service_entity)
             activities = client.get_club_activities(club_id)
 
             @ndb.transactional
             def put():
-                ndb.put_multi(Activity.from_strava(ndb.Key(Club, club_id), activity)
+                ndb.put_multi(Activity.entity_from_strava(ndb.Key(Club, club_id), activity)
                         for activity in activities)
             put()
 

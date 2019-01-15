@@ -19,6 +19,7 @@ import sys
 import time
 
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import msgprop
 
 from endpoints import message_types
 from endpoints import messages
@@ -31,97 +32,19 @@ from shared.datastore import message_util
 
 _KG_TO_POUNDS = 2.20462262185
 
-class Measure(ndb.Model):
-    """Holds a measure."""
-    date = ndb.DateTimeProperty()
-
-    weight = ndb.FloatProperty()  # 1
-    height = ndb.FloatProperty(indexed=False)  # 4
-    fat_free_mass = ndb.FloatProperty(indexed=False)  # 5
-    fat_ratio = ndb.FloatProperty(indexed=False)  # 6
-    fat_mass_weight = ndb.FloatProperty(indexed=False)  # 8
-    diastolic_blood_pressure = ndb.FloatProperty(indexed=False)  # 9
-    systolic_blood_pressure = ndb.FloatProperty(indexed=False)  # 10
-    heart_pulse = ndb.FloatProperty(indexed=False)  # 11
-    temperature = ndb.FloatProperty(indexed=False)  # 12
-    spo2 = ndb.FloatProperty(indexed=False)  # 54
-    body_temperature = ndb.FloatProperty(indexed=False)  # 71
-    skin_temperature = ndb.FloatProperty(indexed=False)  # 72
-    muscle_mass = ndb.FloatProperty(indexed=False)  # 76
-    hydration = ndb.FloatProperty(indexed=False)  # 77
-    bone_mass = ndb.FloatProperty(indexed=False)  # 88
-    pulse_wave_velocity = ndb.FloatProperty(indexed=False)  # 91
-
-    @classmethod
-    def from_withings(cls, service_key, measure):
-        attributes = dict()
-        for key, type_int in nokia.NokiaMeasureGroup.MEASURE_TYPES:
-            value = measure.get_measure(type_int)
-            if value is not None:
-                attributes[key] = value
-        measure = Measure(
-                id=measure.date.timestamp,
-                parent=service_key,
-                date=measure.date.datetime.replace(tzinfo=None),
-                **attributes)
-        return measure
-
-    @classmethod
-    def from_fitbit_time_series(cls, service_key, measure):
-        date = datetime.datetime.strptime(
-                measure['dateTime'], '%Y-%m-%d')
-        measure = Measure(
-                id=date.strftime('%s'),
-                parent=service_key,
-                date=date,
-                weight=float(measure['value']),
-                )
-        return measure
-
-    @classmethod
-    def from_fitbit_log(cls, service_key, measure):
-        date = datetime.datetime.strptime(
-                measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S')
-        measure = Measure(id=measure['logId'],
-                parent=service_key,
-                date=date,
-                weight=measure['weight'],
-                fat_ratio=measure['fat'],
-                )
-        return measure
-
-    @classmethod
-    def latest_query(cls, service_key, measure_type):
-        return Measure.query(measure_type != None, ancestor=service_key).order(
-                measure_type, -Measure.date)
-
-    @classmethod
-    def fetch_lastupdate(cls, service_key):
-        return Measure.query(ancestor=service_key).order(-Measure.date).fetch(1)
-
-    @classmethod
-    def to_message(cls, entity, *args, **kwargs):
-        return message_util.to_message(
-                MeasureMessage, entity,
-                cls._to_message, *args, **kwargs)
-    
-    @classmethod
-    def _to_message(cls, key, value):
-        return value
-
 
 class MeasureMessage(messages.Message):
     id = messages.StringField(1)
-    date = message_types.DateTimeField(2)
 
+    date = message_types.DateTimeField(2)
     weight = messages.FloatField(3)  # 1
     height = messages.FloatField(4)  # 4
     fat_free_mass = messages.FloatField(5)  # 5
     fat_ratio = messages.FloatField(6)  # 6
     fat_mass_weight = messages.FloatField(7)  # 8
-    diastolic_blood_pressure = messages.FloatField(8)  # 9
-    systolic_blood_pressure = messages.FloatField(9)  # 10
-    heart_pulse = messages.FloatField(10)  # 11
+    diastolic_blood_pressure = messages.IntegerField(8)  # 9
+    systolic_blood_pressure = messages.IntegerField(9)  # 10
+    heart_pulse = messages.IntegerField(10)  # 11
     temperature = messages.FloatField(11)  # 12
     spo2 = messages.FloatField(12)  # 54
     body_temperature = messages.FloatField(13)  # 71
@@ -132,45 +55,81 @@ class MeasureMessage(messages.Message):
     pulse_wave_velocity = messages.FloatField(18)  # 91
 
 
+class Measure(object):
+
+    @classmethod
+    def message_from_withings(cls, measure):
+        attributes = dict()
+        for key, type_int in nokia.NokiaMeasureGroup.MEASURE_TYPES:
+            value = measure.get_measure(type_int)
+            if value is not None:
+                attributes[key] = value
+        return MeasureMessage(
+                id=str(measure.date.timestamp),
+                date=measure.date.datetime.replace(tzinfo=None),
+                **attributes)
+
+    @classmethod
+    def message_from_fitbit_time_series(cls, measure):
+        date = datetime.datetime.strptime(
+                measure['dateTime'], '%Y-%m-%d')
+        return MeasureMessage(
+                id=date.strftime('%s'),
+                date=date,
+                weight=float(measure['value']),
+                )
+
+    @classmethod
+    def message_from_fitbit_log(cls, measure):
+        date = datetime.datetime.strptime(
+                measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S')
+        return MeasureMessage(
+                id=measure['logId'],
+                date=date,
+                weight=measure['weight'],
+                fat_ratio=measure['fat'],
+                )
+
+    @classmethod
+    def latest_query(cls, service_key, measure_type):
+        return Measure.query(
+                MeasureMessage.measure_type != None,
+                ancestor=service_key
+                ).order(MeasureMessage.measure_type, -Measure.date)
+
+    @classmethod
+    def fetch_lastupdate(cls, service_key):
+        return Measure.query(
+                ancestor=service_key
+                ).order(-MeasureMessage.date).fetch(1)
+
+
+class SeriesMessage(messages.Message):
+    measures = messages.MessageField(MeasureMessage, 2, repeated=True)
+
+
 class Series(ndb.Model):
     """Holds a series of measures."""
-    measures = ndb.LocalStructuredProperty(Measure, repeated=True)
+    series = msgprop.MessageProperty(SeriesMessage, indexed=['measures.measure_type', 'measures.date'])
 
     @classmethod
-    def from_withings(cls, service_key, measures, id="default"):
-        measures = [Measure.from_withings(service_key, measure)
-                for measure in measures]
-        return Series(parent=service_key, id=id, measures=measures)
+    def entity_from_withings(cls, service_key, measures, id="default"):
+        measures = [Measure.message_from_withings(m) for m in measures]
+        series = SeriesMessage(measures=measures)
+        return Series(id=id, parent=service_key, series=series)
 
     @classmethod
-    def from_fitbit_time_series(cls, service_key, measures, id="default"):
-        measures = [Measure.from_fitbit_time_series(service_key, measure)
-                for measure in measures]
-        return Series(parent=service_key, id=id, measures=measures)
+    def entity_from_fitbit_time_series(cls, service_key, measures, id="default"):
+        measures = [Measure.message_from_fitbit_time_series(m) for m in measures]
+        series = SeriesMessage(measures=measures)
+        return Series(id=id, parent=service_key, series=series)
 
     @classmethod
-    def from_fitbit_log(cls, service_key, measures, id="default"):
-        measures = [Measure.from_fitbit_log(service_key, measure)
-                for measure in measures]
-        return Series(parent=service_key, id=id, measures=measures)
-
-    @classmethod
-    def to_message(cls, entity, *args, **kwargs):
-        return message_util.to_message(
-                SeriesMessage, entity,
-                cls._to_message, *args, **kwargs)
-
-    @classmethod
-    def _to_message(cls, key, value):
-        if key == 'measures':
-            return [Measure.to_message(measure) for measure in value]
-        return value
+    def entity_from_fitbit_log(cls, service_key, measures, id="default"):
+        measures = [Measure.message_from_fitbit_log(m) for m in measures]
+        series = SeriesMessage(measures=measures)
+        return Series(id=id, parent=service_key, series=series)
 
     @classmethod
     def get_default(cls, parent):
         return ndb.Key(cls, "default", parent=parent).get()
-
-
-class SeriesMessage(messages.Message):
-    id = messages.StringField(1)
-    measures = messages.MessageField(MeasureMessage, 2, repeated=True)

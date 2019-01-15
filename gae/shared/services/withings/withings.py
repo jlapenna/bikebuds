@@ -30,8 +30,8 @@ class Synchronizer(object):
 
         @ndb.transactional
         def put_series():
-            Series.from_withings(service.key, measures).put()
-        put_series()
+            Series.entity_from_withings(service.key, measures).put()
+        return put_series()
 
 
 def create_client(service):
