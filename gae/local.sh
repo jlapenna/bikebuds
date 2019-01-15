@@ -28,6 +28,8 @@ function main() {
   popd
 
   dev_appserver.py \
+    --log_level=debug \
+    --enable_console \
     --specified_service_ports=default:8081,api:8082,backend:8083 \
     gae/frontend/app.yaml \
     gae/api/app.yaml \
