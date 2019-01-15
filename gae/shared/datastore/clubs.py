@@ -85,6 +85,8 @@ class Club(ndb.Model):
     # Non-strava info.
     members = ndb.StructuredProperty(AthleteRef, repeated=True)
 
+    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
+
     @classmethod
     def from_strava(cls, club):
         return cls(
@@ -112,6 +114,8 @@ class Club(ndb.Model):
     
     @classmethod
     def _to_message(cls, key, value, *args, **kwargs):
+        if key == 'strava_id':
+            return None
         if key == 'members':
             return [AthleteRef.to_message(member) for member in value]
         return value
