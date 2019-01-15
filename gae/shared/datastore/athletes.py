@@ -33,6 +33,8 @@ class ClubRef(ndb.Model):
     name = ndb.StringProperty(indexed=False)
     profile_medium = ndb.StringProperty(indexed=False)
     url = ndb.StringProperty(indexed=False)
+    admin = ndb.BooleanProperty(indexed=True)
+    owner = ndb.BooleanProperty(indexed=True)
 
     @classmethod
     def from_strava(cls, club):
@@ -40,7 +42,9 @@ class ClubRef(ndb.Model):
                 key=ndb.Key(cls, club.id),
                 name=club.name,
                 profile_medium=club.profile_medium,
-                url=club.url)
+                url=club.url,
+                admin=club.admin,
+                owner=club.owner)
 
     @classmethod
     def to_message(cls, entity, *args, **kwargs):
@@ -81,6 +85,8 @@ class Athlete(ndb.Model):
     clubs = ndb.StructuredProperty(ClubRef, indexed=True, repeated=True)
     # bikes = [SummaryGear, ...]
     # shoes = [SummaryGear, ...]
+
+    strava_id = ndb.ComputedProperty(lambda self: self.key.id())
 
     @classmethod
     def from_strava(cls, service_key, athlete):
@@ -127,6 +133,8 @@ class Athlete(ndb.Model):
 
     @classmethod
     def _to_message(cls, key, value, *args, **kwargs):
+        if key == 'strava_id':
+            return None
         if key == 'clubs':
             return [ClubRef.to_message(club)
                     for club in value]
@@ -146,6 +154,8 @@ class ClubRefMessage(messages.Message):
     name = messages.StringField(2)
     profile_medium = messages.StringField(3)
     url = messages.StringField(4)
+    admin = messages.BooleanField(5)
+    owner = messages.BooleanField(6)
 
 
 class AthleteMessage(messages.Message):
