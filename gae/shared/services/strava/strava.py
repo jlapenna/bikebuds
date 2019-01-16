@@ -56,7 +56,8 @@ class ActivitiesSynchronizer(object):
 
         @ndb.transactional
         def put():
-            ndb.put_multi(Activity.from_strava(service.key, activity)
+            ndb.put_multi(
+                    Activity.entity_from_strava(service.key, activity)
                     for activity in activities)
         return put()
 

@@ -66,7 +66,12 @@
         "id"
       ],
       "parameters": {
+        "activities": {
+          "location": "query",
+          "type": "boolean"
+        },
         "id": {
+          "format": "int64",
           "location": "path",
           "type": "string"
         }
@@ -310,6 +315,12 @@
     "MainClubResponse": {
       "id": "MainClubResponse",
       "properties": {
+        "activities": {
+          "items": {
+            "$ref": "SharedDatastoreActivitiesActivityMessage"
+          },
+          "type": "array"
+        },
         "club": {
           "$ref": "SharedDatastoreClubsClubMessage"
         },
@@ -444,6 +455,9 @@
         },
         "activity_type": {
           "type": "string"
+        },
+        "athlete": {
+          "$ref": "SharedDatastoreAthleteRefAthleteRefMessage"
         },
         "athlete_count": {
           "format": "int64",
@@ -597,10 +611,35 @@
     "SharedDatastoreActivitiesPolylineMapMessage": {
       "id": "SharedDatastoreActivitiesPolylineMapMessage",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "polyline": {
           "type": "string"
         },
         "summary_polyline": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SharedDatastoreAthleteRefAthleteRefMessage": {
+      "id": "SharedDatastoreAthleteRefAthleteRefMessage",
+      "properties": {
+        "firstname": {
+          "type": "string"
+        },
+        "id": {
+          "format": "int64",
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "profile_medium": {
           "type": "string"
         }
       },
@@ -614,7 +653,7 @@
         },
         "clubs": {
           "items": {
-            "$ref": "SharedDatastoreAthletesClubRefMessage"
+            "$ref": "SharedDatastoreClubRefClubRefMessage"
           },
           "type": "array"
         },
@@ -689,9 +728,12 @@
       },
       "type": "object"
     },
-    "SharedDatastoreAthletesClubRefMessage": {
-      "id": "SharedDatastoreAthletesClubRefMessage",
+    "SharedDatastoreClubRefClubRefMessage": {
+      "id": "SharedDatastoreClubRefClubRefMessage",
       "properties": {
+        "admin": {
+          "type": "boolean"
+        },
         "id": {
           "format": "int64",
           "type": "string"
@@ -699,32 +741,13 @@
         "name": {
           "type": "string"
         },
+        "owner": {
+          "type": "boolean"
+        },
         "profile_medium": {
           "type": "string"
         },
         "url": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "SharedDatastoreClubsAthleteRefMessage": {
-      "id": "SharedDatastoreClubsAthleteRefMessage",
-      "properties": {
-        "firstname": {
-          "type": "string"
-        },
-        "id": {
-          "format": "int64",
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "profile": {
-          "type": "string"
-        },
-        "profile_medium": {
           "type": "string"
         }
       },
@@ -758,7 +781,7 @@
         },
         "members": {
           "items": {
-            "$ref": "SharedDatastoreClubsAthleteRefMessage"
+            "$ref": "SharedDatastoreAthleteRefAthleteRefMessage"
           },
           "type": "array"
         },
@@ -806,8 +829,8 @@
           "type": "string"
         },
         "diastolic_blood_pressure": {
-          "format": "double",
-          "type": "number"
+          "format": "int64",
+          "type": "string"
         },
         "fat_free_mass": {
           "format": "double",
@@ -822,8 +845,8 @@
           "type": "number"
         },
         "heart_pulse": {
-          "format": "double",
-          "type": "number"
+          "format": "int64",
+          "type": "string"
         },
         "height": {
           "format": "double",
@@ -853,8 +876,8 @@
           "type": "number"
         },
         "systolic_blood_pressure": {
-          "format": "double",
-          "type": "number"
+          "format": "int64",
+          "type": "string"
         },
         "temperature": {
           "format": "double",
@@ -870,9 +893,6 @@
     "SharedDatastoreMeasuresSeriesMessage": {
       "id": "SharedDatastoreMeasuresSeriesMessage",
       "properties": {
-        "id": {
-          "type": "string"
-        },
         "measures": {
           "items": {
             "$ref": "SharedDatastoreMeasuresMeasureMessage"

@@ -138,7 +138,7 @@ class BikebudsApi(remote.Service):
 
         response = ActivitiesResponse(activities=[])
         for activity in Activity.query(ancestor=user.key).order(-Activity.start_date):
-            response.activities.append(Activity.to_message(activity))
+            response.activities.append(activity.activity)
         return response
 
     @endpoints.method(
@@ -195,14 +195,13 @@ class BikebudsApi(remote.Service):
         activities = []
         if request.activities:
             two_weeks = datetime.datetime.now() - datetime.timedelta(days=14)
-            members = [member.key.id() for member in club_entity.club.members]
+            members = [member.id for member in club_entity.club.members]
             logging.debug('%s: %s', two_weeks, members)
             activity_query = Activity.query(
-                    Activity.athlete_id.IN(members),
+                    Activity.activity.athlete.id.IN(members),
                     Activity.start_date > two_weeks
                     ).order(Activity.start_date)
-            activities = [Activity.to_message(a)
-                    for a in activity_query.fetch()]
+            activities = [a.activity for a in activity_query.fetch()]
 
         return ClubResponse(club=club_entity.club, activities=activities)
 
@@ -237,9 +236,6 @@ class BikebudsApi(remote.Service):
             logging.info('Finished request (no result)')
             return SeriesResponse()
         logging.info('Finished series')
-
-        for m in series_entity.series.measures:
-            logging.debug(m)
 
         try:
             return SeriesResponse(series=series_entity.series)

@@ -29,6 +29,7 @@ import nokia
 
 from shared.config import config
 from shared.datastore import services
+from shared.datastore.activities import Activity
 from shared.datastore.admin import DatastoreState, SyncState
 from shared.datastore.athletes import Athlete
 from shared.datastore.clubs import Club
@@ -70,6 +71,10 @@ def cleanup():
         ndb.delete_multi(Athlete.query().fetch(keys_only=True))
         ndb.delete_multi(Club.query().fetch(keys_only=True))
     _do_cleanup(6, datastore_state, cleanup)
+
+    def cleanup():
+        ndb.delete_multi(Activity.query().fetch(keys_only=True))
+    _do_cleanup(7, datastore_state, cleanup)
 
     return 'OK', 200
 
