@@ -25,6 +25,9 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 
@@ -36,6 +39,9 @@ class Club extends Component {
 
   static styles = {
     root: {
+      width: "100%",
+    },
+    card: {
       width: "360px",
     },
     media: {
@@ -49,21 +55,28 @@ class Club extends Component {
     this.state = {
       fetched: false,
       club: undefined,
+      activities: undefined,
       error: undefined,
     }
   }
 
+  handleListItemClick = (index, activity) => {
+    console.log('Club.handleListItemClick', index, activity);
+  }
+
   updateClubState = (response) => {
-    console.log('ClubWrapper.updateClubState:', response);
+    console.log('Club.updateClubState:', response);
     if (response.status === 400) {
       this.setState({
         club: null,
+        activities: null,
         error: response.statusText,
       });
       return;
     }
     this.setState({
       club: response.result.club,
+      activities: response.result.activities,
     });
   }
 
@@ -84,68 +97,102 @@ class Club extends Component {
       && !this.state.fetched
       && this.state.club === undefined) {
       this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_club({id: this.props.clubId}
-          ).then(this.updateClubState, this.updateClubState);
+      window.gapi.client.bikebuds.get_club({
+        id: this.props.clubId,
+        activities: true
+      }).then(this.updateClubState, this.updateClubState);
     }
   }
 
   render() {
     if (this.state.club === undefined) {
       return null;
-    } else if (this.state.club === null) {
+    }
+    if (this.state.club === null) {
       return (
         <React.Fragment>
           {this.state.error}
         </React.Fragment>
       );
     }
+
     return (
-      <Card className={this.props.classes.root}>
-        <CardMedia
-          className={this.props.classes.media}
-          image={this.state.club.cover_photo_small}
-          title="Contemplative Reptile"
-        >
-              <Avatar className={this.props.classes.avatar}
-                alt={this.state.club.name}
-                src={this.state.club.profile_medium}>
-              </Avatar>
-        </CardMedia>
-        <CardContent className={this.props.classes.content}>
-          <Grid container
-            direction="column"
-            justify="space-evenly"
-            alignItems="center">
-            <Grid item>
-              <Typography variant="h5">{this.state.club.name}</Typography>
-            </Grid>
-            <Grid item>
-              <Grid container className={this.props.classes.clubContainer}
-                direction="row"
-                justify="space-evenly"
-                alignItems="center"
+      <div className={this.props.classes.root}>
+        <Grid className={this.props.classes.contentGridElement} container spacing={24}>
+          <Grid className={this.props.classes.contentGridElement} item xs={3}>
+            <Card className={this.props.classes.card}>
+              <CardMedia
+                className={this.props.classes.media}
+                image={this.state.club.cover_photo_small}
+                title="Contemplative Reptile"
               >
-                {this.state.club.members.map((member, index) => {
-                  var url = '';
-                  return (
-                    <Grid item key={index}>
-                      <Button alt={member.firstname} href={url}>
-                        <Avatar
-                          alt={member.firstname}
-                          src={member.profile_medium} />
-                        <Typography>{member.firstname} {member.lastname}</Typography>
-                      </Button>
+                <Avatar className={this.props.classes.avatar}
+                  alt={this.state.club.name}
+                  src={this.state.club.profile_medium}>
+                </Avatar>
+              </CardMedia>
+              <CardContent className={this.props.classes.content}>
+                <Grid container
+                  direction="column"
+                  justify="space-evenly"
+                  alignItems="center">
+                  <Grid item>
+                    <Typography variant="h5">{this.state.club.name}</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Grid container className={this.props.classes.clubContainer}
+                      direction="row"
+                      justify="space-evenly"
+                      alignItems="center"
+                    >
+                      {this.state.club.members.map((member, index) => {
+                        var url = '';
+                        return (
+                          <Grid item key={index}>
+                            <Button alt={member.firstname} href={url}>
+                              <Avatar
+                                alt={member.firstname}
+                                src={member.profile_medium} />
+                              <Typography>{member.firstname} {member.lastname}</Typography>
+                            </Button>
+                          </Grid>
+                        );
+                      })
+                      }
                     </Grid>
-                  );
-                })
-                }
-              </Grid>
-            </Grid>
+                  </Grid>
+                </Grid>
+              </CardContent>
+              <CardActionArea>
+              </CardActionArea>
+            </Card>
           </Grid>
-        </CardContent>
-        <CardActionArea>
-        </CardActionArea>
-      </Card>
+          <Grid className={this.props.classes.contentGridElement} item xs={6}>
+          </Grid>
+          <Grid className={this.props.classes.contentGridElement} item xs={3}>
+            <Card className={this.props.classes.card}>
+              <CardContent className={this.props.classes.content}>
+                <Typography variant="h5">Activities</Typography>
+                {this.state.activities !== undefined && <List>
+                  {this.state.activities.map((activity, index) => {
+                    return (
+                      <ListItem
+                        key={index}
+                        onClick={this.handleListItemClick.bind(this, index, activity)}
+                        selected={this.state.selectedIndex === index}
+                      >
+                        <ListItemText>{activity.name}</ListItemText>
+                      </ListItem>)
+                  })
+                  }
+                </List>}
+              </CardContent>
+              <CardActionArea>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        </Grid>
+      </div>
     );
   };
 }

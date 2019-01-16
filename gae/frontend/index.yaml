@@ -13,15 +13,19 @@ indexes:
     direction: desc
 - kind: "Activity"
   properties:
+  - name: "athlete_id"
+  - name: "start_date"
+- kind: "Activity"
+  properties:
+  - name: "activity.athlete.id"
+  - name: "start_date"
+- kind: "Activity"
+  properties:
   - name: "__key__"
   - name: "start_date"
 - kind: "Activity"
   properties:
   - name: "strava_id"
-  - name: "start_date"
-- kind: "Activity"
-  properties:
-  - name: "athlete_id"
   - name: "start_date"
 - kind: "Service"
   properties:
