@@ -173,22 +173,23 @@ class Main extends Component {
           render={(thinger) => <Club
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
+            profile={this.state.profile}
             clubId={Number(thinger.match.params.club_id)}
           />}
         />
         <Route path="/" exact
           render={() => <Home
-            profile={this.state.profile}
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
+            profile={this.state.profile}
           />}
         />
         <Route path="/settings" exact
           render={() => <Settings
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
-            onPreferencesChanged={this.onPreferencesChanged}
             profile={this.state.profile}
+            onPreferencesChanged={this.onPreferencesChanged}
           />}
         />
         <Route path="/signup" exact

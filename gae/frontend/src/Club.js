@@ -25,11 +25,10 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
+import ActivityListCard from './ActivityListCard';
+import ActivitiesWrapper from './ActivitiesWrapper';
 
 class Club extends Component {
 
@@ -42,6 +41,7 @@ class Club extends Component {
       width: "100%",
     },
     card: {
+      height: "400px",
       width: "360px",
     },
     media: {
@@ -62,6 +62,13 @@ class Club extends Component {
 
   handleListItemClick = (index, activity) => {
     console.log('Club.handleListItemClick', index, activity);
+  }
+
+  onActivitiesResponse = (response) => {
+    console.log('Club.onActivitiesResponse', response);
+    this.setState({
+      activities: response.result.activities
+    });
   }
 
   updateClubState = (response) => {
@@ -167,29 +174,15 @@ class Club extends Component {
               </CardActionArea>
             </Card>
           </Grid>
-          <Grid className={this.props.classes.contentGridElement} item xs={6}>
-          </Grid>
-          <Grid className={this.props.classes.contentGridElement} item xs={3}>
-            <Card className={this.props.classes.card}>
-              <CardContent className={this.props.classes.content}>
-                <Typography variant="h5">Activities</Typography>
-                {this.state.activities !== undefined && <List>
-                  {this.state.activities.map((activity, index) => {
-                    return (
-                      <ListItem
-                        key={index}
-                        onClick={this.handleListItemClick.bind(this, index, activity)}
-                        selected={this.state.selectedIndex === index}
-                      >
-                        <ListItemText>{activity.name}</ListItemText>
-                      </ListItem>)
-                  })
-                  }
-                </List>}
-              </CardContent>
-              <CardActionArea>
-              </CardActionArea>
-            </Card>
+          <Grid className={this.props.classes.contentGridElement} item xs={8}>
+            <ActivitiesWrapper
+              gapiReady={this.props.gapiReady}
+              onResponse={this.onActivitiesResponse} />
+            <ActivityListCard
+              gapiReady={this.props.gapiReady} 
+              profile={this.props.profile}
+              activities={this.state.activities}
+              showAthlete={true} />
           </Grid>
         </Grid>
       </div>
@@ -197,4 +190,8 @@ class Club extends Component {
   };
 }
 
+Club.propTypes = {
+  profile: PropTypes.object.isRequired,
+  gapiReady: PropTypes.bool.isRequired,
+}
 export default withStyles(Club.styles)(Club);

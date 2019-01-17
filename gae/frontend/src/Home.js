@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 
 import ActivityListCard from './ActivityListCard';
+import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
@@ -27,6 +28,13 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {}
+  }
+
+  onActivitiesResponse = (response) => {
+    console.log('Home.onActivitiesReady', response);
+    this.setState({
+      activities: response.result.activities
+    });
   }
 
   onMeasuresReady = (measures) => {
@@ -44,14 +52,18 @@ class Home extends Component {
         />
         <Grid container spacing={24}>
           <Grid item xs={12} lg={8}>
+            <ActivitiesWrapper
+              gapiReady={this.props.gapiReady}
+              onResponse={this.onActivitiesResponse} />
             <ActivityListCard
+              gapiReady={this.props.gapiReady} 
               profile={this.props.profile}
-              gapiReady={this.props.gapiReady} />
+              activities={this.state.activities} />
           </Grid>
           <Grid item xs={12} lg={4}>
             <MeasuresCard
-              profile={this.props.profile}
               gapiReady={this.props.gapiReady}
+              profile={this.props.profile}
               measures={this.state.measures}
               title="Weight"
               intervalUnit="d" intervalFormat="MMM D" intervalCount="30"
@@ -59,8 +71,8 @@ class Home extends Component {
           </Grid>
           <Grid item xs={12}>
             <MeasuresCard
-              profile={this.props.profile}
               gapiReady={this.props.gapiReady}
+              profile={this.props.profile}
               measures={this.state.measures}
               title="Historical Weight"
               intervalUnit="M" intervalFormat="MMM 'YY" intervalCount="120"
@@ -73,7 +85,7 @@ class Home extends Component {
 }
 
 Home.propTypes = {
-  profile: PropTypes.object.isRequired,
+  profile: PropTypes.object,
   gapiReady: PropTypes.bool.isRequired,
 }
 export default Home;

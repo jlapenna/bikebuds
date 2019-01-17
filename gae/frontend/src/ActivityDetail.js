@@ -167,7 +167,7 @@ class ActivityDetail extends Component {
       );
     }
 
-    const distance = readableDistance(this.props.activity.distance);
+    const distance = readableDistance(this.props.activity.distance, this.props.profile);
     const duration = readableDuration(this.props.activity.moving_time);
     const average_speed = readableSpeed(this.props.activity.average_speed, this.props.profile);
     return (
@@ -202,7 +202,7 @@ class ActivityDetail extends Component {
 
 
 ActivityDetail.propTypes = {
-  profile: PropTypes.object.isRequired,
+  profile: PropTypes.object,
   activity: PropTypes.object,
 }
 export default withStyles(styles)(ActivityDetail);

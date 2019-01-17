@@ -76,52 +76,42 @@ class ActivityListCard extends Component {
     });
   }
 
-  /**
-   * @inheritDoc
-   */
-  componentDidMount() {
-    this.setState({});
-  }
-
-  /**
-   * @inheritDoc
-   */
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.gapiReady
-      && !this.state.fetched
-      && this.state.activities === undefined) {
-      this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_activities().then(this.updateActivitiesState);
-    }
-  }
-
   renderCardContent() {
-    if (this.state.activities === undefined) {
+    if (this.props.activities === undefined) {
       return;
     }
     return (
-          <Grid className={this.props.classes.contentGridElement} container spacing={24}>
-            <Grid className={this.props.classes.contentGridElement} item xs={12} sm={4} lg={4}>
-              <List>
-                {this.state.activities.map((activity, index) => {
-                  return (
-                    <ListItem
-                      key={index}
-                      onClick={this.onListItemClick.bind(this, index, activity)}
-                      selected={this.state.selectedIndex === index}
-                    >
-                      <ListItemText>{activity.name}</ListItemText>
-                    </ListItem>)
-                })
+      <Grid className={this.props.classes.contentGridElement} container spacing={24}>
+        <Grid className={this.props.classes.contentGridElement} item xs={12} sm={4} lg={4}>
+          <List>
+            {this.props.activities.map((activity, index) => {
+              var fullName = undefined;
+              if (this.props.showAthlete && activity.athlete !== undefined) {
+                if (activity.athlete.firstname !== undefined) {
+                  fullName = activity.athlete.firstname
+                }
+                if (activity.athlete.lastname !== undefined) {
+                  fullName = fullName + " " + activity.athlete.lastname;
+                }
               }
-              </List>
-            </Grid>
-            <Grid className={this.props.classes.contentGridElement} item xs={false} sm={8} lg={8}>
-              <Hidden xsDown>
-                <ActivityDetail profile={this.props.profile} activity={this.state.selectedActivity} />
-              </Hidden>
-            </Grid>
-          </Grid>
+              return (
+                <ListItem
+                  key={index}
+                  onClick={this.onListItemClick.bind(this, index, activity)}
+                  selected={this.state.selectedIndex === index}
+                >
+                  <ListItemText primary={activity.name} secondary={fullName} />
+                </ListItem>)
+            })
+            }
+          </List>
+        </Grid>
+        <Grid className={this.props.classes.contentGridElement} item xs={false} sm={8} lg={8}>
+          <Hidden xsDown>
+            <ActivityDetail profile={this.props.profile} activity={this.state.selectedActivity} />
+          </Hidden>
+        </Grid>
+      </Grid>
     )
   };
 
@@ -139,6 +129,7 @@ class ActivityListCard extends Component {
 
 
 ActivityListCard.propTypes = {
-  profile: PropTypes.object.isRequired,
+  profile: PropTypes.object,
+  showAthlete: PropTypes.bool,
 }
 export default withStyles(styles)(ActivityListCard);
