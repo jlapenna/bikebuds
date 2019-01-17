@@ -98,8 +98,9 @@ class Activity(ndb.Model):
     start_date = ndb.DateTimeProperty(indexed=True)
 
     @classmethod
-    def entity_from_strava(cls, parent_key, activity):
-        activity_message = Activity.message_from_strava(activity)
+    def entity_from_strava(cls, parent_key, activity, detailed_athlete=None):
+        activity_message = Activity.message_from_strava(activity,
+                detailed_athlete=detailed_athlete)
 
         start_date = None
         if activity.start_date is not None:
@@ -111,9 +112,11 @@ class Activity(ndb.Model):
                 start_date=start_date)
 
     @classmethod
-    def message_from_strava(cls, activity):
+    def message_from_strava(cls, activity, detailed_athlete=None):
         athlete = None
-        if activity.athlete is not None:
+        if detailed_athlete:
+            athlete = AthleteRef.from_strava(detailed_athlete)
+        elif activity.athlete:
             athlete = AthleteRef.from_strava(activity.athlete)
 
         start_date = None
