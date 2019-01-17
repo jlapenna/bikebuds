@@ -22,18 +22,13 @@ import firebase from 'firebase/app';
 import { config } from './Config';
 import Signup from './Signup';
 
-
 firebase.initializeApp(config);
-
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
-    <Signup
-      firebaseUser={{}}
-      gapiReady={false}
-      onFinished={() => {}}
-    />
-    , div);
+    <Signup firebaseUser={{}} gapiReady={false} onFinished={() => {}} />,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

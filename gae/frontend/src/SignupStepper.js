@@ -15,44 +15,41 @@ import Typography from '@material-ui/core/Typography';
 import { config } from './Config';
 import { createSession } from './session_util';
 
-
 class SignupStepper extends React.Component {
-
   static propTypes = {
     firebaseUser: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired,
-    onFinished: PropTypes.func.isRequired,
-  }
+    onFinished: PropTypes.func.isRequired
+  };
 
-  static styles = (theme) => ({
+  static styles = theme => ({
     root: {
-      height: '100%',
+      height: '100%'
     },
     stepBody: {
       marginTop: theme.spacing.unit,
-      marginBottom: theme.spacing.unit,
+      marginBottom: theme.spacing.unit
     },
     stepContent: {
       marginTop: theme.spacing.unit,
-      marginBottom: theme.spacing.unit,
+      marginBottom: theme.spacing.unit
     },
-    stepFooter: {
-    },
+    stepFooter: {},
     mobileButton: {
       marginRight: theme.spacing.unit,
-      marginLeft: theme.spacing.unit,
+      marginLeft: theme.spacing.unit
     },
     desktopButton: {
-      marginRight: theme.spacing.unit,
-    },
-  })
+      marginRight: theme.spacing.unit
+    }
+  });
 
   constructor(props) {
     super(props);
     this.state = {
       steps: this.createSteps(),
       activeStepIndex: 0,
-      connectTransition: false,
+      connectTransition: false
     };
   }
 
@@ -70,7 +67,7 @@ class SignupStepper extends React.Component {
           );
         },
         isOptional: false,
-        buttonLabel: 'Next',
+        buttonLabel: 'Next'
       },
       {
         label: 'Consent and Notice',
@@ -80,13 +77,20 @@ class SignupStepper extends React.Component {
               <div>
                 We will:
                 <ul>
-                  <li><strong>Collect</strong> your data from several third-party services.</li>
-                  <li><strong>Share</strong> your data with other users of bikebuds and its administrators.</li>
+                  <li>
+                    <strong>Collect</strong> your data from several third-party
+                    services.
+                  </li>
+                  <li>
+                    <strong>Share</strong> your data with other users of
+                    bikebuds and its administrators.
+                  </li>
                 </ul>
                 <div>
-                  Though efforts are made to maintain the privacy and access controls
-                  offered by the third-party services, the nature of this service requires
-                  that these privacy controls and restrictions are ignored.
+                  Though efforts are made to maintain the privacy and access
+                  controls offered by the third-party services, the nature of
+                  this service requires that these privacy controls and
+                  restrictions are ignored.
                   <p />
                   <em>This is not an officially supported Google product.</em>
                 </div>
@@ -95,57 +99,53 @@ class SignupStepper extends React.Component {
           );
         },
         isOptional: false,
-        buttonLabel: 'Next',
+        buttonLabel: 'Next'
       },
       {
         label: 'Connect Strava',
         content: () => {
           return (
-            <div>Connect your account, we will use your activities and profile.</div>
+            <div>
+              Connect your account, we will use your activities and profile.
+            </div>
           );
         },
         isOptional: false,
         serviceName: 'strava',
-        buttonLabel: 'Connect',
+        buttonLabel: 'Connect'
       },
       {
         label: 'Connect Withings',
         content: () => {
-          return (
-            <div>Connect your account, we will use your health data.</div>
-          );
+          return <div>Connect your account, we will use your health data.</div>;
         },
         isOptional: true,
         serviceName: 'withings',
-        buttonLabel: 'Connect',
+        buttonLabel: 'Connect'
       },
       {
         label: 'Connect Fitbit',
         content: () => {
-          return (
-            <div>Connect your account, we will use your health data.</div>
-          );
+          return <div>Connect your account, we will use your health data.</div>;
         },
         isOptional: true,
         serviceName: 'fitbit',
-        buttonLabel: 'Connect',
+        buttonLabel: 'Connect'
       },
       {
         label: 'Wrap up',
         content: () => {
-          return (
-            <div>You&apos;re all set!</div>
-          );
+          return <div>You&apos;re all set!</div>;
         },
         isOptional: false,
-        buttonLabel: 'Finish',
-      },
+        buttonLabel: 'Finish'
+      }
     ];
-  }
+  };
 
   handleBack = () => {
     this.setState(state => ({
-      activeStepIndex: state.activeStepIndex - 1,
+      activeStepIndex: state.activeStepIndex - 1
     }));
   };
 
@@ -154,15 +154,20 @@ class SignupStepper extends React.Component {
     let activeStep = this.state.steps[activeStepIndex];
 
     if (activeStep.serviceName !== undefined) {
-      this.setState({connectPending: true});
+      this.setState({ connectPending: true });
 
-      createSession((response) => {
+      createSession(response => {
         if (response.status === 200) {
-          window.location.replace(config.frontendUrl + '/services/' +
-            activeStep.serviceName + '/init?dest=/signup?service=' + activeStep.serviceName);
+          window.location.replace(
+            config.frontendUrl +
+              '/services/' +
+              activeStep.serviceName +
+              '/init?dest=/signup?service=' +
+              activeStep.serviceName
+          );
         } else {
           console.log('Unable to create a session.', response);
-          this.setState({connectPending: false});
+          this.setState({ connectPending: false });
         }
       });
       return;
@@ -173,7 +178,7 @@ class SignupStepper extends React.Component {
     }
 
     this.setState({
-      activeStepIndex: activeStepIndex + 1,
+      activeStepIndex: activeStepIndex + 1
     });
   };
 
@@ -188,7 +193,7 @@ class SignupStepper extends React.Component {
 
     this.setState(state => {
       return {
-        activeStepIndex: state.activeStepIndex + 1,
+        activeStepIndex: state.activeStepIndex + 1
       };
     });
   };
@@ -202,7 +207,7 @@ class SignupStepper extends React.Component {
     for (var i = 0; i < this.state.steps.length; i++) {
       if (this.state.steps[i].serviceName === startingService) {
         this.setState({
-          activeStepIndex: (i + 1),
+          activeStepIndex: i + 1
         });
         break;
       }
@@ -227,7 +232,7 @@ class SignupStepper extends React.Component {
 
     if (activeStepIndex === steps.length) {
       return null;
-    };
+    }
 
     let activeStep = steps[activeStepIndex];
     let stepContent = activeStep ? activeStep.content(this.props) : null;
@@ -236,9 +241,7 @@ class SignupStepper extends React.Component {
       <div className={classes.root}>
         <div className={classes.stepBody}>
           <Typography variant="h4">{activeStep.label}</Typography>
-          <div className={classes.stepContent}>
-            {stepContent}
-          </div>
+          <div className={classes.stepContent}>{stepContent}</div>
           <Hidden smUp>
             {activeStep.isOptional && (
               <Button
@@ -254,10 +257,7 @@ class SignupStepper extends React.Component {
         </div>
         <div className={classes.stepFooter}>
           <Hidden xsDown>
-            <Stepper
-              alternativeLabel
-              activeStep={activeStepIndex}
-            >
+            <Stepper alternativeLabel activeStep={activeStepIndex}>
               {this.renderSteps()}
             </Stepper>
           </Hidden>
@@ -276,7 +276,11 @@ class SignupStepper extends React.Component {
                     onClick={this.handleNext}
                   >
                     {activeStep.buttonLabel}
-                    {this.props.theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                    {this.props.theme.direction === 'rtl' ? (
+                      <KeyboardArrowLeft />
+                    ) : (
+                      <KeyboardArrowRight />
+                    )}
                   </Button>
                 </React.Fragment>
               }
@@ -288,9 +292,12 @@ class SignupStepper extends React.Component {
                   color="primary"
                   onClick={this.handleBack}
                 >
-                  {this.props.theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                  {this.props.theme.direction === 'rtl' ? (
+                    <KeyboardArrowRight />
+                  ) : (
+                    <KeyboardArrowLeft />
+                  )}
                   Back
-
                 </Button>
               }
             >
@@ -331,4 +338,6 @@ class SignupStepper extends React.Component {
     );
   }
 }
-export default withStyles(SignupStepper.styles, { withTheme: true })(SignupStepper);
+export default withStyles(SignupStepper.styles, { withTheme: true })(
+  SignupStepper
+);

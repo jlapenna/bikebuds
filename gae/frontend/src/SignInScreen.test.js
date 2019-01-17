@@ -22,14 +22,10 @@ import firebase from 'firebase/app';
 import { config } from './Config';
 import SignInScreen from './SignInScreen';
 
-
 firebase.initializeApp(config);
-
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(
-    <SignInScreen />
-    , div);
+  ReactDOM.render(<SignInScreen />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

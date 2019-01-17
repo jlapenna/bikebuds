@@ -16,8 +16,12 @@
 
 import React, { Component } from 'react';
 
-import { Redirect, BrowserRouter as Router, Route, Switch,
-    } from "react-router-dom";
+import {
+  Redirect,
+  BrowserRouter as Router,
+  Route,
+  Switch
+} from 'react-router-dom';
 
 import firebase from 'firebase/app';
 
@@ -32,13 +36,12 @@ import SignInScreen from './SignInScreen';
 
 firebase.initializeApp(config);
 
-
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isSignedIn: undefined,
-      firebaseUser: undefined,
+      firebaseUser: undefined
     };
   }
 
@@ -46,16 +49,20 @@ class App extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver =
-      firebase.auth().onAuthStateChanged((firebaseUser) => {
+    this.unregisterAuthObserver = firebase
+      .auth()
+      .onAuthStateChanged(firebaseUser => {
         // If we've unmounted before this callback executes, we don't want to
         // update state.
         if (this.unregisterAuthObserver === null) {
           return;
         }
-        this.setState({isSignedIn: !!firebaseUser, firebaseUser: firebaseUser});
+        this.setState({
+          isSignedIn: !!firebaseUser,
+          firebaseUser: firebaseUser
+        });
       });
-  };
+  }
 
   /**
    * @inheritDoc
@@ -63,7 +70,7 @@ class App extends Component {
   componentWillUnmount() {
     this.unregisterAuthObserver();
     this.unregisterAuthObserver = null;
-  };
+  }
 
   render() {
     if (this.state.isSignedIn === undefined) {
@@ -86,7 +93,7 @@ class App extends Component {
                 <div>Misconfigured.</div>
               </Route>
               <Route>
-                <Main firebaseUser={this.state.firebaseUser}/>
+                <Main firebaseUser={this.state.firebaseUser} />
               </Route>
             </Switch>
           </Router>

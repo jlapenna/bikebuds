@@ -21,8 +21,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 
-import { withScriptjs, withGoogleMap, BicyclingLayer, GoogleMap,
-  Polyline } from 'react-google-maps'
+import {
+  withScriptjs,
+  withGoogleMap,
+  BicyclingLayer,
+  GoogleMap,
+  Polyline
+} from 'react-google-maps';
 
 import { config } from './Config';
 import { readableDistance, readableDuration, readableSpeed } from './convert';
@@ -34,53 +39,60 @@ import { readableDistance, readableDuration, readableSpeed } from './convert';
   ]}
 */
 
-const googleMapURL = "https://maps.googleapis.com/maps/api/js?key="
-  + config.mapsApiKey
-  + "&v=3.exp&libraries=geometry,drawing,places";
+const googleMapURL =
+  'https://maps.googleapis.com/maps/api/js?key=' +
+  config.mapsApiKey +
+  '&v=3.exp&libraries=geometry,drawing,places';
 
-
-const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
-  const {onMapMounted, ...otherProps} = props;
-  return <GoogleMap {...otherProps} ref={c => {
-    onMapMounted && onMapMounted(c)
-  }}>{props.children}</GoogleMap>
-}));
-
+const GoogleMapsWrapper = withScriptjs(
+  withGoogleMap(props => {
+    const { onMapMounted, ...otherProps } = props;
+    return (
+      <GoogleMap
+        {...otherProps}
+        ref={c => {
+          onMapMounted && onMapMounted(c);
+        }}
+      >
+        {props.children}
+      </GoogleMap>
+    );
+  })
+);
 
 class _ActivityMap extends Component {
-
   static styles = {
     root: {
-      height: "100%",
-      width: "100%",
-      overflow: "visible",
-      display: "flex",
-      "flex-direction": "column",
-      "align-items": "center",
+      height: '100%',
+      width: '100%',
+      overflow: 'visible',
+      display: 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center'
     },
     containerElement: {
-      "min-height": "200px",
-      height: "100%",
-      width: "100%",
-      flex: "1"
+      'min-height': '200px',
+      height: '100%',
+      width: '100%',
+      flex: '1'
     },
     mapElement: {
-      height: "100%",
-      width: "100%",
+      height: '100%',
+      width: '100%'
     },
     loadingElement: {
-      height: "100%",
-      width: "100%",
-    },
-  }
+      height: '100%',
+      width: '100%'
+    }
+  };
 
   state = {
-    mapMounted: false,
+    mapMounted: false
   };
 
   _mapRef = null;
 
-  _handleMapMounted = (c) => {
+  _handleMapMounted = c => {
     if (!c || this._mapRef) return;
     this._mapRef = c;
 
@@ -96,16 +108,19 @@ class _ActivityMap extends Component {
     if (!this.state.mapMounted || !this.props.activity) {
       return;
     }
-    if (this.state.mapMounted !== prevState.mapMounted
-        || this.props.activity !== prevProps.activity) {
+    if (
+      this.state.mapMounted !== prevState.mapMounted ||
+      this.props.activity !== prevProps.activity
+    ) {
       var decodedPolyline = [];
       if (this.props.activity.map.summary_polyline) {
         decodedPolyline = window.google.maps.geometry.encoding.decodePath(
-          this.props.activity.map.summary_polyline)
+          this.props.activity.map.summary_polyline
+        );
       }
 
       var bounds = new window.google.maps.LatLngBounds();
-      decodedPolyline.forEach((point) => {
+      decodedPolyline.forEach(point => {
         bounds.extend(point);
       });
       this._mapRef.fitBounds(bounds);
@@ -123,7 +138,9 @@ class _ActivityMap extends Component {
       <GoogleMapsWrapper
         googleMapURL={googleMapURL}
         loadingElement={<div className={this.props.classes.loadingElement} />}
-        containerElement={<div className={this.props.classes.containerElement} />}
+        containerElement={
+          <div className={this.props.classes.containerElement} />
+        }
         mapElement={<div className={this.props.classes.mapElement} />}
         defaultZoom={10}
         onMapMounted={this._handleMapMounted}
@@ -134,45 +151,43 @@ class _ActivityMap extends Component {
           options={{
             strokeColor: '#ff4081',
             strokeOpacity: 1,
-            strokeWeight: 3,
+            strokeWeight: 3
           }}
         />
         <BicyclingLayer autoUpdate />
       </GoogleMapsWrapper>
-    )
+    );
   }
 }
 const ActivityMap = withStyles(_ActivityMap.styles)(_ActivityMap);
 
-
 class ActivityDetail extends Component {
-
   static styles = {
     root: {
-      height: "100%",
-      width: "100%",
-      overflow: "visible",
-      display: "flex",
-      "flex-direction": "column",
-      "align-items": "center",
+      height: '100%',
+      width: '100%',
+      overflow: 'visible',
+      display: 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center'
     },
     activityRow: {
-      width: "100%",
+      width: '100%'
     },
     activitySummary: {
-      width: "100%",
-      display: "flex",
-      "align-items": "stretch",
+      width: '100%',
+      display: 'flex',
+      'align-items': 'stretch'
     },
     activitySummaryItem: {
-      width: "100%",
-    },
-  }
+      width: '100%'
+    }
+  };
 
   static propTypes = {
     profile: PropTypes.object,
-    activity: PropTypes.object,
-  }
+    activity: PropTypes.object
+  };
 
   render() {
     if (this.props.activity === undefined) {
@@ -184,9 +199,15 @@ class ActivityDetail extends Component {
       );
     }
 
-    const distance = readableDistance(this.props.activity.distance, this.props.profile);
+    const distance = readableDistance(
+      this.props.activity.distance,
+      this.props.profile
+    );
     const duration = readableDuration(this.props.activity.moving_time);
-    const average_speed = readableSpeed(this.props.activity.average_speed, this.props.profile);
+    const average_speed = readableSpeed(
+      this.props.activity.average_speed,
+      this.props.profile
+    );
     return (
       <div className={this.props.classes.root}>
         <div className={this.props.classes.activityRow}>
@@ -204,18 +225,19 @@ class ActivityDetail extends Component {
               <Typography variant="h4">{duration}</Typography>
             </div>
             <Hidden mdDown>
-            <div className={this.props.classes.activitySummaryItem}>
-              <Typography variant="subtitle1">Calories</Typography>
-              <Typography variant="h4">{this.props.activity.kilojoules}</Typography>
-            </div>
+              <div className={this.props.classes.activitySummaryItem}>
+                <Typography variant="subtitle1">Calories</Typography>
+                <Typography variant="h4">
+                  {this.props.activity.kilojoules}
+                </Typography>
+              </div>
             </Hidden>
           </div>
         </div>
         <ActivityMap activity={this.props.activity} />
       </div>
     );
-  };
+  }
 }
-
 
 export default withStyles(ActivityDetail.styles)(ActivityDetail);

@@ -22,18 +22,13 @@ import firebase from 'firebase/app';
 import { config } from './Config';
 import SignupStepper from './SignupStepper';
 
-
 firebase.initializeApp(config);
-
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
-    <SignupStepper
-      firebaseUser={{}}
-      gapiReady={false}
-      onFinished={() => {}}
-    />
-    , div);
+    <SignupStepper firebaseUser={{}} gapiReady={false} onFinished={() => {}} />,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

@@ -24,35 +24,34 @@ import Typography from '@material-ui/core/Typography';
 
 import MeasuresChart from './MeasuresChart';
 
-
 class MeasuresCard extends Component {
-
   static defaultProps = {
-      intervalUnit: 'M',
-      intervalCount: 12,
-      intervalFormat: "MMM 'YY",
-  }
+    intervalUnit: 'M',
+    intervalCount: 12,
+    intervalFormat: "MMM 'YY"
+  };
 
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    measures: PropTypes.array,
-  }
+    measures: PropTypes.array
+  };
 
   static styles = {
     root: {
-      "height": "400px",
-    },
-  }
+      height: '400px'
+    }
+  };
 
   renderCardContent() {
     return (
       <CardContent className={this.props.classes.content}>
-        {this.props.title !== undefined
-          && <Typography variant="h5">{this.props.title}</Typography>}
+        {this.props.title !== undefined && (
+          <Typography variant="h5">{this.props.title}</Typography>
+        )}
         <MeasuresChart {...this.props} />
       </CardContent>
-    )
-  };
+    );
+  }
 
   render() {
     return (
@@ -60,6 +59,6 @@ class MeasuresCard extends Component {
         {this.renderCardContent()}
       </Card>
     );
-  };
+  }
 }
 export default withStyles(MeasuresCard.styles)(MeasuresCard);

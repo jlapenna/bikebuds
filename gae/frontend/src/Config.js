@@ -15,25 +15,26 @@
  */
 
 export const config = {
-    apiKey: "AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU",
-    authDomain: "auth.bikebuds.cc",
-    databaseURL: "https://bikebuds-app.firebaseio.com",
-    mapsApiKey: "AIzaSyDYL7pYdE2y0ctSok8BXAYONfe-Y1Xf4gg",
-    projectId: "bikebuds-app",
-    storageBucket: "bikebuds-app.appspot.com",
-    messagingSenderId: "294988021695",
-    vapidKey: "BJhh1vC_dqRl-Q9zN3Eldtc7hPsSzBMnNavSGgU-gIO8kj_sh5MD127Q3tbHY5mlIe79kUvxKPNY9RHY4917Ktg",
+  apiKey: 'AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU',
+  authDomain: 'auth.bikebuds.cc',
+  databaseURL: 'https://bikebuds-app.firebaseio.com',
+  mapsApiKey: 'AIzaSyDYL7pYdE2y0ctSok8BXAYONfe-Y1Xf4gg',
+  projectId: 'bikebuds-app',
+  storageBucket: 'bikebuds-app.appspot.com',
+  messagingSenderId: '294988021695',
+  vapidKey:
+    'BJhh1vC_dqRl-Q9zN3Eldtc7hPsSzBMnNavSGgU-gIO8kj_sh5MD127Q3tbHY5mlIe79kUvxKPNY9RHY4917Ktg',
 
-    devserverUrl: (process.env.NODE_ENV === "development")
-      ? "http://localhost:8081"
-      : "",
-    frontendUrl: (process.env.NODE_ENV === "development")
-      ? "http://localhost:8081"
-      : "",
-    apiUrl: (process.env.NODE_ENV === "development")
-      ? "http://localhost:8082"
-      : "https://api.bikebuds.cc",
-    backendUrl: (process.env.NODE_ENV === "development")
-      ? "http://localhost:8083"
-      : "https://backend.bikebuds.cc",
+  devserverUrl:
+    process.env.NODE_ENV === 'development' ? 'http://localhost:8081' : '',
+  frontendUrl:
+    process.env.NODE_ENV === 'development' ? 'http://localhost:8081' : '',
+  apiUrl:
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8082'
+      : 'https://api.bikebuds.cc',
+  backendUrl:
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8083'
+      : 'https://backend.bikebuds.cc'
 };

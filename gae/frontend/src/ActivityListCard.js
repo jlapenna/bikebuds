@@ -30,24 +30,23 @@ import Typography from '@material-ui/core/Typography';
 import ActivityDetail from './ActivityDetail';
 
 class ActivityListCard extends Component {
-
   static styles = {
     root: {
-      "height": "400px",
+      height: '400px'
     },
     content: {
-      "height": "400px",
+      height: '400px'
     },
     contentGridElement: {
-      "height": "100%",
-      overflow: "auto",
-    },
-  }
+      height: '100%',
+      overflow: 'auto'
+    }
+  };
 
   static propTypes = {
     profile: PropTypes.object,
-    showAthlete: PropTypes.bool,
-  }
+    showAthlete: PropTypes.bool
+  };
 
   constructor(props) {
     super(props);
@@ -55,19 +54,18 @@ class ActivityListCard extends Component {
       fetched: false,
       activities: undefined,
       selectedActivity: undefined,
-      selectedIndex: undefined,
-
-    }
+      selectedIndex: undefined
+    };
   }
 
   handleListItemClick = (index, activity) => {
     this.setState({
       selectedActivity: activity,
-      selectedIndex: index,
+      selectedIndex: index
     });
-  }
+  };
 
-  handleUpdateActivities = (response) => {
+  handleUpdateActivities = response => {
     var activities = response.result.activities || [];
 
     if (activities.length > 0) {
@@ -78,26 +76,36 @@ class ActivityListCard extends Component {
     this.setState({
       activities: activities,
       selectedActivity: selectedActivity,
-      selectedIndex: selectedindex,
+      selectedIndex: selectedindex
     });
-  }
+  };
 
   renderCardContent() {
     if (this.props.activities === undefined) {
       return;
     }
     return (
-      <Grid className={this.props.classes.contentGridElement} container spacing={24}>
-        <Grid className={this.props.classes.contentGridElement} item xs={12} sm={4} lg={4}>
+      <Grid
+        className={this.props.classes.contentGridElement}
+        container
+        spacing={24}
+      >
+        <Grid
+          className={this.props.classes.contentGridElement}
+          item
+          xs={12}
+          sm={4}
+          lg={4}
+        >
           <List>
             {this.props.activities.map((activity, index) => {
               var fullName = undefined;
               if (this.props.showAthlete && activity.athlete !== undefined) {
                 if (activity.athlete.firstname !== undefined) {
-                  fullName = activity.athlete.firstname
+                  fullName = activity.athlete.firstname;
                 }
                 if (activity.athlete.lastname !== undefined) {
-                  fullName = fullName + " " + activity.athlete.lastname;
+                  fullName = fullName + ' ' + activity.athlete.lastname;
                 }
               }
               return (
@@ -107,19 +115,28 @@ class ActivityListCard extends Component {
                   selected={this.state.selectedIndex === index}
                 >
                   <ListItemText primary={activity.name} secondary={fullName} />
-                </ListItem>)
-            })
-            }
+                </ListItem>
+              );
+            })}
           </List>
         </Grid>
-        <Grid className={this.props.classes.contentGridElement} item xs={false} sm={8} lg={8}>
+        <Grid
+          className={this.props.classes.contentGridElement}
+          item
+          xs={false}
+          sm={8}
+          lg={8}
+        >
           <Hidden xsDown>
-            <ActivityDetail profile={this.props.profile} activity={this.state.selectedActivity} />
+            <ActivityDetail
+              profile={this.props.profile}
+              activity={this.state.selectedActivity}
+            />
           </Hidden>
         </Grid>
       </Grid>
-    )
-  };
+    );
+  }
 
   render() {
     return (
@@ -130,6 +147,6 @@ class ActivityListCard extends Component {
         </CardContent>
       </Card>
     );
-  };
+  }
 }
 export default withStyles(ActivityListCard.styles)(ActivityListCard);

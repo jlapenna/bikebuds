@@ -19,40 +19,42 @@ import React, { Component } from 'react';
 
 import { readableWeight } from './convert';
 
-
 class MeasuresWrapper extends Component {
-
   static propTypes = {
     onMeasuresReady: PropTypes.func.isRequired,
-    profile: PropTypes.object.isRequired,
-  }
+    profile: PropTypes.object.isRequired
+  };
 
   constructor(props) {
     super(props);
     this.state = {
       fetched: false,
-      measures: undefined,
-    }
+      measures: undefined
+    };
   }
 
-  handleSeries = (response) => {
+  handleSeries = response => {
     console.log('MeasuresWrapper.handleSeries:', response);
     var measures = [];
-    if (response.result.series !== undefined
-      && response.result.series.measures !== undefined) {
+    if (
+      response.result.series !== undefined &&
+      response.result.series.measures !== undefined
+    ) {
       measures = response.result.series.measures;
     }
     for (var measure in measures) {
       if (measures[measure].weight !== undefined) {
         measures[measure].weight = readableWeight(
-          measures[measure].weight, this.props.profile);
+          measures[measure].weight,
+          this.props.profile
+        );
       }
     }
     this.setState({
-      measures: measures,
+      measures: measures
     });
     this.props.onMeasuresReady(measures);
-  }
+  };
 
   /**
    * @inheritDoc
@@ -67,10 +69,12 @@ class MeasuresWrapper extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady
-      && !this.state.fetched
-      && this.state.measures === undefined) {
-      this.setState({fetched: true});
+    if (
+      this.props.gapiReady &&
+      !this.state.fetched &&
+      this.state.measures === undefined
+    ) {
+      this.setState({ fetched: true });
       window.gapi.client.bikebuds.get_series().then(this.handleSeries);
     }
   }
@@ -79,10 +83,8 @@ class MeasuresWrapper extends Component {
    * @inheritDoc
    */
   render() {
-    return (
-      <div className="MeasuresWrapper" />
-    );
-  };
+    return <div className="MeasuresWrapper" />;
+  }
 }
 
 export default MeasuresWrapper;

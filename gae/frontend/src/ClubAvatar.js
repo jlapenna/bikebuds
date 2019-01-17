@@ -17,42 +17,37 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 
-
 class ClubAvatar extends Component {
-
   static propTypes = {
-    club: PropTypes.object.isRequired,
-  }
+    club: PropTypes.object.isRequired
+  };
 
   static styles = {
     avatar: {
-      "max-height": 32,
-      "max-width": 32,
-      width: "auto",
-      height: "auto",
-    },
-  }
+      'max-height': 32,
+      'max-width': 32,
+      width: 'auto',
+      height: 'auto'
+    }
+  };
 
   render() {
-    var url = "/club/" + this.props.club.id;
+    var url = '/club/' + this.props.club.id;
     return (
-      <IconButton
-        component={Link}
-        to={url}
-        alt={this.props.club.name}
-      >
-        <Avatar className={this.props.classes.avatar}
+      <IconButton component={Link} to={url} alt={this.props.club.name}>
+        <Avatar
+          className={this.props.classes.avatar}
           alt={this.props.club.name}
-          src={this.props.club.profile_medium}>
-        </Avatar>
+          src={this.props.club.profile_medium}
+        />
       </IconButton>
     );
-  };
+  }
 }
 export default withStyles(ClubAvatar.styles)(ClubAvatar);

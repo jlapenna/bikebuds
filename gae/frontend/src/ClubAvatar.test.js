@@ -17,19 +17,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import ClubAvatar from './ClubAvatar';
-
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <ClubAvatar
-        club={{id: 1, name: "ClubName"}}
-      />
-    </Router>
-    , div);
+      <ClubAvatar club={{ id: 1, name: 'ClubName' }} />
+    </Router>,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

@@ -17,22 +17,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import ProfileCard from './ProfileCard';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
   const firebaseUser = {
-    displayName: "Display Name",
-    photoUrl: "/logo-round.svg",
+    displayName: 'Display Name',
+    photoUrl: '/logo-round.svg'
   };
   ReactDOM.render(
     <Router>
-      <ProfileCard
-        firebaseUser={firebaseUser}
-      />
-    </Router>
-    , div);
+      <ProfileCard firebaseUser={firebaseUser} />
+    </Router>,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

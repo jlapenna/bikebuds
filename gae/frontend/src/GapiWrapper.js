@@ -21,9 +21,7 @@ import 'firebase/auth';
 
 import { config } from './Config';
 
-
 const bikebudsDiscoveryUrl = config.apiUrl + '/bikebuds-v1.discovery';
-
 
 class GapiWrapper extends Component {
   constructor(props) {
@@ -33,15 +31,15 @@ class GapiWrapper extends Component {
       bikebudsDiscovery: undefined,
       bikebudsLoaded: undefined,
       bikebudsReady: false,
-      authDict: undefined,
-    }
+      authDict: undefined
+    };
     this.onGapiLoaded = this.onGapiLoaded.bind(this);
   }
 
   /** Load the gapi client after the library is loaded. */
   onGapiLoaded() {
     window.gapi.load('client', () => {
-      this.setState({clientLoaded: true});
+      this.setState({ clientLoaded: true });
     });
   }
 
@@ -50,9 +48,9 @@ class GapiWrapper extends Component {
    */
   componentDidMount() {
     // Listen for sign-in, sign-out
-    this.unregisterAuthObserver = firebase.auth().onAuthStateChanged((user) => {
-      user.getIdToken(true).then((idToken) => {
-        this.setState({authDict: {access_token: idToken}});
+    this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
+      user.getIdToken(true).then(idToken => {
+        this.setState({ authDict: { access_token: idToken } });
       });
     });
 
@@ -60,57 +58,60 @@ class GapiWrapper extends Component {
     const gapiScript = document.createElement('script');
     gapiScript.src = 'https://apis.google.com/js/api.js?onload=onGapiLoaded';
     window.onGapiLoaded = this.onGapiLoaded;
-    document.body.appendChild(gapiScript)
+    document.body.appendChild(gapiScript);
 
     // Fetch a discovery doc.
-    fetch(bikebudsDiscoveryUrl).then((discoveryResponse) => {
-      discoveryResponse.json().then((bikebudsDiscovery) => {
-        this.setState({bikebudsDiscovery: bikebudsDiscovery});
+    fetch(bikebudsDiscoveryUrl).then(discoveryResponse => {
+      discoveryResponse.json().then(bikebudsDiscovery => {
+        this.setState({ bikebudsDiscovery: bikebudsDiscovery });
       });
     });
-  };
+  }
 
   /**
    * @inheritDoc
    */
   componentWillUnmount() {
     this.unregisterAuthObserver();
-  };
+  }
 
   /**
    * @inheritDoc
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if ((this.state.clientLoaded !== prevState.clientLoaded)
-      || (this.state.bikebudsDiscovery !== prevState.bikebudsDiscovery)) {
-      if (this.state.clientLoaded
-        && this.state.bikebudsDiscovery !== undefined
-        && this.bikebudsLoaded === undefined) {
-        this.setState({bikebudsLoaded: false});
+    if (
+      this.state.clientLoaded !== prevState.clientLoaded ||
+      this.state.bikebudsDiscovery !== prevState.bikebudsDiscovery
+    ) {
+      if (
+        this.state.clientLoaded &&
+        this.state.bikebudsDiscovery !== undefined &&
+        this.bikebudsLoaded === undefined
+      ) {
+        this.setState({ bikebudsLoaded: false });
         window.gapi.client.load(this.state.bikebudsDiscovery).then(() => {
-          this.setState({bikebudsLoaded: true});
+          this.setState({ bikebudsLoaded: true });
         });
-      };
-    };
-    if ((this.state.authDict !== prevState.authDict)
-      || (this.state.bikebudsLoaded !== prevState.bikebudsLoaded)) {
-      if ((this.state.authDict !== undefined)
-        && this.state.bikebudsLoaded) {
+      }
+    }
+    if (
+      this.state.authDict !== prevState.authDict ||
+      this.state.bikebudsLoaded !== prevState.bikebudsLoaded
+    ) {
+      if (this.state.authDict !== undefined && this.state.bikebudsLoaded) {
         window.gapi.client.setToken(this.state.authDict);
         window.gapi.client.setApiKey(config.apiKey);
-        this.setState({bikebudsReady: true});
+        this.setState({ bikebudsReady: true });
         this.props.onReady();
-      };
-    };
-  };
+      }
+    }
+  }
 
   /**
    * @inheritDoc
    */
   render() {
-    return (
-      <div className="GapiWrapper" />
-    );
-  };
+    return <div className="GapiWrapper" />;
+  }
 }
 export default GapiWrapper;

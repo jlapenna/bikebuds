@@ -26,9 +26,15 @@ export function readableDistance(meters, profile) {
     return undefined;
   }
   if (getUnitPref(profile) === 'IMPERIAL') {
-    return convert(meters).from('m').to('mi').toFixed(2);
+    return convert(meters)
+      .from('m')
+      .to('mi')
+      .toFixed(2);
   } else {
-    return convert(meters).from('m').to('km').toFixed(2);
+    return convert(meters)
+      .from('m')
+      .to('km')
+      .toFixed(2);
   }
 }
 
@@ -36,9 +42,14 @@ export function readableSpeed(meters_per_second, profile) {
   if (meters_per_second === undefined) {
     return undefined;
   }
-  var speed = convert(meters_per_second).from('m/s').to('km/h');
+  var speed = convert(meters_per_second)
+    .from('m/s')
+    .to('km/h');
   if (getUnitPref(profile) === 'IMPERIAL') {
-    return convert(speed).from('km').to('mi').toFixed(2);
+    return convert(speed)
+      .from('km')
+      .to('mi')
+      .toFixed(2);
   } else {
     return speed.toFixed(2);
   }
@@ -49,7 +60,12 @@ export function readableWeight(weight, profile) {
     return undefined;
   }
   if (getUnitPref(profile) === 'IMPERIAL') {
-    return Number(convert(weight).from('kg').to('lb').toFixed(1));
+    return Number(
+      convert(weight)
+        .from('kg')
+        .to('lb')
+        .toFixed(1)
+    );
   } else {
     return Number(weight.toFixed(1));
   }

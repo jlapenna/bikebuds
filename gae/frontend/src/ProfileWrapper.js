@@ -17,32 +17,30 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-
 class ProfileWrapper extends Component {
-
   static propTypes = {
     onProfileReady: PropTypes.func.isRequired,
-    profile: PropTypes.object,
-  }
+    profile: PropTypes.object
+  };
 
   constructor(props) {
     super(props);
     this.state = {
       fetched: false,
-      profile: props.profile,
-    }
+      profile: props.profile
+    };
   }
 
-  handleProfile = (response) => {
+  handleProfile = response => {
     console.log('ProfileWrapper.handleProfile:', response.result);
     if (response.result === undefined) {
       return;
     }
     this.setState({
-      profile: response.result,
+      profile: response.result
     });
     this.props.onProfileReady(response.result);
-  }
+  };
 
   /**
    * @inheritDoc
@@ -57,10 +55,12 @@ class ProfileWrapper extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ProfileWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady
-      && !this.state.fetched
-      && this.state.profile === undefined) {
-      this.setState({fetched: true});
+    if (
+      this.props.gapiReady &&
+      !this.state.fetched &&
+      this.state.profile === undefined
+    ) {
+      this.setState({ fetched: true });
       window.gapi.client.bikebuds.get_profile().then(this.handleProfile);
     }
   }
@@ -70,9 +70,7 @@ class ProfileWrapper extends Component {
    */
   render() {
     console.log('ProfileWrapper.render', this.state.profile);
-    return (
-      <div className="ProfileWrapper" />
-    );
-  };
+    return <div className="ProfileWrapper" />;
+  }
 }
 export default ProfileWrapper;

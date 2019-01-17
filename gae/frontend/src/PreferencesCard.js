@@ -29,50 +29,50 @@ import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-
 class PreferencesCard extends Component {
-
   static propTypes = {
     preferences: PropTypes.object.isRequired,
-    onPreferencesChanged: PropTypes.func.isRequired,
-  }
+    onPreferencesChanged: PropTypes.func.isRequired
+  };
 
   static styles = theme => ({
     root: {
-      "min-height": "200px",
+      'min-height': '200px'
     },
     container: {
       display: 'flex',
-      flexWrap: 'wrap',
-    },
-  })
+      flexWrap: 'wrap'
+    }
+  });
 
   constructor(props) {
     super(props);
     this.state = {
-      preferences: props.preferences,
-    }
+      preferences: props.preferences
+    };
   }
 
-  handlePreferences = (response) => {
+  handlePreferences = response => {
     console.log('PreferencesCard.updatePreferenceState', response);
     this.setState({
       preferences: response.result.preferences,
-      preferencesFetched: true,
+      preferencesFetched: true
     });
     this.props.onPreferencesChanged(response.result.preferences);
-  }
+  };
 
-  handleRadioGroupChange = (event) => {
-    var newState = {preferences: cloneDeepWith(this.state.preferences)};
+  handleRadioGroupChange = event => {
+    var newState = { preferences: cloneDeepWith(this.state.preferences) };
     if (event.target.name === 'units') {
       newState.preferences.units = event.target.value;
     } else if (event.target.name === 'weight_service') {
       newState.preferences.weight_service = event.target.value;
     }
     this.setState(newState);
-    window.gapi.client.bikebuds.update_preferences(newState).then(this.handlePreferences);
-  }
+    window.gapi.client.bikebuds
+      .update_preferences(newState)
+      .then(this.handlePreferences);
+  };
 
   /**
    * @inheritDoc
@@ -85,7 +85,9 @@ class PreferencesCard extends Component {
     return (
       <CardContent className={this.props.classes.content}>
         <div className={this.props.classes.container}>
-          <FormControl component="fieldset" className={this.props.classes.formControl}
+          <FormControl
+            component="fieldset"
+            className={this.props.classes.formControl}
             disabled={!this.state.preferences}
           >
             <Typography variant="h5">Unit</Typography>
@@ -96,11 +98,21 @@ class PreferencesCard extends Component {
               value={this.state.preferences.units}
               onChange={this.handleRadioGroupChange}
             >
-              <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
-              <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
+              <FormControlLabel
+                value="METRIC"
+                control={<Radio />}
+                label="Metric"
+              />
+              <FormControlLabel
+                value="IMPERIAL"
+                control={<Radio />}
+                label="Imperial"
+              />
             </RadioGroup>
           </FormControl>
-          <FormControl component="fieldset" className={this.props.classes.formControl}
+          <FormControl
+            component="fieldset"
+            className={this.props.classes.formControl}
             disabled={!this.state.preferences}
           >
             <Typography variant="h5">Weight Service</Typography>
@@ -111,23 +123,30 @@ class PreferencesCard extends Component {
               value={this.state.preferences.weight_service}
               onChange={this.handleRadioGroupChange}
             >
-              <FormControlLabel value="FITBIT" control={<Radio />} label="Fitbit" />
-              <FormControlLabel value="WITHINGS" control={<Radio />} label="Withings" />
+              <FormControlLabel
+                value="FITBIT"
+                control={<Radio />}
+                label="Fitbit"
+              />
+              <FormControlLabel
+                value="WITHINGS"
+                control={<Radio />}
+                label="Withings"
+              />
             </RadioGroup>
           </FormControl>
         </div>
       </CardContent>
-    )
-  };
+    );
+  }
 
   render() {
     return (
       <Card className={this.props.classes.root}>
         {this.renderCardContent()}
-        <CardActions>
-        </CardActions>
+        <CardActions />
       </Card>
     );
-  };
+  }
 }
 export default withStyles(PreferencesCard.styles)(PreferencesCard);

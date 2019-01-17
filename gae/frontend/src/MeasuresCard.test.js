@@ -19,29 +19,25 @@ import ReactDOM from 'react-dom';
 
 import MeasuresCard from './MeasuresCard';
 
-
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(
-    <MeasuresCard
-      profile={{}}
-    />
-    , div);
+  ReactDOM.render(<MeasuresCard profile={{}} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });
 
 it('renders measures without crashing', () => {
   const div = document.createElement('div');
   var measures = [
-    {date: "2014-04-01T15:36:48", heart_pulse: "84", id: "1396366608"},
-    {date: "2014-04-01T15:36:48", fat_free_mass: 61.629, fat_mass_weight:
-      39.218, fat_ratio: 38.889, id: "1396366608", weight: 222.3}
+    { date: '2014-04-01T15:36:48', heart_pulse: '84', id: '1396366608' },
+    {
+      date: '2014-04-01T15:36:48',
+      fat_free_mass: 61.629,
+      fat_mass_weight: 39.218,
+      fat_ratio: 38.889,
+      id: '1396366608',
+      weight: 222.3
+    }
   ];
-  ReactDOM.render(
-    <MeasuresCard
-      profile={{}}
-      measures={measures}
-    />
-    , div);
+  ReactDOM.render(<MeasuresCard profile={{}} measures={measures} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

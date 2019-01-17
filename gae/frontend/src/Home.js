@@ -24,30 +24,28 @@ import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
-
 class Home extends Component {
-
   static propTypes = {
     profile: PropTypes.object,
-    gapiReady: PropTypes.bool.isRequired,
-  }
+    gapiReady: PropTypes.bool.isRequired
+  };
 
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {};
   }
 
-  handleActivitiesResponse = (response) => {
+  handleActivitiesResponse = response => {
     console.log('Home.onActivitiesReady', response);
     this.setState({
       activities: response.result.activities
     });
-  }
+  };
 
-  handleMeasuresReady = (measures) => {
+  handleMeasuresReady = measures => {
     console.log('Home.handleMeasuresReady', measures);
-    this.setState({measures: measures});
-  }
+    this.setState({ measures: measures });
+  };
 
   render() {
     return (
@@ -61,11 +59,13 @@ class Home extends Component {
           <Grid item xs={12} lg={8}>
             <ActivitiesWrapper
               gapiReady={this.props.gapiReady}
-              onResponse={this.handleActivitiesResponse} />
+              onResponse={this.handleActivitiesResponse}
+            />
             <ActivityListCard
-              gapiReady={this.props.gapiReady} 
+              gapiReady={this.props.gapiReady}
               profile={this.props.profile}
-              activities={this.state.activities} />
+              activities={this.state.activities}
+            />
           </Grid>
           <Grid item xs={12} lg={4}>
             <MeasuresCard
@@ -73,7 +73,9 @@ class Home extends Component {
               profile={this.props.profile}
               measures={this.state.measures}
               title="Weight"
-              intervalUnit="d" intervalFormat="MMM D" intervalCount="30"
+              intervalUnit="d"
+              intervalFormat="MMM D"
+              intervalCount="30"
             />
           </Grid>
           <Grid item xs={12}>
@@ -82,7 +84,9 @@ class Home extends Component {
               profile={this.props.profile}
               measures={this.state.measures}
               title="Historical Weight"
-              intervalUnit="M" intervalFormat="MMM 'YY" intervalCount="120"
+              intervalUnit="M"
+              intervalFormat="MMM 'YY"
+              intervalCount="120"
             />
           </Grid>
         </Grid>

@@ -19,19 +19,19 @@ import ReactDOM from 'react-dom';
 
 import PreferencesCard from './PreferencesCard';
 
-
 it('renders without crashing', () => {
   const div = document.createElement('div');
   const firebaseUser = {
-    displayName: "Display Name",
-    photoUrl: "/logo-round.svg",
+    displayName: 'Display Name',
+    photoUrl: '/logo-round.svg'
   };
   ReactDOM.render(
     <PreferencesCard
       firebaseUser={firebaseUser}
-      onPreferencesChanged={(preferences) => {}}
+      onPreferencesChanged={preferences => {}}
       preferences={{}}
-    />
-    , div);
+    />,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -34,42 +34,43 @@ import Typography from '@material-ui/core/Typography';
 import { config } from './Config';
 import ClubAvatar from './ClubAvatar';
 
-
 class ProfileCard extends Component {
-
   static propTypes = {
-    firebaseUser: PropTypes.object.isRequired,
-  }
+    firebaseUser: PropTypes.object.isRequired
+  };
 
   static styles = {
     root: {
-      height:300,
+      height: 300
     },
     avatar: {
       width: 128,
-      height: 128,
+      height: 128
     },
     clubContainer: {
-      "min-height": 56,
-    },
-  }
+      'min-height': 56
+    }
+  };
 
   constructor(props) {
     super(props);
     this.state = {
-      connectActionPending: false,
-    }
+      connectActionPending: false
+    };
   }
 
   handleConnectServices = () => {
     window.location.replace(config.frontendUrl + '/signup');
-  }
+  };
 
   handleSignOut = () => {
-    firebase.auth().signOut().then(() => {
-      window.location.reload();
-    });
-  }
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
+        window.location.reload();
+      });
+  };
 
   /**
    * @inheritDoc
@@ -90,8 +91,7 @@ class ProfileCard extends Component {
               <ClubAvatar club={club} />
             </Grid>
           );
-        })
-        }
+        })}
       </React.Fragment>
     );
   }
@@ -100,21 +100,28 @@ class ProfileCard extends Component {
     return (
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
-          <Grid container
+          <Grid
+            container
             direction="column"
             justify="space-evenly"
-            alignItems="center">
+            alignItems="center"
+          >
             <Grid item>
-              <Avatar className={this.props.classes.avatar}
+              <Avatar
+                className={this.props.classes.avatar}
                 alt={this.props.firebaseUser.displayName}
-                src={this.props.firebaseUser.photoURL}>
-              </Avatar>
+                src={this.props.firebaseUser.photoURL}
+              />
             </Grid>
             <Grid item>
-              <Typography variant="h5">{this.props.firebaseUser.displayName}</Typography>
+              <Typography variant="h5">
+                {this.props.firebaseUser.displayName}
+              </Typography>
             </Grid>
             <Grid item>
-              <Grid className={this.props.classes.clubContainer} container
+              <Grid
+                className={this.props.classes.clubContainer}
+                container
                 direction="row"
                 justify="space-evenly"
                 alignItems="center"
@@ -125,17 +132,21 @@ class ProfileCard extends Component {
           </Grid>
         </CardContent>
         <CardActions>
-          <Button color="primary" variant="contained"
+          <Button
+            color="primary"
+            variant="contained"
             component={Link}
             to="/signup"
-            disabled={this.state.connectActionPending}>
+            disabled={this.state.connectActionPending}
+          >
             Connect Services
           </Button>
-          <Button color="secondary"
-            onClick={this.handleSignOut}>Sign-out</Button>
+          <Button color="secondary" onClick={this.handleSignOut}>
+            Sign-out
+          </Button>
         </CardActions>
       </Card>
     );
-  };
+  }
 }
 export default withStyles(ProfileCard.styles)(ProfileCard);

@@ -23,24 +23,20 @@ import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
-
 class Settings extends Component {
-
   static propTypes = {
-    onPreferencesChanged: PropTypes.func.isRequired,
-  }
+    onPreferencesChanged: PropTypes.func.isRequired
+  };
 
-  handlePreferencesChanged = (preferences) => {
+  handlePreferencesChanged = preferences => {
     console.log('Settings.handlePreferencesChanged', preferences);
     this.props.onPreferencesChanged(preferences);
-  }
+  };
 
   render() {
     return (
       <div>
-        <Grid container spacing={24}
-          justify="space-evenly"
-          alignItems="center">
+        <Grid container spacing={24} justify="space-evenly" alignItems="center">
           <Grid item xs={12} sm={12}>
             <ProfileCard
               firebaseUser={this.props.firebaseUser}
@@ -57,16 +53,22 @@ class Settings extends Component {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard serviceName="fitbit"
-              gapiReady={this.props.gapiReady} />
+            <ServiceCard
+              serviceName="fitbit"
+              gapiReady={this.props.gapiReady}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard serviceName="strava"
-              gapiReady={this.props.gapiReady} />
+            <ServiceCard
+              serviceName="strava"
+              gapiReady={this.props.gapiReady}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard serviceName="withings"
-              gapiReady={this.props.gapiReady} />
+            <ServiceCard
+              serviceName="withings"
+              gapiReady={this.props.gapiReady}
+            />
           </Grid>
         </Grid>
       </div>

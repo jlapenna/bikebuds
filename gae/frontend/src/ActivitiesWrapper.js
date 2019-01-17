@@ -17,28 +17,26 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-
 class ActivitiesWrapper extends Component {
-
   static propTypes = {
-    onResponse: PropTypes.func.isRequired,
-  }
+    onResponse: PropTypes.func.isRequired
+  };
 
   constructor(props) {
     super(props);
     this.state = {
       fetched: false,
-      response: undefined,
-    }
+      response: undefined
+    };
   }
 
-  handleUpdateRequestState = (response) => {
+  handleUpdateRequestState = response => {
     console.log('ActivitiesWrapper.handleUpdateRequestState:', response.result);
     this.setState({
-      response: response,
+      response: response
     });
     this.props.onResponse(response);
-  }
+  };
 
   /**
    * @inheritDoc
@@ -53,11 +51,15 @@ class ActivitiesWrapper extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ActivitiesWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady
-      && !this.state.fetched
-      && this.state.response === undefined) {
-      this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_activities().then(this.handleUpdateRequestState);
+    if (
+      this.props.gapiReady &&
+      !this.state.fetched &&
+      this.state.response === undefined
+    ) {
+      this.setState({ fetched: true });
+      window.gapi.client.bikebuds
+        .get_activities()
+        .then(this.handleUpdateRequestState);
     }
   }
 
@@ -66,9 +68,7 @@ class ActivitiesWrapper extends Component {
    */
   render() {
     console.log('ActivitiesWrapper.render', this.state.response);
-    return (
-      <div className="ActivitiesWrapper" />
-    );
-  };
+    return <div className="ActivitiesWrapper" />;
+  }
 }
 export default ActivitiesWrapper;

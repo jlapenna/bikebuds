@@ -21,43 +21,49 @@ import { withStyles } from '@material-ui/core/styles';
 
 import moment from 'moment';
 
-
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
-  CartesianGrid, Label } from 'recharts';
-
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Label
+} from 'recharts';
 
 class MeasuresChart extends Component {
-
   static defaultProps = {
     intervalUnit: 'M',
     intervalCount: 12,
-    intervalFormat: "MMM 'YY",
-  }
+    intervalFormat: "MMM 'YY"
+  };
 
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    measures: PropTypes.array,
-  }
+    measures: PropTypes.array
+  };
 
   static styles = {
     root: {
-      "height": "400px",
-    },
-  }
+      height: '400px'
+    }
+  };
 
   constructor(props) {
     super(props);
     this.state = {
       measures: undefined,
-      weightDomain: ["dataMin - 1", "dataMax + 1"],
-      fatDomain: ["dataMin - 1", "dataMax + 1"],
-    }
+      weightDomain: ['dataMin - 1', 'dataMax + 1'],
+      fatDomain: ['dataMin - 1', 'dataMax + 1']
+    };
   }
 
-  handleMeasures = (newMeasures) => {
+  handleMeasures = newMeasures => {
     var preferredNextDate = moment.utc().endOf('day');
-    var earliestDate = preferredNextDate.clone().subtract(
-      this.props.intervalCount, this.props.intervalUnit);
+    var earliestDate = preferredNextDate
+      .clone()
+      .subtract(this.props.intervalCount, this.props.intervalUnit);
     var measures = [];
     for (var i = 0; i < newMeasures.length; i++) {
       var measure = newMeasures[newMeasures.length - 1 - i];
@@ -67,15 +73,17 @@ class MeasuresChart extends Component {
       }
       if (measureDate <= preferredNextDate) {
         measures.unshift(measure);
-        preferredNextDate.subtract(1, 'seconds').startOf(this.props.intervalUnit);
+        preferredNextDate
+          .subtract(1, 'seconds')
+          .startOf(this.props.intervalUnit);
       }
-    };
+    }
 
     this.setState({
-      measures: measures,
+      measures: measures
     });
     console.log('MeasuresChart.handleMeasures:', this.state);
-  }
+  };
 
   /**
    * @inheritDoc
@@ -108,53 +116,59 @@ class MeasuresChart extends Component {
         >
           <XAxis
             dataKey="date"
-            tickFormatter={
-              (tick) => moment.utc(tick).format(this.props.intervalFormat)}
-              tick={{ position: "bottom", angle: -45 }}
-              textAnchor="end"
-              interval="preserveStartEnd"
-              padding={{left: 12, right: 12}}
-            />
-            <YAxis dataKey="weight" yAxisId={0}
-              name="Weight"
-              tickFormatter={(tick) => tick.toFixed(1)}
-              interval={0}
-              domain={this.state.weightDomain}
-            >
-              <Label color="#03dac6" value="Weight" angle={-90} position="left" />
-            </YAxis>
-            <YAxis dataKey="fat_ratio" yAxisId={1} orientation="right"
-              tickFormatter={(tick) => tick.toFixed(1)}
-              interval={0}
-              domain={this.state.fatDomain}
-            >
-              <Label value="Fat %" angle={-90} position="right" />
-            </YAxis>
-            <CartesianGrid stroke="#f5f5f5" />
-            <Tooltip
-              formatter={(value) => value.toFixed(1)}
-              labelFormatter={(value) => moment.utc(value).format('LLL')}
-            />
-            <Line
-              dataKey="weight"
-              name="Weight"
-              yAxisId={0}
-              connectNulls
-              isAnimationActive={false}
-              stroke="#03dac6"
-            />
-            <Line
-              dataKey="fat_ratio"
-              name="Fat %"
-              type="monotone"
-              yAxisId={1}
-              connectNulls
-              isAnimationActive={false}
-              stroke="#ff4081"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-    )
+            tickFormatter={tick =>
+              moment.utc(tick).format(this.props.intervalFormat)
+            }
+            tick={{ position: 'bottom', angle: -45 }}
+            textAnchor="end"
+            interval="preserveStartEnd"
+            padding={{ left: 12, right: 12 }}
+          />
+          <YAxis
+            dataKey="weight"
+            yAxisId={0}
+            name="Weight"
+            tickFormatter={tick => tick.toFixed(1)}
+            interval={0}
+            domain={this.state.weightDomain}
+          >
+            <Label color="#03dac6" value="Weight" angle={-90} position="left" />
+          </YAxis>
+          <YAxis
+            dataKey="fat_ratio"
+            yAxisId={1}
+            orientation="right"
+            tickFormatter={tick => tick.toFixed(1)}
+            interval={0}
+            domain={this.state.fatDomain}
+          >
+            <Label value="Fat %" angle={-90} position="right" />
+          </YAxis>
+          <CartesianGrid stroke="#f5f5f5" />
+          <Tooltip
+            formatter={value => value.toFixed(1)}
+            labelFormatter={value => moment.utc(value).format('LLL')}
+          />
+          <Line
+            dataKey="weight"
+            name="Weight"
+            yAxisId={0}
+            connectNulls
+            isAnimationActive={false}
+            stroke="#03dac6"
+          />
+          <Line
+            dataKey="fat_ratio"
+            name="Fat %"
+            type="monotone"
+            yAxisId={1}
+            connectNulls
+            isAnimationActive={false}
+            stroke="#ff4081"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    );
   }
 }
 export default withStyles(MeasuresChart.styles)(MeasuresChart);

@@ -30,28 +30,26 @@ import Typography from '@material-ui/core/Typography';
 import ActivityListCard from './ActivityListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 
-
 class Club extends Component {
-
   static propTypes = {
     clubId: PropTypes.number.isRequired,
     gapiReady: PropTypes.bool.isRequired,
-    profile: PropTypes.object.isRequired,
-  }
+    profile: PropTypes.object.isRequired
+  };
 
   static styles = {
     root: {
-      width: "100%",
+      width: '100%'
     },
     card: {
-      height: "400px",
-      width: "360px",
+      height: '400px',
+      width: '360px'
     },
     media: {
-      height: "176px",
-      width: "360px",
-    },
-  }
+      height: '176px',
+      width: '360px'
+    }
+  };
 
   constructor(props) {
     super(props);
@@ -59,36 +57,36 @@ class Club extends Component {
       fetched: false,
       club: undefined,
       activities: undefined,
-      error: undefined,
-    }
+      error: undefined
+    };
   }
 
   handleListItemClick = (index, activity) => {
     console.log('Club.handleListItemClick', index, activity);
-  }
+  };
 
-  handleActivitiesResponse = (response) => {
+  handleActivitiesResponse = response => {
     console.log('Club.handleActivities', response);
     this.setState({
       activities: response.result.activities
     });
-  }
+  };
 
-  updateClubState = (response) => {
+  updateClubState = response => {
     console.log('Club.updateClubState:', response);
     if (response.status === 400) {
       this.setState({
         club: null,
         activities: null,
-        error: response.statusText,
+        error: response.statusText
       });
       return;
     }
     this.setState({
       club: response.result.club,
-      activities: response.result.activities,
+      activities: response.result.activities
     });
-  }
+  };
 
   /**
    * @inheritDoc
@@ -103,14 +101,18 @@ class Club extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ClubWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady
-      && !this.state.fetched
-      && this.state.club === undefined) {
-      this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_club({
-        id: this.props.clubId,
-        activities: true
-      }).then(this.updateClubState, this.updateClubState);
+    if (
+      this.props.gapiReady &&
+      !this.state.fetched &&
+      this.state.club === undefined
+    ) {
+      this.setState({ fetched: true });
+      window.gapi.client.bikebuds
+        .get_club({
+          id: this.props.clubId,
+          activities: true
+        })
+        .then(this.updateClubState, this.updateClubState);
     }
   }
 
@@ -119,16 +121,16 @@ class Club extends Component {
       return null;
     }
     if (this.state.club === null) {
-      return (
-        <React.Fragment>
-          {this.state.error}
-        </React.Fragment>
-      );
+      return <React.Fragment>{this.state.error}</React.Fragment>;
     }
 
     return (
       <div className={this.props.classes.root}>
-        <Grid className={this.props.classes.contentGridElement} container spacing={24}>
+        <Grid
+          className={this.props.classes.contentGridElement}
+          container
+          spacing={24}
+        >
           <Grid className={this.props.classes.contentGridElement} item xs={3}>
             <Card className={this.props.classes.card}>
               <CardMedia
@@ -136,21 +138,26 @@ class Club extends Component {
                 image={this.state.club.cover_photo_small}
                 title="Contemplative Reptile"
               >
-                <Avatar className={this.props.classes.avatar}
+                <Avatar
+                  className={this.props.classes.avatar}
                   alt={this.state.club.name}
-                  src={this.state.club.profile_medium}>
-                </Avatar>
+                  src={this.state.club.profile_medium}
+                />
               </CardMedia>
               <CardContent className={this.props.classes.content}>
-                <Grid container
+                <Grid
+                  container
                   direction="column"
                   justify="space-evenly"
-                  alignItems="center">
+                  alignItems="center"
+                >
                   <Grid item>
                     <Typography variant="h5">{this.state.club.name}</Typography>
                   </Grid>
                   <Grid item>
-                    <Grid container className={this.props.classes.clubContainer}
+                    <Grid
+                      container
+                      className={this.props.classes.clubContainer}
                       direction="row"
                       justify="space-evenly"
                       alignItems="center"
@@ -162,34 +169,37 @@ class Club extends Component {
                             <Button alt={member.firstname} href={url}>
                               <Avatar
                                 alt={member.firstname}
-                                src={member.profile_medium} />
-                              <Typography>{member.firstname} {member.lastname}</Typography>
+                                src={member.profile_medium}
+                              />
+                              <Typography>
+                                {member.firstname} {member.lastname}
+                              </Typography>
                             </Button>
                           </Grid>
                         );
-                      })
-                      }
+                      })}
                     </Grid>
                   </Grid>
                 </Grid>
               </CardContent>
-              <CardActionArea>
-              </CardActionArea>
+              <CardActionArea />
             </Card>
           </Grid>
           <Grid className={this.props.classes.contentGridElement} item xs={8}>
             <ActivitiesWrapper
               gapiReady={this.props.gapiReady}
-              onResponse={this.handleActivitiesResponse} />
+              onResponse={this.handleActivitiesResponse}
+            />
             <ActivityListCard
-              gapiReady={this.props.gapiReady} 
+              gapiReady={this.props.gapiReady}
               profile={this.props.profile}
               activities={this.state.activities}
-              showAthlete={true} />
+              showAthlete={true}
+            />
           </Grid>
         </Grid>
       </div>
     );
-  };
+  }
 }
 export default withStyles(Club.styles)(Club);
