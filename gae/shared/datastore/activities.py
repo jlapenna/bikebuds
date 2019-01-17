@@ -94,7 +94,7 @@ class ActivityMessage(messages.Message):
 class Activity(ndb.Model):
     # id = string
     activity = msgprop.MessageProperty(ActivityMessage,
-            indexed_fields=['id', 'athlete.id'])
+            indexed_fields=['id', 'private', 'athlete.id'])
     start_date = ndb.DateTimeProperty(indexed=True)
 
     @classmethod

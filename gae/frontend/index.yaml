@@ -17,6 +17,15 @@ indexes:
     direction: desc
 - kind: "Activity"
   properties:
+  - name: "activity.athlete.id"
+  - name: "activity.private"
+  - name: "start_date"
+- kind: "Activity"
+  properties:
+  - name: "activity.private"
+  - name: "start_date"
+- kind: "Activity"
+  properties:
   - name: "athlete_id"
   - name: "start_date"
 - kind: "Activity"

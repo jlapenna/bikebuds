@@ -61,19 +61,8 @@ class Club extends Component {
     };
   }
 
-  handleListItemClick = (index, activity) => {
-    console.log('Club.handleListItemClick', index, activity);
-  };
-
-  handleActivitiesResponse = response => {
-    console.log('Club.handleActivities', response);
-    this.setState({
-      activities: response.result.activities
-    });
-  };
-
-  updateClubState = response => {
-    console.log('Club.updateClubState:', response);
+  handleClub = response => {
+    console.log('Club.handleClub:', response);
     if (response.status === 400) {
       this.setState({
         club: null,
@@ -86,6 +75,10 @@ class Club extends Component {
       club: response.result.club,
       activities: response.result.activities
     });
+  };
+
+  handleListItemClick = (index, activity) => {
+    console.log('Club.handleListItemClick', index, activity);
   };
 
   /**
@@ -112,7 +105,7 @@ class Club extends Component {
           id: this.props.clubId,
           activities: true
         })
-        .then(this.updateClubState, this.updateClubState);
+        .then(this.handleClub, this.handleClub);
     }
   }
 
@@ -186,10 +179,6 @@ class Club extends Component {
             </Card>
           </Grid>
           <Grid className={this.props.classes.contentGridElement} item xs={8}>
-            <ActivitiesWrapper
-              gapiReady={this.props.gapiReady}
-              onResponse={this.handleActivitiesResponse}
-            />
             <ActivityListCard
               gapiReady={this.props.gapiReady}
               profile={this.props.profile}
