@@ -22,22 +22,45 @@ export function readableDuration(seconds, profile) {
 }
 
 export function readableDistance(meters, profile) {
-  return convert(meters).from('m').to('mi').toFixed(2);
+  if (meters === undefined) {
+    return undefined;
+  }
+  if (getUnitPref(profile) === 'IMPERIAL') {
+    return convert(meters).from('m').to('mi').toFixed(2);
+  } else {
+    return convert(meters).from('m').to('km').toFixed(2);
+  }
 }
 
 export function readableSpeed(meters_per_second, profile) {
+  if (meters_per_second === undefined) {
+    return undefined;
+  }
   var speed = convert(meters_per_second).from('m/s').to('km/h');
-  if (profile.preferences.units === 'IMPERIAL') {
+  if (getUnitPref(profile) === 'IMPERIAL') {
     return convert(speed).from('km').to('mi').toFixed(2);
   } else {
     return speed.toFixed(2);
   }
 }
 
-export function readableWeight(kg, profile) {
-  if (profile.preferences.units === 'IMPERIAL') {
-    return Number(convert(kg).from('kg').to('lb').toFixed(1));
-  } else {
-    return Number(kg.toFixed(1));
+export function readableWeight(weight, profile) {
+  if (weight === undefined) {
+    return undefined;
   }
+  if (getUnitPref(profile) === 'IMPERIAL') {
+    return Number(convert(weight).from('kg').to('lb').toFixed(1));
+  } else {
+    return Number(weight.toFixed(1));
+  }
+}
+
+function getUnitPref(profile) {
+  if (profile === undefined) {
+    return undefined;
+  }
+  if (profile.preferences === undefined) {
+    return undefined;
+  }
+  return profile.preferences.units;
 }
