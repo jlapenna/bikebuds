@@ -82,7 +82,6 @@ class PreferencesCard extends Component {
   }
 
   renderCardContent() {
-    console.log('PreferencesCard.renderCardContent', this.state.preferences);
     return (
       <CardContent className={this.props.classes.content}>
         <div className={this.props.classes.container}>

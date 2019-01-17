@@ -144,11 +144,9 @@ class ServiceCard extends Component {
           alignItems="center">
           <Grid className={this.props.classes.cardContentItem} item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {(this.state.service && this.state.service.sync_date != null) &&
-                <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
-            }
-            {(!this.state.service || !this.state.service.sync_date) &&
-                <i>&#8203;</i>
+            {(this.state.service && this.state.service.sync_date != null)
+                ?  <i>Last sync: <Moment fromNow>{this.state.service.sync_date}</Moment></i>
+                : <i>&#8203;</i>
             }
           </Grid>
           <Grid className={this.props.classes.cardContentItem} item>

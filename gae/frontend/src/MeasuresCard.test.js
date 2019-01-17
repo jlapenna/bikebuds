@@ -17,22 +17,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { BrowserRouter as Router } from "react-router-dom";
+import MeasuresCard from './MeasuresCard';
 
-import ProfileCard from './ProfileCard';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  const firebaseUser = {
-    displayName: "Display Name",
-    photoUrl: "/logo-round.svg",
-  };
   ReactDOM.render(
-    <Router>
-      <ProfileCard
-        firebaseUser={firebaseUser}
-      />
-    </Router>
+    <MeasuresCard
+      profile={{}}
+    />
+    , div);
+  ReactDOM.unmountComponentAtNode(div);
+});
+
+it('renders measures without crashing', () => {
+  const div = document.createElement('div');
+  var measures = [
+    {date: "2014-04-01T15:36:48", heart_pulse: "84", id: "1396366608"},
+    {date: "2014-04-01T15:36:48", fat_free_mass: 61.629, fat_mass_weight:
+      39.218, fat_ratio: 38.889, id: "1396366608", weight: 222.3}
+  ];
+  ReactDOM.render(
+    <MeasuresCard
+      profile={{}}
+      measures={measures}
+    />
     , div);
   ReactDOM.unmountComponentAtNode(div);
 });

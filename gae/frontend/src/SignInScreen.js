@@ -39,7 +39,6 @@ class SignInScreen extends Component {
     this.state = {
       isSignedIn: undefined,
     };
-    this.handleSignOut = this.handleSignOut.bind(this);
   };
 
 
@@ -69,6 +68,11 @@ class SignInScreen extends Component {
    */
   componentDidMount() {
     this.unregisterAuthObserver = firebase.auth().onAuthStateChanged((user) => {
+      // If we've unmounted before this callback executes, we don't want to
+      // update state.
+      if (this.unregisterAuthObserver === null) {
+        return;
+      }
       var signedIn = !!user;
       console.log('SignInScreen: onAuthStateChanged', signedIn, user);
       this.setState({isSignedIn: signedIn});
@@ -81,9 +85,10 @@ class SignInScreen extends Component {
   componentWillUnmount() {
     console.log('SignInScreen: componentWillUnmount');
     this.unregisterAuthObserver();
+    this.unregisterAuthObserver = null;
   };
 
-  handleSignOut(e) { 
+  handleSignOut = (e) => { 
     console.log('handleSignOut', e);
     firebase.auth().currentUser.getIdToken().then(function(idToken) {
       firebase.auth().signOut();

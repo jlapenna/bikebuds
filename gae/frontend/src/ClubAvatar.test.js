@@ -19,18 +19,15 @@ import ReactDOM from 'react-dom';
 
 import { BrowserRouter as Router } from "react-router-dom";
 
-import ProfileCard from './ProfileCard';
+import ClubAvatar from './ClubAvatar';
+
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  const firebaseUser = {
-    displayName: "Display Name",
-    photoUrl: "/logo-round.svg",
-  };
   ReactDOM.render(
     <Router>
-      <ProfileCard
-        firebaseUser={firebaseUser}
+      <ClubAvatar
+        club={{id: 1, name: "ClubName"}}
       />
     </Router>
     , div);

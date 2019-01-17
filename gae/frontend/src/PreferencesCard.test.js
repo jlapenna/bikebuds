@@ -17,9 +17,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { BrowserRouter as Router } from "react-router-dom";
+import PreferencesCard from './PreferencesCard';
 
-import ProfileCard from './ProfileCard';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
@@ -28,11 +27,11 @@ it('renders without crashing', () => {
     photoUrl: "/logo-round.svg",
   };
   ReactDOM.render(
-    <Router>
-      <ProfileCard
-        firebaseUser={firebaseUser}
-      />
-    </Router>
+    <PreferencesCard
+      firebaseUser={firebaseUser}
+      onPreferencesChanged={(preferences) => {}}
+      preferences={{}}
+    />
     , div);
   ReactDOM.unmountComponentAtNode(div);
 });

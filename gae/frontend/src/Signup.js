@@ -11,6 +11,7 @@ class Signup extends React.Component {
 
   static propTypes = {
     firebaseUser: PropTypes.object.isRequired,
+    gapiReady: PropTypes.bool.isRequired,
   }
 
   static styles = (theme) => ({

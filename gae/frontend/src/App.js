@@ -48,6 +48,11 @@ class App extends Component {
   componentDidMount() {
     this.unregisterAuthObserver =
       firebase.auth().onAuthStateChanged((firebaseUser) => {
+        // If we've unmounted before this callback executes, we don't want to
+        // update state.
+        if (this.unregisterAuthObserver === null) {
+          return;
+        }
         this.setState({isSignedIn: !!firebaseUser, firebaseUser: firebaseUser});
       });
   };
@@ -57,6 +62,7 @@ class App extends Component {
    */
   componentWillUnmount() {
     this.unregisterAuthObserver();
+    this.unregisterAuthObserver = null;
   };
 
   render() {

@@ -17,22 +17,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { BrowserRouter as Router } from "react-router-dom";
+import firebase from 'firebase/app';
 
-import ProfileCard from './ProfileCard';
+import { config } from './Config';
+import SignupStepper from './SignupStepper';
+
+
+firebase.initializeApp(config);
+
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  const firebaseUser = {
-    displayName: "Display Name",
-    photoUrl: "/logo-round.svg",
-  };
   ReactDOM.render(
-    <Router>
-      <ProfileCard
-        firebaseUser={firebaseUser}
-      />
-    </Router>
+    <SignupStepper
+      firebaseUser={{}}
+      gapiReady={false}
+      onFinished={() => {}}
+    />
     , div);
   ReactDOM.unmountComponentAtNode(div);
 });
