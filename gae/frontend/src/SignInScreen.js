@@ -25,15 +25,15 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import logoRound from './logo-round.svg';
 
 
-const styles = {
-  logo: {
-    display: "block",
-    margin : "20px auto 10px",
-  },
-}
-
-
 class SignInScreen extends Component {
+
+  static styles = {
+    logo: {
+      display: "block",
+      margin : "20px auto 10px",
+    },
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -107,5 +107,4 @@ class SignInScreen extends Component {
     );
   };
 }
-
-export default withStyles(styles)(SignInScreen);
+export default withStyles(SignInScreen.styles)(SignInScreen);

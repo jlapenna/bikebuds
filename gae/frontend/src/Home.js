@@ -24,21 +24,28 @@ import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
+
 class Home extends Component {
+
+  static propTypes = {
+    profile: PropTypes.object,
+    gapiReady: PropTypes.bool.isRequired,
+  }
+
   constructor(props) {
     super(props);
     this.state = {}
   }
 
-  onActivitiesResponse = (response) => {
+  handleActivitiesResponse = (response) => {
     console.log('Home.onActivitiesReady', response);
     this.setState({
       activities: response.result.activities
     });
   }
 
-  onMeasuresReady = (measures) => {
-    console.log('Home.onMeasuresReady', measures);
+  handleMeasuresReady = (measures) => {
+    console.log('Home.handleMeasuresReady', measures);
     this.setState({measures: measures});
   }
 
@@ -48,13 +55,13 @@ class Home extends Component {
         <MeasuresWrapper
           profile={this.props.profile}
           gapiReady={this.props.gapiReady}
-          onMeasuresReady={this.onMeasuresReady}
+          onMeasuresReady={this.handleMeasuresReady}
         />
         <Grid container spacing={24}>
           <Grid item xs={12} lg={8}>
             <ActivitiesWrapper
               gapiReady={this.props.gapiReady}
-              onResponse={this.onActivitiesResponse} />
+              onResponse={this.handleActivitiesResponse} />
             <ActivityListCard
               gapiReady={this.props.gapiReady} 
               profile={this.props.profile}
@@ -82,10 +89,5 @@ class Home extends Component {
       </div>
     );
   }
-}
-
-Home.propTypes = {
-  profile: PropTypes.object,
-  gapiReady: PropTypes.bool.isRequired,
 }
 export default Home;

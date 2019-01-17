@@ -21,7 +21,9 @@ import 'firebase/auth';
 
 import { config } from './Config';
 
+
 const bikebudsDiscoveryUrl = config.apiUrl + '/bikebuds-v1.discovery';
+
 
 class GapiWrapper extends Component {
   constructor(props) {
@@ -111,5 +113,4 @@ class GapiWrapper extends Component {
     );
   };
 }
-
 export default GapiWrapper;

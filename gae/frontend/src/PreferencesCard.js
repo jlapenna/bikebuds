@@ -29,17 +29,24 @@ import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-const styles = theme => ({
-  root: {
-    "min-height": "200px",
-  },
-  container: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-});
 
 class PreferencesCard extends Component {
+
+  static propTypes = {
+    preferences: PropTypes.object.isRequired,
+    onPreferencesChanged: PropTypes.func.isRequired,
+  }
+
+  static styles = theme => ({
+    root: {
+      "min-height": "200px",
+    },
+    container: {
+      display: 'flex',
+      flexWrap: 'wrap',
+    },
+  })
+
   constructor(props) {
     super(props);
     this.state = {
@@ -47,7 +54,16 @@ class PreferencesCard extends Component {
     }
   }
 
-  onHandleChange = (event) => {
+  handlePreferences = (response) => {
+    console.log('PreferencesCard.updatePreferenceState', response);
+    this.setState({
+      preferences: response.result.preferences,
+      preferencesFetched: true,
+    });
+    this.props.onPreferencesChanged(response.result.preferences);
+  }
+
+  handleRadioGroupChange = (event) => {
     var newState = {preferences: cloneDeepWith(this.state.preferences)};
     if (event.target.name === 'units') {
       newState.preferences.units = event.target.value;
@@ -55,16 +71,7 @@ class PreferencesCard extends Component {
       newState.preferences.weight_service = event.target.value;
     }
     this.setState(newState);
-    window.gapi.client.bikebuds.update_preferences(newState).then(this.updatePreferencesState);
-  }
-
-  updatePreferencesState = (response) => {
-    console.log('PreferencesCard.updatePreferenceState', response);
-    this.setState({
-      preferences: response.result.preferences,
-      preferencesFetched: true,
-    });
-    this.props.onPreferencesChanged(response.result.preferences);
+    window.gapi.client.bikebuds.update_preferences(newState).then(this.handlePreferences);
   }
 
   /**
@@ -88,7 +95,7 @@ class PreferencesCard extends Component {
               name="units"
               className={this.props.classes.group}
               value={this.state.preferences.units}
-              onChange={this.onHandleChange}
+              onChange={this.handleRadioGroupChange}
             >
               <FormControlLabel value="METRIC" control={<Radio />} label="Metric" />
               <FormControlLabel value="IMPERIAL" control={<Radio />} label="Imperial" />
@@ -103,7 +110,7 @@ class PreferencesCard extends Component {
               name="weight_service"
               className={this.props.classes.group}
               value={this.state.preferences.weight_service}
-              onChange={this.onHandleChange}
+              onChange={this.handleRadioGroupChange}
             >
               <FormControlLabel value="FITBIT" control={<Radio />} label="Fitbit" />
               <FormControlLabel value="WITHINGS" control={<Radio />} label="Withings" />
@@ -124,9 +131,4 @@ class PreferencesCard extends Component {
     );
   };
 }
-
-PreferencesCard.propTypes = {
-  preferences: PropTypes.object.isRequired,
-  onPreferencesChanged: PropTypes.func.isRequired,
-}
-export default withStyles(styles)(PreferencesCard);
+export default withStyles(PreferencesCard.styles)(PreferencesCard);

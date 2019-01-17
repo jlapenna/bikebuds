@@ -23,12 +23,17 @@ import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
+
 class Settings extends Component {
+
+  static propTypes = {
+    onPreferencesChanged: PropTypes.func.isRequired,
+  }
 
   handlePreferencesChanged = (preferences) => {
     console.log('Settings.handlePreferencesChanged', preferences);
     this.props.onPreferencesChanged(preferences);
-  };
+  }
 
   render() {
     return (
@@ -49,7 +54,7 @@ class Settings extends Component {
               gapiReady={this.props.gapiReady}
               onPreferencesChanged={this.handlePreferencesChanged}
               preferences={this.props.profile.preferences}
-              />
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ServiceCard serviceName="fitbit"
@@ -67,9 +72,5 @@ class Settings extends Component {
       </div>
     );
   }
-}
-
-Settings.propTypes = {
-  onPreferencesChanged: PropTypes.func.isRequired,
 }
 export default Settings;

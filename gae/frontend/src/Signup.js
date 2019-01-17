@@ -7,16 +7,20 @@ import { withStyles } from '@material-ui/core/styles';
 
 import SignupStepper from './SignupStepper';
 
-
-const styles = (theme) => ({
-  root: {
-    "background-color": 'red',
-    display: 'flex',
-    height: '100%',
-  },
-});
-
 class Signup extends React.Component {
+
+  static propTypes = {
+    firebaseUser: PropTypes.object.isRequired,
+  }
+
+  static styles = (theme) => ({
+    root: {
+      "background-color": 'red',
+      display: 'flex',
+      height: '100%',
+    },
+  })
+
   constructor(props) {
     super(props);
     this.state = {
@@ -46,9 +50,4 @@ class Signup extends React.Component {
     );
   }
 }
-
-
-Signup.propTypes = {
-  firebaseUser: PropTypes.object.isRequired,
-};
-export default withStyles(styles)(Signup);
+export default withStyles(Signup.styles)(Signup);

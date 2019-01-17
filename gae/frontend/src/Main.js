@@ -44,43 +44,45 @@ import Signup from './Signup';
 
 const drawerWidth = 240;
 
-const styles = (theme) => ({
-  root: {
-    display: 'flex',
-    height: '100%',
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawer: {
-    [theme.breakpoints.up('md')]: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-  },
-  appBar: {
-    [theme.breakpoints.up('md')]: {
-      width: '100%',
-      zIndex: theme.zIndex.drawer + 1,
-    },
-  },
-  menuButton: {
-    marginRight: 20,
-    [theme.breakpoints.up('md')]: {
-      display: 'none',
-    },
-  },
-  toolbar: theme.mixins.toolbar,
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing.unit * 3,
-  },
-  active: {
-    backgroundColor: theme.palette.action.selected
-  },
-});
 
 class Main extends Component {
+
+  static styles = (theme) => ({
+    root: {
+      display: 'flex',
+      height: '100%',
+    },
+    drawerPaper: {
+      width: drawerWidth,
+    },
+    drawer: {
+      [theme.breakpoints.up('md')]: {
+        width: drawerWidth,
+        flexShrink: 0,
+      },
+    },
+    appBar: {
+      [theme.breakpoints.up('md')]: {
+        width: '100%',
+        zIndex: theme.zIndex.drawer + 1,
+      },
+    },
+    menuButton: {
+      marginRight: 20,
+      [theme.breakpoints.up('md')]: {
+        display: 'none',
+      },
+    },
+    toolbar: theme.mixins.toolbar,
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing.unit * 3,
+    },
+    active: {
+      backgroundColor: theme.palette.action.selected
+    },
+  });
+
   constructor(props) {
     super(props);
     this.state = {
@@ -90,36 +92,31 @@ class Main extends Component {
     };
   }
 
-  onDrawerToggle = () => {
+  handleDrawerToggle = () => {
     this.setState(state => ({ mobileOpen: !state.mobileOpen }));
   };
 
-  onGapiReady = () => {
+  handleGapiReady = () => {
     this.setState({gapiReady: true});
   }
 
-  onMeasuresReady = (measures) => {
-    console.log('Main.onMeasuresReady', measures);
-    this.setState({measures: measures});
-  }
-
-  onPreferencesChanged = (preferences) => {
-    console.log('Main.onPreferencesChanged', preferences);
+  handlePreferencesChanged = (preferences) => {
+    console.log('Main.handlePreferencesChanged', preferences);
     this.setState((state, props) => {
       state.profile.preferences = preferences;
       return {profile: state.profile};
     });
   }
 
-  onProfileReady = (profile) => {
-    console.log('Main.onProfileReady', profile);
+  handleProfileReady = (profile) => {
+    console.log('Main.handleProfileReady', profile);
     this.setState({
       profile: profile
     });
   }
 
-  onFcmMessage = (payload) => {
-    console.log('Main.onFcmMessage', payload);
+  handleFcmMessage = (payload) => {
+    console.log('Main.handleFcmMessage', payload);
   }
 
   renderDrawerContent() {
@@ -189,7 +186,7 @@ class Main extends Component {
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
             profile={this.state.profile}
-            onPreferencesChanged={this.onPreferencesChanged}
+            onPreferencesChanged={this.handlePreferencesChanged}
           />}
         />
         <Route path="/signup" exact
@@ -209,21 +206,21 @@ class Main extends Component {
     return (
       <Router>
       <div className={this.props.classes.root}>
-        <GapiWrapper onReady={this.onGapiReady} />
+        <GapiWrapper onReady={this.handleGapiReady} />
         <ProfileWrapper
           firebaseUser={this.props.firebaseUser}
           gapiReady={this.state.gapiReady}
-          onProfileReady={this.onProfileReady}
+          onProfileReady={this.handleProfileReady}
           profile={this.state.profile}
         />
         <FcmWrapper
           gapiReady={this.state.gapiReady}
-          onMessage={this.onFcmMessage}
+          onMessage={this.handleFcmMessage}
         />
         <AppBar className={this.props.classes.appBar} position="fixed">
           <Toolbar>
             <IconButton className={this.props.classes.menuButton} 
-              onClick={this.onDrawerToggle}
+              onClick={this.handleDrawerToggle}
               color="inherit"
               aria-label="Menu">
               <MenuIcon />
@@ -239,7 +236,7 @@ class Main extends Component {
               variant="temporary"
               anchor={this.props.theme.direction === 'rtl' ? 'right' : 'left'}
               open={this.state.mobileOpen}
-              onClose={this.onDrawerToggle}
+              onClose={this.handleDrawerToggle}
               classes={{
                 paper: this.props.classes.drawerPaper,
               }}
@@ -271,5 +268,4 @@ class Main extends Component {
     );
   };
 }
-
-export default withStyles(styles, {withTheme: true})(Main);
+export default withStyles(Main.styles, {withTheme: true})(Main);

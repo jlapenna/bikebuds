@@ -15,38 +15,38 @@ import Typography from '@material-ui/core/Typography';
 import { config } from './Config';
 import { createSession } from './session_util';
 
-const styles = (theme) => ({
-  root: {
-    height: '100%',
-  },
-  stepBody: {
-    marginTop: theme.spacing.unit,
-    marginBottom: theme.spacing.unit,
-  },
-  stepContent: {
-    marginTop: theme.spacing.unit,
-    marginBottom: theme.spacing.unit,
-  },
-  stepFooter: {
-  },
-  mobileButton: {
-    marginRight: theme.spacing.unit,
-    marginLeft: theme.spacing.unit,
-  },
-  desktopButton: {
-    marginRight: theme.spacing.unit,
-  },
-});
-
-
 
 class SignupStepper extends React.Component {
+
+  static styles = (theme) => ({
+    root: {
+      height: '100%',
+    },
+    stepBody: {
+      marginTop: theme.spacing.unit,
+      marginBottom: theme.spacing.unit,
+    },
+    stepContent: {
+      marginTop: theme.spacing.unit,
+      marginBottom: theme.spacing.unit,
+    },
+    stepFooter: {
+    },
+    mobileButton: {
+      marginRight: theme.spacing.unit,
+      marginLeft: theme.spacing.unit,
+    },
+    desktopButton: {
+      marginRight: theme.spacing.unit,
+    },
+  })
+
   static propTypes = {
     classes: PropTypes.object,
     firebaseUser: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired,
     onFinished: PropTypes.func.isRequired,
-  };
+  }
 
   constructor(props) {
     super(props);
@@ -144,6 +144,12 @@ class SignupStepper extends React.Component {
     ];
   }
 
+  handleBack = () => {
+    this.setState(state => ({
+      activeStepIndex: state.activeStepIndex - 1,
+    }));
+  };
+
   handleNext = () => {
     const { activeStepIndex } = this.state;
     let activeStep = this.state.steps[activeStepIndex];
@@ -170,12 +176,6 @@ class SignupStepper extends React.Component {
     this.setState({
       activeStepIndex: activeStepIndex + 1,
     });
-  };
-
-  handleBack = () => {
-    this.setState(state => ({
-      activeStepIndex: state.activeStepIndex - 1,
-    }));
   };
 
   handleSkip = () => {
@@ -269,17 +269,17 @@ class SignupStepper extends React.Component {
               activeStep={activeStepIndex}
               nextButton={
                 <React.Fragment>
-                <Button
-                  className={classes.mobileButton}
-                  variant="contained"
-                  color="primary"
-                  disabled={connectPending}
-                  onClick={this.handleNext}
-                >
-                  {activeStep.buttonLabel}
-                  {this.props.theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-                </Button>
-              </React.Fragment>
+                  <Button
+                    className={classes.mobileButton}
+                    variant="contained"
+                    color="primary"
+                    disabled={connectPending}
+                    onClick={this.handleNext}
+                  >
+                    {activeStep.buttonLabel}
+                    {this.props.theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                  </Button>
+                </React.Fragment>
               }
               backButton={
                 <Button
@@ -332,5 +332,4 @@ class SignupStepper extends React.Component {
     );
   }
 }
-
-export default withStyles(styles, { withTheme: true })(SignupStepper);
+export default withStyles(SignupStepper.styles, { withTheme: true })(SignupStepper);

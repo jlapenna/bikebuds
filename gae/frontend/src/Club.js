@@ -30,10 +30,13 @@ import Typography from '@material-ui/core/Typography';
 import ActivityListCard from './ActivityListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 
+
 class Club extends Component {
 
   static propTypes = {
     clubId: PropTypes.number.isRequired,
+    gapiReady: PropTypes.bool.isRequired,
+    profile: PropTypes.object.isRequired,
   }
 
   static styles = {
@@ -64,8 +67,8 @@ class Club extends Component {
     console.log('Club.handleListItemClick', index, activity);
   }
 
-  onActivitiesResponse = (response) => {
-    console.log('Club.onActivitiesResponse', response);
+  handleActivitiesResponse = (response) => {
+    console.log('Club.handleActivities', response);
     this.setState({
       activities: response.result.activities
     });
@@ -177,7 +180,7 @@ class Club extends Component {
           <Grid className={this.props.classes.contentGridElement} item xs={8}>
             <ActivitiesWrapper
               gapiReady={this.props.gapiReady}
-              onResponse={this.onActivitiesResponse} />
+              onResponse={this.handleActivitiesResponse} />
             <ActivityListCard
               gapiReady={this.props.gapiReady} 
               profile={this.props.profile}
@@ -188,10 +191,5 @@ class Club extends Component {
       </div>
     );
   };
-}
-
-Club.propTypes = {
-  profile: PropTypes.object.isRequired,
-  gapiReady: PropTypes.bool.isRequired,
 }
 export default withStyles(Club.styles)(Club);

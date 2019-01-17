@@ -24,16 +24,20 @@ import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 
 
-const styles = {
-  avatar: {
-    "max-height": 32,
-    "max-width": 32,
-    width: "auto",
-    height: "auto",
-  },
-};
-
 class ClubAvatar extends Component {
+
+  static propTypes = {
+    club: PropTypes.object.isRequired,
+  }
+
+  static styles = {
+    avatar: {
+      "max-height": 32,
+      "max-width": 32,
+      width: "auto",
+      height: "auto",
+    },
+  }
 
   render() {
     var url = "/club/" + this.props.club.id;
@@ -43,16 +47,12 @@ class ClubAvatar extends Component {
         to={url}
         alt={this.props.club.name}
       >
-      <Avatar className={this.props.classes.avatar}
-        alt={this.props.club.name}
-        src={this.props.club.profile_medium}>
-      </Avatar>
+        <Avatar className={this.props.classes.avatar}
+          alt={this.props.club.name}
+          src={this.props.club.profile_medium}>
+        </Avatar>
       </IconButton>
     );
   };
 }
-
-ClubAvatar.propTypes = {
-  club: PropTypes.object.isRequired,
-}
-export default withStyles(styles)(ClubAvatar);
+export default withStyles(ClubAvatar.styles)(ClubAvatar);

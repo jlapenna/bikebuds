@@ -162,5 +162,4 @@ class FcmWrapper extends Component {
     );
   };
 }
-
 export default FcmWrapper;

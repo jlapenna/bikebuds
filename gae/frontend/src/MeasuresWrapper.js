@@ -21,6 +21,12 @@ import { readableWeight } from './convert';
 
 
 class MeasuresWrapper extends Component {
+
+  static propTypes = {
+    onMeasuresReady: PropTypes.func.isRequired,
+    profile: PropTypes.object.isRequired,
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -29,8 +35,8 @@ class MeasuresWrapper extends Component {
     }
   }
 
-  updateMeasuresState = (response) => {
-    console.log('MeasuresWrapper.updateMeasuresState:', response);
+  handleSeries = (response) => {
+    console.log('MeasuresWrapper.handleSeries:', response);
     var measures = [];
     if (response.result.series !== undefined
       && response.result.series.measures !== undefined) {
@@ -39,7 +45,7 @@ class MeasuresWrapper extends Component {
     for (var measure in measures) {
       if (measures[measure].weight !== undefined) {
         measures[measure].weight = readableWeight(
-            measures[measure].weight, this.props.profile);
+          measures[measure].weight, this.props.profile);
       }
     }
     this.setState({
@@ -65,7 +71,7 @@ class MeasuresWrapper extends Component {
       && !this.state.fetched
       && this.state.measures === undefined) {
       this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_series().then(this.updateMeasuresState);
+      window.gapi.client.bikebuds.get_series().then(this.handleSeries);
     }
   }
 
@@ -79,8 +85,4 @@ class MeasuresWrapper extends Component {
   };
 }
 
-MeasuresWrapper.propTypes = {
-  onMeasuresReady: PropTypes.func.isRequired,
-  profile: PropTypes.object.isRequired,
-}
 export default MeasuresWrapper;

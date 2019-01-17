@@ -24,13 +24,25 @@ import Typography from '@material-ui/core/Typography';
 
 import MeasuresChart from './MeasuresChart';
 
-const styles = {
-  root: {
-    "height": "400px",
-  },
-};
 
 class MeasuresCard extends Component {
+
+  static defaultProps = {
+      intervalUnit: 'M',
+      intervalCount: 12,
+      intervalFormat: "MMM 'YY",
+  }
+
+  static propTypes = {
+    profile: PropTypes.object.isRequired,
+    measures: PropTypes.array,
+  }
+
+  static styles = {
+    root: {
+      "height": "400px",
+    },
+  }
 
   renderCardContent() {
     return (
@@ -50,15 +62,4 @@ class MeasuresCard extends Component {
     );
   };
 }
-
-
-MeasuresCard.defaultProps = {
-    intervalUnit: 'M',
-    intervalCount: 12,
-    intervalFormat: "MMM 'YY",
-}
-MeasuresCard.propTypes = {
-  profile: PropTypes.object.isRequired,
-  measures: PropTypes.array,
-}
-export default withStyles(styles)(MeasuresCard);
+export default withStyles(MeasuresCard.styles)(MeasuresCard);

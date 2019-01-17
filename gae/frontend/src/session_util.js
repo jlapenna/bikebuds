@@ -18,6 +18,7 @@ import firebase from 'firebase/app';
 
 import { config } from './Config';
 
+
 export function createSession(responseCallback) {
     firebase.auth().currentUser.getIdToken().then((idToken) => {
       fetch(config.frontendUrl + '/services/session', {

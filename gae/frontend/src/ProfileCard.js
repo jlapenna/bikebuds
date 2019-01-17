@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { Link } from "react-router-dom";
@@ -33,38 +34,42 @@ import Typography from '@material-ui/core/Typography';
 import { config } from './Config';
 import ClubAvatar from './ClubAvatar';
 
-const styles = {
-  root: {
-    height:300,
-  },
-  avatar: {
-    width: 128,
-    height: 128,
-  },
-  clubContainer: {
-    "min-height": 56,
-  },
-};
 
 class ProfileCard extends Component {
+
+  static propTypes = {
+    firebaseUser: PropTypes.object.isRequired,
+  }
+
+  static styles = {
+    root: {
+      height:300,
+    },
+    avatar: {
+      width: 128,
+      height: 128,
+    },
+    clubContainer: {
+      "min-height": 56,
+    },
+  }
+
   constructor(props) {
     super(props);
     this.state = {
       connectActionPending: false,
     }
-    this.onSignOut = this.onSignOut.bind(this);
-    this.onConnectServices = this.onConnectServices.bind(this);
   }
 
-  onSignOut() {
+  handleConnectServices = () => {
+    window.location.replace(config.frontendUrl + '/signup');
+  }
+
+  handleSignOut = () => {
     firebase.auth().signOut().then(() => {
       window.location.reload();
     });
-  };
-
-  onConnectServices() {
-    window.location.replace(config.frontendUrl + '/signup');
-  };
+  }
 
   /**
    * @inheritDoc
@@ -127,11 +132,10 @@ class ProfileCard extends Component {
             Connect Services
           </Button>
           <Button color="secondary"
-            onClick={this.onSignOut}>Sign-out</Button>
+            onClick={this.handleSignOut}>Sign-out</Button>
         </CardActions>
       </Card>
     );
   };
 }
-
-export default withStyles(styles)(ProfileCard);
+export default withStyles(ProfileCard.styles)(ProfileCard);

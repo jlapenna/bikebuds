@@ -38,41 +38,6 @@ const googleMapURL = "https://maps.googleapis.com/maps/api/js?key="
   + config.mapsApiKey
   + "&v=3.exp&libraries=geometry,drawing,places";
 
-const styles = {
-  root: {
-    height: "100%",
-    width: "100%",
-    overflow: "visible",
-    display: "flex",
-    "flex-direction": "column",
-    "align-items": "center",
-  },
-  containerElement: {
-    "min-height": "200px",
-    height: "100%",
-    width: "100%",
-    flex: "1"
-  },
-  mapElement: {
-    height: "100%",
-    width: "100%",
-  },
-  loadingElement: {
-    height: "100%",
-    width: "100%",
-  },
-  activityRow: {
-    width: "100%",
-  },
-  activitySummary: {
-    width: "100%",
-    display: "flex",
-    "align-items": "stretch",
-  },
-  activitySummaryItem: {
-    width: "100%",
-  },
-};
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   const {onMapMounted, ...otherProps} = props;
@@ -83,6 +48,31 @@ const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
 
 
 class _ActivityMap extends Component {
+
+  static styles = {
+    root: {
+      height: "100%",
+      width: "100%",
+      overflow: "visible",
+      display: "flex",
+      "flex-direction": "column",
+      "align-items": "center",
+    },
+    containerElement: {
+      "min-height": "200px",
+      height: "100%",
+      width: "100%",
+      flex: "1"
+    },
+    mapElement: {
+      height: "100%",
+      width: "100%",
+    },
+    loadingElement: {
+      height: "100%",
+      width: "100%",
+    },
+  }
 
   state = {
     mapMounted: false,
@@ -152,10 +142,37 @@ class _ActivityMap extends Component {
     )
   }
 }
-const ActivityMap = withStyles(styles)(_ActivityMap);
+const ActivityMap = withStyles(_ActivityMap.styles)(_ActivityMap);
 
 
 class ActivityDetail extends Component {
+
+  static styles = {
+    root: {
+      height: "100%",
+      width: "100%",
+      overflow: "visible",
+      display: "flex",
+      "flex-direction": "column",
+      "align-items": "center",
+    },
+    activityRow: {
+      width: "100%",
+    },
+    activitySummary: {
+      width: "100%",
+      display: "flex",
+      "align-items": "stretch",
+    },
+    activitySummaryItem: {
+      width: "100%",
+    },
+  }
+
+  static propTypes = {
+    profile: PropTypes.object,
+    activity: PropTypes.object,
+  }
 
   render() {
     if (this.props.activity === undefined) {
@@ -201,8 +218,4 @@ class ActivityDetail extends Component {
 }
 
 
-ActivityDetail.propTypes = {
-  profile: PropTypes.object,
-  activity: PropTypes.object,
-}
-export default withStyles(styles)(ActivityDetail);
+export default withStyles(ActivityDetail.styles)(ActivityDetail);

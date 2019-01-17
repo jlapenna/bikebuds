@@ -22,6 +22,7 @@ class ProfileWrapper extends Component {
 
   static propTypes = {
     onProfileReady: PropTypes.func.isRequired,
+    profile: PropTypes.object,
   }
 
   constructor(props) {
@@ -32,8 +33,8 @@ class ProfileWrapper extends Component {
     }
   }
 
-  updateProfileState = (response) => {
-    console.log('ProfileWrapper.updateProfileState:', response.result);
+  handleProfile = (response) => {
+    console.log('ProfileWrapper.handleProfile:', response.result);
     if (response.result === undefined) {
       return;
     }
@@ -60,7 +61,7 @@ class ProfileWrapper extends Component {
       && !this.state.fetched
       && this.state.profile === undefined) {
       this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_profile().then(this.updateProfileState);
+      window.gapi.client.bikebuds.get_profile().then(this.handleProfile);
     }
   }
 
@@ -73,10 +74,5 @@ class ProfileWrapper extends Component {
       <div className="ProfileWrapper" />
     );
   };
-}
-
-
-ProfileWrapper.propTypes = {
-  profile: PropTypes.object,
 }
 export default ProfileWrapper;

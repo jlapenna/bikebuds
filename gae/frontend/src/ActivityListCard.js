@@ -29,20 +29,26 @@ import Typography from '@material-ui/core/Typography';
 
 import ActivityDetail from './ActivityDetail';
 
-const styles = {
-  root: {
-    "height": "400px",
-  },
-  content: {
-    "height": "400px",
-  },
-  contentGridElement: {
-    "height": "100%",
-    overflow: "auto",
-  },
-};
-
 class ActivityListCard extends Component {
+
+  static styles = {
+    root: {
+      "height": "400px",
+    },
+    content: {
+      "height": "400px",
+    },
+    contentGridElement: {
+      "height": "100%",
+      overflow: "auto",
+    },
+  }
+
+  static propTypes = {
+    profile: PropTypes.object,
+    showAthlete: PropTypes.bool,
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -54,7 +60,14 @@ class ActivityListCard extends Component {
     }
   }
 
-  updateActivitiesState = (response) => {
+  handleListItemClick = (index, activity) => {
+    this.setState({
+      selectedActivity: activity,
+      selectedIndex: index,
+    });
+  }
+
+  handleUpdateActivities = (response) => {
     var activities = response.result.activities || [];
 
     if (activities.length > 0) {
@@ -66,13 +79,6 @@ class ActivityListCard extends Component {
       activities: activities,
       selectedActivity: selectedActivity,
       selectedIndex: selectedindex,
-    });
-  }
-
-  onListItemClick = (index, activity) => {
-    this.setState({
-      selectedActivity: activity,
-      selectedIndex: index,
     });
   }
 
@@ -97,7 +103,7 @@ class ActivityListCard extends Component {
               return (
                 <ListItem
                   key={index}
-                  onClick={this.onListItemClick.bind(this, index, activity)}
+                  onClick={this.handleListItemClick.bind(this, index, activity)}
                   selected={this.state.selectedIndex === index}
                 >
                   <ListItemText primary={activity.name} secondary={fullName} />
@@ -126,10 +132,4 @@ class ActivityListCard extends Component {
     );
   };
 }
-
-
-ActivityListCard.propTypes = {
-  profile: PropTypes.object,
-  showAthlete: PropTypes.bool,
-}
-export default withStyles(styles)(ActivityListCard);
+export default withStyles(ActivityListCard.styles)(ActivityListCard);

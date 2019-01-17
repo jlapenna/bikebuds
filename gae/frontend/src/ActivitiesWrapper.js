@@ -32,8 +32,8 @@ class ActivitiesWrapper extends Component {
     }
   }
 
-  updateRequestStateState = (response) => {
-    console.log('ActivitiesWrapper.updateRequestStateState:', response.result);
+  handleUpdateRequestState = (response) => {
+    console.log('ActivitiesWrapper.handleUpdateRequestState:', response.result);
     this.setState({
       response: response,
     });
@@ -57,7 +57,7 @@ class ActivitiesWrapper extends Component {
       && !this.state.fetched
       && this.state.response === undefined) {
       this.setState({fetched: true});
-      window.gapi.client.bikebuds.get_activities().then(this.updateRequestStateState);
+      window.gapi.client.bikebuds.get_activities().then(this.handleUpdateRequestState);
     }
   }
 
@@ -71,6 +71,4 @@ class ActivitiesWrapper extends Component {
     );
   };
 }
-
-
 export default ActivitiesWrapper;
