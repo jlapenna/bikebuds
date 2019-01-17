@@ -41,13 +41,13 @@ class FcmWrapper extends Component {
     }
 
     this.messaging = firebase.messaging();
-    this.messaging.usePublicVapidKey(config.vapidKey);
     this.tokenListener = null;
     this.messageListener = null;
   }
 
   registerFcm = () => {
     console.log('FcmWrapper.registerFcm');
+    this.messaging.usePublicVapidKey(config.vapidKey);
     this.messaging
       .requestPermission()
       .then(() => {
