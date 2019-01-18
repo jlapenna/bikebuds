@@ -28,6 +28,7 @@
     "start": "PORT=8080 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:staged": "CI=true react-scripts test --env=jsdom --findRelatedTests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -46,6 +47,7 @@
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "npm run test:staged",
       "prettier --single-quote --write",
       "git add"
     ]
