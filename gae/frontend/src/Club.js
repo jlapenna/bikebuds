@@ -28,7 +28,6 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import ActivityListCard from './ActivityListCard';
-import ActivitiesWrapper from './ActivitiesWrapper';
 
 class Club extends Component {
   static propTypes = {
