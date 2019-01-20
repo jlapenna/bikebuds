@@ -15,25 +15,107 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:bikebuds/firebase_container.dart';
 import 'package:bikebuds/firebase_http_client.dart';
-import 'package:bikebuds/splash_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/home_screen.dart';
+import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis_auth/auth_io.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(App());
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = GoogleSignIn();
-final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class _AppState extends State<App> {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final FirebaseState firebase = loadDefaultFirebase();
+
+  Future<FirebaseState> firebaseNextLoader;
+
+  StreamSubscription<FirebaseUser> _userListener;
+
+  BikebudsApi _api;
+  MainProfileResponse _profile;
+  SharedDatastoreUsersClientMessage _client;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Services off the main project.
+    firebaseNextLoader = loadNextFirebase(context);
+
+    // Listen for future auth state changes.
+    _userListener =
+        firebase.auth.onAuthStateChanged.listen(_onAuthStateChanged);
+  }
+
+  void _onAuthStateChanged(user) async {
+    print("_AppState._onAuthStateChanged: $user");
+    if (user == null) {
+      _api = null;
+      setState(() {
+        _profile = null;
+      });
+      return;
+    }
+    _api = await _loadBikebudsApi(user);
+
+    var profileFuture = _api.getProfile(MainRequest());
+    var clientFuture = _registerWithBikebuds();
+    var profile = await profileFuture;
+    var client = (await clientFuture)?.client;
+    setState(() {
+      _profile = profile;
+      _client = client;
+    });
+  }
+
+  Future<BikebudsApi> _loadBikebudsApi(user) async {
+    print('_AppState._loadBikebudsApi');
+    var token = await user.getIdToken(refresh: true);
+    var options = await firebase.app.options;
+    String key = options.apiKey;
+
+    var api = BikebudsApi(FirebaseHttpClient(token, clientViaApiKey(key)));
+    return api;
+  }
+
+  Future<MainClientResponse> _registerWithBikebuds() async {
+    print('_AppState._registerWithBikebuds');
+    var messagingToken = await firebase.messaging.getToken();
+    var request = MainUpdateClientRequest()
+      ..client = (SharedDatastoreUsersClientMessage()..id = messagingToken);
+    return _api.updateClient(request);
+  }
+
+  @override
+  void dispose() {
+    _userListener?.cancel();
+    super.dispose();
+  }
+
+  _handleSignInComplete(FirebaseUser user) {
+    print('_AppState.handleSignInComplete: $user');
+    if (user == null) {
+      print('_AppState.handleSignInComplete: Unable to sign-in.');
+      return;
+    }
+
+    // Now, register messaging on the default project.
+    print('App._handleSignInComplete: requestNotificationPermission');
+    firebase.messaging.requestNotificationPermissions();
+    firebase.registerMessaging();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -43,130 +125,42 @@ class MyApp extends StatelessWidget {
         accentColor: Color(0xFFff4081),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => SplashScreen(_auth, _googleSignIn, _firebaseMessaging,
-            title: 'Bikebuds'),
-        '/home': (context) => HomeScreen(title: 'Bikebuds'),
-      },
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  Future<dynamic> _googleServicesJson;
-  StreamSubscription<FirebaseUser> _listener;
-  Future<String> _firebaseClientToken;
-
-  FirebaseUser _firebaseUser;
-  BikebudsApi _api;
-  var _loadingAthlete = false;
-  SharedDatastoreAthletesAthleteMessage _athlete;
-  var _clientUpdated = false;
-  SharedDatastoreUsersClientMessage _client;
-
-  _HomeScreenState();
-
-  @override
-  void initState() {
-    super.initState();
-    _googleServicesJson = _loadGoogleServicesJson();
-    _listener = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
-
-    _firebaseClientToken = _firebaseMessaging.getToken();
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
-      },
-    );
+      routes: buildRoutes());
   }
 
-  Future<dynamic> _loadGoogleServicesJson() async {
-    return json.decode(await DefaultAssetBundle.of(context)
-        .loadString("android/app/google-services.json"));
-  }
-
-  void _onAuthStateChanged(user) async {
-    print("Auth State Changed: $user");
-    setState(() {
-      _firebaseUser = user;
-    });
-
-    // We don't setState for the API because it alone isn't enough to
-    // trigger a rebuild.
-    var googleServicesJson = await _googleServicesJson;
-    String key = googleServicesJson['client'][0]['api_key'][0]['current_key'];
-    var token = await user.getIdToken(refresh: true);
-    _api = BikebudsApi(FirebaseHttpClient(token, clientViaApiKey(key)));
-
-    if (!_loadingAthlete) {
-      _loadingAthlete = true;
-      _api.getProfile(MainRequest()).then((response) {
-        setState(() {
-          _athlete = response.athlete;
-        });
-      });
-    }
-
-    if (!_clientUpdated) {
-      _clientUpdated = true;
-
-      var request = MainUpdateClientRequest()
-        ..client = (SharedDatastoreUsersClientMessage()
-          ..id = (await _firebaseClientToken));
-      print('request: ' + request.toJson().toString());
-      _api.updateClient(request).then((response) {
-        setState(() {
-          _client = response.client;
-        });
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _listener?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String name = _firebaseUser == null
-        ? "Unexpected..."
-        : (_firebaseUser?.displayName ?? _firebaseUser?.email);
-    var registered =
-        (_client?.id != null) ? "Client registered" : "Not registered.";
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _athlete?.profile == null
-                ? Text("Photo")
-                : Image.network(_athlete?.profile),
-            Text(name),
-            Text(_athlete?.city ?? "Profile not available"),
-            Text(registered),
-          ],
-        ),
-      ),
-    );
+  Map<String, WidgetBuilder> buildRoutes() {
+    print('_AppState.buildRoutes');
+    return {
+      '/': (context) => FutureBuilder(
+          future: firebaseNextLoader,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              print('_AppState.build: hasData');
+              var firebaseNext = snapshot.data;
+              return SignInScreen(
+                  googleSignIn, firebase, firebaseNext, _handleSignInComplete);
+            } else {
+              print('_AppState.build: noData');
+              return buildSignInProgressScaffold();
+            }
+          }),
+      '/home': (context) => FutureBuilder(
+          future: firebaseNextLoader,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              print('_AppState.build: hasData');
+              var firebaseNext = snapshot.data;
+              return HomeScreen(
+                  firebase: firebase,
+                  firebaseNext: firebaseNext,
+                  api: _api,
+                  client: _client,
+                  profile: _profile);
+            } else {
+              print('_AppState.build: noData');
+              return buildSignInProgressScaffold();
+            }
+          }),
+    };
   }
 }
