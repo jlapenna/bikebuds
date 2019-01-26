@@ -16,6 +16,7 @@
 
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -25,8 +26,9 @@ class FirebaseState {
   final FirebaseApp app;
   final FirebaseAuth auth;
   final FirebaseMessaging messaging;
+  final Firestore firestore;
 
-  FirebaseState({this.app, this.auth, this.messaging});
+  FirebaseState({this.app, this.auth, this.messaging, this.firestore});
 
   registerMessaging() {
     if (messaging == null) {
@@ -67,7 +69,8 @@ Future<FirebaseState> loadNextFirebase(BuildContext context) async {
   }
 
   var auth = FirebaseAuth.fromApp(app);
-  var state = FirebaseState(app: app, auth: auth);
+  var firestore = Firestore(app: app);
+  var state = FirebaseState(app: app, auth: auth, firestore: firestore);
   print('loadNextFirebase: $app, $state');
   return Future.value(state);
 }

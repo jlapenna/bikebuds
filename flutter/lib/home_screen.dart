@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import 'package:bikebuds/event_card.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/profile_card.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,23 +43,60 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future<DocumentSnapshot> eventFuture;
+  DocumentReference eventRef;
+
+  @override
+  void initState() {
+    super.initState();
+
+    var collection = widget.firebaseNext.firestore.collection("events");
+    eventRef = collection.document("root-event");
+    eventFuture = eventRef.get();
+  }
+
   @override
   Widget build(BuildContext context) {
     var userFuture = widget.firebase.auth.currentUser();
     if (userFuture == null) {
       Navigator.pushNamed(context, "/signin");
     }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),
       ),
       body: Center(
-          child: FutureBuilder(
-              future: userFuture,
-              builder: (context, snapshot) {
-                return ProfileCard(
-                    snapshot.data, widget.client, widget.profile);
-              })),
+          child: Column(
+        children: <Widget>[
+          buildProfileCardBuilder(userFuture),
+          buildEventCardBuilder()
+        ],
+      )),
     );
+  }
+
+  FutureBuilder<FirebaseUser> buildProfileCardBuilder(
+      Future<FirebaseUser> userFuture) {
+    return FutureBuilder(
+        future: userFuture,
+        builder: (context, snapshot) {
+          return ProfileCard(snapshot.data, widget.client, widget.profile);
+        });
+  }
+
+  StreamBuilder<DocumentSnapshot> buildEventCardBuilder() {
+    return StreamBuilder<DocumentSnapshot>(
+        stream: eventRef.snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return new Text('Loading...');
+            default:
+              return EventCard(widget.firebaseNext, eventRef, snapshot.data);
+          }
+        });
   }
 }

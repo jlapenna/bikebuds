@@ -16,7 +16,6 @@
 
 import 'dart:async';
 
-import 'package:bikebuds/firebase_container.dart';
 import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/home_screen.dart';
@@ -131,36 +130,45 @@ class _AppState extends State<App> {
   Map<String, WidgetBuilder> buildRoutes() {
     print('_AppState.buildRoutes');
     return {
-      '/': (context) => FutureBuilder(
-          future: firebaseNextLoader,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              print('_AppState.build: hasData');
-              var firebaseNext = snapshot.data;
-              return SignInScreen(
-                  googleSignIn, firebase, firebaseNext, _handleSignInComplete);
-            } else {
-              print('_AppState.build: noData');
-              return buildSignInProgressScaffold();
-            }
-          }),
-      '/home': (context) => FutureBuilder(
-          future: firebaseNextLoader,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              print('_AppState.build: hasData');
-              var firebaseNext = snapshot.data;
-              return HomeScreen(
-                  firebase: firebase,
-                  firebaseNext: firebaseNext,
-                  api: _api,
-                  client: _client,
-                  profile: _profile);
-            } else {
-              print('_AppState.build: noData');
-              return buildSignInProgressScaffold();
-            }
-          }),
+      '/': (context) => buildSignInRoute(),
+      '/signin': (context) => buildSignInRoute(),
+      '/home': (context) => buildHomeRoute(),
     };
+  }
+
+  FutureBuilder<FirebaseState> buildHomeRoute() {
+    return FutureBuilder(
+        future: firebaseNextLoader,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            print('_AppState.build: hasData');
+            var firebaseNext = snapshot.data;
+            return HomeScreen(
+                firebase: firebase,
+                firebaseNext: firebaseNext,
+                api: _api,
+                client: _client,
+                profile: _profile);
+          } else {
+            print('_AppState.build: noData');
+            return buildSignInProgressScaffold();
+          }
+        });
+  }
+
+  FutureBuilder<FirebaseState> buildSignInRoute() {
+    return FutureBuilder(
+        future: firebaseNextLoader,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            print('_AppState.build: hasData');
+            var firebaseNext = snapshot.data;
+            return SignInScreen(
+                googleSignIn, firebase, firebaseNext, _handleSignInComplete);
+          } else {
+            print('_AppState.build: noData');
+            return buildSignInProgressScaffold();
+          }
+        });
   }
 }
