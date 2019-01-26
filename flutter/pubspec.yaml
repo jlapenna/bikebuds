@@ -31,15 +31,15 @@ dependencies:
     sdk: flutter
 
   # https://firebase.google.com/docs/flutter/setup
-  firebase_core: ^0.2.5+1
+  firebase_core: ^0.3.0
 
   # https://pub.dartlang.org/packages/firebase_auth
-  firebase_auth: ^0.6.6
-  google_sign_in: ^3.2.4
+  firebase_auth: ^0.8.0+1
+  google_sign_in: ^3.3.0
   googleapis_auth: ^0.2.6
 
   # Firebase Plugins
-  firebase_messaging: ^2.1.0
+  firebase_messaging: ^2.2.0
 
   # Bikebuds API
   bikebuds_api:

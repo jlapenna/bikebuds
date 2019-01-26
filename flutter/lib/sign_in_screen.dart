@@ -15,7 +15,7 @@
  */
 
 import 'package:bikebuds/firebase_util.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -79,28 +79,23 @@ class _SignInScreenState extends State<SignInScreen> {
     }
     print('SplashScreen._doSignIn: googleUser.authenticate');
     googleAuth = await googleUser.authentication;
-//    final AuthCredential credential = GoogleAuthProvider.getCredential(
-//      accessToken: googleAuth.accessToken,
-//      idToken: googleAuth.idToken,
-//    );
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
     // Then authenticate the google identity with firebase to get a firebase user.
     print('SplashScreen._doSignIn: signInWithGoogle');
     firebaseUserFuture = widget.firebase.auth.currentUser();
     if (firebaseUserFuture == null) {
-//      firebaseUserFuture =
-//          widget.firebase.auth.signInWithCredential(credential);
-//      firebaseUserFuture =
-      widget.firebase.auth.signInWithGoogle(
-          idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+      firebaseUserFuture =
+          widget.firebase.auth.signInWithCredential(credential);
     }
 
     // Then do that with the other firebase project.
     print('SplashScreen._doSignIn: next: signInWithGoogle');
-//    firebaseNextUserFuture =
-//        widget.firebaseNext.auth.signInWithCredential(credential);
-    widget.firebaseNext.auth.signInWithGoogle(
-        idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+    firebaseNextUserFuture =
+        widget.firebaseNext.auth.signInWithCredential(credential);
 
     return Future.wait([firebaseUserFuture, firebaseNextUserFuture]);
   }
