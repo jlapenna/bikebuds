@@ -22,13 +22,36 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 
+class FirebaseSignInState {
+  final FirebaseUser user;
+  final FirebaseUser userNext;
+
+  FirebaseSignInState(this.user, this.userNext);
+
+  @override
+  String toString() {
+    return 'FirebaseUsers(${user?.uid}, ${userNext?.uid})';
+  }
+
+  get signedIn => user != null && userNext != null;
+}
+
 class FirebaseState {
   final FirebaseApp app;
   final FirebaseAuth auth;
   final FirebaseMessaging messaging;
-  final Firestore firestore;
 
-  FirebaseState({this.app, this.auth, this.messaging, this.firestore});
+  FirebaseApp appNext;
+  FirebaseAuth authNext;
+  Firestore firestore;
+
+  FirebaseState(
+      {@required this.app, @required this.auth, @required this.messaging});
+
+  @override
+  String toString() {
+    return 'FirebaseState(${app?.name}, ${appNext?.name})';
+  }
 
   registerMessaging() {
     if (messaging == null) {
@@ -45,37 +68,35 @@ class FirebaseState {
         print('on launch $message');
       },
     );
-
   }
 }
 
-FirebaseState loadDefaultFirebase() {
+Future<FirebaseState> loadFirebase(BuildContext context) async {
+  print('loadFirebase');
+  var state = _loadDefaultFirebase();
+  var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
+      .loadString("android/app/google-services-next-android.json"));
+  FirebaseOptions options = _toFirebaseOptions(loadedJson);
+  try {
+    state.appNext = await FirebaseApp.configure(name: "next", options: options);
+  } catch (e) {
+    state.appNext = await FirebaseApp.appNamed("next");
+  }
+
+  state.authNext = FirebaseAuth.fromApp(state.appNext);
+  state.firestore = Firestore(app: state.appNext);
+  print('loadFirebase: $state');
+  return Future.value(state);
+}
+
+FirebaseState _loadDefaultFirebase() {
   var app = FirebaseApp.instance;
-  var auth = FirebaseAuth.fromApp(app);
+  var auth = FirebaseAuth.instance;
   var messaging = FirebaseMessaging();
   return FirebaseState(app: app, auth: auth, messaging: messaging);
 }
 
-Future<FirebaseState> loadNextFirebase(BuildContext context) async {
-  print('loadNextFirebase');
-  var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
-      .loadString("android/app/google-services-next-android.json"));
-  FirebaseOptions options = toFirebaseOptions(loadedJson);
-  FirebaseApp app;
-  try {
-    app = await FirebaseApp.configure(name: "next", options: options);
-  } catch (e) {
-    app = await FirebaseApp.appNamed("next");
-  }
-
-  var auth = FirebaseAuth.fromApp(app);
-  var firestore = Firestore(app: app);
-  var state = FirebaseState(app: app, auth: auth, firestore: firestore);
-  print('loadNextFirebase: $app, $state');
-  return Future.value(state);
-}
-
-FirebaseOptions toFirebaseOptions(dynamic config) {
+FirebaseOptions _toFirebaseOptions(dynamic config) {
   // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
   return FirebaseOptions(
       googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],

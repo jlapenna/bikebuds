@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 /**
@@ -19,11 +23,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
-  final FirebaseState firebaseNext;
+  final FirebaseState firebase;
   final DocumentReference eventRef;
   final DocumentSnapshot event;
 
-  EventCard(this.firebaseNext, this.eventRef, this.event);
+  EventCard({this.firebase, this.eventRef, this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,7 @@ class EventCard extends StatelessWidget {
             child: Icon(Icons.add),
             onPressed: () {
               print('Eventcard: buttonPushed');
-              firebaseNext.firestore.runTransaction((Transaction tx) async {
+              firebase.firestore.runTransaction((Transaction tx) async {
                 print('Eventcard: transaction executing');
                 DocumentSnapshot postSnapshot = await tx.get(eventRef);
                 if (postSnapshot.exists) {

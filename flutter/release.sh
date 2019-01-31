@@ -54,6 +54,7 @@ function main() {
   echo "Building..."
   pushd flutter
   flutter build apk \
+      -t lib/app.dart \
       --build-number="${version_code}" \
       --build-name="${version_code}"
 

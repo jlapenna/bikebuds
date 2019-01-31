@@ -1,3 +1,4 @@
+import 'package:bikebuds/bikebuds_util.dart';
 /**
  * Copyright 2019 Google Inc. All Rights Reserved.
  *
@@ -21,31 +22,42 @@ import 'package:transparent_image/transparent_image.dart';
 
 class ProfileCard extends StatelessWidget {
   final FirebaseUser firebaseUser;
-  final SharedDatastoreUsersClientMessage client;
   final MainProfileResponse profile;
 
-  ProfileCard(this.firebaseUser, this.client, this.profile);
+  ProfileCard(this.firebaseUser, this.profile);
 
   @override
   Widget build(BuildContext context) {
-    var profilePhoto = profile == null
-        ? Image.memory(kTransparentImage)
-        : FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage, image: profile?.athlete?.profile);
+    var theme = Theme.of(context);
+    var photoUrl = profile?.athlete?.profile ?? firebaseUser?.photoUrl;
+    var profilePhoto = photoUrl == null
+        ? MemoryImage(
+            kTransparentImage,
+          )
+        : NetworkImage(photoUrl);
+    var avatar = CircleAvatar(
+      backgroundImage: profilePhoto,
+      radius: 64,
+    );
     String name = firebaseUser == null
         ? ""
         : (firebaseUser?.displayName ?? firebaseUser?.email);
-    var registered =
-        (client?.id != null) ? "Client registered" : "Not registered.";
-    var city = profile?.athlete?.city ?? "Profile not available";
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        profilePhoto,
-        Text(name),
-        Text(city),
-        Text(registered),
-      ],
+//    var registered =
+//        (client?.client?.id != null) ? "Client registered" : "Not registered.";
+    var city = profile?.athlete?.city ?? "";
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            avatar,
+            Text(name),
+            Text(city),
+//        Text(registered),
+          ],
+        ),
+      ),
     );
   }
 }

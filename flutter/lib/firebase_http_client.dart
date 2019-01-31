@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'package:bikebuds/firebase_util.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart'
     show BaseClient, BaseRequest, Client, StreamedResponse;
 
@@ -35,4 +37,16 @@ class FirebaseHttpClient extends BaseClient {
     request.headers.addAll(headers);
     return baseClient.send(request);
   }
+}
+
+Future<FirebaseHttpClient> loadFirebaseHttpClient(
+    Future<FirebaseState> firebaseLoader) async {
+  print('_AppState._loadBikebudsApi');
+  var firebase = await firebaseLoader;
+  var firebaseUser = await firebase.auth.currentUser();
+  var token = await (firebaseUser).getIdToken(refresh: true);
+  var options = await firebase.app.options;
+  String key = options.apiKey;
+
+  return FirebaseHttpClient(token, clientViaApiKey(key));
 }

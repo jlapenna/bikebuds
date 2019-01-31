@@ -19,16 +19,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class SignInScreen extends StatefulWidget {
-  final GoogleSignIn googleSignIn;
-  final FirebaseState firebase;
-  final FirebaseState firebaseNext;
-  final dynamic onSignInComplete;
+final GoogleSignIn googleSignIn = GoogleSignIn();
 
-  SignInScreen(this.googleSignIn, this.firebase, this.firebaseNext,
-      this.onSignInComplete,
-      {Key key})
-      : super(key: key);
+class SignInScreen extends StatefulWidget {
+  final FirebaseState firebase;
+
+  SignInScreen(this.firebase, {Key key}) : super(key: key);
 
   @override
   _SignInScreenState createState() => _SignInScreenState();
@@ -41,69 +37,76 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
-    print('SplashScreen.initState: ${widget.firebase}, ${widget.firebaseNext}');
-    if (widget.firebase?.auth == null || widget.firebaseNext?.auth == null) {
-      print('SplashScreen.initState: Not ready to sign in, waiting for next.');
-      return;
-    }
-
-    _startSignIn();
+    doSignIn();
   }
 
-  void _startSignIn() async {
-    print('SplashScreen._startSignIn');
-    await _doSignIn();
-    Navigator.pushReplacementNamed(context, "/home");
-    widget.onSignInComplete(await widget.firebase.auth.currentUser());
-  }
-
-  Future _doSignIn() async {
-    print('SplashScreen._doSignIn: ${widget.firebase}, ${widget.firebaseNext}');
-
-    // If we already have the right users, we don't have to sign in. Sweet!
-    var firebaseUserFuture = widget.firebase.auth.currentUser();
-    var firebaseNextUserFuture = widget.firebaseNext.auth.currentUser();
-    if (firebaseUserFuture != null && firebaseNextUserFuture != null) {
-      return Future.wait([firebaseUserFuture, firebaseNextUserFuture]);
-    }
+  doSignIn() async {
+    print('SignInScreen.doSignIn: $widget.firebase');
 
     // Otherwise, try to find the user's Google Identity.
-    var googleUser = widget.googleSignIn.currentUser;
+    var googleUser = googleSignIn.currentUser;
     if (googleUser == null) {
-      print('SplashScreen._doSignIn: signInSilently');
-      googleUser = await widget.googleSignIn.signInSilently();
+      print('SignInScreen.doSignIn: signInSilently');
+      googleUser = await googleSignIn.signInSilently();
     }
     if (googleUser == null) {
-      print('SplashScreen._doSignIn: signIn');
-      googleUser = await widget.googleSignIn.signIn();
+      print('SignInScreen.doSignIn: signIn');
+      googleUser = await googleSignIn.signIn();
     }
-    print('SplashScreen._doSignIn: googleUser.authenticate');
-    googleAuth = await googleUser.authentication;
+    print('SignInScreen.doSignIn: googleUser.authenticate: ${googleUser?.id}');
+
+    // Get auth credentials to sign into firebase.
+    var googleAuth = await googleUser.authentication;
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    // Then authenticate the google identity with firebase to get a firebase user.
-    print('SplashScreen._doSignIn: signInWithGoogle');
-    firebaseUserFuture = widget.firebase.auth.currentUser();
-    if (firebaseUserFuture == null) {
-      firebaseUserFuture =
-          widget.firebase.auth.signInWithCredential(credential);
-    }
+    // Sign in with the "next" firebase project.
+    print('SignInScreen.doSignIn: next: signInWithCredential');
+    var firebaseNextUser =
+        await widget.firebase.authNext.signInWithCredential(credential);
+    await firebaseNextUser.getIdToken(refresh: true);
 
-    // Then do that with the other firebase project.
-    print('SplashScreen._doSignIn: next: signInWithGoogle');
-    firebaseNextUserFuture =
-        widget.firebaseNext.auth.signInWithCredential(credential);
+    // Sign into the primary project.
+    print('SignInScreen.doSignIn: signInWithCredential');
+    var firebaseUser =
+        await widget.firebase.auth.signInWithCredential(credential);
+    await firebaseUser.getIdToken(refresh: true);
 
-    return Future.wait([firebaseUserFuture, firebaseNextUserFuture]);
+    var state = FirebaseSignInState(firebaseUser, firebaseNextUser);
+
+    print('SignInScreen.doSignIn: Popping from: $state');
+    Navigator.pop(context, state);
   }
 
   @override
   Widget build(BuildContext context) {
     return buildSignInProgressScaffold();
   }
+}
+
+Future<FirebaseSignInState> ensureSignedIn(
+    BuildContext context, FirebaseState firebase) async {
+  var firebaseUserFuture = firebase.auth.currentUser();
+  var firebaseNextUserFuture = firebase.authNext.currentUser();
+  FirebaseSignInState signInState = FirebaseSignInState(
+      await firebaseUserFuture, await firebaseNextUserFuture);
+  print('ensureSignedIn: signedIn: ${signInState.signedIn}');
+
+  // If we already have the right users, we don't have to sign in. Sweet!
+  if (signInState.signedIn) {
+    return signInState;
+  }
+
+  // Otherwise launch the sign in screen and wait for a result.
+  print('ensureSignedIn: awaiting SignInScreen');
+  return Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => SignInScreen(firebase),
+    ),
+  );
 }
 
 Scaffold buildSignInProgressScaffold() {
@@ -118,6 +121,20 @@ Scaffold buildSignInProgressScaffold() {
             new SizedBox(width: 20.0),
             new Text("Signing in..."),
           ],
+        ),
+      ],
+    ),
+  );
+}
+
+Scaffold buildSplashProgressScaffold() {
+  return new Scaffold(
+    body: new Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[],
         ),
       ],
     ),
