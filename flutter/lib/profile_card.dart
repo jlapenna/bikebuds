@@ -28,7 +28,6 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
     var photoUrl = profile?.athlete?.profile ?? firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
         ? MemoryImage(
@@ -42,8 +41,6 @@ class ProfileCard extends StatelessWidget {
     String name = firebaseUser == null
         ? ""
         : (firebaseUser?.displayName ?? firebaseUser?.email);
-//    var registered =
-//        (client?.client?.id != null) ? "Client registered" : "Not registered.";
     var city = profile?.athlete?.city ?? "";
     return Card(
       child: Padding(

@@ -6,16 +6,16 @@ import 'package:bikebuds/event_list.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:flutter/material.dart';
 
-class HomeContent extends StatefulWidget {
+class EventsContent extends StatefulWidget {
   final FirebaseState firebase;
 
-  HomeContent({this.firebase});
+  EventsContent({this.firebase});
 
   @override
-  _HomeContentState createState() => _HomeContentState();
+  _EventsContentState createState() => _EventsContentState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _EventsContentState extends State<EventsContent> {
   @override
   Widget build(BuildContext context) {
     return Container(

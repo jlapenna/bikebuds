@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/home_content.dart';
+import 'package:bikebuds/events_content.dart';
 import 'package:bikebuds/settings_content.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
     return <Widget>[
       DrawerHeader(),
       ListTile(
-        title: Text('Home'),
+        title: Text('Rides'),
         onTap: () {
           setState(() {
             _selectedDrawerItem = 0;
@@ -100,44 +100,16 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget buildBody() {
     if (firebase == null) {
-      return buildSplashProgressScaffold();
+      return new Container();
     }
 
     switch (_selectedDrawerItem) {
       case 0:
-        return HomeContent(firebase: firebase);
+        return EventsContent(firebase: firebase);
       case 1:
         return SettingsContent(bikebuds: bikebuds);
       default:
-        return buildDefault();
+        return Container();
     }
   }
-
-  Widget buildDefault() {
-    return Center(
-      child: Column(
-        children: <Widget>[
-          Text(firebase.toString()),
-          FutureBuilder(
-              future: bikebuds.user,
-              builder: (context, AsyncSnapshot<FirebaseUser> snapshot) =>
-                  Text(snapshot.data?.displayName ?? "No name")),
-        ],
-      ),
-    );
-  }
-}
-
-Scaffold buildSplashProgressScaffold() {
-  return new Scaffold(
-    body: new Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
-        ),
-      ],
-    ),
-  );
 }

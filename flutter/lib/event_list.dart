@@ -22,7 +22,12 @@ class _EventListState extends State<EventList> {
     return StreamBuilder<QuerySnapshot>(
         stream: widget.firebase.firestore.collection('events').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          return ListView(children: createChildren(snapshot));
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(child: new CircularProgressIndicator());
+            default:
+              return ListView(children: createChildren(snapshot));
+          }
         });
   }
 
@@ -44,7 +49,6 @@ class _EventListState extends State<EventList> {
         event['start_date'].toString(),
       ),
       onTap: () {
-        print('XXX: tapped : ${event.reference.snapshots()}');
         Navigator.push(
           context,
           MaterialPageRoute(
