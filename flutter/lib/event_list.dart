@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:bikebuds/event_screen.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class _EventListState extends State<EventList> {
     return StreamBuilder<QuerySnapshot>(
         stream: widget.firebase.firestore.collection('events').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          return new ListView(children: createChildren(snapshot));
+          return ListView(children: createChildren(snapshot));
         });
   }
 
@@ -36,10 +37,23 @@ class _EventListState extends State<EventList> {
         .toList();
   }
 
-  Widget buildItem(DocumentSnapshot document) {
+  Widget buildItem(DocumentSnapshot event) {
     return ListTile(
-      title: Text(document['title']),
-      subtitle: Text(document['start_date'].toString()),
+      title: Text(event['title']),
+      subtitle: Text(
+        event['start_date'].toString(),
+      ),
+      onTap: () {
+        print('XXX: tapped : ${event.reference.snapshots()}');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventScreen(
+                firebase: widget.firebase,
+                event: event),
+          ),
+        );
+      },
     );
   }
 }

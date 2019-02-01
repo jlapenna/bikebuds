@@ -127,3 +127,17 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+Scaffold buildSplashProgressScaffold() {
+  return new Scaffold(
+    body: new Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[],
+        ),
+      ],
+    ),
+  );
+}

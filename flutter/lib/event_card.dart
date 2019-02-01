@@ -24,35 +24,36 @@ import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
   final FirebaseState firebase;
-  final DocumentReference eventRef;
   final DocumentSnapshot event;
 
-  EventCard({this.firebase, this.eventRef, this.event});
+  EventCard({this.firebase, this.event});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        event != null ? Text(event['title']) : Text("No event"),
-        event != null
-            ? Text(event['votes']?.toString() ?? "No votes")
-            : Text("No event"),
-        FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () {
-              print('Eventcard: buttonPushed');
-              firebase.firestore.runTransaction((Transaction tx) async {
-                print('Eventcard: transaction executing');
-                DocumentSnapshot postSnapshot = await tx.get(eventRef);
-                if (postSnapshot.exists) {
-                  await tx.update(eventRef, <String, dynamic>{
-                    'votes': (postSnapshot.data['votes'] ?? 0) + 1
-                  });
-                }
-              });
-            }),
-      ],
+    return Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          event != null ? Text(event['title']) : Text("No event"),
+          event != null
+              ? Text(event['votes']?.toString() ?? "No votes")
+              : Text("No event"),
+          FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () {
+                print('Eventcard: buttonPushed');
+                firebase.firestore.runTransaction((Transaction tx) async {
+                  print('Eventcard: transaction executing');
+                  DocumentSnapshot postSnapshot = await tx.get(event.reference);
+                  if (postSnapshot.exists) {
+                    await tx.update(event.reference, <String, dynamic>{
+                      'votes': (postSnapshot.data['votes'] ?? 0) + 1
+                    });
+                  }
+                });
+              }),
+        ],
+      ),
     );
   }
 }

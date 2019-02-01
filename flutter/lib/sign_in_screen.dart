@@ -82,7 +82,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return buildSignInProgressScaffold();
+    return new Scaffold(
+      body: new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new CircularProgressIndicator(),
+              new SizedBox(width: 20.0),
+              new Text("Signing in..."),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -105,38 +119,6 @@ Future<FirebaseSignInState> ensureSignedIn(
     context,
     MaterialPageRoute(
       builder: (context) => SignInScreen(firebase),
-    ),
-  );
-}
-
-Scaffold buildSignInProgressScaffold() {
-  return new Scaffold(
-    body: new Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new CircularProgressIndicator(),
-            new SizedBox(width: 20.0),
-            new Text("Signing in..."),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-Scaffold buildSplashProgressScaffold() {
-  return new Scaffold(
-    body: new Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
-        ),
-      ],
     ),
   );
 }
