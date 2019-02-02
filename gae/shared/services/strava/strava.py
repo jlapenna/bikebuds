@@ -25,6 +25,7 @@ from google.appengine.ext import ndb
 from shared.config import config
 from shared.datastore import services
 from shared.datastore.activities import Activity
+from shared.datastore.admin import SubscriptionEvent
 from shared.datastore.athletes import Athlete, ClubRef
 from shared.datastore.clubs import Club, AthleteRef
 from shared.datastore.services import Service
@@ -69,7 +70,7 @@ class ActivitiesSynchronizer(object):
         client = ClientWrapper(service)
         client.ensure_access()
         activity = client.get_activity(activity_id)
-        return Activity.from_strava(service.key, activity).put()
+        return Activity.entity_from_strava(service.key, activity).put()
 
 
 class ClubsSynchronizer(object):
@@ -125,7 +126,7 @@ class ClubActivitiesSharedSynchronizer(object):
                     .order(Athlete.strava_id)
                     .fetch(keys_only=True)
                     )
-            service_keys = [athlete_entity.parent()
+            service_keys = [athlete_entity.key.parent()
                     for athlete_entity in athlete_entities]
             service_entities = Service.query(Service.key.IN(service_entity_keys),
                     Service.credentials != None).fetch()
@@ -143,6 +144,63 @@ class ClubActivitiesSharedSynchronizer(object):
                 ndb.put_multi(Activity.entity_from_strava(ndb.Key(Club, club_id), activity)
                         for activity in activities)
             put()
+
+
+class SubscriptionEventProcessor(object):
+    """Syncs all subscription events."""
+
+    def sync(self):
+        events_query = SubscriptionEvent.gql("""
+        WHERE processing != TRUE
+        ORDER BY processing, owner_id, object_id, event_time
+        """)
+        batches = collections.defaultdict(list)
+        for event in events_query:
+            batches[(event.owner_id, event.object_id)].append(event)
+        for (owner_id, object_id), batch in batches.iteritems():
+            self.defer_batch(owner_id, object_id, batch)
+
+    def defer_batch(self, owner_id, object_id, batch):
+        logging.debug('defer_batch: %s, %s, %s', owner_id, object_id, len(batch))
+
+        @ndb.transactional
+        def defer():
+            for event in batch:
+                event.processing = True
+            ndb.put_multi(batch)
+            deferred.defer(process_batch,
+                    owner_id, object_id, batch,
+                    _transactional=True)
+        defer()
+
+
+def process_batch(owner_id, object_id, batch):
+    logging.debug('process_batch:  %s, %s, %s', owner_id, object_id, len(batch))
+    service_key = batch[0].key.parent()
+    object_id = batch[0].object_id
+    object_type = batch[0].object_type
+
+    if object_type != 'activity':
+        logging.warn('Update object_type not implemented: %s', object_type)
+        return
+
+    operations = [event.aspect_type for event in batch]
+
+    @ndb.transactional
+    def transact():
+        if 'delete' in operations:
+            activity_key = ndb.Key(Activity, object_id, parent=service_key)
+            result = activity_key.delete()
+            logging.debug('delete result: %s -> %s', activity_key, result)
+        else:
+            service = service_key.get()
+            client = ClientWrapper(service)
+            client.ensure_access()
+            activity = client.get_activity(object_id)
+            activity_key = Activity.entity_from_strava(service.key, activity).put()
+            logging.debug('create result: %s -> %s', activity.id, activity_key)
+        ndb.delete_multi((event.key for event in batch))
+    transact()
 
 
 class ClientWrapper(object):

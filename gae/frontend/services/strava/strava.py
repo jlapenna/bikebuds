@@ -16,6 +16,8 @@ import json
 import logging
 import os
 
+from google.appengine.api import taskqueue
+
 import flask
 from flask_cors import cross_origin
 
@@ -23,8 +25,11 @@ import stravalib
 
 from shared import auth_util
 from shared.config import config
-from shared.datastore import services
-from shared.datastore import users
+from shared.datastore.admin import SubscriptionEvent
+from shared.datastore.athletes import Athlete
+from shared.datastore.services import Service
+from shared.datastore.users import User
+from shared.services.strava.strava import process_batch
 
 
 SERVICE_NAME = 'strava'
@@ -34,11 +39,63 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
+@module.route('/services/strava/events', methods=['GET'])
+@cross_origin(origins=['https://www.strava.com'])
+def events_get():
+    mode = flask.request.args.get('hub.mode')
+    challenge = flask.request.args.get('hub.challenge')
+    verify_token = flask.request.args.get('hub.verify_token')
+
+    if verify_token != config.strava_creds['verify_token']:
+        return 'Invalid verify_token', 401
+
+    return flask.jsonify({'hub.challenge': challenge})
+
+
+@module.route('/services/strava/events', methods=['POST'])
+@cross_origin(origins=['https://www.strava.com'])
+def events_post():
+    # I guess someone could DOS us with events, I guess they're not
+    # authenticated... These are not supplied in sub events.
+    #verify_token = flask.request.args.get('hub.verify_token', None)
+    #if verify_token != config.strava_creds['verify_token']:
+    #    raise auth.AuthError(401, 'Invalid verify_token')
+
+    # Events come in the form:
+    #event_json = {'aspect_type': 'create',
+    #        'event_time': 1549151210,
+    #        'object_id': 2120237411,
+    #        'object_type': 'activity',
+    #        'owner_id': 35056021,
+    #        'subscription_id': 133263,
+    #        'updates': {}
+    #        }
+
+    event_json = flask.request.get_json()
+    owner_id = event_json['owner_id']
+    athlete_entity = Athlete.get_by_id(owner_id, keys_only=True)
+
+    @ndb.transactional
+    def transact():
+        event_entity = SubscriptionEvent(
+                parent=athlete_entity.parent(), **event_json).put()
+
+        taskqueue.add(
+                countdown=60,
+                url='/tasks/process_events',
+                target='backend',
+                _transactional=True
+                )
+    transact()
+    
+    return 'OK', 200
+
+
 @module.route('/services/strava/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
-    user = users.User.get(claims)
-    service = services.Service.get(user.key, SERVICE_NAME)
+    user = User.get(claims)
+    service = Service.get(user.key, SERVICE_NAME)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
@@ -48,8 +105,8 @@ def init(claims):
 @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def redirect(claims):
-    user = users.User.get(claims)
-    service = services.Service.get(user.key, SERVICE_NAME)
+    user = User.get(claims)
+    service = Service.get(user.key, SERVICE_NAME)
 
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')

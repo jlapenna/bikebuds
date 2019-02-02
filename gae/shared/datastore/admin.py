@@ -35,3 +35,12 @@ class SyncState(ndb.Model):
     modified = ndb.DateTimeProperty(auto_now=True)
     total_tasks = ndb.IntegerProperty(indexed=False)
     completed_tasks = ndb.IntegerProperty(indexed=False)
+
+
+class SubscriptionEvent(ndb.Expando):
+    """Holds data related to a subscription event."""
+    _use_memcache = False
+
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    modified = ndb.DateTimeProperty(auto_now=True)
+    processing = ndb.BooleanProperty()

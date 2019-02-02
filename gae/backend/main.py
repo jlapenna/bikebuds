@@ -30,7 +30,7 @@ import nokia
 from shared.config import config
 from shared.datastore import services
 from shared.datastore.activities import Activity
-from shared.datastore.admin import DatastoreState, SyncState
+from shared.datastore.admin import DatastoreState, SubscriptionEvent, SyncState
 from shared.datastore.athletes import Athlete
 from shared.datastore.clubs import Club
 from shared.datastore.measures import Series
@@ -75,6 +75,55 @@ def cleanup():
     def cleanup():
         ndb.delete_multi(Activity.query().fetch(keys_only=True))
     _do_cleanup(7, datastore_state, cleanup)
+
+    def cleanup():
+        athlete_entity = Athlete.get_by_id(35056021, keys_only=True)
+        SubscriptionEvent(parent=athlete_entity.parent(),
+                **{'aspect_type': 'create',
+                    'event_time': 1549151210,
+                    'object_id': 2120517766,
+                    'object_type': 'activity',
+                    'owner_id': 35056021,
+                    'subscription_id': 133263,
+                    'updates': {}
+                    }).put()
+        SubscriptionEvent(parent=athlete_entity.parent(),
+                **{'aspect_type': 'update',
+                    'event_time': 1549151212,
+                    'object_id': 2120517766,
+                    'object_type': 'activity',
+                    'owner_id': 35056021,
+                    'subscription_id': 133263,
+                    'updates': {'title': 'Updated Title'}
+                    }).put()
+        SubscriptionEvent(parent=athlete_entity.parent(),
+                **{'aspect_type': 'create',
+                    'event_time': 1549151211,
+                    'object_id': 2120517859,
+                    'object_type': 'activity',
+                    'owner_id': 35056021,
+                    'subscription_id': 133263,
+                    'updates': {}
+                    }).put()
+        SubscriptionEvent(parent=athlete_entity.parent(),
+                **{'aspect_type': 'update',
+                    'event_time': 1549151213,
+                    'object_id': 2120517859,
+                    'object_type': 'activity',
+                    'owner_id': 35056021,
+                    'subscription_id': 133263,
+                    'updates': {'title': 'Second Updated Title'}
+                    }).put()
+        SubscriptionEvent(parent=athlete_entity.parent(),
+                **{'aspect_type': 'delete',
+                    'event_time': 1549151214,
+                    'object_id': 2120517859,
+                    'object_type': 'activity',
+                    'owner_id': 35056021,
+                    'subscription_id': 133263,
+                    'updates': {}
+                    }).put()
+    _do_cleanup(8, datastore_state, cleanup)
 
     return 'OK', 200
 
@@ -201,7 +250,12 @@ def _do_sync(service, service_creds, synchronizer, check_creds=True):
 @app.route('/tasks/process', methods=['GET', 'POST'])
 def process():
     _do_process(strava.ClubsMembersProcessor())
+    return 'OK', 200
 
+
+@app.route('/tasks/process_events', methods=['GET', 'POST'])
+def process_events():
+    _do_process(strava.SubscriptionEventProcessor())
     return 'OK', 200
 
 

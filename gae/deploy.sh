@@ -25,7 +25,11 @@ function main() {
 
   activate_env
 
-  local services="frontend api backend";
+  if [[ -z "$@" ]]; then
+    local services="frontend api backend";
+  else
+    local services="$@";
+  fi
 
   local date="$(date)";
   # First, commit all the code outstanding into a temporary commit for
@@ -33,25 +37,30 @@ function main() {
   git add .
   git commit --allow-empty -a -m"Working Set: ${date}";
 
+  # Make sure that all our code talks to a prod instance, (don't pass "local").
   ./gae/update_api.sh
 
-  # First, update the API endpoint.
-  gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
+  if [[ "$services" == *"api"* ]]; then
+    # First, update the API endpoint.
+    gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
+  fi;
 
-  # Then, build the react app.
-  pushd gae/frontend
-  npm run build
-  popd
+  if [[ "$services" == *"frontend"* ]]; then
+    # Maybe build the react app.
+    pushd gae/frontend
+    npm run build
+    popd
+  fi
 
   # Appengine no longer supports symlinks when uploading an app.
   # We have to manually copy over files before deploying, then restore the
   # links.
   # https://issuetracker.google.com/issues/70571662
-
-  for service in ${services}; do
-    rm "gae/${service}/shared";
-    cp -r "gae/shared" "gae/${service}/"
-  done;
+  # Actually, this is fixed, now...
+  #for service in ${services}; do
+  #  rm "gae/${service}/shared";
+  #  cp -r "gae/shared" "gae/${service}/"
+  #done;
 
   # In order to include /lib/ in our uploaded source, we need to manipulate the
   # gae gitignore to strip it right before upload
@@ -66,7 +75,7 @@ function main() {
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
-  #git push --force production master
+  git push --force production master
 
   # Break apart the include lib commit.
   git reset HEAD~

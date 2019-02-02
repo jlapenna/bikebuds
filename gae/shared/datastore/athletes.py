@@ -105,3 +105,12 @@ class Athlete(ndb.Model):
             return None
         else:
             return athletes[0]
+
+    @classmethod
+    def get_by_id(cls, strava_id, keys_only=False):
+        athletes = Athlete.query(
+                Athlete.athlete.id == strava_id).fetch(1, keys_only=True)
+        if athletes is None or len(athletes) == 0:
+            return None
+        else:
+            return athletes[0]

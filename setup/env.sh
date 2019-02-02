@@ -33,8 +33,11 @@ function main() {
   pip2 install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
 
   echo ""
-  echo "Copying over service keys to frontend."
+  echo "Linking service keys to frontend."
   cp -rf "${repo_path}/private/service_keys" "${frontend_path}/lib/"
+  pushd "${frontend_path}/lib"
+  ln -s ../../../private/service_keys
+  popd
 
   echo ""
   echo "Installing api dependencies."
@@ -42,8 +45,11 @@ function main() {
   pip2 install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
 
   echo ""
-  echo "Copying over service keys to api."
-  cp -rf "${repo_path}/private/service_keys" "${api_path}/lib/"
+  echo "Linking service keys to backend."
+  cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
+  pushd "${backend_path}/lib"
+  ln -s ../../../private/service_keys
+  popd
 
   echo ""
   echo "Installing backend dependencies."
@@ -51,8 +57,11 @@ function main() {
   pip2 install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
 
   echo ""
-  echo "Copying over service keys to backend."
-  cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
+  echo "Linking service keys to api."
+  cp -rf "${repo_path}/private/service_keys" "${api_path}/lib/"
+  pushd "${api_path}/lib"
+  ln -s ../../../private/service_keys
+  popd
 
   echo ""
   echo "Initializing npm packages for frontend."
