@@ -82,6 +82,7 @@ def cleanup():
 @app.route('/tasks/sync', methods=['GET'])
 def sync():
     user_services = services.Service.query(
+            services.Service.credentials != None,
             services.Service.sync_enabled == True,
             services.Service.syncing == False
             ).fetch()
