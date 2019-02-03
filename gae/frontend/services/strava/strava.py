@@ -24,8 +24,8 @@ from flask_cors import cross_origin
 import stravalib
 
 from shared import auth_util
+from shared import task_util
 from shared.config import config
-from shared.datastore.admin import SubscriptionEvent
 from shared.datastore.athletes import Athlete
 from shared.datastore.services import Service
 from shared.datastore.users import User
@@ -73,20 +73,9 @@ def events_post():
 
     event_json = flask.request.get_json()
     owner_id = event_json['owner_id']
-    athlete_entity = Athlete.get_by_id(owner_id, keys_only=True)
-
-    @ndb.transactional
-    def transact():
-        event_entity = SubscriptionEvent(
-                parent=athlete_entity.parent(), **event_json).put()
-
-        taskqueue.add(
-                countdown=60,
-                url='/tasks/process_events',
-                target='backend',
-                _transactional=True
-                )
-    transact()
+    athlete_key = Athlete.get_by_id(owner_id, keys_only=True)
+    event_entity = SubscriptionEvent(parent=athlete_key.parent(), **event_json)
+    task_util.process_event(event_entity)
     
     return 'OK', 200
 
@@ -118,6 +107,8 @@ def redirect(claims):
             code=code)
 
     service_creds = service.update_credentials(dict(creds))
+
+    task_util.sync_service(service)
 
     return flask.redirect('/services/redirect?dest=' + dest)
 

@@ -24,6 +24,7 @@ from flask_cors import cross_origin
 import nokia 
 
 from shared import auth_util
+from shared import task_util
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
@@ -70,6 +71,8 @@ def redirect(claims):
             consumer_secret=creds.consumer_secret)
 
     service_creds = service.update_credentials(creds_dict)
+
+    task_util.sync_service(service)
 
     return flask.redirect('/services/redirect?dest=' + dest)
 

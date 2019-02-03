@@ -28,7 +28,7 @@ import flask
 import nokia
 
 from shared.config import config
-from shared.datastore import services
+from shared import task_util
 from shared.datastore.activities import Activity
 from shared.datastore.admin import DatastoreState, SubscriptionEvent, SyncState
 from shared.datastore.athletes import Athlete
@@ -76,101 +76,26 @@ def cleanup():
         ndb.delete_multi(Activity.query().fetch(keys_only=True))
     _do_cleanup(7, datastore_state, cleanup)
 
-    def cleanup():
-        athlete_entity = Athlete.get_by_id(35056021, keys_only=True)
-        SubscriptionEvent(parent=athlete_entity.parent(),
-                **{'aspect_type': 'create',
-                    'event_time': 1549151210,
-                    'object_id': 2120517766,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }).put()
-        SubscriptionEvent(parent=athlete_entity.parent(),
-                **{'aspect_type': 'update',
-                    'event_time': 1549151212,
-                    'object_id': 2120517766,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {'title': 'Updated Title'}
-                    }).put()
-        SubscriptionEvent(parent=athlete_entity.parent(),
-                **{'aspect_type': 'create',
-                    'event_time': 1549151211,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }).put()
-        SubscriptionEvent(parent=athlete_entity.parent(),
-                **{'aspect_type': 'update',
-                    'event_time': 1549151213,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {'title': 'Second Updated Title'}
-                    }).put()
-        SubscriptionEvent(parent=athlete_entity.parent(),
-                **{'aspect_type': 'delete',
-                    'event_time': 1549151214,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }).put()
-    _do_cleanup(8, datastore_state, cleanup)
-
     return 'OK', 200
 
 
 @app.route('/tasks/sync', methods=['GET'])
 def sync():
-    user_services = services.Service.query(
-            services.Service.credentials != None,
-            services.Service.sync_enabled == True,
-            services.Service.syncing == False
-            ).fetch()
-    @ndb.transactional
-    def submit_sync():
-        state = SyncState(completed_tasks=0)
-        state_key = state.put()
-
-        tasks = []
-        for service in user_services:
-            user_key = service.key.parent()
-            service.syncing = True
-
-            tasks.append(
-                    taskqueue.Task(
-                        url='/tasks/service_sync/' + service.key.id(),
-                        target='backend',
-                        params={
-                            'state': state_key.urlsafe(),
-                            'user': user_key.urlsafe(),
-                            'service': service.key.urlsafe()
-                            }
-                        )
-                    )
-        state.total_tasks = len(tasks)
-        state.put()
-
-        for task in tasks:
-            task.add()
-    submit_sync()
-
+    services = [
+            service for service in Service.query(
+                Service.credentials != None,
+                Service.sync_enabled == True,
+                Service.syncing == False
+                )]
+    task_util.sync_services(services)
     return 'OK', 200
 
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync(service_name):
     state_key = ndb.Key(urlsafe=flask.request.values.get('state'))
-    user_key = ndb.Key(urlsafe=flask.request.values.get('user'))
     service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
+    user_key = service.key.parent()
     service_creds = service.get_credentials()
 
     if service_name == 'withings':
@@ -183,7 +108,7 @@ def service_sync(service_name):
         _do_sync(service, service_creds, strava.ClubsSynchronizer())
 
     @ndb.transactional(xg=True)
-    def update_state():
+    def transact():
         state = state_key.get()
         state.completed_tasks += 1
         state.put()
@@ -192,9 +117,9 @@ def service_sync(service_name):
         service.sync_successful = True
         service.put()
 
-        logging.info('Incrementing completed tasks for %s', state)
+        logging.info('Incrementing completed tasks for %s', state.key)
         if state.completed_tasks == state.total_tasks:
-            logging.info('Completed all pending tasks for %s', state)
+            logging.info('Completed all pending tasks for %s', state.key)
             taskqueue.add(
                     url='/tasks/process',
                     target='backend',
@@ -202,7 +127,7 @@ def service_sync(service_name):
                         'state': state_key.urlsafe(),
                         },
                     transactional=True)
-    update_state()
+    transact()
 
     return 'OK', 200
 
@@ -284,3 +209,51 @@ def _do_process(processor):
                 sys.exc_info()[0].__name__,
                 processor_name)
         raise SyncException, SyncException(msg), sys.exc_info()[2]
+
+def _add_test_sub_events():
+    athlete_entity = Athlete.get_by_id(35056021, keys_only=True)
+    SubscriptionEvent(parent=athlete_entity.parent(),
+            **{'aspect_type': 'create',
+                'event_time': 1549151210,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()
+    SubscriptionEvent(parent=athlete_entity.parent(),
+            **{'aspect_type': 'update',
+                'event_time': 1549151212,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Updated Title'}
+                }).put()
+    SubscriptionEvent(parent=athlete_entity.parent(),
+            **{'aspect_type': 'create',
+                'event_time': 1549151211,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()
+    SubscriptionEvent(parent=athlete_entity.parent(),
+            **{'aspect_type': 'update',
+                'event_time': 1549151213,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Second Updated Title'}
+                }).put()
+    SubscriptionEvent(parent=athlete_entity.parent(),
+            **{'aspect_type': 'delete',
+                'event_time': 1549151214,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()

@@ -22,6 +22,7 @@ from flask_cors import cross_origin
 import fitbit
 
 from shared import auth_util
+from shared import task_util
 from shared.config import config
 from shared.datastore import services
 from shared.datastore import users
@@ -61,6 +62,8 @@ def redirect(claims):
     creds = auth_client.fetch_access_token(code)
 
     service_creds = service.update_credentials(creds)
+
+    task_util.sync_service(service)
 
     return flask.redirect('/services/redirect?dest=' + dest)
 
