@@ -259,6 +259,8 @@ It was third party cookies. so I set up a firebase custom domain:
 
 # Strava web push.
 
+# Subscribing 
+
 curl -G https://api.strava.com/api/v3/push_subscriptions     -d client_id=XXX     -d client_secret=YYY
 
 curl -X POST https://api.strava.com/api/v3/push_subscriptions \
@@ -269,3 +271,15 @@ curl -X POST https://api.strava.com/api/v3/push_subscriptions \
 
 responds with:
 {"id":333333,"resource_state":2,"application_id":77777,"callback_url":"https://bikebuds.cc/services/strava/events","created_at":"2019-02-02T17:55:59.510256816Z","updated_at":"2019-02-02T17:55:59.510255963Z"}
+
+## pushing a test event
+
+curl -H 'Content-Type: application/json' -X POST 'http://localhost:8081/services/strava/events' -d '{
+     "aspect_type": "create",
+     "event_time": 1549151211,
+     "object_id": 2120517859,
+     "object_type": "activity",
+     "owner_id": 35056021,
+     "subscription_id": 133263,
+     "updates": {}
+     }'
