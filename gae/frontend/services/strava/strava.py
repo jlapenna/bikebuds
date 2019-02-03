@@ -26,6 +26,7 @@ import stravalib
 from shared import auth_util
 from shared import task_util
 from shared.config import config
+from shared.datastore.admin import SubscriptionEvent
 from shared.datastore.athletes import Athlete
 from shared.datastore.services import Service
 from shared.datastore.users import User

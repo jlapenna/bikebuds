@@ -21,7 +21,7 @@ import sys
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from shared.datastore.admin import SubscriptionEvent, SyncState
+from shared.datastore.admin import SyncState
 from shared.datastore.services import Service
 
 
@@ -65,5 +65,5 @@ def process_event(event_entity):
             countdown=60,
             url='/tasks/process_events',
             target='backend',
-            _transactional=True
+            transactional=True
             )
