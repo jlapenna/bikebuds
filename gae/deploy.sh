@@ -18,7 +18,9 @@
 
 source setup/base.sh
 
-VERSION=10000
+# Using the same version results in app caching and inconsistent new release
+# deployments.
+#VERSION=10000
 
 function main() {
   local repo_path="$(get_repo_path)";
@@ -69,7 +71,7 @@ function main() {
   git commit --allow-empty -a -m"Include lib: ${date}" >/dev/null
 
   # Then, deploy everything.
-  yes|gcloud app deploy -v ${VERSION} \
+  yes|gcloud app deploy \
     gae/frontend/cron.yaml \
     gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
