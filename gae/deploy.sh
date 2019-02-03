@@ -18,9 +18,24 @@
 
 source setup/base.sh
 
-# Using the same version results in app caching and inconsistent new release
-# deployments.
-#VERSION=10000
+function delete_old_versions() {
+  # From: https://almcc.me/blog/2017/05/04/removing-older-versions-on-google-app-engine/
+  local service=$1
+  local max_versions=$2
+
+  local versions=$(gcloud app versions list --service default --sort-by '~version' --filter="version.servingStatus='STOPPED'" --format 'value(version.id)' | sort -r)
+  local count=0
+  echo "Keeping the $max_versions latest versions of the $1 service"
+  for version in $versions; do
+    ((count++))
+    if [ $count -gt $max_versions ]; then
+      echo "Going to delete version $version of the $service service."
+      gcloud app versions delete $version --service $service -q
+    else
+      echo "Going to keep version $version of the $service service."
+    fi
+  done
+}
 
 function main() {
   local repo_path="$(get_repo_path)";
@@ -42,6 +57,9 @@ function main() {
   # Make sure that all our code talks to a prod instance, (don't pass "local").
   ./gae/update_api.sh
 
+  # Make sure we're not using cached pyc.
+  find ./ -iname '*.py[co]' -delete
+
   if [[ "$services" == *"api"* ]]; then
     # First, update the API endpoint.
     gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
@@ -54,30 +72,40 @@ function main() {
     popd
   fi
 
-  # Appengine no longer supports symlinks when uploading an app.
-  # We have to manually copy over files before deploying, then restore the
-  # links.
-  # https://issuetracker.google.com/issues/70571662
-  # Actually, this is fixed, now...
-  #for service in ${services}; do
-  #  rm "gae/${service}/shared";
-  #  cp -r "gae/shared" "gae/${service}/"
-  #done;
-
   # In order to include /lib/ in our uploaded source, we need to manipulate the
   # gae gitignore to strip it right before upload
   sed -i '/\/lib/d' gae/.gitignore
   git add . >/dev/null
   git commit --allow-empty -a -m"Include lib: ${date}" >/dev/null
 
-  # Then, deploy everything.
+  git push --force production master
+
+  # Generate source contexts for debugging.
+  for service in $services; do
+    gcloud debug source gen-repo-info-file \
+        --output-directory=gae/$service \
+        --source-directory=gae/$service;
+    cat gae/$service/source-context.json
+  done;
+
+  # Deploy apps
   yes|gcloud app deploy \
     gae/frontend/cron.yaml \
     gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
-  git push --force production master
+  # Delete older versions.
+  for service in ${services}; do
+    if [[ "$service" == "frontend" ]]; then
+      # For the sake of gae, our frontend is actually the default service.
+      service="default";
+    fi
+    delete_old_versions $service 2;
+  done;
+
+  # Remove the generated source contexts
+  rm gae/*/source-context.json >/dev/null 2>&1
 
   # Break apart the include lib commit.
   git reset HEAD~
