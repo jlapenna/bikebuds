@@ -2,7 +2,7 @@ cron:
 - description: 'Sync'
   url: /tasks/sync
   target: backend
-  schedule: every 24 hours
+  schedule: every 168 hours
 
 - description: 'Cleanup'
   url: /tasks/cleanup
