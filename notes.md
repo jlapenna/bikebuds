@@ -158,20 +158,32 @@ get_measures returns NokiaMeasureGroup.
 # SSL CERTIFICATE 
 
 ```text
-./certbot-auto --manual certonly -d '*.bikebuds.cc'
-IMPORTANT NOTES:
- - Congratulations! Your certificate and chain have been saved at:
-   /etc/letsencrypt/live/bikebuds.cc/fullchain.pem
-   Your key file has been saved at:
-   /etc/letsencrypt/live/bikebuds.cc/privkey.pem
-   Your cert will expire on 2019-02-09. To obtain a new or tweaked
-   version of this certificate in the future, simply run certbot-auto
-   again. To non-interactively renew *all* of your certificates, run
-   "certbot-auto renew"
- - If you like Certbot, please consider supporting our work by:
+./certbot-auto --manual certonly -d '*.bikebuds.cc';
+rm -rf bikebuds.cc-cert/;
+sudo cp -Lr /etc/letsencrypt/live/bikebuds.cc bikebuds.cc-cert;
+sudo chown -R jlapenna bikebuds.cc-cert;
+openssl rsa \
+    -in bikebuds.cc-cert/privkey.pem \
+    -out bikebuds.cc-cert/privkey_rsa.pem;
+gcloud app ssl-certificates create \
+    --display-name star-dot-bikebuds.cc \
+    --certificate bikebuds.cc-cert/fullchain.pem \
+    --private-key bikebuds.cc-cert/privkey_rsa.pem;
+gcloud app domain-mappings update '*.bikebuds.cc' \
+    --certificate-id XXXXXXXXXXX
+```
 
-   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
-   Donating to EFF:                    https://eff.org/donate-le
+## Proper configuration:
+```
+$ gcloud app ssl-certificates list
+ID        DISPLAY_NAME          DOMAIN_NAMES
+10654169  managed_certificate   apidocs.bikebuds.cc
+11115986  star-dot-bikebuds.cc  *.bikebuds.cc
+
+$ gcloud app domain-mappings list
+ID             SSL_CERTIFICATE_ID  SSL_MANAGEMENT_TYPE  PENDING_AUTO_CERT
+*.bikebuds.cc  11115986            MANUAL
+bikebuds.cc                        AUTOMATIC            11114599
 ```
 
 # Keys and Clients
