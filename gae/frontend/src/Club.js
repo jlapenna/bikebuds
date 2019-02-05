@@ -41,8 +41,7 @@ class Club extends Component {
       width: '100%'
     },
     card: {
-      height: '400px',
-      width: '360px'
+      height: '400px'
     },
     media: {
       height: '176px',
@@ -123,12 +122,17 @@ class Club extends Component {
           container
           spacing={24}
         >
-          <Grid className={this.props.classes.contentGridElement} item xs={3}>
+          <Grid
+            className={this.props.classes.contentGridElement}
+            item
+            xs={12}
+            md={3}
+          >
             <Card className={this.props.classes.card}>
               <CardMedia
                 className={this.props.classes.media}
                 image={this.state.club.cover_photo_small}
-                title="Contemplative Reptile"
+                title="Club Photo"
               >
                 <Avatar
                   className={this.props.classes.avatar}
@@ -149,7 +153,7 @@ class Club extends Component {
                   <Grid item>
                     <Grid
                       container
-                      className={this.props.classes.clubContainer}
+                      className={this.props.classes.membersContainer}
                       direction="row"
                       justify="space-evenly"
                       alignItems="center"
@@ -177,7 +181,12 @@ class Club extends Component {
               <CardActionArea />
             </Card>
           </Grid>
-          <Grid className={this.props.classes.contentGridElement} item xs={8}>
+          <Grid
+            className={this.props.classes.contentGridElement}
+            item
+            xs={12}
+            md={9}
+          >
             <ActivityListCard
               gapiReady={this.props.gapiReady}
               profile={this.props.profile}

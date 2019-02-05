@@ -200,7 +200,7 @@ class BikebudsApi(remote.Service):
             activity_query = Activity.query(
                     Activity.activity.athlete.id.IN(members),
                     Activity.start_date > two_weeks
-                    ).order(Activity.start_date)
+                    ).order(-Activity.start_date)
             activities = [a.activity for a in activity_query.fetch()]
 
         return ClubResponse(club=club_entity.club, activities=activities)

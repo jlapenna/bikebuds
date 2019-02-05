@@ -22,15 +22,20 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
+- kind: "Activity"
+  properties:
+  - name: "activity.athlete.id"
+  - name: "start_date"
+- kind: "Activity"
+  properties:
+  - name: "activity.athlete.id"
+  - name: "start_date"
+    direction: desc
 - kind: "SubscriptionEvent"
   properties:
   - name: "owner_id"
   - name: "object_id"
   - name: "event_time"
-- kind: "Activity"
-  properties:
-  - name: "activity.athlete.id"
-  - name: "start_date"
 - kind: "Activity"
   properties:
   - name: "activity.athlete.id"
