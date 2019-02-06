@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import 'dart:async';
+
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class EventScreen extends StatefulWidget {
   final FirebaseState firebase;
@@ -30,46 +32,90 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  Stream<DocumentSnapshot> _eventStream;
-  TextEditingController _titleController;
-  Map<String, dynamic> event;
+  Stream<DocumentSnapshot> eventStream;
+  StreamSubscription<DocumentSnapshot> eventStreamSubscription;
+
+  FocusNode titleFocusNode;
+  TextEditingController titleController;
+
+  FocusNode descriptionFocusNode;
+  TextEditingController descriptionController;
+
+  Map<String, dynamic> latestEvent;
 
   @override
   void initState() {
     super.initState();
-    _eventStream = widget.event.reference.snapshots();
-    _eventStream.listen((event) {
-      // This loop-back allows text updates from other devices to immediately
-      // cause a local update.
-      _titleController.text = event['title'];
-      setState(() {
-        this.event = event.data;
-      });
-    });
+    // TODO: This doesn't handle the screen being background.
+    // TODO: We overwrite any remote updates when when description focus changes.
 
-    _titleController = new TextEditingController(text: widget.event['title']);
-    _titleController.addListener(_titleListener);
+    titleFocusNode = FocusNode();
+    titleFocusNode.addListener(titleFocusListener);
+    titleController = new TextEditingController(text: widget.event['title']);
+
+    descriptionFocusNode = FocusNode();
+    descriptionFocusNode.addListener(descriptionFocusListener);
+    descriptionController =
+        new TextEditingController(text: widget.event['description']);
+
+    eventStream = widget.event.reference.snapshots();
+    eventStreamSubscription = eventStream.listen(eventStreamListener);
   }
 
-  void _titleListener() async {
-    if (event != null && event['title'] == _titleController.text) {
-      // Debounce events, we are notified even when selection criteria changes!
-      return;
-    }
-    print(
-        '_titleListener: starting transaction ${_titleController.text}, ${event}');
-    widget.firebase.firestore.runTransaction((Transaction tx) async {
-      print('_titleListener: running transaction ${_titleController.text}');
-      await tx.update(widget.event.reference, <String, dynamic>{
-        'title': _titleController.text,
+  void titleFocusListener() {
+    print('EventScreen.titleFocusListener: Focus: ${titleFocusNode.hasFocus}');
+    if (!titleFocusNode.hasFocus) {
+      // We lost focus.
+      widget.firebase.firestore.runTransaction((Transaction tx) async {
+        print(
+            'EventScreen.titleFocusListener: running transaction "${titleController.text}"');
+        await tx.update(widget.event.reference, <String, dynamic>{
+          'title': titleController.text,
+        });
+        print('EventScreen.titleFocusListener: completed transaction.');
       });
-      print('_titleListener: completed transaction.');
+    }
+  }
+
+  void descriptionFocusListener() {
+    print(
+        'EventScreen.descriptionFocusListener: Focus: ${descriptionFocusNode.hasFocus}');
+    if (!descriptionFocusNode.hasFocus) {
+      // We lost focus.
+      widget.firebase.firestore.runTransaction((Transaction tx) async {
+        print(
+            'EventScreen.descriptionFocusListener: running transaction "${descriptionController.text}"');
+        await tx.update(widget.event.reference, <String, dynamic>{
+          'description': descriptionController.text,
+        });
+        print('EventScreen.descriptionFocusListener: completed transaction.');
+      });
+    }
+  }
+
+  /// Updates this screen with the latest changes from firebase.
+  void eventStreamListener(latestSnapshot) {
+    // Only update the UI from firebase if those elements are not focused.
+    if (!titleFocusNode.hasFocus) {
+      titleController.text = latestSnapshot['title'];
+    }
+    if (!descriptionFocusNode.hasFocus) {
+      descriptionController.text = latestSnapshot['description'];
+    }
+    setState(() {
+      this.latestEvent = latestSnapshot.data;
     });
   }
 
   @override
   void dispose() {
-    _titleController?.dispose();
+    titleFocusNode?.dispose();
+    titleController?.dispose();
+
+    descriptionFocusNode?.dispose();
+    descriptionController?.dispose();
+
+    eventStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -87,7 +133,7 @@ class _EventScreenState extends State<EventScreen> {
     return ListView(
       children: <Widget>[
         StreamBuilder(
-          stream: _eventStream,
+          stream: eventStream,
           builder:
               (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             switch (snapshot.connectionState) {
@@ -111,12 +157,22 @@ class _EventScreenState extends State<EventScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
-              controller: _titleController,
+              controller: titleController,
+              focusNode: titleFocusNode,
               autocorrect: true,
               maxLines: 1,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(labelText: 'Title'),
               style: Theme.of(context).textTheme.headline,
+            ),
+            TextField(
+              controller: descriptionController,
+              focusNode: descriptionFocusNode,
+              autocorrect: true,
+              maxLines: 4,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(labelText: 'Description'),
+              style: Theme.of(context).textTheme.body1,
             ),
           ],
         ),
