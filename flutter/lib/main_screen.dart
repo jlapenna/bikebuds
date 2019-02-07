@@ -5,13 +5,10 @@
 import 'dart:async';
 
 import 'package:bikebuds/bikebuds_util.dart';
-import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/events_content.dart';
 import 'package:bikebuds/settings_content.dart';
 import 'package:bikebuds/sign_in_screen.dart';
-import 'package:bikebuds_api/bikebuds/v1.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -76,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return <Widget>[
-      DrawerHeader(),
+      DrawerHeader(child: Container()),
       ListTile(
         title: Text('Rides'),
         onTap: () {

@@ -34,8 +34,4 @@ class _AppState extends State<App> {
     bikebuds.registerClient();
     firebase.registerMessaging();
   }
-
-  _handleBikebudsUpdated(BikebudsState bikebuds) {
-    print('App._handleBikebudsUpdated: $bikebuds');
-  }
 }
