@@ -59,7 +59,7 @@ class _EventsListState extends State<EventsList> {
         : dateTimeFormat.format(event['start_date']);
     return ListTile(
       title: Text(event['title']),
-      subtitle: Text(startDate ),
+      subtitle: Text(startDate),
       onTap: () {
         Navigator.push(
           context,

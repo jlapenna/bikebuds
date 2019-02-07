@@ -14,8 +14,10 @@
 
 import 'dart:async';
 
+import 'package:bikebuds/date_util.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -30,6 +32,8 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
+  DocumentSnapshot event;
+
   Stream<DocumentSnapshot> eventStream;
   StreamSubscription<DocumentSnapshot> eventStreamSubscription;
 
@@ -39,13 +43,13 @@ class _EventScreenState extends State<EventScreen> {
   FocusNode descriptionFocusNode;
   TextEditingController descriptionController;
 
-  Map<String, dynamic> latestEvent;
-
   @override
   void initState() {
     super.initState();
     // TODO: This doesn't handle the screen being background.
     // TODO: We overwrite any remote updates when when description focus changes.
+
+    this.event = widget.event;
 
     titleFocusNode = FocusNode();
     titleFocusNode.addListener(titleFocusListener);
@@ -100,8 +104,22 @@ class _EventScreenState extends State<EventScreen> {
     if (!descriptionFocusNode.hasFocus) {
       descriptionController.text = latestSnapshot['description'];
     }
+    // TODO: Update start date with remote changes.
+
     setState(() {
-      this.latestEvent = latestSnapshot.data;
+      this.event = latestSnapshot;
+    });
+  }
+
+  void handleStartDateChanged(newStartDate) {
+    print('EventScreen.handleStartDateChanged: $newStartDate');
+    widget.firebase.firestore.runTransaction((Transaction tx) async {
+      print(
+          'EventScreen.handleStartDateChanged: running transaction "$newStartDate"');
+      await tx.update(widget.event.reference, <String, dynamic>{
+        'start_date': newStartDate,
+      });
+      print('EventScreen.handleStartDateChanged: completed transaction.');
     });
   }
 
@@ -160,8 +178,20 @@ class _EventScreenState extends State<EventScreen> {
               autocorrect: true,
               maxLines: 1,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: 'Title'),
               style: Theme.of(context).textTheme.headline,
+              decoration: InputDecoration(
+                  labelText: 'Title', hasFloatingPlaceholder: false),
+            ),
+            DateTimePickerFormField(
+              format: dateTimeFormat,
+              onChanged: handleStartDateChanged,
+              editable: false,
+              initialDate: widget.event['start_date'],
+              initialValue: widget.event['start_date'],
+              inputType: InputType.both,
+              style: Theme.of(context).textTheme.body1,
+              decoration: InputDecoration(
+                  labelText: 'Start Date', hasFloatingPlaceholder: false),
             ),
             TextField(
               controller: descriptionController,
@@ -169,8 +199,8 @@ class _EventScreenState extends State<EventScreen> {
               autocorrect: true,
               maxLines: 4,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: 'Description'),
               style: Theme.of(context).textTheme.body1,
+              decoration: InputDecoration(labelText: 'Description'),
             ),
           ],
         ),

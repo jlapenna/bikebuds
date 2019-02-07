@@ -37,8 +37,7 @@ class BikebudsState {
   Future<MainClientResponse> registerClient() async {
     var firebaseToken = await (await firebase).messaging.getToken();
     var request = MainUpdateClientRequest()
-      ..client = (SharedDatastoreUsersClientMessage()
-        ..id = firebaseToken);
+      ..client = (SharedDatastoreUsersClientMessage()..id = firebaseToken);
     return (await _api).updateClient(request);
   }
 }
