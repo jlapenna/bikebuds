@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:bikebuds/event_list.dart';
+import 'package:bikebuds/events_list.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +19,7 @@ class _EventsContentState extends State<EventsContent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: EventList(firebase: widget.firebase),
+      child: EventsList(firebase: widget.firebase),
     );
   }
 }

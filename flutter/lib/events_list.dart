@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:bikebuds/date_util.dart';
 import 'package:bikebuds/event_screen.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EventList extends StatefulWidget {
+class EventsList extends StatefulWidget {
   final FirebaseState firebase;
 
-  EventList({this.firebase});
+  EventsList({this.firebase});
 
   @override
-  _EventListState createState() => _EventListState();
+  _EventsListState createState() => _EventsListState();
 }
 
-class _EventListState extends State<EventList> {
+class _EventsListState extends State<EventsList> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -43,18 +44,18 @@ class _EventListState extends State<EventList> {
   }
 
   Widget buildItem(DocumentSnapshot event) {
+    var startDate = event['start_date'] == null
+        ? null
+        : dateTimeFormat.format(event['start_date']);
     return ListTile(
       title: Text(event['title']),
-      subtitle: Text(
-        event['start_date'].toString(),
-      ),
+      subtitle: Text(startDate ),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventScreen(
-                firebase: widget.firebase,
-                event: event),
+            builder: (context) =>
+                EventScreen(firebase: widget.firebase, event: event),
           ),
         );
       },
