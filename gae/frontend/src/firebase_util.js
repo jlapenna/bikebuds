@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
 
-import { firebaseState } from './firebase_util';
-import SignInScreen from './SignInScreen';
+import { config, nextConfig } from './Config';
 
-it('renders without crashing', () => {
-  const div = document.createElement('div');
-  ReactDOM.render(<SignInScreen firebaseState={firebaseState} />, div);
-  ReactDOM.unmountComponentAtNode(div);
-});
+const _firebaseApp = firebase.initializeApp(config);
+const _firebaseAppNext = firebase.initializeApp(nextConfig, 'next');
+const _firestore = firebase.firestore(_firebaseAppNext);
+
+export const firebaseState = {
+  app: _firebaseApp,
+  auth: firebase.auth(),
+
+  appNext: _firebaseAppNext,
+  authNext: firebase.auth(_firebaseAppNext),
+  firestore: _firestore
+};

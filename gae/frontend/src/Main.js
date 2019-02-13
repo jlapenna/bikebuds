@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
@@ -39,6 +40,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 
 import Club from './Club';
+import Events from './Events';
 import FcmWrapper from './FcmWrapper';
 import GapiWrapper from './GapiWrapper';
 import Home from './Home';
@@ -49,6 +51,11 @@ import Signup from './Signup';
 const drawerWidth = 240;
 
 class Main extends Component {
+  static propTypes = {
+    firebaseState: PropTypes.object.isRequired,
+    firebaseUser: PropTypes.object.isRequired
+  };
+
   static styles = theme => ({
     root: {
       display: 'flex',
@@ -145,6 +152,16 @@ class Main extends Component {
           </ListItem>
           <ListItem
             button
+            key="Events"
+            component={NavLink}
+            to="/events"
+            exact
+            activeClassName={this.props.classes.active}
+          >
+            <ListItemText>Rides</ListItemText>
+          </ListItem>
+          <ListItem
+            button
             key="Settings"
             component={NavLink}
             to="/settings"
@@ -170,6 +187,7 @@ class Main extends Component {
             exact
             render={() => (
               <Signup
+                firebaseState={this.props.firebaseState}
                 firebaseUser={this.props.firebaseUser}
                 gapiReady={this.state.gapiReady}
               />
@@ -188,6 +206,7 @@ class Main extends Component {
           path="/club/:club_id"
           render={thinger => (
             <Club
+              firebaseState={this.props.firebaseState}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
               profile={this.state.profile}
@@ -200,6 +219,19 @@ class Main extends Component {
           exact
           render={() => (
             <Home
+              firebaseState={this.props.firebaseState}
+              firebaseUser={this.props.firebaseUser}
+              gapiReady={this.state.gapiReady}
+              profile={this.state.profile}
+            />
+          )}
+        />
+        <Route
+          path="/events"
+          exact
+          render={() => (
+            <Events
+              firebaseState={this.props.firebaseState}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
               profile={this.state.profile}
@@ -211,6 +243,7 @@ class Main extends Component {
           exact
           render={() => (
             <Settings
+              firebaseState={this.props.firebaseState}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
               profile={this.state.profile}
@@ -223,6 +256,7 @@ class Main extends Component {
           exact
           render={() => (
             <Signup
+              firebaseState={this.props.firebaseState}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
             />
@@ -241,12 +275,14 @@ class Main extends Component {
         <div className={this.props.classes.root}>
           <GapiWrapper onReady={this.handleGapiReady} />
           <ProfileWrapper
+            firebaseState={this.props.firebaseState}
             firebaseUser={this.props.firebaseUser}
             gapiReady={this.state.gapiReady}
             onProfileReady={this.handleProfileReady}
             profile={this.state.profile}
           />
           <FcmWrapper
+            firebaseState={this.props.firebaseState}
             gapiReady={this.state.gapiReady}
             onMessage={this.handleFcmMessage}
           />

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -32,6 +33,10 @@ class SignInScreen extends Component {
     }
   };
 
+  static propTypes = {
+    firebaseState: PropTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -39,14 +44,26 @@ class SignInScreen extends Component {
     };
   }
 
+  handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
+    console.log('SignInScreen.signInSuccessWithAuthResult', authResult, this);
+    this.props.firebaseState.authNext
+      .signInAndRetrieveDataWithCredential(authResult.credential)
+      .then(signInResult => {
+        console.log('SignInScreen.signInWithCredential result:', signInResult);
+      })
+      .catch(error => {
+        console.log('SignInScreen.catch:', error);
+      });
+    console.log('SignInScreen.signInSuccessWithAuthResult: done');
+
+    // Return false to not redirect
+    return false;
+  };
+
   uiConfig = {
     // Popup signin flow rather than redirect flow.
     callbacks: {
-      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-        console.log('signInsuccessWithAuthResult', authResult);
-        // Return false to not redirect
-        return false;
-      }
+      signInSuccessWithAuthResult: this.handleSignInSuccessWithAuthResult
     },
     signInFlow: 'popup',
     signInOptions: [
@@ -64,16 +81,18 @@ class SignInScreen extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
-      // If we've unmounted before this callback executes, we don't want to
-      // update state.
-      if (this.unregisterAuthObserver === null) {
-        return;
+    this.unregisterAuthObserver = this.props.firebaseState.auth.onAuthStateChanged(
+      user => {
+        // If we've unmounted before this callback executes, we don't want to
+        // update state.
+        if (this.unregisterAuthObserver === null) {
+          return;
+        }
+        var signedIn = !!user;
+        console.log('SignInScreen: onAuthStateChanged', signedIn, user);
+        this.setState({ isSignedIn: signedIn });
       }
-      var signedIn = !!user;
-      console.log('SignInScreen: onAuthStateChanged', signedIn, user);
-      this.setState({ isSignedIn: signedIn });
-    });
+    );
   }
 
   /**
@@ -87,11 +106,13 @@ class SignInScreen extends Component {
 
   handleSignOut = e => {
     console.log('handleSignOut', e);
-    firebase
-      .auth()
-      .currentUser.getIdToken()
+    this.props.firebaseState.auth.currentUser
+      .getIdToken()
       .then(function(idToken) {
-        firebase.auth().signOut();
+        this.props.firebaseState.auth.signOut();
+      })
+      .then(function(idToken) {
+        this.props.firebaseState.authNext.signOut();
       });
   };
 
@@ -109,7 +130,7 @@ class SignInScreen extends Component {
         <img className={classes.logo} alt="Bikebuds Logo" src={logoRound} />
         <StyledFirebaseAuth
           uiConfig={this.uiConfig}
-          firebaseAuth={firebase.auth()}
+          firebaseAuth={this.props.firebaseState.auth}
         />
       </div>
     );

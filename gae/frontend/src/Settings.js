@@ -25,6 +25,8 @@ import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
   static propTypes = {
+    profile: PropTypes.object,
+    gapiReady: PropTypes.bool.isRequired,
     onPreferencesChanged: PropTypes.func.isRequired
   };
 

@@ -23,18 +23,14 @@ import {
   Switch
 } from 'react-router-dom';
 
-import firebase from 'firebase/app';
-
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
-import { config } from './Config';
+import { firebaseState } from './firebase_util';
 import Main from './Main';
 import SignInScreen from './SignInScreen';
-
-firebase.initializeApp(config);
 
 class App extends Component {
   constructor(props) {
@@ -49,9 +45,9 @@ class App extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver = firebase
-      .auth()
-      .onAuthStateChanged(firebaseUser => {
+    this.unregisterAuthObserver = firebaseState.auth.onAuthStateChanged(
+      firebaseUser => {
+        console.log('App.onAuthStateChanged: ', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
         // update state.
         if (this.unregisterAuthObserver === null) {
@@ -61,13 +57,30 @@ class App extends Component {
           isSignedIn: !!firebaseUser,
           firebaseUser: firebaseUser
         });
-      });
+      }
+    );
+    this.unregisterAuthObserverNext = firebaseState.authNext.onAuthStateChanged(
+      firebaseUser => {
+        console.log('App.onAuthStateChanged: Next', firebaseUser);
+        // If we've unmounted before this callback executes, we don't want to
+        // update state.
+        if (this.unregisterAuthObserverNext === null) {
+          return;
+        }
+        this.setState({
+          isSignedInNext: !!firebaseUser,
+          firebaseUserNext: firebaseUser
+        });
+      }
+    );
   }
 
   /**
    * @inheritDoc
    */
   componentWillUnmount() {
+    this.unregisterAuthObserverNext();
+    this.unregisterAuthObserverNext = null;
     this.unregisterAuthObserver();
     this.unregisterAuthObserver = null;
   }
@@ -93,7 +106,10 @@ class App extends Component {
                 <div>Misconfigured.</div>
               </Route>
               <Route>
-                <Main firebaseUser={this.state.firebaseUser} />
+                <Main
+                  firebaseState={firebaseState}
+                  firebaseUser={this.state.firebaseUser}
+                />
               </Route>
             </Switch>
           </Router>
@@ -108,7 +124,7 @@ class App extends Component {
         <Router>
           <Switch>
             <Route path="/signin">
-              <SignInScreen />
+              <SignInScreen firebaseState={firebaseState} />
             </Route>
             <Route path="/services">
               <div>Misconfigured.</div>

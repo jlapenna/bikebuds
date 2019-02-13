@@ -38,3 +38,12 @@ export const config = {
       ? 'http://localhost:8083'
       : 'https://backend.bikebuds.cc'
 };
+
+export const nextConfig = {
+  apiKey: 'AIzaSyD3s0s08T3YKGD-qhS-sPuBwHNQDNSMwg4',
+  authDomain: 'auth.bikebuds.cc',
+  databaseURL: 'https://bikebuds-next.firebaseio.com',
+  projectId: 'bikebuds-next',
+  storageBucket: 'bikebuds-next.appspot.com',
+  messagingSenderId: '535000950083'
+};

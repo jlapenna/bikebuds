@@ -17,11 +17,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { BrowserRouter as Router } from 'react-router-dom';
+
 import { firebaseState } from './firebase_util';
-import SignInScreen from './SignInScreen';
+import Events from './Events';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<SignInScreen firebaseState={firebaseState} />, div);
+  ReactDOM.render(
+    <Router>
+      <Events firebaseState={firebaseState} gapiReady={true} />
+    </Router>,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });
