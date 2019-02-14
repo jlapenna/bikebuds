@@ -28,6 +28,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
+import CookieConsent from 'react-cookie-consent';
+
 import { firebaseState } from './firebase_util';
 import Main from './Main';
 import SignInScreen from './SignInScreen';
@@ -85,55 +87,62 @@ class App extends Component {
     this.unregisterAuthObserver = null;
   }
 
+  renderSignedInRouter() {
+    return (
+      <Router>
+        <Switch>
+          <Route path="/app">
+            <Redirect to="/" />
+          </Route>
+          <Route path="/signin">
+            <Redirect to="/" />
+          </Route>
+          <Route path="/services">
+            <div>Misconfigured.</div>
+          </Route>
+          <Route>
+            <Main
+              firebaseState={firebaseState}
+              firebaseUser={this.state.firebaseUser}
+            />
+          </Route>
+        </Switch>
+      </Router>
+    );
+  }
+
+  renderSignedOutRouter() {
+    return (
+      <Router>
+        <Switch>
+          <Route path="/signin">
+            <SignInScreen firebaseState={firebaseState} />
+          </Route>
+          <Route path="/services">
+            <div>Misconfigured.</div>
+          </Route>
+          <Route path="/">
+            <Redirect to="/signin" />
+          </Route>
+        </Switch>
+      </Router>
+    );
+  }
+
   render() {
     if (this.state.isSignedIn === undefined) {
       // We haven't initialized state, so we don't know what to render.
       return null;
     }
-    if (this.state.isSignedIn) {
-      return (
-        <MuiThemeProvider theme={theme}>
-          <CssBaseline />
-          <Router>
-            <Switch>
-              <Route path="/app">
-                <Redirect to="/" />
-              </Route>
-              <Route path="/signin">
-                <Redirect to="/" />
-              </Route>
-              <Route path="/services">
-                <div>Misconfigured.</div>
-              </Route>
-              <Route>
-                <Main
-                  firebaseState={firebaseState}
-                  firebaseUser={this.state.firebaseUser}
-                />
-              </Route>
-            </Switch>
-          </Router>
-        </MuiThemeProvider>
-      );
-    }
-
-    // Not signed in.
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <Switch>
-            <Route path="/signin">
-              <SignInScreen firebaseState={firebaseState} />
-            </Route>
-            <Route path="/services">
-              <div>Misconfigured.</div>
-            </Route>
-            <Route path="/">
-              <Redirect to="/signin" />
-            </Route>
-          </Switch>
-        </Router>
+        {this.state.isSignedIn
+          ? this.renderSignedInRouter()
+          : this.renderSignedOutRouter()}
+        <CookieConsent buttonStyle={{ backgroundColor: '#03dac6' }}>
+          This website uses cookies to enhance the user experience.
+        </CookieConsent>
       </MuiThemeProvider>
     );
   }
