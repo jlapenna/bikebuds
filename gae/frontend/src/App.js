@@ -32,7 +32,9 @@ import CookieConsent from 'react-cookie-consent';
 
 import { firebaseState } from './firebase_util';
 import Main from './Main';
+import Privacy from './Privacy';
 import SignInScreen from './SignInScreen';
+import ToS from './ToS';
 
 class App extends Component {
   constructor(props) {
@@ -91,6 +93,12 @@ class App extends Component {
     return (
       <Router>
         <Switch>
+          <Route path="/privacy">
+            <Privacy />
+          </Route>
+          <Route path="/tos">
+            <ToS />
+          </Route>
           <Route path="/app">
             <Redirect to="/" />
           </Route>
