@@ -192,6 +192,7 @@ class Club extends Component {
               profile={this.props.profile}
               activities={this.state.activities}
               showAthlete={true}
+              showDate={true}
             />
           </Grid>
         </Grid>

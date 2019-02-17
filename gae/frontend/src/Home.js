@@ -65,6 +65,7 @@ class Home extends Component {
               gapiReady={this.props.gapiReady}
               profile={this.props.profile}
               activities={this.state.activities}
+              showDate={true}
             />
           </Grid>
           <Grid item xs={12} lg={4}>

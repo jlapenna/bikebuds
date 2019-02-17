@@ -27,6 +27,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
+import moment from 'moment';
+
 import ActivityDetail from './ActivityDetail';
 
 class ActivityListCard extends Component {
@@ -45,7 +47,8 @@ class ActivityListCard extends Component {
 
   static propTypes = {
     profile: PropTypes.object,
-    showAthlete: PropTypes.bool
+    showAthlete: PropTypes.bool,
+    showDate: PropTypes.bool
   };
 
   constructor(props) {
@@ -108,13 +111,26 @@ class ActivityListCard extends Component {
                   fullName = fullName + ' ' + activity.athlete.lastname;
                 }
               }
+              var startDate = undefined;
+              if (this.props.showDate) {
+                startDate = moment(activity.start_date_local).format('LLL');
+              }
+
+              var secondary = undefined;
+              if (fullName !== undefined && startDate !== undefined) {
+                secondary = fullName + ' \u2022 ' + startDate;
+              } else if (fullName !== undefined) {
+                secondary = fullName;
+              } else if (startDate !== undefined) {
+                secondary = startDate;
+              }
               return (
                 <ListItem
                   key={index}
                   onClick={this.handleListItemClick.bind(this, index, activity)}
                   selected={this.state.selectedIndex === index}
                 >
-                  <ListItemText primary={activity.name} secondary={fullName} />
+                  <ListItemText primary={activity.name} secondary={secondary} />
                 </ListItem>
               );
             })}
