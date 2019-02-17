@@ -102,6 +102,10 @@ class Activity(ndb.Model):
         activity_message = Activity.message_from_strava(activity,
                 detailed_athlete=detailed_athlete)
 
+        # We can only index a sub-field of a message, no a message itself, so
+        # instead, we store a copy of the start_date, here. We could, in the
+        # future, add start_date.milliseconds to the index list, and do a
+        # WHERE on that field, but that's a task for another day.
         start_date = None
         if activity.start_date is not None:
             start_date = activity.start_date.astimezone(
@@ -126,7 +130,7 @@ class Activity(ndb.Model):
 
         start_date_local = None
         if activity.start_date_local is not None:
-            start_date_local = activity.start_date.replace(tzinfo=None)
+            start_date_local = activity.start_date_local.replace(tzinfo=None)
 
         start_latlng = None
         if activity.start_latlng is not None:
