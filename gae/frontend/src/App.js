@@ -28,8 +28,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
-import CookieConsent from 'react-cookie-consent';
-
 import { firebaseState } from './firebase_util';
 import Main from './Main';
 import Privacy from './Privacy';
@@ -154,9 +152,6 @@ class App extends Component {
         {this.state.isSignedIn
           ? this.renderSignedInRouter()
           : this.renderSignedOutRouter()}
-        <CookieConsent buttonStyle={{ backgroundColor: '#03dac6' }}>
-          This website uses cookies to enhance the user experience.
-        </CookieConsent>
       </MuiThemeProvider>
     );
   }
