@@ -51,11 +51,6 @@ import Signup from './Signup';
 const drawerWidth = 240;
 
 class Main extends Component {
-  static propTypes = {
-    firebaseState: PropTypes.object.isRequired,
-    firebaseUser: PropTypes.object.isRequired
-  };
-
   static styles = theme => ({
     root: {
       display: 'flex',
@@ -68,7 +63,15 @@ class Main extends Component {
       [theme.breakpoints.up('md')]: {
         width: drawerWidth,
         flexShrink: 0
-      }
+      },
+      height: '100%',
+      'text-align': 'center'
+    },
+    drawerList: {
+      height: '100%'
+    },
+    drawerFooter: {
+      bottom: 0
     },
     appBar: {
       [theme.breakpoints.up('md')]: {
@@ -91,6 +94,11 @@ class Main extends Component {
       backgroundColor: theme.palette.action.selected
     }
   });
+
+  static propTypes = {
+    firebaseState: PropTypes.object.isRequired,
+    firebaseUser: PropTypes.object.isRequired
+  };
 
   constructor(props) {
     super(props);
@@ -139,7 +147,10 @@ class Main extends Component {
     return (
       <React.Fragment>
         <div className={this.props.classes.toolbar} />
-        <List onClick={() => this.setState({ mobileOpen: false })}>
+        <List
+          className={this.props.classes.drawerList}
+          onClick={() => this.setState({ mobileOpen: false })}
+        >
           <ListItem
             button
             key="Home"
@@ -171,6 +182,11 @@ class Main extends Component {
             <ListItemText>Settings</ListItemText>
           </ListItem>
         </List>
+        <div className={this.props.classes.drawerFooter}>
+          <Typography variant="caption">
+            <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
+          </Typography>
+        </div>
       </React.Fragment>
     );
   }

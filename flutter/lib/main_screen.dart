@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/events_content.dart';
+import 'package:bikebuds/privacy_util.dart';
 import 'package:bikebuds/settings_content.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:flutter/material.dart';
@@ -66,43 +67,70 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text("Bikebuds"),
       ),
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: buildDrawerItems(),
-        ),
-      ),
+      drawer: buildDrawer(),
       body: buildBody(),
     );
   }
 
-  buildDrawerItems() {
+  Drawer buildDrawer() {
     if (firebase == null) {
-      return <Widget>[];
+      return null;
     }
 
-    return <Widget>[
-      DrawerHeader(child: Container()),
-      ListTile(
-        title: Text('Rides'),
-        onTap: () {
-          setState(() {
-            _selectedDrawerItem = 0;
-            Navigator.pop(context);
-          });
-        },
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(child: Container()),
+                ListTile(
+                  title: Text('Rides'),
+                  onTap: () {
+                    setState(() {
+                      _selectedDrawerItem = 0;
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+                ListTile(
+                  title: Text('Settings'),
+                  onTap: () {
+                    setState(() {
+                      _selectedDrawerItem = 1;
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Divider(),
+                    ListTile(
+                      title: Center(
+                        child: Text('ToS - Privacy'),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showPrivacyDialog(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      ListTile(
-        title: Text('Settings'),
-        onTap: () {
-          setState(() {
-            _selectedDrawerItem = 1;
-            Navigator.pop(context);
-          });
-        },
-      ),
-    ];
+    );
   }
 
   Widget buildBody() {

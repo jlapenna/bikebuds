@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -30,6 +31,9 @@ class SignInScreen extends Component {
     logo: {
       display: 'block',
       margin: '20px auto 10px'
+    },
+    privacyFooter: {
+      'text-align': 'center'
     }
   };
 
@@ -132,6 +136,12 @@ class SignInScreen extends Component {
           uiConfig={this.uiConfig}
           firebaseAuth={this.props.firebaseState.auth}
         />
+        <Typography
+          className={this.props.classes.privacyFooter}
+          variant="caption"
+        >
+          <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
+        </Typography>
       </div>
     );
   }

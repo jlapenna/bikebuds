@@ -224,10 +224,10 @@ export default class Privacy extends Component {
         <p />
         <hr />
         <p>
-          Based on
+          Based on{' '}
           <a href="https://github.com/appdotnet/template-terms-of-service/blob/master/privacy_template.md">
             https://github.com/appdotnet/template-terms-of-service/blob/master/privacy_template.md
-          </a>
+          </a>{' '}
           with usage allowed under the CC BY-SA 3.0 Creative Commons license
         </p>
       </div>

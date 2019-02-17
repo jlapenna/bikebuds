@@ -438,16 +438,11 @@ export default class ToS extends Component {
         </p>
         <hr />
         <p>
-          <span>Based on </span>
-          <span>
-            <a href="https://github.com/appdotnet/template-terms-of-service/blob/master/terms_template.md">
-              https://github.com/appdotnet/template-terms-of-service/blob/master/terms_template.md
-            </a>
-          </span>
-          <span>
-            &nbsp;with usage allowed under the CC BY-SA 3.0 Creative Commons
-            license
-          </span>
+          Based on{' '}
+          <a href="https://github.com/appdotnet/template-terms-of-service/blob/master/terms_template.md">
+            https://github.com/appdotnet/template-terms-of-service/blob/master/terms_template.md
+          </a>{' '}
+          with usage allowed under the CC BY-SA 3.0 Creative Commons license
         </p>
       </div>
     );

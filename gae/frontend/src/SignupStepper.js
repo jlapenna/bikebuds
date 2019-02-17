@@ -14,6 +14,9 @@ import Typography from '@material-ui/core/Typography';
 
 import { config } from './Config';
 import { createSession } from './session_util';
+import Consent from './Consent';
+import Privacy from './Privacy';
+import ToS from './ToS';
 
 class SignupStepper extends React.Component {
   static propTypes = {
@@ -34,7 +37,7 @@ class SignupStepper extends React.Component {
       marginTop: theme.spacing.unit,
       marginBottom: theme.spacing.unit
     },
-    stepFooter: {},
+    stepper: {},
     mobileButton: {
       marginRight: theme.spacing.unit,
       marginLeft: theme.spacing.unit
@@ -57,46 +60,22 @@ class SignupStepper extends React.Component {
     return [
       {
         label: 'Welcome',
+        content: () => <Consent />,
+        isOptional: false,
+        buttonLabel: 'I\u00A0Agree'
+      },
+      {
+        label: 'Terms of Service',
         content: () => {
-          return (
-            <React.Fragment>
-              This may be your first visit or updates may have triggered a
-              profile update. In either case, step through this wizard to get
-              your account set up properly.
-            </React.Fragment>
-          );
+          return <ToS />;
         },
         isOptional: false,
         buttonLabel: 'Next'
       },
       {
-        label: 'Consent and Notice',
+        label: 'Privacy',
         content: () => {
-          return (
-            <React.Fragment>
-              <div>
-                We will:
-                <ul>
-                  <li>
-                    <strong>Collect</strong> your data from several third-party
-                    services.
-                  </li>
-                  <li>
-                    <strong>Share</strong> your data with other users of
-                    bikebuds and its administrators.
-                  </li>
-                </ul>
-                <div>
-                  Though efforts are made to maintain the privacy and access
-                  controls offered by the third-party services, the nature of
-                  this service requires that these privacy controls and
-                  restrictions are ignored.
-                  <p />
-                  <em>This is not an officially supported Google product.</em>
-                </div>
-              </div>
-            </React.Fragment>
-          );
+          return <Privacy />;
         },
         isOptional: false,
         buttonLabel: 'Next'
@@ -214,6 +193,16 @@ class SignupStepper extends React.Component {
     }
   }
 
+  /**
+   * @inheritDoc
+   */
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('SignupStepper.componentDidUpdate', prevProps);
+    if (this.state.activeStepIndex !== prevState.activeStepIndex) {
+      window.scrollTo(0, 0);
+    }
+  }
+
   renderSteps() {
     return this.state.steps.map((step, index) => {
       const props = {};
@@ -239,6 +228,14 @@ class SignupStepper extends React.Component {
 
     return (
       <div className={classes.root}>
+        <div ref={ref => (this._div = ref)} />
+        <Hidden xsDown>
+          <div className={classes.stepper}>
+            <Stepper alternativeLabel activeStep={activeStepIndex}>
+              {this.renderSteps()}
+            </Stepper>
+          </div>
+        </Hidden>
         <div className={classes.stepBody}>
           <Typography variant="h4">{activeStep.label}</Typography>
           <div className={classes.stepContent}>{stepContent}</div>
@@ -255,13 +252,8 @@ class SignupStepper extends React.Component {
             )}
           </Hidden>
         </div>
-        <div className={classes.stepFooter}>
-          <Hidden xsDown>
-            <Stepper alternativeLabel activeStep={activeStepIndex}>
-              {this.renderSteps()}
-            </Stepper>
-          </Hidden>
-          <Hidden smUp>
+        <Hidden smUp>
+          <div className={classes.stepper}>
             <MobileStepper
               variant="progress"
               steps={steps.length}
@@ -303,37 +295,37 @@ class SignupStepper extends React.Component {
             >
               {this.renderSteps()}
             </MobileStepper>
-          </Hidden>
-          <Hidden xsDown>
-            <Button
-              disabled={connectPending || this.state.activeStepIndex === 0}
-              onClick={this.handleBack}
-              className={classes.desktopButton}
-            >
-              Back
-            </Button>
-            {activeStep.isOptional && (
-              <Button
-                disabled={connectPending}
-                variant="outlined"
-                color="primary"
-                onClick={this.handleSkip}
-                className={classes.desktopButton}
-              >
-                Skip
-              </Button>
-            )}
+          </div>
+        </Hidden>
+        <Hidden xsDown>
+          <Button
+            disabled={connectPending || this.state.activeStepIndex === 0}
+            onClick={this.handleBack}
+            className={classes.desktopButton}
+          >
+            Back
+          </Button>
+          {activeStep.isOptional && (
             <Button
               disabled={connectPending}
-              variant="contained"
+              variant="outlined"
               color="primary"
-              onClick={this.handleNext}
+              onClick={this.handleSkip}
               className={classes.desktopButton}
             >
-              {activeStep.buttonLabel}
+              Skip
             </Button>
-          </Hidden>
-        </div>
+          )}
+          <Button
+            disabled={connectPending}
+            variant="contained"
+            color="primary"
+            onClick={this.handleNext}
+            className={classes.desktopButton}
+          >
+            {activeStep.buttonLabel}
+          </Button>
+        </Hidden>
       </div>
     );
   }

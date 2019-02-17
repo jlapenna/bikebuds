@@ -123,6 +123,12 @@ class App extends Component {
     return (
       <Router>
         <Switch>
+          <Route path="/privacy">
+            <Privacy />
+          </Route>
+          <Route path="/tos">
+            <ToS />
+          </Route>
           <Route path="/signin">
             <SignInScreen firebaseState={firebaseState} />
           </Route>
