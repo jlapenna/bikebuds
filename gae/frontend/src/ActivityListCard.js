@@ -53,35 +53,65 @@ class ActivityListCard extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      fetched: false,
-      activities: undefined,
-      selectedActivity: undefined,
-      selectedIndex: undefined
-    };
+    console.log('ActivityListCard: ', props);
+    if (
+      this.props.activities !== undefined &&
+      this.props.activities.length > 0
+    ) {
+      this.state = {
+        selectedActivity: this.props.activities[0],
+        selectedIndex: 0
+      };
+    } else {
+      this.state = {};
+    }
   }
 
   handleListItemClick = (index, activity) => {
+    console.log('ActivityListCard.handleListItemClick: ', index, activity);
     this.setState({
       selectedActivity: activity,
       selectedIndex: index
     });
   };
 
-  handleUpdateActivities = response => {
-    var activities = response.result.activities || [];
+  handleUpdateActivities = activities => {
+    console.log('ActivityListCard.handleUpdateActivities: ');
+    activities = activities || [];
 
     if (activities.length > 0) {
       var selectedActivity = activities[0];
-      var selectedindex = 0;
+      var selectedIndex = 0;
     }
 
     this.setState({
-      activities: activities,
       selectedActivity: selectedActivity,
-      selectedIndex: selectedindex
+      selectedIndex: selectedIndex
     });
   };
+
+  /**
+   * @inheritDoc
+   */
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('ActivityListCard.componentDidUpdate', prevProps, this.props);
+    if (prevProps.activities !== this.props.activities) {
+      console.log(
+        'ActivityListCard.componentDidUpdate: new activities props',
+        this.props.activities
+      );
+    }
+    if (
+      this.props.activities !== prevProps.activities &&
+      this.props.activities !== undefined &&
+      this.props.activities.length > 0
+    ) {
+      this.setState({
+        selectedActivity: this.props.activities[0],
+        selectedIndex: 0
+      });
+    }
+  }
 
   renderCardContent() {
     if (this.props.activities === undefined) {

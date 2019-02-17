@@ -91,7 +91,7 @@ class Club extends Component {
    * @inheritDoc
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ClubWrapper.componentDidUpdate', prevProps);
+    console.log('Club.componentDidUpdate', prevProps);
     if (
       this.props.gapiReady &&
       !this.state.fetched &&
