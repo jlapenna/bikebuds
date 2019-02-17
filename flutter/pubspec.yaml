@@ -75,6 +75,7 @@ flutter:
   assets:
   - "android/app/google-services-app-android.json"
   - "android/app/google-services-next-android.json"
+  - "assets/logo-round.png"
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

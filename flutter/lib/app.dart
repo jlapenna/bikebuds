@@ -19,12 +19,16 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(App());
 
+const Color PRIMARY_COLOR = Color(0xFF03dac6);
+const Color ACCENT_COLOR = Color(0xFFff4081);
+
 class App extends StatefulWidget {
   @override
   _AppState createState() => _AppState();
 }
 
 class _AppState extends State<App> {
+
   FirebaseState firebase;
   BikebudsState bikebuds;
 
@@ -33,10 +37,15 @@ class _AppState extends State<App> {
     return MaterialApp(
         title: 'Bikebuds',
         theme: ThemeData(
-          primaryColor: Color(0xFF03dac6),
-          accentColor: Color(0xFFff4081),
+          primaryColor: PRIMARY_COLOR,
+          accentColor: ACCENT_COLOR,
+          buttonColor: PRIMARY_COLOR,
         ),
-        home: MainScreen(onSignedIn: _handleSignedIn));
+        initialRoute: '/',
+        routes: <String, WidgetBuilder> {
+          '/': (BuildContext context) =>  MainScreen(onSignedIn: _handleSignedIn),
+        },
+    );
   }
 
   _handleSignedIn(FirebaseState firebase, BikebudsState bikebuds,

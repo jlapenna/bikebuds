@@ -37,14 +37,17 @@ class FirebaseHttpClient extends BaseClient {
   }
 }
 
-Future<FirebaseHttpClient> loadFirebaseHttpClient(
+Future<FirebaseHttpClient> loadFromFuture(
     Future<FirebaseState> firebaseLoader) async {
-  print('_AppState._loadBikebudsApi');
-  var firebase = await firebaseLoader;
-  var firebaseUser = await firebase.auth.currentUser();
-  var token = await (firebaseUser).getIdToken(refresh: true);
-  var options = await firebase.app.options;
-  String key = options.apiKey;
+  print('firebase_http_client.loadFromFuture');
+  return loadFromState(await firebaseLoader);
+}
 
+Future<FirebaseHttpClient> loadFromState(FirebaseState firebaseState) async {
+  print('firebase_http_client.loadFromState');
+  var firebaseUser = await firebaseState.auth.currentUser();
+  var token = await firebaseUser.getIdToken(refresh: true);
+  var options = await firebaseState.app.options;
+  String key = options.apiKey;
   return FirebaseHttpClient(token, clientViaApiKey(key));
 }

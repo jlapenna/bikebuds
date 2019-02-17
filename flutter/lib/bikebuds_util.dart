@@ -12,22 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BikebudsState {
-  final Future<FirebaseState> firebase;
+  final Future<FirebaseState> _firebaseState;
   Future<BikebudsApi> _api;
+  StreamSubscription<FirebaseUser> _unsubscribe;
 
-  BikebudsState(this.firebase) {
+  BikebudsState(firebaseState)
+      : _firebaseState = firebaseState {
+    _firebaseState.then((FirebaseState firebaseState) {
+      _unsubscribe = firebaseState.auth.onAuthStateChanged
+          .listen(_handleOnAuthStateChanged);
+    });
+    _api = Future(
+            () async => BikebudsApi(await loadFromFuture(firebaseState)));
+  }
+
+  _handleOnAuthStateChanged(FirebaseUser user) async {
+    print('BikebudsState._handleOnAuthStateChanged: $user');
     _api =
-        Future(() async => BikebudsApi(await loadFirebaseHttpClient(firebase)));
+        Future(() async => BikebudsApi(await loadFromFuture(_firebaseState)));
+  }
+
+  dispose() {
+    if (_unsubscribe != null) {
+      _unsubscribe.cancel();
+    }
   }
 
   Future<FirebaseUser> get user async {
-    return (await firebase).auth.currentUser();
+    return (await _firebaseState).auth.currentUser();
   }
 
   Future<MainProfileResponse> get profile async {
@@ -35,7 +55,7 @@ class BikebudsState {
   }
 
   Future<MainClientResponse> registerClient() async {
-    var firebaseToken = await (await firebase).messaging.getToken();
+    var firebaseToken = await (await _firebaseState).messaging.getToken();
     var request = MainUpdateClientRequest()
       ..client = (SharedDatastoreUsersClientMessage()..id = firebaseToken);
     return (await _api).updateClient(request);

@@ -36,13 +36,14 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<FirebaseState> firebaseLoader;
   FirebaseState firebase;
+  FirebaseSignInState signedInState;
+
   BikebudsState bikebuds;
 
   @override
   void initState() {
     super.initState();
     firebaseLoader = loadFirebase(context).then(_onLoaded);
-    bikebuds = BikebudsState(firebaseLoader);
   }
 
   FutureOr<FirebaseState> _onLoaded(FirebaseState firebase) async {
@@ -50,19 +51,43 @@ class _MainScreenState extends State<MainScreen> {
 
     // Ensure we're signed in.
     FirebaseSignInState signedInState = await ensureSignedIn(context, firebase);
-    print('Main._onLoaded: signedIn: ${signedInState.signedIn}');
+    print('Main._onLoaded: signedIn: ${signedInState?.signedIn}');
+    if (signedInState == null || !signedInState.signedIn) {
+      Navigator.pop(context);
+      return firebase;
+    }
+
+    // Set up a bikebuds API client.
+    var bikebuds;
+    if (signedInState != null && signedInState.signedIn) {
+      bikebuds = BikebudsState(Future(() async => firebase));
+    }
+
+    // Notify.
+    setState(() {
+      this.signedInState = signedInState;
+      this.firebase = firebase;
+      this.bikebuds = bikebuds;
+    });
 
     // Notify our parent...
     widget.onSignedIn(firebase, bikebuds, signedInState);
 
-    setState(() {
-      this.firebase = firebase;
-    });
+    // Return a loaded firebase.
     return firebase;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (signedInState == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Bikebuds"),
+        ),
+        body: Container(),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),
@@ -73,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Drawer buildDrawer() {
-    if (firebase == null) {
+    if (firebase == null || signedInState == null) {
       return null;
     }
 
@@ -134,8 +159,16 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget buildBody() {
-    if (firebase == null) {
-      return new Container();
+    if (firebase == null || signedInState == null) {
+      return GestureDetector(
+        child: Center(
+          child: Text('ToS - Privacy'),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          showPrivacyDialog(context);
+        },
+      );
     }
 
     switch (_selectedDrawerItem) {

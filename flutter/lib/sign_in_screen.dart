@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/privacy_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -29,17 +30,19 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  GoogleSignInAuthentication googleAuth;
-  bool firebaseGoogleSignInStarted = false;
+  var signingIn = false;
 
   @override
   void initState() {
     super.initState();
-    doSignIn();
+    //doSignIn();
   }
 
   doSignIn() async {
     print('SignInScreen.doSignIn: $widget.firebase');
+    setState(() {
+      this.signingIn = true;
+    });
 
     // Otherwise, try to find the user's Google Identity.
     var googleUser = googleSignIn.currentUser;
@@ -52,6 +55,12 @@ class _SignInScreenState extends State<SignInScreen> {
       googleUser = await googleSignIn.signIn();
     }
     print('SignInScreen.doSignIn: googleUser.authenticate: ${googleUser?.id}');
+
+    if (googleUser == null) {
+      // The user aborted Google sign in.
+      Navigator.pop(context, null);
+      return;
+    }
 
     // Get auth credentials to sign into firebase.
     var googleAuth = await googleUser.authentication;
@@ -78,22 +87,53 @@ class _SignInScreenState extends State<SignInScreen> {
     Navigator.pop(context, state);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Column(
+  Widget buildSigningIn(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CircularProgressIndicator(),
+                SizedBox(width: 20.0),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildStartSignIn(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new CircularProgressIndicator(),
-              new SizedBox(width: 20.0),
-              new Text("Signing in..."),
-            ],
+          Image.asset("assets/logo-round.png"),
+          RaisedButton(
+            color: Colors.white,
+            child: Text("Sign in with Google"),
+            onPressed: () => doSignIn(),
+          ),
+          FlatButton(
+            child: Text("Privacy - ToS"),
+            onPressed: () {
+              showPrivacyDialog(context);
+            },
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: signingIn ? buildSigningIn(context) : buildStartSignIn(context),
     );
   }
 }
