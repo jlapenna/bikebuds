@@ -37,3 +37,12 @@ class AthleteRef(object):
                 lastname=athlete.lastname,
                 profile_medium=athlete.profile_medium,
                 profile=athlete.profile)
+
+    @classmethod
+    def from_athlete_message(cls, athlete):
+        return AthleteRefMessage(
+                id=athlete.id,
+                firstname=athlete.firstname,
+                lastname=athlete.lastname,
+                profile_medium=athlete.profile_medium,
+                profile=athlete.profile)

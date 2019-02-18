@@ -26,6 +26,7 @@ from shared.config import config
 from shared.datastore import services
 from shared.datastore.activities import Activity
 from shared.datastore.admin import SubscriptionEvent
+from shared.datastore.athlete_ref import AthleteRef
 from shared.datastore.athletes import Athlete, ClubRef
 from shared.datastore.clubs import Club, AthleteRef
 from shared.datastore.services import Service
@@ -197,7 +198,14 @@ def process_batch(owner_id, object_id, batch):
             client = ClientWrapper(service)
             client.ensure_access()
             activity = client.get_activity(object_id)
-            activity_key = Activity.entity_from_strava(service.key, activity).put()
+            activity_entity = Activity.entity_from_strava(service_key,
+                    activity)
+            # get_activity returns a MetaAthelte, which only has an athlete id,
+            # replace from the stored athlete entity.
+            athlete_entity = Athlete.get_private(service_key)
+            activity_entity.activity.athlete = AthleteRef.from_athlete_message(
+                    athlete_entity.athlete)
+            activity_key = activity_entity.put()
             logging.debug('create result: %s -> %s', activity.id, activity_key)
         ndb.delete_multi((event.key for event in batch))
     transact()
