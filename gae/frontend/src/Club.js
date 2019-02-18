@@ -129,6 +129,9 @@ class Club extends Component {
             md={3}
           >
             <Card className={this.props.classes.card}>
+              {/*This causes an error when there is no profile photo:
+                "index.js:1446 Warning: Material-UI: either `image` or `src`
+                property must be specified." */}
               <CardMedia
                 className={this.props.classes.media}
                 image={this.state.club.cover_photo_small}
