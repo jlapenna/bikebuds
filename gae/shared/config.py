@@ -16,36 +16,29 @@ import json
 import os
 
 
-class ProdConfig(object):
+class _Config(object):
     def __init__(self):
-        self.devserver_url = ''
-        self.frontend_url = 'https://www.bikebuds.cc'
-        self.api_url = 'https://api.bikebuds.cc'
-        self.backend_url = 'https://backend.bikebuds.cc'
-        self.origins = [self.frontend_url, self.api_url, self.backend_url]
-        self.fitbit_creds = json.load(open('lib/service_keys/fitbit.json'))
-        self.strava_creds = json.load(open('lib/service_keys/strava.json'))
-        self.withings_creds = json.load(open('lib/service_keys/withings.json'))
-        self.prod = True
-        self.local = False
+        base_config = json.load(open('lib/env/config.json'))
+        for key, value in base_config.iteritems():
+            setattr(self, key, value)
+
+        # TODO: This is the only conditional here, eliminate it.
+        self.origins = _devOrProd(
+            [self.devserver_url, self.frontend_url, self.api_url, self.backend_url],
+            [self.frontend_url, self.api_url, self.backend_url])
+
+        self.issuer = 'https://securetoken.google.com/' + self.project_id
+
+        self.fitbit_creds = json.load(open('lib/env/service_keys/fitbit.json'))
+        self.strava_creds = json.load(open('lib/env/service_keys/strava.json'))
+        self.withings_creds = json.load(open('lib/env/service_keys/withings.json'))
 
 
-class LocalConfig(object):
-    def __init__(self):
-        self.devserver_url = 'http://localhost:8080'
-        self.frontend_url = 'http://localhost:8081'
-        self.api_url = 'http://localhost:8082'
-        self.backend_url = 'http://localhost:8083'
-        self.origins = [self.devserver_url, self.frontend_url, self.api_url,
-                self.backend_url]
-        self.fitbit_creds = json.load(open('lib/service_keys/fitbit-local.json'))
-        self.strava_creds = json.load(open('lib/service_keys/strava-local.json'))
-        self.withings_creds = json.load(open('lib/service_keys/withings-local.json'))
-        self.prod = False
-        self.local = True
+def _devOrProd(dev, prod):
+    if not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+        return dev
+    else:
+        return prod
 
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    config = ProdConfig()
-else:
-    config = LocalConfig()
+config = _Config()

@@ -30,6 +30,7 @@ from endpoints import remote
 from firebase_admin import messaging
 
 from shared import auth_util
+from shared.config import config
 from shared import task_util
 from shared.datastore.admin import SyncState
 from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
@@ -115,12 +116,12 @@ class UpdateServiceRequest(messages.Message):
     name='bikebuds',
     version='v1',
     issuers={'firebase': endpoints.Issuer(
-        'https://securetoken.google.com/bikebuds-app',
+        config.issuer,
         'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
         # Using this (per some documentation...) is wrong...
         #'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
         )},
-    audiences={'firebase': 'bikebuds-app'}
+    audiences={'firebase': config.project_id}
     )
 class BikebudsApi(remote.Service):
 

@@ -31,7 +31,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import { config } from './Config';
+import { config } from './config';
 import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {

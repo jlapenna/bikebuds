@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from shared.config import config
+
 # Hide innocuous errors.
 import warnings
 import urllib3.contrib.appengine
@@ -40,12 +42,7 @@ urlfetch.set_default_fetch_deadline(30)
 
 # Firebase admin setup
 import firebase_admin
-from firebase_admin import auth
 from firebase_admin import credentials
-
-try:
-    FIREBASE_ADMIN_CREDS = credentials.Certificate(
-            'lib/service_keys/bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json')
-    firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
-except IOError, e:
-    logging.warn('Unable to find admin credentials for firebase. This is probably a bug.');
+FIREBASE_ADMIN_CREDS = credentials.Certificate(
+        'lib/env/service_keys/firebase-adminsdk.json')
+firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)

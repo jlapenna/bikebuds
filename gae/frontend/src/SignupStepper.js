@@ -12,7 +12,7 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
 
-import { config } from './Config';
+import { config } from './config';
 import { createSession } from './session_util';
 import Consent from './Consent';
 import Privacy from './Privacy';

@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-import { config } from './Config';
+import { config } from './config';
 
 const bikebudsDiscoveryUrl = config.apiUrl + '/bikebuds-v1.discovery';
 

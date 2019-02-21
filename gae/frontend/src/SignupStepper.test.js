@@ -19,7 +19,7 @@ import ReactDOM from 'react-dom';
 
 import firebase from 'firebase/app';
 
-import { config } from './Config';
+import { config } from './config';
 import SignupStepper from './SignupStepper';
 
 firebase.initializeApp(config);

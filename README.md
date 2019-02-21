@@ -77,34 +77,69 @@ bikebuds development requires:
 From the root directory:
 
 ```
+# Ensure you have the right apps on your machine to do development.
 ./setup/dev.sh  # Installs pre-reqs
-# Ensure you have the proper service keys in private/service_keys
+
+# Ensure the source tree links to the proper configs, so you can compile.
 ./setup/env.sh  # Sets up 
 ```
 
-### Private files
+### Evironment Configs
 
-bikebuds/private should exist with the following files, which you'll need to
-generate for yourself.
+The setup script directs you to clone some environment git repos. There are two,
+dev and prod.
 
-Note: A private git repo for admins only can be found at:
-https://source.developers.google.com/p/bikebuds-app/r/private
+If you're jlapenna, you need prod to push; otherwise you only need dev. If
+you're on the dev geam, you can clone that with the provided command.
+
+If you're jlapenna or the dev team, you can create a directory that looks a lot
+like this:
 
 ```
-private
+dev
+├── app_configs
+│   ├── GoogleService-Info-app.plist
+│   ├── GoogleService-Info-next.plist
+│   ├── google-services-app-android.json
+│   └── google-services-next-android.json
+├── config.json
 ├── debug.keystore
-├── prod.jks
+├── dev -> dev
 └── service_keys
-    ├── bikebuds-app-firebase-adminsdk-888ix-2dfafbb556.json
+    ├── firebase-adminsdk.json
     ├── fitbit.json
-    ├── fitbit-local.json
     ├── strava.json
-    ├── strava-local.json
-    ├── withings.json
-    └── withings-local.json
+    └── withings.json
 ```
 
-#### fitbit.json
+#### dev/config.json
+```
+{
+  "project_id": "",
+
+  "api_key": "",
+  "auth_domain": "",
+  "database_url": "",
+  "storage_bucket": "",
+  "message_sender_id": "",
+  "vapid_key": "",
+
+
+  "next_project_id": "",
+  "next_api_key": "",
+  "next_auth_domain": "",
+  "next_database_url": "",
+  "next_storage_bucket": "",
+  "next_message_sender_id": "",
+
+  "devserver_url": "http://localhost:8080",
+  "frontend_url": "http://localhost:8081",
+  "api_url": "http://localhost:8082",
+  "backend_url": "http://localhost:8083"
+}
+```
+
+#### dev/service_keys/fitbit.json
 ```
 {
   "admin_account": "user@domain",
@@ -116,7 +151,7 @@ private
 }
 ```
 
-#### strava.json
+#### dev/service_keys/strava.json
 ```
 {
   "client_id": "XXX",
@@ -125,7 +160,7 @@ private
 }
 ```
 
-#### withings.json
+#### dev/service_keys/withings.json
 ```
 {
   "admin_account": "user@domain",

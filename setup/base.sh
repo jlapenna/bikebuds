@@ -45,7 +45,7 @@ function get_env_path() {
   echo "${env_path}";
 }
 
-function activate_env() {
+function activate_virtualenv() {
   local env_path="$(get_env_path)";
   echo "Activating virtual environment at ${env_path}"
   virtualenv --python python2 "${env_path}" >/dev/null 2>&1
@@ -54,6 +54,20 @@ function activate_env() {
     echo "Unable to setup virtual environment. Quitting." >&2
     exit 2;
   fi
+}
+
+function set_local_environment() {
+  echo "Activiting local environment."
+  pushd environments
+  ln -sf dev env
+  popd
+}
+
+function set_prod_environment() {
+  echo "Activiting deploy environment."
+  pushd environments
+  ln -sf prod env
+  popd
 }
 
 get_repo_path

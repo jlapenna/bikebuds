@@ -29,7 +29,7 @@ import {
   Polyline
 } from 'react-google-maps';
 
-import { config } from './Config';
+import { config } from './config';
 import { readableDistance, readableDuration, readableSpeed } from './convert';
 
 /*

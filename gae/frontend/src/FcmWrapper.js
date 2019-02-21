@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/messaging';
 
-import { config } from './Config';
+import { config } from './config';
 
 class FcmWrapper extends Component {
   static propTypes = {

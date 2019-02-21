@@ -16,7 +16,7 @@
 
 import firebase from 'firebase/app';
 
-import { config } from './Config';
+import { config } from './config';
 
 export function createSession(responseCallback) {
   firebase

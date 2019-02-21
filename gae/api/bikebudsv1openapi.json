@@ -693,7 +693,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -734,7 +734,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -763,7 +763,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -792,7 +792,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -821,7 +821,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -856,7 +856,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -891,7 +891,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -926,7 +926,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -955,7 +955,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -984,7 +984,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -1019,7 +1019,7 @@
         "security": [
           {
             "api_key": [],
-            "firebase-dca327ad": []
+            "firebase-469e91f7": []
           }
         ]
       }
@@ -1041,15 +1041,15 @@
       "authorizationUrl": "",
       "flow": "implicit",
       "type": "oauth2",
-      "x-google-issuer": "https://securetoken.google.com/bikebuds-app",
+      "x-google-issuer": "https://securetoken.google.com/bikebuds-test",
       "x-google-jwks_uri": "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
     },
-    "firebase-dca327ad": {
+    "firebase-469e91f7": {
       "authorizationUrl": "",
       "flow": "implicit",
       "type": "oauth2",
-      "x-google-audiences": "-,a,b,b,d,e,i,k,p,p,s,u",
-      "x-google-issuer": "https://securetoken.google.com/bikebuds-app",
+      "x-google-audiences": "-,b,b,d,e,e,i,k,s,s,t,t,u",
+      "x-google-issuer": "https://securetoken.google.com/bikebuds-test",
       "x-google-jwks_uri": "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
     }
   },

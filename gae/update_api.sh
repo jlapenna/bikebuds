@@ -43,11 +43,13 @@ function main() {
   local spec_path="${api_path}/${API}${VERSION}openapi.json"
   local discovery_path="${api_path}/${API}-${VERSION}.discovery"
 
+  # These commands do accept -a but it doesn't seem to actually respect that
+  # flag completely, as evidenced by failures not finding files from /lib/...
+  pushd "${api_path}"
+
   echo "Generating openapi spec for deploy."
-  python "${api_path}/lib/endpoints/endpointscfg.py" get_openapi_spec main.BikebudsApi \
-      -a "${api_path}" \
+  python "lib/endpoints/endpointscfg.py" get_openapi_spec main.BikebudsApi \
       --hostname "${PROD_API_HOSTNAME}" \
-      -o "${api_path}" \
      ;
   if [[ "$?" != 0 || ! -e "${spec_path}" ]]; then
     echo "spec file not created."
@@ -55,10 +57,8 @@ function main() {
   fi
 
   echo "Generating discovery doc for javascript and dart."
-  python "${api_path}/lib/endpoints/endpointscfg.py" get_discovery_doc main.BikebudsApi \
-      -a "${api_path}" \
+  python "lib/endpoints/endpointscfg.py" get_discovery_doc main.BikebudsApi \
       --hostname "${hostname}" \
-      -o "${api_path}" \
      ;
   if [[ "$?" != 0 || ! -e "${discovery_path}" ]]; then
     echo "json discovery file not created."
@@ -66,8 +66,7 @@ function main() {
   fi
 
   echo "Generating jar zip for android."
-  python "${api_path}/lib/endpoints/endpointscfg.py" get_client_lib java main.BikebudsApi \
-      -a "${api_path}" \
+  python "lib/endpoints/endpointscfg.py" get_client_lib java main.BikebudsApi \
       --hostname "${PROD_API_HOSTNAME}" \
       -o "${tmp_path}" \
       -bs gradle \
@@ -76,6 +75,8 @@ function main() {
     echo "zip file for client not created."
     exit 1;
   fi
+
+  popd
 
   echo "Building the android library."
   unzip -o "${zip_path}" -d "${tmp_path}"

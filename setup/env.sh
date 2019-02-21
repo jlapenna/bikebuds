@@ -21,46 +21,51 @@ source setup/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_env
+  activate_virtualenv
 
-  local api_path="${repo_path}/gae/api"
-  local backend_path="${repo_path}/gae/backend"
-  local frontend_path="${repo_path}/gae/frontend"
+  echo ""
+  echo "Setting up environments."
+  mkdir -f environments >/dev/null 2>&1;
+  pushd environments;
+  if [[ ! -d "dev" ]]; then
+    echo "TODO: Please install the dev config git repo, then press enter."
+    echo "cd ${repo_path}/environments"
+    echo "gcloud --project=bikebuds-test source repos clone env dev"
+    read
+  fi
+  if [[ ! -d "prod" ]]; then
+    echo "TODO: Please install the prod config git repo, then press enter."
+    echo "cd ${repo_path}/environments;"
+    echo "gcloud --project=bikebuds-app source repos clone env prod"
+    read
+  fi
+  popd
 
   echo ""
   echo "Installing frontend dependencies."
+  local frontend_path="${repo_path}/gae/frontend"
   rm -rf "${frontend_path}/lib"
   pip2 install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
-
-  echo ""
-  echo "Linking service keys to frontend."
-  cp -rf "${repo_path}/private/service_keys" "${frontend_path}/lib/"
-  pushd "${frontend_path}/lib"
-  ln -s ../../../private/service_keys
+  pushd "$frontend_path/lib"
+  ln -sf ../../../environments/env
   popd
 
   echo ""
   echo "Installing api dependencies."
+  local api_path="${repo_path}/gae/api"
   rm -rf "${api_path}/lib"
   pip2 install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
-
-  echo ""
-  echo "Linking service keys to backend."
-  cp -rf "${repo_path}/private/service_keys" "${backend_path}/lib/"
-  pushd "${backend_path}/lib"
-  ln -s ../../../private/service_keys
+  pushd "$api_path/lib"
+  ln -sf ../../../environments/env
   popd
 
   echo ""
   echo "Installing backend dependencies."
+  local backend_path="${repo_path}/gae/backend"
   rm -rf "${backend_path}/lib"
   pip2 install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
-
-  echo ""
-  echo "Linking service keys to api."
-  cp -rf "${repo_path}/private/service_keys" "${api_path}/lib/"
-  pushd "${api_path}/lib"
-  ln -s ../../../private/service_keys
+  pushd "$backend_path/lib"
+  ln -sf ../../../environments/env
   popd
 
   echo ""

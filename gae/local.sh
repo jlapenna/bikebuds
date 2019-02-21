@@ -21,13 +21,15 @@ source setup/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_env
+  activate_virtualenv
+  set_local_environment
 
   pushd gae/frontend;
   BROWSER=none npm start &
   popd
 
   dev_appserver.py \
+    -A bikebuds-test \
     --log_level=debug \
     --enable_console \
     --specified_service_ports=default:8081,api:8082,backend:8083 \

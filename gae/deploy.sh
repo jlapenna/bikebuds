@@ -40,7 +40,8 @@ function delete_old_versions() {
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_env
+  activate_virtualenv
+  set_prod_environment
 
   if [[ -z "$@" ]]; then
     local services="frontend api backend";
@@ -113,9 +114,12 @@ function main() {
   # And then check that out, effectively reverting to the working set.
   git checkout .
 
-  # Finally break apart the working set commit, back to where we started before
+  # Break apart the working set commit, back to where we started before
   # the deploy script.
   git reset HEAD~
+
+  # And restore the dev environment config.
+  set_local_environment
 }
 
 main "$@"

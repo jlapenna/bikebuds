@@ -31,7 +31,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-import { config } from './Config';
+import { config } from './config';
 import { createSession } from './session_util';
 
 class ServiceCard extends Component {
