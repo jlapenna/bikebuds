@@ -17,7 +17,32 @@
 # Dependencies for development, in order to start a dev server, for example.
 
 function main() {
-  sudo apt install python python-dev python3 python3-dev python-pip virtualenv
+  local repo_path="$(get_repo_path)";
+
+  sudo apt install -y python python-dev python-pip
+  sudo apt install -y python3 python3-dev
+  sudo apt install -y virtualenv
+  sudo apt install -y gradle
+  sudo apt install -y google-cloud-sdk-app-engine-python \
+      google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
+
+  echo "Apt installed python2.7, pip 2.x, virtualenv, gradle and gcloud cli."
+  echo "Or it didn't, you might need to install them yourself."
+  read
+
+  echo "Install flutter in ~/flutter/sdk, then press enter."
+  read
+
+  echo "Install android studio (and the sdk in ~/android/sdk), then press enter."
+  read
+
+  echo "Install NPM, then press enter."
+  read
+
+  echo "Now make sure dart, flutter, and android tools are in your path, then press enter."
+  read
+
+  echo "Run setup/discapis.sh, after ensuring your path is set up correctly."
 }
 
 main "$@"

@@ -25,7 +25,7 @@ function main() {
 
   echo ""
   echo "Setting up environments."
-  mkdir -f environments >/dev/null 2>&1;
+  mkdir environments >/dev/null 2>&1;
   pushd environments;
   if [[ ! -d "dev" ]]; then
     echo "TODO: Please install the dev config git repo, then press enter."

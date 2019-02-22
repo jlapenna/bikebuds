@@ -8,6 +8,8 @@ VERSION="v1"
 
 
 function main() {
+  local repo_path="$(get_repo_path)";
+
   local is_local="$1";
   if [[ "$is_local" ]]; then
     local hostname="${LOCAL_API_HOSTNAME}";
@@ -15,11 +17,9 @@ function main() {
     local hostname="${PROD_API_HOSTNAME}";
   fi
 
-  local repo_path="$(get_repo_path)";
-
-  local disc_gen_path=$(readlink -f "${repo_path}/generated/discoveryapis_generator")
+  local disc_gen_path="${repo_path}/generated/discoveryapis_generator";
   local disc_gen_resources_path="${disc_gen_path}/lib/src/dart_resources.dart"
-  if [ "$?" -ne 0 ]; then
+  if [[ ! -e "$disc_gen_path" ]]; then
     echo "Unable to locate the discovery generator path, did you install it?"
     exit 1;
   elif [ -n "$(grep "non-required path parameter" "${disc_gen_resources_path}")" ]; then

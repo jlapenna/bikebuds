@@ -11,6 +11,10 @@ LOCAL_API_URL="http://${LOCAL_API_HOSTNAME}"
 LOCAL_BACKEND_URL='http://localhost:8083'
 
 function verify_deps() {
+  if [[ ! "$(command -v gcloud)" ]]; then
+    echo 'Error: gcloud is not installed. Quitting.' >&2
+    exit 1
+  fi
   if [[ ! "$(command -v virtualenv)" ]]; then
     echo 'Error: virtualenv is not installed. Quitting.' >&2
     exit 1
@@ -37,8 +41,8 @@ function get_repo_path() {
 }
 
 function get_env_path() {
-  local env_path=$(readlink -f "$(get_repo_path)/appengine_env")
-  if [ "$?" -ne 0 ]; then
+  local env_path=$(readlink -e "$(get_repo_path)/appengine_env")
+  if [[ ! -e "$env_path" ]]; then
     echo "Unable to locate the virtual environment. Quitting." >&2
     exit 1;
   fi
@@ -59,6 +63,7 @@ function activate_virtualenv() {
 function set_local_environment() {
   echo "Activiting local environment."
   pushd environments
+  rm env
   ln -sf dev env
   popd
 }
@@ -66,6 +71,7 @@ function set_local_environment() {
 function set_prod_environment() {
   echo "Activiting deploy environment."
   pushd environments
+  rm env
   ln -sf prod env
   popd
 }

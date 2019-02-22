@@ -56,20 +56,20 @@ Most details below assume you're using a linux machine for development.
 
 bikebuds development requires:
 
-* gCloud CLI
-  * https://cloud.google.com/sdk/gcloud/
-* AppEngine SDK
-  * https://cloud.google.com/appengine/downloads (For python)
-* NPM
-  * https://www.npmjs.com/get-npm
-* Flutter SDK
-  * https://flutter.io/docs/get-started/install
-* Python 2.x
+* Python 2.7
   * https://www.python.org/downloads/ (See "Specific Releases").
 * PIP 2.x
   * https://pypi.org/project/pip/
 * virtualenv
   * https://virtualenv.pypa.io/en/latest/
+* gCloud CLI
+  * https://cloud.google.com/sdk/gcloud/
+* NPM
+  * https://www.npmjs.com/get-npm
+* Android Studio
+  * package:args/args.dart
+* Flutter SDK
+  * https://flutter.io/docs/get-started/install
 
 
 ### Setup
@@ -82,6 +82,43 @@ From the root directory:
 
 # Ensure the source tree links to the proper configs, so you can compile.
 ./setup/env.sh  # Sets up 
+```
+
+After running `setup/dev.sh`, you need to edit a file because of the way our
+spec file is generated. You'll want to apply this diff:
+```
+diff --git a/lib/src/dart_resources.dart b/lib/src/dart_resources.dart
+index 9ed04ae..0d180f3 100644
+--- a/lib/src/dart_resources.dart
++++ b/lib/src/dart_resources.dart
+@@ -218,20 +218,15 @@ class DartResourceMethod {
+     validatePathParam(MethodParameter param) {
+       templateVars[param.jsonName] = param.name;
+ 
+-      if (param.required) {
+-        if (param.type is UnnamedArrayType) {
+-          params.writeln(
+-              '    if (${param.name} == null || ${param.name}.isEmpty) {');
+-        } else {
+-          params.writeln('    if (${param.name} == null) {');
+-        }
+-        params.writeln('      throw new ${imports.core.ref()}ArgumentError'
+-            '("Parameter ${param.name} is required.");');
+-        params.writeln('    }');
++      if (param.type is UnnamedArrayType) {
++        params.writeln(
++            '    if (${param.name} == null || ${param.name}.isEmpty) {');
+       } else {
+-        // Is this an error?
+-        throw 'non-required path parameter';
++        params.writeln('    if (${param.name} == null) {');
+       }
++      params.writeln('      throw new ${imports.core.ref()}ArgumentError'
++          '("Parameter ${param.name} is required.");');
++      params.writeln('    }');
+     }
+ 
+     encodeQueryParam(MethodParameter param) {
 ```
 
 ### Evironment Configs
