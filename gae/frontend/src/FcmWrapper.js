@@ -45,7 +45,9 @@ class FcmWrapper extends Component {
 
   registerFcm = () => {
     console.log('FcmWrapper.registerFcm');
-    this.messaging.usePublicVapidKey(config.vapidKey);
+    if (config.vapidKey !== undefined) {
+      this.messaging.usePublicVapidKey(config.vapidKey);
+    }
     this.messaging
       .requestPermission()
       .then(() => {
