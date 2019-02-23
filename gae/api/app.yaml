@@ -2,9 +2,6 @@ runtime: python27
 api_version: 1
 threadsafe: true
 service: api
-instance_class: b4
-basic_scaling:
-  max_instances: 8
 
 builtins:
 - deferred: on
@@ -33,6 +30,3 @@ handlers:
 env_variables:
   # Firebase
   FIREBASE_PROJECT_ID: 'bikebuds-app'
-
-  # Endpoints 
-  ENDPOINTS_SERVICE_NAME: api.bikebuds.cc

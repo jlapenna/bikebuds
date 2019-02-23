@@ -61,11 +61,6 @@ function main() {
   # Make sure we're not using cached pyc.
   find ./ -iname '*.py[co]' -delete
 
-  if [[ "$services" == *"api"* ]]; then
-    # First, update the API endpoint.
-    gcloud endpoints services deploy gae/api/bikebudsv1openapi.json
-  fi;
-
   if [[ "$services" == *"frontend"* ]]; then
     # Maybe build the react app.
     pushd gae/frontend
