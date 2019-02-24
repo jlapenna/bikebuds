@@ -1,13 +1,16 @@
+Flask
+
+requests
+requests-toolbelt
+
+google-auth
+google-cloud-datastore
 google-endpoints
 google-endpoints-api-management
 
-Flask
-requests
-requests-toolbelt
-google-auth
-cachetools
 firebase-admin
-pyjwt
 
+stravalib
 nokia
+fitbit
 measurement

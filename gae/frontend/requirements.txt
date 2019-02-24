@@ -1,11 +1,11 @@
-google-endpoints
-
 Flask
-pyjwt
 flask-cors
-google-auth
+
 requests
 requests-toolbelt
+
+google-auth
+google-cloud-datastore
 
 firebase-admin
 
