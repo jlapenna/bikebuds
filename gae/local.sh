@@ -37,7 +37,7 @@ function main() {
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
-#  fg;
+  fg;
 }
 
 main "$@"
