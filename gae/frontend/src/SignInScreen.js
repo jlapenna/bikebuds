@@ -44,21 +44,42 @@ class SignInScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isSignedIn: undefined
+      isSignedIn: undefined,
+      isSignedInNext: undefined
     };
   }
 
+  _isSignedIn() {
+    if (
+      this.state.isSignedIn === undefined ||
+      this.state.isSignedInNext === undefined
+    ) {
+      return undefined;
+    }
+    return this.state.isSignedIn && this.state.isSignedInNext;
+  }
+
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
-    console.log('SignInScreen.signInSuccessWithAuthResult', authResult, this);
+    console.log('SignInScreen.signInSuccessWithAuthResult', authResult);
     this.props.firebaseState.authNext
       .signInAndRetrieveDataWithCredential(authResult.credential)
       .then(signInResult => {
-        console.log('SignInScreen.signInWithCredential result:', signInResult);
+        console.log(
+          'SignInScreen.signInWithCredential: result:',
+          authResult,
+          signInResult
+        );
       })
       .catch(error => {
-        console.log('SignInScreen.catch:', error);
+        console.log(
+          'SignInScreen.signInWithCredential: catch:',
+          authResult,
+          error
+        );
       });
-    console.log('SignInScreen.signInSuccessWithAuthResult: done');
+    console.log(
+      'SignInScreen.signInSuccessWithAuthResult: Started NEXT sign in'
+    );
 
     // Return false to not redirect
     return false;
@@ -86,15 +107,31 @@ class SignInScreen extends Component {
    */
   componentDidMount() {
     this.unregisterAuthObserver = this.props.firebaseState.auth.onAuthStateChanged(
-      user => {
+      firebaseUser => {
+        console.log('SignInScreen.onAuthStateChanged: ', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
         // update state.
         if (this.unregisterAuthObserver === null) {
           return;
         }
-        var signedIn = !!user;
-        console.log('SignInScreen: onAuthStateChanged', signedIn, user);
-        this.setState({ isSignedIn: signedIn });
+        this.setState({
+          isSignedIn: !!firebaseUser,
+          firebaseUser: firebaseUser
+        });
+      }
+    );
+    this.unregisterAuthObserverNext = this.props.firebaseState.authNext.onAuthStateChanged(
+      firebaseUser => {
+        console.log('SignInScreen.onAuthStateChanged: Next', firebaseUser);
+        // If we've unmounted before this callback executes, we don't want to
+        // update state.
+        if (this.unregisterAuthObserverNext === null) {
+          return;
+        }
+        this.setState({
+          isSignedInNext: !!firebaseUser,
+          firebaseUserNext: firebaseUser
+        });
       }
     );
   }
@@ -104,29 +141,19 @@ class SignInScreen extends Component {
    */
   componentWillUnmount() {
     console.log('SignInScreen: componentWillUnmount');
+    this.unregisterAuthObserverNext();
+    this.unregisterAuthObserverNext = null;
     this.unregisterAuthObserver();
     this.unregisterAuthObserver = null;
   }
 
-  handleSignOut = e => {
-    console.log('handleSignOut', e);
-    this.props.firebaseState.auth.currentUser
-      .getIdToken()
-      .then(function(idToken) {
-        this.props.firebaseState.auth.signOut();
-      })
-      .then(function(idToken) {
-        this.props.firebaseState.authNext.signOut();
-      });
-  };
-
   render() {
     const { classes } = this.props;
-    if (this.state.isSignedIn === undefined) {
+    if (this._isSignedIn() === undefined) {
       // We haven't initialized state, so we don't know what to render.
       return null;
     }
-    if (this.state.isSignedIn) {
+    if (this._isSignedIn()) {
       return null;
     }
     return (

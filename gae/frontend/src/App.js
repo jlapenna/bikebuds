@@ -39,9 +39,33 @@ class App extends Component {
     super(props);
     this.state = {
       isSignedIn: undefined,
-      firebaseUser: undefined
+      firebaseUser: undefined,
+      isSignedInNext: undefined,
+      firebaseUserNext: undefined
     };
   }
+
+  _isSignedIn() {
+    if (
+      this.state.isSignedIn === undefined ||
+      this.state.isSignedInNext === undefined
+    ) {
+      return undefined;
+    }
+    return this.state.isSignedIn && this.state.isSignedInNext;
+  }
+
+  handleSignOut = e => {
+    console.log('handleSignOut', e);
+    this.props.firebaseState.auth.currentUser
+      .getIdToken()
+      .then(function(idToken) {
+        this.props.firebaseState.auth.signOut();
+      })
+      .then(function(idToken) {
+        this.props.firebaseState.authNext.signOut();
+      });
+  };
 
   /**
    * @inheritDoc
@@ -109,7 +133,9 @@ class App extends Component {
           <Route>
             <Main
               firebaseState={firebaseState}
-              firebaseUser={this.state.firebaseUser}
+              firebaseUser={
+                this._isSignedIn() ? this.state.firebaseUser : undefined
+              }
             />
           </Route>
         </Switch>
@@ -142,14 +168,16 @@ class App extends Component {
   }
 
   render() {
-    if (this.state.isSignedIn === undefined) {
+    console.log('App.render: ', this.state);
+    if (this._isSignedIn() === undefined) {
+      console.log('App.render: Still uninitialized');
       // We haven't initialized state, so we don't know what to render.
       return null;
     }
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        {this.state.isSignedIn
+        {this._isSignedIn()
           ? this.renderSignedInRouter()
           : this.renderSignedOutRouter()}
       </MuiThemeProvider>
