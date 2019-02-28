@@ -38,6 +38,8 @@ function main() {
 
   echo "Install NPM, then press enter."
   read
+  npm install -g firebase-tools
+  npm install -g fcm-cli
 
   echo "Now make sure dart, flutter, and android tools are in your path, then press enter."
   read

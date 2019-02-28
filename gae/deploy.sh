@@ -91,6 +91,9 @@ function main() {
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
+  # Deploy firebase
+  ./firebase/deploy.sh
+  
   # Delete older versions.
   for service in ${services}; do
     if [[ "$service" == "frontend" ]]; then
