@@ -21,8 +21,8 @@ import { readableWeight } from './convert';
 
 class MeasuresWrapper extends Component {
   static propTypes = {
-    onMeasuresReady: PropTypes.func.isRequired,
-    profile: PropTypes.object.isRequired
+    profile: PropTypes.object.isRequired,
+    render: PropTypes.func.isRequired
   };
 
   constructor(props) {
@@ -53,20 +53,8 @@ class MeasuresWrapper extends Component {
     this.setState({
       measures: measures
     });
-    this.props.onMeasuresReady(measures);
   };
 
-  /**
-   * @inheritDoc
-   */
-  componentDidMount() {
-    // Triggers componentDidUpdate on mount.
-    this.setState({});
-  }
-
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresWrapper.componentDidUpdate', prevProps);
     if (
@@ -79,11 +67,8 @@ class MeasuresWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   render() {
-    return <div className="MeasuresWrapper" />;
+    return <React.Fragment>{this.props.render(this.state)}</React.Fragment>;
   }
 }
 

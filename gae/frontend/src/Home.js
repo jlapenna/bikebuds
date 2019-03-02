@@ -42,55 +42,51 @@ class Home extends Component {
     });
   };
 
-  handleMeasuresReady = measures => {
-    console.log('Home.handleMeasuresReady', measures);
-    this.setState({ measures: measures });
-  };
-
   render() {
     return (
       <div>
         <MeasuresWrapper
           profile={this.props.profile}
           gapiReady={this.props.gapiReady}
-          onMeasuresReady={this.handleMeasuresReady}
+          render={wrapperState => (
+            <Grid container spacing={24}>
+              <Grid item xs={12} lg={8}>
+                <ActivitiesWrapper
+                  gapiReady={this.props.gapiReady}
+                  onResponse={this.handleActivitiesResponse}
+                />
+                <ActivityListCard
+                  gapiReady={this.props.gapiReady}
+                  profile={this.props.profile}
+                  activities={this.state.activities}
+                  showDate={true}
+                />
+              </Grid>
+              <Grid item xs={12} lg={4}>
+                <MeasuresCard
+                  gapiReady={this.props.gapiReady}
+                  profile={this.props.profile}
+                  measures={wrapperState.measures}
+                  title="Weight"
+                  intervalUnit="d"
+                  intervalFormat="MMM D"
+                  intervalCount="30"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <MeasuresCard
+                  gapiReady={this.props.gapiReady}
+                  profile={this.props.profile}
+                  measures={wrapperState.measures}
+                  title="Historical Weight"
+                  intervalUnit="M"
+                  intervalFormat="MMM 'YY"
+                  intervalCount="120"
+                />
+              </Grid>
+            </Grid>
+          )}
         />
-        <Grid container spacing={24}>
-          <Grid item xs={12} lg={8}>
-            <ActivitiesWrapper
-              gapiReady={this.props.gapiReady}
-              onResponse={this.handleActivitiesResponse}
-            />
-            <ActivityListCard
-              gapiReady={this.props.gapiReady}
-              profile={this.props.profile}
-              activities={this.state.activities}
-              showDate={true}
-            />
-          </Grid>
-          <Grid item xs={12} lg={4}>
-            <MeasuresCard
-              gapiReady={this.props.gapiReady}
-              profile={this.props.profile}
-              measures={this.state.measures}
-              title="Weight"
-              intervalUnit="d"
-              intervalFormat="MMM D"
-              intervalCount="30"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <MeasuresCard
-              gapiReady={this.props.gapiReady}
-              profile={this.props.profile}
-              measures={this.state.measures}
-              title="Historical Weight"
-              intervalUnit="M"
-              intervalFormat="MMM 'YY"
-              intervalCount="120"
-            />
-          </Grid>
-        </Grid>
       </div>
     );
   }
