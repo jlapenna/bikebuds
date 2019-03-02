@@ -40,7 +40,9 @@ class App extends Component {
     super(props);
     this.state = {
       firebase:
-        props.firebase !== undefined ? props.firebase : new FirebaseState(),
+        props.firebase !== undefined
+          ? props.firebase
+          : new FirebaseState(true /* enableMessaging */),
       isSignedIn: undefined,
       firebaseUser: undefined,
       isSignedInNext: undefined,
