@@ -25,9 +25,10 @@ import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
   static propTypes = {
-    profile: PropTypes.object,
     gapiReady: PropTypes.bool.isRequired,
-    onPreferencesChanged: PropTypes.func.isRequired
+    onPreferencesChanged: PropTypes.func.isRequired,
+    firebaseUser: PropTypes.object,
+    profile: PropTypes.object
   };
 
   handlePreferencesChanged = preferences => {

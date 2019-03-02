@@ -21,23 +21,19 @@ import EventsListCard from './EventsListCard';
 
 class Events extends Component {
   static propTypes = {
-    firebaseState: PropTypes.object.isRequired,
+    firebase: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired
   };
 
   constructor(props) {
     super(props);
-    this.query = props.firebaseState.firestore.collection('events');
+    this.query = props.firebase.firestore.collection('events');
     this.state = {};
   }
 
   render() {
     return (
-      <EventsListCard
-        firebaseState={this.props.firebaseState}
-        gapiReady={this.props.gapiReady}
-        query={this.query}
-      />
+      <EventsListCard gapiReady={this.props.gapiReady} query={this.query} />
     );
   }
 }

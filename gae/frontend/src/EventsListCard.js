@@ -44,7 +44,6 @@ class EventListCard extends Component {
   };
 
   static propTypes = {
-    firebaseState: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired,
     query: PropTypes.object.isRequired
   };

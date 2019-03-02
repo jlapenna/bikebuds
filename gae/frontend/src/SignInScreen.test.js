@@ -17,11 +17,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { firebaseState } from './firebase_util';
+import { FirebaseState } from './firebase_util';
 import SignInScreen from './SignInScreen';
 
 it('renders without crashing', () => {
+  var firebase = new FirebaseState(false /* enableMessaging */);
   const div = document.createElement('div');
-  ReactDOM.render(<SignInScreen firebaseState={firebaseState} />, div);
+  ReactDOM.render(<SignInScreen firebase={firebase} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

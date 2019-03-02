@@ -26,8 +26,8 @@ import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
   static propTypes = {
-    profile: PropTypes.object,
-    gapiReady: PropTypes.bool.isRequired
+    gapiReady: PropTypes.bool.isRequired,
+    profile: PropTypes.object
   };
 
   constructor(props) {

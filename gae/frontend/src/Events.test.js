@@ -19,14 +19,15 @@ import ReactDOM from 'react-dom';
 
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import { firebaseState } from './firebase_util';
+import { FirebaseState } from './firebase_util';
 import Events from './Events';
 
 it('renders without crashing', () => {
+  var firebase = new FirebaseState(false /* enableMessaging */);
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <Events firebaseState={firebaseState} gapiReady={true} />
+      <Events firebase={firebase} gapiReady={true} />
     </Router>,
     div
   );

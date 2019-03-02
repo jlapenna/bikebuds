@@ -14,21 +14,47 @@
  * limitations under the License.
  */
 
+import React from 'react';
+
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import 'firebase/messaging';
 
 import { config, nextConfig } from './config';
 
-const _firebaseApp = firebase.initializeApp(config);
-const _firebaseAppNext = firebase.initializeApp(nextConfig, 'next');
-const _firestore = firebase.firestore(_firebaseAppNext);
+export class FirebaseState {
+  constructor(enableMessaging) {
+    this.app = firebase.initializeApp(config);
+    this.auth = firebase.auth();
 
-export const firebaseState = {
-  app: _firebaseApp,
-  auth: firebase.auth(),
+    if (enableMessaging) {
+      this.messaging = firebase.messaging();
+    }
 
-  appNext: _firebaseAppNext,
-  authNext: firebase.auth(_firebaseAppNext),
-  firestore: _firestore
-};
+    this.appNext = firebase.initializeApp(nextConfig, 'next');
+    this.authNext = firebase.auth(this.appNext);
+    this.firestore = firebase.firestore(this.appNext);
+  }
+
+  onAuthStateChanged = (appObserver, appNextObserver) => {
+    console.log('FirebaseState.onAuthStatechanged');
+    var unregisterAppObserver = this.auth.onAuthStateChanged(appObserver);
+    var unregisterAppNextObserver = this.authNext.onAuthStateChanged(
+      appNextObserver
+    );
+    return function() {
+      unregisterAppObserver();
+      unregisterAppNextObserver();
+    };
+  };
+
+  signOut = e => {
+    console.log('FirebaseState.signOut', e);
+    var signOutPromise = this.auth.signOut();
+    var nextSignOutPromise = this.authNext.signOut();
+    return Promise.app(signOutPromise, nextSignOutPromise);
+  };
+}
+
+export const FirebaseContext = React.createContext();

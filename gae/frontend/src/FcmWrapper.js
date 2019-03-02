@@ -17,13 +17,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import firebase from 'firebase/app';
-import 'firebase/messaging';
-
 import { config } from './config';
 
 class FcmWrapper extends Component {
   static propTypes = {
+    firebase: PropTypes.object.isRequired,
+    gapiReady: PropTypes.bool.isRequired,
     onMessage: PropTypes.func,
     onReady: PropTypes.func
   };
@@ -38,7 +37,6 @@ class FcmWrapper extends Component {
       client: undefined
     };
 
-    this.messaging = firebase.messaging();
     this.tokenListener = null;
     this.messageListener = null;
   }
@@ -46,13 +44,13 @@ class FcmWrapper extends Component {
   registerFcm = () => {
     console.log('FcmWrapper.registerFcm');
     if (config.vapidKey !== undefined) {
-      this.messaging.usePublicVapidKey(config.vapidKey);
+      this.props.firebase.messaging.usePublicVapidKey(config.vapidKey);
     }
-    this.messaging
+    this.props.firebase.messaging
       .requestPermission()
       .then(() => {
         console.log('FcmWrapper.registerFcm: got token');
-        return this.messaging.getToken();
+        return this.props.firebase.messaging.getToken();
       })
       .then(token => {
         console.log('FcmWrapper.registerFcm: token set');
@@ -94,11 +92,11 @@ class FcmWrapper extends Component {
    */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
-    this.tokenListener = this.messaging.onTokenRefresh(() => {
+    this.tokenListener = this.props.firebase.messaging.onTokenRefresh(() => {
       console.log('FcmWrapper.onTokenRefresh');
       this.registerFcm();
     });
-    this.messageListener = this.messaging.onMessage(payload => {
+    this.messageListener = this.props.firebase.messaging.onMessage(payload => {
       console.log('FcmWrapper.onMessage', payload);
       if (this.props.onMessage !== undefined) {
         this.props.onMessage(payload);

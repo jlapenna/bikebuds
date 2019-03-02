@@ -28,7 +28,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
-import { firebaseState } from './firebase_util';
+import { FirebaseState, FirebaseContext } from './firebase_util';
+
 import Main from './Main';
 import Privacy from './Privacy';
 import SignInScreen from './SignInScreen';
@@ -38,6 +39,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      firebase:
+        props.firebase !== undefined ? props.firebase : new FirebaseState(),
       isSignedIn: undefined,
       firebaseUser: undefined,
       isSignedInNext: undefined,
@@ -55,23 +58,11 @@ class App extends Component {
     return this.state.isSignedIn && this.state.isSignedInNext;
   }
 
-  handleSignOut = e => {
-    console.log('handleSignOut', e);
-    this.props.firebaseState.auth.currentUser
-      .getIdToken()
-      .then(function(idToken) {
-        this.props.firebaseState.auth.signOut();
-      })
-      .then(function(idToken) {
-        this.props.firebaseState.authNext.signOut();
-      });
-  };
-
   /**
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver = firebaseState.auth.onAuthStateChanged(
+    this.unregisterAuthObserver = this.state.firebase.onAuthStateChanged(
       firebaseUser => {
         console.log('App.onAuthStateChanged: ', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
@@ -83,14 +74,12 @@ class App extends Component {
           isSignedIn: !!firebaseUser,
           firebaseUser: firebaseUser
         });
-      }
-    );
-    this.unregisterAuthObserverNext = firebaseState.authNext.onAuthStateChanged(
+      },
       firebaseUser => {
         console.log('App.onAuthStateChanged: Next', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
         // update state.
-        if (this.unregisterAuthObserverNext === null) {
+        if (this.unregisterAuthObserver === null) {
           return;
         }
         this.setState({
@@ -105,8 +94,6 @@ class App extends Component {
    * @inheritDoc
    */
   componentWillUnmount() {
-    this.unregisterAuthObserverNext();
-    this.unregisterAuthObserverNext = null;
     this.unregisterAuthObserver();
     this.unregisterAuthObserver = null;
   }
@@ -132,7 +119,7 @@ class App extends Component {
           </Route>
           <Route>
             <Main
-              firebaseState={firebaseState}
+              firebase={this.state.firebase}
               firebaseUser={
                 this._isSignedIn() ? this.state.firebaseUser : undefined
               }
@@ -154,7 +141,7 @@ class App extends Component {
             <ToS />
           </Route>
           <Route path="/signin">
-            <SignInScreen firebaseState={firebaseState} />
+            <SignInScreen firebase={this.state.firebase} />
           </Route>
           <Route path="/services">
             <div>Misconfigured.</div>
@@ -177,9 +164,11 @@ class App extends Component {
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        {this._isSignedIn()
-          ? this.renderSignedInRouter()
-          : this.renderSignedOutRouter()}
+        <FirebaseContext.Provider value={this.state.firebase}>
+          {this._isSignedIn()
+            ? this.renderSignedInRouter()
+            : this.renderSignedOutRouter()}
+        </FirebaseContext.Provider>
       </MuiThemeProvider>
     );
   }

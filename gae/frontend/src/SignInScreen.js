@@ -38,7 +38,7 @@ class SignInScreen extends Component {
   };
 
   static propTypes = {
-    firebaseState: PropTypes.object.isRequired
+    firebase: PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -61,7 +61,7 @@ class SignInScreen extends Component {
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
     console.log('SignInScreen.signInSuccessWithAuthResult', authResult);
-    this.props.firebaseState.authNext
+    this.props.firebase.authNext
       .signInAndRetrieveDataWithCredential(authResult.credential)
       .then(signInResult => {
         console.log(
@@ -106,7 +106,7 @@ class SignInScreen extends Component {
    * @inheritDoc
    */
   componentDidMount() {
-    this.unregisterAuthObserver = this.props.firebaseState.auth.onAuthStateChanged(
+    this.unregisterAuthObserver = this.props.firebase.auth.onAuthStateChanged(
       firebaseUser => {
         console.log('SignInScreen.onAuthStateChanged: ', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
@@ -120,7 +120,7 @@ class SignInScreen extends Component {
         });
       }
     );
-    this.unregisterAuthObserverNext = this.props.firebaseState.authNext.onAuthStateChanged(
+    this.unregisterAuthObserverNext = this.props.firebase.authNext.onAuthStateChanged(
       firebaseUser => {
         console.log('SignInScreen.onAuthStateChanged: Next', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
@@ -161,7 +161,7 @@ class SignInScreen extends Component {
         <img className={classes.logo} alt="Bikebuds Logo" src={logoRound} />
         <StyledFirebaseAuth
           uiConfig={this.uiConfig}
-          firebaseAuth={this.props.firebaseState.auth}
+          firebaseAuth={this.props.firebase.auth}
         />
         <Typography
           className={this.props.classes.privacyFooter}

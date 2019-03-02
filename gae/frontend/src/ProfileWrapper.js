@@ -17,8 +17,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-class ProfileWrapper extends Component {
+export default class ProfileWrapper extends Component {
   static propTypes = {
+    gapiReady: PropTypes.bool.isRequired,
     onProfileReady: PropTypes.func.isRequired,
     profile: PropTypes.object
   };
@@ -73,4 +74,5 @@ class ProfileWrapper extends Component {
     return <div className="ProfileWrapper" />;
   }
 }
-export default ProfileWrapper;
+
+export const ProfileContext = React.createContext();

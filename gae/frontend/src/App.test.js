@@ -17,10 +17,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { FirebaseState } from './firebase_util';
 import App from './App';
 
 it('renders without crashing', () => {
+  var firebase = new FirebaseState(false /* enableMessaging */);
   const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
+  ReactDOM.render(<App firebase={firebase} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });
