@@ -17,17 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import {
-  NavLink,
-  Redirect,
-  BrowserRouter as Router,
-  Route,
-  Switch
-} from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
@@ -39,14 +30,11 @@ import Typography from '@material-ui/core/Typography';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import Club from './Club';
-import Events from './Events';
+import DrawerContent from './DrawerContent';
 import FcmManager from './FcmManager';
 import GapiWrapper from './GapiWrapper';
-import Home from './Home';
+import MainContent from './MainContent';
 import ProfileWrapper from './ProfileWrapper';
-import Settings from './Settings';
-import Signup from './Signup';
 
 const drawerWidth = 240;
 
@@ -67,12 +55,7 @@ class Main extends Component {
       height: '100%',
       'text-align': 'center'
     },
-    drawerList: {
-      height: '100%'
-    },
-    drawerFooter: {
-      bottom: 0
-    },
+    toolbar: theme.mixins.toolbar,
     appBar: {
       [theme.breakpoints.up('md')]: {
         width: '100%',
@@ -85,7 +68,6 @@ class Main extends Component {
         display: 'none'
       }
     },
-    toolbar: theme.mixins.toolbar,
     content: {
       flexGrow: 1,
       padding: theme.spacing.unit * 3
@@ -114,6 +96,7 @@ class Main extends Component {
   };
 
   handleGapiReady = () => {
+    console.log('Main.handleGapiReady');
     this.setState({ gapiReady: true });
   };
 
@@ -135,150 +118,6 @@ class Main extends Component {
   handleFcmMessage = payload => {
     console.log('Main.handleFcmMessage', payload);
   };
-
-  renderDrawerContent() {
-    if (this.state.profile === undefined) {
-      return null;
-    }
-    if (!this.state.profile.signup_complete) {
-      return null;
-    }
-
-    return (
-      <React.Fragment>
-        <div className={this.props.classes.toolbar} />
-        <List
-          className={this.props.classes.drawerList}
-          onClick={() => this.setState({ mobileOpen: false })}
-        >
-          <ListItem
-            button
-            key="Home"
-            component={NavLink}
-            to="/"
-            exact
-            activeClassName={this.props.classes.active}
-          >
-            <ListItemText>Home</ListItemText>
-          </ListItem>
-          <ListItem
-            button
-            key="Events"
-            component={NavLink}
-            to="/events"
-            exact
-            activeClassName={this.props.classes.active}
-          >
-            <ListItemText>Rides</ListItemText>
-          </ListItem>
-          <ListItem
-            button
-            key="Settings"
-            component={NavLink}
-            to="/settings"
-            exact
-            activeClassName={this.props.classes.active}
-          >
-            <ListItemText>Settings</ListItemText>
-          </ListItem>
-        </List>
-        <div className={this.props.classes.drawerFooter}>
-          <Typography variant="caption">
-            <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
-          </Typography>
-        </div>
-      </React.Fragment>
-    );
-  }
-
-  renderMainContent() {
-    if (this.state.profile === undefined) {
-      return null;
-    }
-    if (!this.state.profile.signup_complete) {
-      return (
-        <Switch>
-          <Route
-            path="/signup"
-            exact
-            render={() => (
-              <Signup
-                firebase={this.props.firebase}
-                firebaseUser={this.props.firebaseUser}
-                gapiReady={this.state.gapiReady}
-              />
-            )}
-          />
-          <Route>
-            <Redirect to="/signup" />
-          </Route>
-        </Switch>
-      );
-    }
-
-    return (
-      <Switch>
-        <Route
-          path="/club/:club_id"
-          render={thinger => (
-            <Club
-              firebaseUser={this.props.firebaseUser}
-              gapiReady={this.state.gapiReady}
-              profile={this.state.profile}
-              clubId={Number(thinger.match.params.club_id)}
-            />
-          )}
-        />
-        <Route
-          path="/"
-          exact
-          render={() => (
-            <Home
-              gapiReady={this.state.gapiReady}
-              profile={this.state.profile}
-            />
-          )}
-        />
-        <Route
-          path="/events"
-          exact
-          render={() => (
-            <Events
-              firebase={this.props.firebase}
-              firebaseUser={this.props.firebaseUser}
-              gapiReady={this.state.gapiReady}
-              profile={this.state.profile}
-            />
-          )}
-        />
-        <Route
-          path="/settings"
-          exact
-          render={() => (
-            <Settings
-              gapiReady={this.state.gapiReady}
-              onPreferencesChanged={this.handlePreferencesChanged}
-              firebaseUser={this.props.firebaseUser}
-              profile={this.state.profile}
-            />
-          )}
-        />
-        <Route
-          path="/signup"
-          exact
-          render={() => (
-            <Signup
-              firebaseUser={this.props.firebaseUser}
-              gapiReady={this.state.gapiReady}
-            />
-          )}
-        />
-        <Route>
-          <Redirect to="/" />
-        </Route>
-      </Switch>
-    );
-  }
 
   render() {
     return (
@@ -330,7 +169,11 @@ class Main extends Component {
                   keepMounted: true // Better open performance on mobile.
                 }}
               >
-                {this.renderDrawerContent()}
+                <div className={this.props.classes.toolbar} />
+                <DrawerContent
+                  profile={this.state.profile}
+                  onClick={() => this.setState({ mobileOpen: false })}
+                />
               </Drawer>
             </Hidden>
             <Hidden smDown>
@@ -341,13 +184,23 @@ class Main extends Component {
                 variant="permanent"
                 open
               >
-                {this.renderDrawerContent()}
+                <div className={this.props.classes.toolbar} />
+                <DrawerContent
+                  profile={this.state.profile}
+                  onClick={() => this.setState({ mobileOpen: false })}
+                />
               </Drawer>
             </Hidden>
           </nav>
           <main className={this.props.classes.content}>
             <div className={this.props.classes.toolbar} />
-            {this.renderMainContent()}
+            <MainContent
+              firebase={this.props.firebase}
+              firebaseUser={this.props.firebaseUser}
+              gapiReady={this.state.gapiReady}
+              onPreferencesChanged={this.handlePreferencesChanged}
+              profile={this.state.profile}
+            />
           </main>
         </div>
       </Router>

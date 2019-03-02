@@ -56,11 +56,7 @@ export default class ProfileWrapper extends Component {
    */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ProfileWrapper.componentDidUpdate', prevProps);
-    if (
-      this.props.gapiReady &&
-      !this.state.fetched &&
-      this.state.profile === undefined
-    ) {
+    if (this.props.gapiReady && !this.state.fetched) {
       this.setState({ fetched: true });
       window.gapi.client.bikebuds.get_profile().then(this.handleProfile);
     }
