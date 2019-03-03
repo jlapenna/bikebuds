@@ -34,7 +34,7 @@ import DrawerContent from './DrawerContent';
 import FcmManager from './FcmManager';
 import GapiWrapper from './GapiWrapper';
 import MainContent from './MainContent';
-import ProfileWrapper from './ProfileWrapper';
+import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 
 const drawerWidth = 240;
 
@@ -86,8 +86,8 @@ class Main extends Component {
     super(props);
     this.state = {
       mobileOpen: false,
-      isSignedUp: true,
-      gapiReady: false
+      gapiReady: false,
+      profile: new ProfileState(this.handleProfileUpdated)
     };
   }
 
@@ -100,16 +100,8 @@ class Main extends Component {
     this.setState({ gapiReady: true });
   };
 
-  handlePreferencesChanged = preferences => {
-    console.log('Main.handlePreferencesChanged', preferences);
-    this.setState((state, props) => {
-      state.profile.preferences = preferences;
-      return { profile: state.profile };
-    });
-  };
-
-  handleProfileReady = profile => {
-    console.log('Main.handleProfileReady', profile);
+  handleProfileUpdated = profile => {
+    console.log('Main.handleProfileUpdated', profile);
     this.setState({
       profile: profile
     });
@@ -126,7 +118,6 @@ class Main extends Component {
           <GapiWrapper onReady={this.handleGapiReady} />
           <ProfileWrapper
             gapiReady={this.state.gapiReady}
-            onProfileReady={this.handleProfileReady}
             profile={this.state.profile}
           />
           <FcmManager
@@ -198,7 +189,6 @@ class Main extends Component {
               firebase={this.props.firebase}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
-              onPreferencesChanged={this.handlePreferencesChanged}
               profile={this.state.profile}
             />
           </main>

@@ -26,14 +26,8 @@ import ServiceCard from './ServiceCard';
 class Settings extends Component {
   static propTypes = {
     gapiReady: PropTypes.bool.isRequired,
-    onPreferencesChanged: PropTypes.func.isRequired,
     firebaseUser: PropTypes.object,
     profile: PropTypes.object
-  };
-
-  handlePreferencesChanged = preferences => {
-    console.log('Settings.handlePreferencesChanged', preferences);
-    this.props.onPreferencesChanged(preferences);
   };
 
   render() {
@@ -51,8 +45,7 @@ class Settings extends Component {
             <PreferencesCard
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.props.gapiReady}
-              onPreferencesChanged={this.handlePreferencesChanged}
-              preferences={this.props.profile.preferences}
+              profile={this.props.profile}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>

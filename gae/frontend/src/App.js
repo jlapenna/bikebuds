@@ -28,7 +28,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import theme from './theme';
 
-import { FirebaseState, FirebaseContext } from './firebase_util';
+import { FirebaseState } from './firebase_util';
 
 import Main from './Main';
 import Privacy from './Privacy';
@@ -60,9 +60,6 @@ class App extends Component {
     return this.state.isSignedIn && this.state.isSignedInNext;
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     this.unregisterAuthObserver = this.state.firebase.onAuthStateChanged(
       firebaseUser => {
@@ -166,11 +163,9 @@ class App extends Component {
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        <FirebaseContext.Provider value={this.state.firebase}>
-          {this._isSignedIn()
-            ? this.renderSignedInRouter()
-            : this.renderSignedOutRouter()}
-        </FirebaseContext.Provider>
+        {this._isSignedIn()
+          ? this.renderSignedInRouter()
+          : this.renderSignedOutRouter()}
       </MuiThemeProvider>
     );
   }

@@ -18,6 +18,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import PreferencesCard from './PreferencesCard';
+import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
@@ -25,12 +26,10 @@ it('renders without crashing', () => {
     displayName: 'Display Name',
     photoUrl: '/logo-round.svg'
   };
+  const profile = new ProfileState();
+  profile.preferences = {};
   ReactDOM.render(
-    <PreferencesCard
-      firebaseUser={firebaseUser}
-      onPreferencesChanged={preferences => {}}
-      preferences={{}}
-    />,
+    <PreferencesCard firebaseUser={firebaseUser} profile={profile} />,
     div
   );
   ReactDOM.unmountComponentAtNode(div);

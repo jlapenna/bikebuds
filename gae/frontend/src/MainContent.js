@@ -41,13 +41,12 @@ class MainContent extends React.Component {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired,
-    onPreferencesChanged: PropTypes.func.isRequired,
     profile: PropTypes.object
   };
 
   render() {
     console.log('MainContent.render: ', this.props.profile);
-    if (!this.props.profile) {
+    if (!this.props.profile.fetched) {
       console.log('MainContent.render: no profile');
       return null;
     }
@@ -113,7 +112,6 @@ class MainContent extends React.Component {
           render={() => (
             <Settings
               gapiReady={this.props.gapiReady}
-              onPreferencesChanged={this.props.onPreferencesChanged}
               firebaseUser={this.props.firebaseUser}
               profile={this.props.profile}
             />

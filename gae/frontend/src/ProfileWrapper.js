@@ -15,45 +15,54 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 
-export default class ProfileWrapper extends Component {
+export class ProfileState {
+  constructor(onUpdated) {
+    this._onUpdated = onUpdated;
+    this.fetched = false;
+  }
+
+  update(result) {
+    console.log('ProfileState.update: ', result);
+    this.fetched = true;
+    this.created = result.created;
+    this.preferences = result.preferences;
+    this.athlete = result.athlete;
+    this.signup_complete = result.signup_complete;
+    this._onUpdated(this);
+  }
+
+  updatePreferences(result) {
+    console.log('ProfileState.updatePreferences: ', result);
+    this.preferences = result.preferences;
+    this._onUpdated(this);
+  }
+}
+
+export default class ProfileWrapper extends React.Component {
   static propTypes = {
     gapiReady: PropTypes.bool.isRequired,
-    onProfileReady: PropTypes.func.isRequired,
-    profile: PropTypes.object
+    profile: PropTypes.object.isRequired
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      fetched: false,
-      profile: props.profile
+      fetched: false
     };
   }
 
   handleProfile = response => {
     console.log('ProfileWrapper.handleProfile:', response.result);
-    if (response.result === undefined) {
-      return;
-    }
-    this.setState({
-      profile: response.result
-    });
-    this.props.onProfileReady(response.result);
+    this.props.profile.update(response.result);
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ProfileWrapper.componentDidUpdate', prevProps);
     if (this.props.gapiReady && !this.state.fetched) {
@@ -62,13 +71,8 @@ export default class ProfileWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   render() {
-    console.log('ProfileWrapper.render', this.state.profile);
-    return <div className="ProfileWrapper" />;
+    console.log('ProfileWrapper.render', this.props.profile);
+    return null;
   }
 }
-
-export const ProfileContext = React.createContext();

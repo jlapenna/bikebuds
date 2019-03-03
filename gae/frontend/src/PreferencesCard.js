@@ -30,11 +30,6 @@ import Typography from '@material-ui/core/Typography';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
 class PreferencesCard extends Component {
-  static propTypes = {
-    preferences: PropTypes.object.isRequired,
-    onPreferencesChanged: PropTypes.func.isRequired
-  };
-
   static styles = theme => ({
     root: {
       'min-height': '200px'
@@ -45,105 +40,102 @@ class PreferencesCard extends Component {
     }
   });
 
+  static propTypes = {
+    profile: PropTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      preferences: props.preferences
+      updatingRemote: false
     };
   }
 
   handlePreferences = response => {
     console.log('PreferencesCard.updatePreferenceState', response);
-    this.setState({
-      preferences: response.result.preferences,
-      preferencesFetched: true
-    });
-    this.props.onPreferencesChanged(response.result.preferences);
+    this.props.profile.updatePreferences(response.result);
+    this.setState({ updatingRemote: false });
   };
 
   handleRadioGroupChange = event => {
-    var newState = { preferences: cloneDeepWith(this.state.preferences) };
+    this.setState({ updatingRemote: true });
+
+    var newPreferences = cloneDeepWith(this.props.profile.preferences);
     if (event.target.name === 'units') {
-      newState.preferences.units = event.target.value;
+      newPreferences.units = event.target.value;
     } else if (event.target.name === 'weight_service') {
-      newState.preferences.weight_service = event.target.value;
+      newPreferences.weight_service = event.target.value;
     }
-    this.setState(newState);
+
+    // Update locally and remote, this will trigger to renders, once for local,
+    // once when the result comes back.
+    //
+    // Local
+    this.props.profile.updatePreferences({ preferences: newPreferences });
+    // Remote
     window.gapi.client.bikebuds
-      .update_preferences(newState)
+      .update_preferences({ preferences: newPreferences })
       .then(this.handlePreferences);
   };
 
-  /**
-   * @inheritDoc
-   */
-  componentDidMount() {
-    this.setState({});
-  }
-
-  renderCardContent() {
-    return (
-      <CardContent className={this.props.classes.content}>
-        <div className={this.props.classes.container}>
-          <FormControl
-            component="fieldset"
-            className={this.props.classes.formControl}
-            disabled={!this.state.preferences}
-          >
-            <Typography variant="h5">Unit</Typography>
-            <RadioGroup
-              aria-label="Measurement Units"
-              name="units"
-              className={this.props.classes.group}
-              value={this.state.preferences.units}
-              onChange={this.handleRadioGroupChange}
-            >
-              <FormControlLabel
-                value="METRIC"
-                control={<Radio />}
-                label="Metric"
-              />
-              <FormControlLabel
-                value="IMPERIAL"
-                control={<Radio />}
-                label="Imperial"
-              />
-            </RadioGroup>
-          </FormControl>
-          <FormControl
-            component="fieldset"
-            className={this.props.classes.formControl}
-            disabled={!this.state.preferences}
-          >
-            <Typography variant="h5">Weight Service</Typography>
-            <RadioGroup
-              aria-label="Weight Service"
-              name="weight_service"
-              className={this.props.classes.group}
-              value={this.state.preferences.weight_service}
-              onChange={this.handleRadioGroupChange}
-            >
-              <FormControlLabel
-                value="FITBIT"
-                control={<Radio />}
-                label="Fitbit"
-              />
-              <FormControlLabel
-                value="WITHINGS"
-                control={<Radio />}
-                label="Withings"
-              />
-            </RadioGroup>
-          </FormControl>
-        </div>
-      </CardContent>
-    );
-  }
-
   render() {
+    console.log('PreferencesCard.render: ', this.state);
     return (
       <Card className={this.props.classes.root}>
-        {this.renderCardContent()}
+        <CardContent className={this.props.classes.content}>
+          <div className={this.props.classes.container}>
+            <FormControl
+              component="fieldset"
+              className={this.props.classes.formControl}
+              disabled={this.state.updatingRemote}
+            >
+              <Typography variant="h5">Unit</Typography>
+              <RadioGroup
+                aria-label="Measurement Units"
+                name="units"
+                className={this.props.classes.group}
+                value={this.props.profile.preferences.units}
+                onChange={this.handleRadioGroupChange}
+              >
+                <FormControlLabel
+                  value="METRIC"
+                  control={<Radio />}
+                  label="Metric"
+                />
+                <FormControlLabel
+                  value="IMPERIAL"
+                  control={<Radio />}
+                  label="Imperial"
+                />
+              </RadioGroup>
+            </FormControl>
+            <FormControl
+              component="fieldset"
+              className={this.props.classes.formControl}
+              disabled={this.state.updatingRemote}
+            >
+              <Typography variant="h5">Weight Service</Typography>
+              <RadioGroup
+                aria-label="Weight Service"
+                name="weight_service"
+                className={this.props.classes.group}
+                value={this.props.profile.preferences.weight_service}
+                onChange={this.handleRadioGroupChange}
+              >
+                <FormControlLabel
+                  value="FITBIT"
+                  control={<Radio />}
+                  label="Fitbit"
+                />
+                <FormControlLabel
+                  value="WITHINGS"
+                  control={<Radio />}
+                  label="Withings"
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+        </CardContent>
         <CardActions />
       </Card>
     );
