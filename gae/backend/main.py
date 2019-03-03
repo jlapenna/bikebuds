@@ -48,7 +48,7 @@ class SyncException(Exception):
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):
-    if datastore_state.version < version:
+    if config.is_dev or (datastore_state.version < version):
         logging.info(
                 'Running cleanup: %s -> %s', datastore_state.version, version)
         cleanup_fn()
@@ -70,6 +70,13 @@ def cleanup():
     #def cleanup():
     #    ndb.delete_multi(Activity.query().fetch(keys_only=True))
     #_do_cleanup(7, datastore_state, cleanup)
+    def cleanup():
+        services = Service.query(Service.credentials != None)
+        for service in services:
+            if service.key.id() == 'withings':
+                w = withings.Worker(service)
+                w.remove_subscriptions()
+    _do_cleanup(9, datastore_state, cleanup)
 
     return 'OK', 200
 
@@ -120,11 +127,11 @@ def process_event():
     service = event_key.parent().get()
     service_name = service.key.id()
     if service_name == 'withings':
-        _do(withings.EventsWorker(service))
+        _do(withings.EventsWorker(service), service_key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
-        _do(strava.EventsWorker(service))
+        _do(strava.EventsWorker(service), service_key)
     return 'OK', 200
 
 

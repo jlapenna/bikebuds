@@ -22,6 +22,8 @@ class _Config(object):
         for key, value in base_config.iteritems():
             setattr(self, key, value)
 
+        self.is_dev = _devOrProd(True, False)
+
         # TODO: This is the only conditional here, eliminate it.
         self.origins = _devOrProd(
             [self.devserver_url, self.frontend_url, self.api_url, self.backend_url],
