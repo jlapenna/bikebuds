@@ -46,8 +46,8 @@ def sync_services(services):
                     url='/tasks/service_sync/' + service.key.id(),
                     target='backend',
                     params={
-                        'state': state_key.urlsafe(),
-                        'service': service.key.urlsafe()
+                        'state_key': state_key.urlsafe(),
+                        'service_key': service.key.urlsafe()
                         }
                     )
                 )
@@ -58,12 +58,36 @@ def sync_services(services):
         task.add()
 
 
+@ndb.transactional(xg=True)
+def maybe_finish_sync_services_and_queue_process(service, state_key):
+    logging.info('Incrementing completed tasks for %s', state_key)
+    state = state_key.get()
+    state.completed_tasks += 1
+    state.put()
+
+    service.syncing = False
+    service.sync_successful = True
+    service.put()
+
+    if state.completed_tasks == state.total_tasks:
+        logging.info('Completed all pending tasks for %s', state.key)
+        taskqueue.add(
+                url='/tasks/process',
+                target='backend',
+                params={
+                    'state_key': state_key.urlsafe(),
+                    },
+                transactional=True)
+
+
 @ndb.transactional
 def process_event(event_entity):
     event_entity.put()
     taskqueue.add(
             countdown=60,
-            url='/tasks/process_events',
+            url='/tasks/process_event',
             target='backend',
-            transactional=True
+            transactional=True,
+            params={
+                'event_key': event_entity.key.urlsafe()}
             )

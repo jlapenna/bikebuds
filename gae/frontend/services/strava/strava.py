@@ -30,7 +30,6 @@ from shared.datastore.admin import SubscriptionEvent
 from shared.datastore.athletes import Athlete
 from shared.datastore.services import Service
 from shared.datastore.users import User
-from shared.services.strava.strava import process_batch
 
 
 SERVICE_NAME = 'strava'
@@ -74,10 +73,9 @@ def events_post():
 
     event_json = flask.request.get_json()
     owner_id = event_json['owner_id']
-    athlete_key = Athlete.get_by_id(owner_id, keys_only=True)
-    event_entity = SubscriptionEvent(parent=athlete_key.parent(), **event_json)
+    service_key = Athlete.get_by_id(owner_id, keys_only=True).parent()
+    event_entity = SubscriptionEvent(parent=service_key, **event_json)
     task_util.process_event(event_entity)
-    
     return 'OK', 200
 
 

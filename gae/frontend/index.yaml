@@ -75,3 +75,9 @@ indexes:
   - name: owner_id
   - name: object_id
   - name: event_time
+
+- kind: SubscriptionEvent
+  ancestor: yes
+  properties:
+  - name: event_time
+    direction: desc

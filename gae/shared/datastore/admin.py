@@ -38,7 +38,10 @@ class SyncState(ndb.Model):
 
 
 class SubscriptionEvent(ndb.Expando):
-    """Holds data related to a subscription event."""
+    """Holds data related to a subscription event.
+    
+    Parent should be the service associated with the event.
+    """
     _use_memcache = False
 
     created = ndb.DateTimeProperty(auto_now_add=True)

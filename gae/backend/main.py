@@ -66,15 +66,10 @@ def cleanup():
     else:
         datastore_state = result[0]
 
-    def cleanup():
-        ndb.delete_multi(Series.query().fetch(keys_only=True))
-        ndb.delete_multi(Athlete.query().fetch(keys_only=True))
-        ndb.delete_multi(Club.query().fetch(keys_only=True))
-    _do_cleanup(6, datastore_state, cleanup)
-
-    def cleanup():
-        ndb.delete_multi(Activity.query().fetch(keys_only=True))
-    _do_cleanup(7, datastore_state, cleanup)
+    # Eg.,
+    #def cleanup():
+    #    ndb.delete_multi(Activity.query().fetch(keys_only=True))
+    #_do_cleanup(7, datastore_state, cleanup)
 
     return 'OK', 200
 
@@ -93,167 +88,75 @@ def sync():
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync(service_name):
-    state_key = ndb.Key(urlsafe=flask.request.values.get('state'))
-    service = ndb.Key(urlsafe=flask.request.values.get('service')).get()
+    state_key = ndb.Key(urlsafe=flask.request.values.get('state_key'))
+    service = ndb.Key(urlsafe=flask.request.values.get('service_key')).get()
     user_key = service.key.parent()
     service_creds = service.get_credentials()
-
-    if service_name == 'withings':
-        _do_sync(service, service_creds, withings.Synchronizer())
-    elif service_name == 'fitbit':
-        _do_sync(service, service_creds, bbfitbit.Synchronizer())
-    elif service_name == 'strava':
-        _do_sync(service, service_creds, strava.AthleteSynchronizer())
-        _do_sync(service, service_creds, strava.ActivitiesSynchronizer())
-        _do_sync(service, service_creds, strava.ClubsSynchronizer())
-
-    @ndb.transactional(xg=True)
-    def transact():
-        state = state_key.get()
-        state.completed_tasks += 1
-        state.put()
-
-        service.syncing = False
-        service.sync_successful = True
-        service.put()
-
-        logging.info('Incrementing completed tasks for %s', state.key)
-        if state.completed_tasks == state.total_tasks:
-            logging.info('Completed all pending tasks for %s', state.key)
-            taskqueue.add(
-                    url='/tasks/process',
-                    target='backend',
-                    params={
-                        'state': state_key.urlsafe(),
-                        },
-                    transactional=True)
-    transact()
-
-    return 'OK', 200
-
-
-def _do_sync(service, service_creds, synchronizer, check_creds=True):
-    if check_creds and service_creds is None:
-        logging.info('No creds: %s/%s', service.key, synchronizer)
+    if service_creds is None:
+        logging.info('No creds: %s', service.key)
         return 'OK', 250
 
-    sync_name = synchronizer.__class__.__name__
-    try:
-        logging.info('Synchronizer starting: %s', sync_name)
-        synchronizer.sync(service)
-        sync_successful = True
-        logging.info('Synchronizer completed: %s', sync_name)
-        return 'OK', 200
-    except TimeoutError, e:
-        logging.debug('%s for %s/%s (creds: %s), Originally: %s',
-                sys.exc_info()[0].__name__,
-                service.key,
-                sync_name,
-                service.get_credentials(),
-                sys.exc_info()[1]
-                )
-        msg = 'DeadlineExceeded for %s/%s' % (
-                service.key.id(),
-                sync_name
-                )
-        return 'Sync Failed', 503
-    except Exception, e:
-        logging.debug('%s for %s/%s (creds: %s), Originally: %s',
-            sys.exc_info()[0].__name__,
-            service.key,
-            sync_name,
-            service.get_credentials(),
-            sys.exc_info()[1]
-            )
-        msg = '%s for %s/%s' % (
-                sys.exc_info()[0].__name__,
-                service.key.id(),
-                sync_name)
-        raise SyncException, SyncException(msg), sys.exc_info()[2]
+    if service_name == 'withings':
+        _do(withings.Worker(service), service.key)
+    elif service_name == 'fitbit':
+        _do(bbfitbit.Worker(service), service.key)
+    elif service_name == 'strava':
+        _do(strava.Worker(service), service.key)
+
+    task_util.maybe_finish_sync_services_and_queue_process(service, state_key)
+    return 'OK', 200
 
 
 @app.route('/tasks/process', methods=['GET', 'POST'])
 def process():
-    _do_process(strava.ClubsMembersProcessor())
+    """Called after all services for all users have finished syncing."""
+    _do(strava.ClubMembershipsProcessor(), method='process')
     return 'OK', 200
 
 
-@app.route('/tasks/process_events', methods=['GET', 'POST'])
-def process_events():
-    _do_process(strava.SubscriptionEventProcessor())
+@app.route('/tasks/process_event', methods=['GET', 'POST'])
+def process_event():
+    event_key = ndb.Key(urlsafe=flask.request.values.get('event_key'))
+    service = event_key.parent().get()
+    service_name = service.key.id()
+    if service_name == 'withings':
+        _do(withings.EventsWorker(service))
+    elif service_name == 'fitbit':
+        pass
+    elif service_name == 'strava':
+        _do(strava.EventsWorker(service))
     return 'OK', 200
 
 
-def _do_process(processor):
-    processor_name = processor.__class__.__name__
+def _do(worker, work_key=None, method='sync'):
+    work_name = worker.__class__.__name__
     try:
-        logging.info('Processor starting: %s', processor_name)
-        processor.sync()
-        logging.info('Processor completed: %s', processor_name)
+        logging.info('Worker starting: %s/%s', work_name, work_key)
+        getattr(worker, method)()  # Dynamically run the provided method.
+        sync_successful = True
+        logging.info('Worker completed: %s/%s', work_name, work_key)
+        return 'OK', 200
     except TimeoutError, e:
-        logging.debug('Unable to process: %s -> %s',
-            processor_name,
-            sys.exc_info()[1]
-            )
-        msg = 'DeadlineExceeded for: %s' % (
-            processor_name,
-            )
-        raise SyncException(msg)
-    except Exception, e:
-        logging.debug('%s for %s, Originally: %s',
-            sys.exc_info()[0].__name__,
-            processor_name,
-            sys.exc_info()[1]
-            )
-        msg = '%s for %s' % (
+        logging.debug('%s for %s/%s, Originally: %s',
                 sys.exc_info()[0].__name__,
-                processor_name)
+                work_name,
+                work_key,
+                sys.exc_info()[1]
+                )
+        msg = 'DeadlineExceeded for %s/%s' % (
+                work_name,
+                work_key,
+                )
+        return 'Sync Failed', 503
+    except Exception, e:
+        logging.debug('%s for %s/%s, Originally: %s',
+            sys.exc_info()[0].__name__,
+            work_name,
+            work_key,
+            sys.exc_info()[1]
+            )
+        msg = '%s for %s/%s' % (
+                sys.exc_info()[0].__name__,
+                work_name,
+                work_key)
         raise SyncException, SyncException(msg), sys.exc_info()[2]
-
-def _add_test_sub_events():
-    athlete_entity = Athlete.get_by_id(35056021, keys_only=True)
-    SubscriptionEvent(parent=athlete_entity.parent(),
-            **{'aspect_type': 'create',
-                'event_time': 1549151210,
-                'object_id': 2120517766,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                }).put()
-    SubscriptionEvent(parent=athlete_entity.parent(),
-            **{'aspect_type': 'update',
-                'event_time': 1549151212,
-                'object_id': 2120517766,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {'title': 'Updated Title'}
-                }).put()
-    SubscriptionEvent(parent=athlete_entity.parent(),
-            **{'aspect_type': 'create',
-                'event_time': 1549151211,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                }).put()
-    SubscriptionEvent(parent=athlete_entity.parent(),
-            **{'aspect_type': 'update',
-                'event_time': 1549151213,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {'title': 'Second Updated Title'}
-                }).put()
-    SubscriptionEvent(parent=athlete_entity.parent(),
-            **{'aspect_type': 'delete',
-                'event_time': 1549151214,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                }).put()

@@ -13,8 +13,3 @@ cron:
   url: /tasks/process
   target: backend
   schedule: 1 of jan 12:00
-
-- description: 'Process Events'
-  url: /tasks/process_events
-  target: backend
-  schedule: 2 of jan 12:00

@@ -35,56 +35,49 @@ import stravalib
 from stravalib import exc
 
 
-class AthleteSynchronizer(object):
+class Worker(object):
 
-    def sync(self, service):
-        client = ClientWrapper(service)
-        client.ensure_access()
-        athlete = client.get_athlete()
-        return Athlete.entity_from_strava(service.key, athlete).put()
+    def __init__(self, service):
+        self.service = service
+        self.client = ClientWrapper(service)
 
+    def sync(self):
+        self.sync_athlete()
+        self.sync_activities()
+        self.sync_clubs()
 
-class ActivitiesSynchronizer(object):
+    def sync_athlete(self):
+        self.client.ensure_access()
 
-    def sync(self, service):
-        client = ClientWrapper(service)
-        client.ensure_access()
+        athlete = self.client.get_athlete()
+        return Athlete.entity_from_strava(self.service.key, athlete).put()
+
+    def sync_activities(self):
+        self.client.ensure_access()
 
         activities = []
-        for activity in client.get_activities():
+        for activity in self.client.get_activities():
             if activity.type != 'Ride':
                 continue
             activities.append(activity)
 
-        athlete = client.get_athlete()
+        athlete = self.client.get_athlete()
 
         @ndb.transactional
         def put():
             ndb.put_multi(
-                    Activity.entity_from_strava(service.key, activity,
+                    Activity.entity_from_strava(self.service.key, activity,
                         detailed_athlete=athlete)
                     for activity in activities)
         return put()
 
-    def _sync_activity(self, service, activity_id):
-        """Gets additional info: description, calories and embed_token."""
-        client = ClientWrapper(service)
-        client.ensure_access()
-        activity = client.get_activity(activity_id)
-        return Activity.entity_from_strava(service.key, activity).put()
+    def sync_clubs(self):
+        self.client.ensure_access()
 
-
-class ClubsSynchronizer(object):
-    """Syncs all clubs an athlete is an admin or member of."""
-
-    def sync(self, service):
-        client = ClientWrapper(service)
-        client.ensure_access()
-
-        athlete_entity = Athlete.get_private(service.key)
+        athlete_entity = Athlete.get_private(self.service.key)
         for club_ref in athlete_entity.athlete.clubs:
             logging.info('Fetching club: %s', club_ref.id)
-            club_result = client.get_club(club_ref.id)
+            club_result = self.client.get_club(club_ref.id)
             club_entity = Club.entity_from_strava(club_result)
 
             if (not club_result.private
@@ -94,11 +87,16 @@ class ClubsSynchronizer(object):
                 logging.info('Putting club: %s', club_entity.key.id())
                 club_entity.put()
 
+    def _sync_activity(self, activity_id):
+        """Gets additional info: description, calories and embed_token."""
+        activity = self.client.get_activity(activity_id)
+        return Activity.entity_from_strava(self.service.key, activity).put()
 
-class ClubsMembersProcessor(object):
-    """Syncs all clubs an athlete is an admin or member of."""
 
-    def sync(self):
+class ClubMembershipsProcessor(object):
+    """Syncs every club's memberships."""
+
+    def process(self):
         clubs_to_put = []
         for club_entity in Club.query():
             logging.info('Joining club: %s', club_entity.key.id())
@@ -111,10 +109,10 @@ class ClubsMembersProcessor(object):
         ndb.put_multi(clubs_to_put)
 
 
-class ClubActivitiesSharedSynchronizer(object):
+class ClubActivitiesProcessor(object):
     """Syncs all club activities."""
 
-    def sync(self):
+    def process(self):
         athlete_entities = Athlete.query().fetch()
         club_to_users = collections.defaultdict(lambda: set())
         for athlete_entity in athlete_entities:
@@ -147,39 +145,27 @@ class ClubActivitiesSharedSynchronizer(object):
             put()
 
 
-class SubscriptionEventProcessor(object):
-    """Syncs all subscription events."""
+class EventsWorker(object):
+    def __init__(self, service):
+        self.service = service
+        self.client = ClientWrapper(service)
 
     def sync(self):
-        events_query = SubscriptionEvent.gql("""
-        WHERE processing != TRUE
-        ORDER BY processing, owner_id, object_id, event_time
-        """)
+        client.ensure_access()
+
+        events = SubscriptionEvent.query(
+                ancestor=self.service.key).order(-ndb.GenericProperty('event_time'))
         batches = collections.defaultdict(list)
-        for event in events_query:
-            batches[(event.owner_id, event.object_id)].append(event)
-        for (owner_id, object_id), batch in batches.iteritems():
-            self.defer_batch(owner_id, object_id, batch)
-
-    def defer_batch(self, owner_id, object_id, batch):
-        logging.debug('defer_batch: %s, %s, %s', owner_id, object_id, len(batch))
-
-        @ndb.transactional
-        def defer():
-            for event in batch:
-                event.processing = True
-            ndb.put_multi(batch)
-            deferred.defer(process_batch,
-                    owner_id, object_id, batch,
-                    _transactional=True)
-        defer()
+        for event in events:
+            batches[(event.object_id, event.object_type)].append(event)
+        for (object_id, object_type), batch in batches.iteritems():
+            process_event_batch(
+                    self.client, self.service, object_id, object_type, batch)
 
 
-def process_batch(owner_id, object_id, batch):
-    logging.debug('process_batch:  %s, %s, %s', owner_id, object_id, len(batch))
-    service_key = batch[0].key.parent()
-    object_id = batch[0].object_id
-    object_type = batch[0].object_type
+@ndb.transactional
+def process_event_batch(client, service, object_id, object_type, batch):
+    logging.debug('process_event_batch:  %s, %s, %s', service.key, object_id, len(batch))
 
     if object_type != 'activity':
         logging.warn('Update object_type not implemented: %s', object_type)
@@ -187,28 +173,22 @@ def process_batch(owner_id, object_id, batch):
 
     operations = [event.aspect_type for event in batch]
 
-    @ndb.transactional
-    def transact():
-        if 'delete' in operations:
-            activity_key = ndb.Key(Activity, object_id, parent=service_key)
-            result = activity_key.delete()
-            logging.debug('delete result: %s -> %s', activity_key, result)
-        else:
-            service = service_key.get()
-            client = ClientWrapper(service)
-            client.ensure_access()
-            activity = client.get_activity(object_id)
-            activity_entity = Activity.entity_from_strava(service_key,
-                    activity)
-            # get_activity returns a MetaAthelte, which only has an athlete id,
-            # replace from the stored athlete entity.
-            athlete_entity = Athlete.get_private(service_key)
-            activity_entity.activity.athlete = AthleteRef.from_athlete_message(
-                    athlete_entity.athlete)
-            activity_key = activity_entity.put()
-            logging.debug('create result: %s -> %s', activity.id, activity_key)
-        ndb.delete_multi((event.key for event in batch))
-    transact()
+    if 'delete' in operations:
+        activity_key = ndb.Key(Activity, object_id, parent=service_key)
+        result = activity_key.delete()
+        logging.debug('delete result: %s -> %s', activity_key, result)
+    else:
+        activity = client.get_activity(object_id)
+        activity_entity = Activity.entity_from_strava(service.key, activity)
+        # get_activity returns a MetaAthelte, which only has an athlete id,
+        # replace from the stored athlete entity.
+        athlete_entity = Athlete.get_private(service.key)
+        activity_entity.activity.athlete = AthleteRef.from_athlete_message(
+                athlete_entity.athlete)
+        activity_key = activity_entity.put()
+        logging.debug('create result: %s -> %s', activity.id, activity_key)
+
+    ndb.delete_multi((event.key for event in batch))
 
 
 class ClientWrapper(object):
@@ -249,3 +229,52 @@ class ClientWrapper(object):
             refresh_token=self._service.get_credentials().refresh_token)
         self._service.update_credentials(dict(new_credentials))
         self._client.access_token = self._service.get_credentials().access_token
+
+
+def _add_test_sub_events():
+    service_key = Athlete.get_by_id(35056021, keys_only=True).parent()
+    SubscriptionEvent(parent=service_key,
+            **{'aspect_type': 'create',
+                'event_time': 1549151210,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()
+    SubscriptionEvent(parent=service_key,
+            **{'aspect_type': 'update',
+                'event_time': 1549151212,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Updated Title'}
+                }).put()
+    SubscriptionEvent(parent=service_key,
+            **{'aspect_type': 'create',
+                'event_time': 1549151211,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()
+    SubscriptionEvent(parent=service_key,
+            **{'aspect_type': 'update',
+                'event_time': 1549151213,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Second Updated Title'}
+                }).put()
+    SubscriptionEvent(parent=service_key,
+            **{'aspect_type': 'delete',
+                'event_time': 1549151214,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {}
+                }).put()
