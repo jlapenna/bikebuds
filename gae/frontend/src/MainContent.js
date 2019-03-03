@@ -19,24 +19,13 @@ import React from 'react';
 
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-
 import Club from './Club';
 import Events from './Events';
 import Home from './Home';
 import Settings from './Settings';
 import Signup from './Signup';
 
-class MainContent extends React.Component {
-  static styles = theme => ({
-    list: {
-      height: '100%'
-    },
-    footer: {
-      bottom: 0
-    }
-  });
-
+export default class MainContent extends React.Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
@@ -99,9 +88,7 @@ class MainContent extends React.Component {
           render={() => (
             <Events
               firebase={this.props.firebase}
-              firebaseUser={this.props.firebaseUser}
               gapiReady={this.props.gapiReady}
-              profile={this.props.profile}
             />
           )}
         />
@@ -133,4 +120,3 @@ class MainContent extends React.Component {
     );
   }
 }
-export default withStyles(MainContent.styles)(MainContent);

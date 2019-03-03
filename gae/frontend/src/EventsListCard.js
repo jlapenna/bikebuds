@@ -29,7 +29,7 @@ import Typography from '@material-ui/core/Typography';
 
 import EventDetail from './EventDetail';
 
-class EventListCard extends Component {
+class EventsListCard extends Component {
   static styles = {
     root: {
       height: '400px'
@@ -89,16 +89,10 @@ class EventListCard extends Component {
     });
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('EventsListCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.unsubscribe === undefined) {
@@ -110,9 +104,6 @@ class EventListCard extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   componentWillUnmount() {
     if (this.unsubscribe !== undefined) {
       this.unsubscribe();
@@ -178,4 +169,4 @@ class EventListCard extends Component {
     );
   }
 }
-export default withStyles(EventListCard.styles)(EventListCard);
+export default withStyles(EventsListCard.styles)(EventsListCard);

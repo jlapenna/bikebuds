@@ -17,9 +17,23 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+
+import { withStyles } from '@material-ui/core/styles';
+
 import EventsListCard from './EventsListCard';
 
 class Events extends Component {
+  static styles = theme => ({
+    root: {},
+    fab: {
+      position: 'absolute',
+      bottom: theme.spacing.unit * 2,
+      right: theme.spacing.unit * 2
+    }
+  });
+
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     gapiReady: PropTypes.bool.isRequired
@@ -33,8 +47,17 @@ class Events extends Component {
 
   render() {
     return (
-      <EventsListCard gapiReady={this.props.gapiReady} query={this.query} />
+      <div className={this.props.classes.root}>
+        <EventsListCard gapiReady={this.props.gapiReady} query={this.query} />
+        <Fab
+          color="primary"
+          aria-label="Add"
+          className={this.props.classes.fab}
+        >
+          <AddIcon />
+        </Fab>
+      </div>
     );
   }
 }
-export default Events;
+export default withStyles(Events.styles)(Events);

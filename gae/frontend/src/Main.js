@@ -41,8 +41,7 @@ const drawerWidth = 240;
 class Main extends Component {
   static styles = theme => ({
     root: {
-      display: 'flex',
-      height: '100%'
+      display: 'flex'
     },
     drawerPaper: {
       width: drawerWidth
@@ -68,9 +67,14 @@ class Main extends Component {
         display: 'none'
       }
     },
-    content: {
-      flexGrow: 1,
-      padding: theme.spacing.unit * 3
+    main: {
+      height: '100%',
+      width: '100%',
+      padding: theme.spacing.unit * 2
+    },
+    mainContent: {
+      height: '100%',
+      width: '100%'
     },
     active: {
       backgroundColor: theme.palette.action.selected
@@ -183,9 +187,10 @@ class Main extends Component {
               </Drawer>
             </Hidden>
           </nav>
-          <main className={this.props.classes.content}>
+          <main className={this.props.classes.main}>
             <div className={this.props.classes.toolbar} />
             <MainContent
+              className={this.props.classes.mainContent}
               firebase={this.props.firebase}
               firebaseUser={this.props.firebaseUser}
               gapiReady={this.state.gapiReady}
