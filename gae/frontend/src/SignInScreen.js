@@ -102,9 +102,6 @@ class SignInScreen extends Component {
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     this.unregisterAuthObserver = this.props.firebase.auth.onAuthStateChanged(
       firebaseUser => {
@@ -136,9 +133,6 @@ class SignInScreen extends Component {
     );
   }
 
-  /**
-   * @inheritDoc
-   */
   componentWillUnmount() {
     console.log('SignInScreen: componentWillUnmount');
     this.unregisterAuthObserverNext();

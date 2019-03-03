@@ -127,16 +127,10 @@ class ServiceCard extends Component {
       .then(this.handleService);
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ServiceCard.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.service === undefined) {

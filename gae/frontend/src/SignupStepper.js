@@ -177,9 +177,6 @@ class SignupStepper extends React.Component {
     });
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     let params = new URLSearchParams(window.location.search);
     let startingService = params.get('service');
@@ -193,9 +190,6 @@ class SignupStepper extends React.Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('SignupStepper.componentDidUpdate', prevProps);
     if (this.state.activeStepIndex !== prevState.activeStepIndex) {

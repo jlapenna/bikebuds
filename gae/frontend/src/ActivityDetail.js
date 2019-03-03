@@ -101,9 +101,6 @@ class _ActivityMap extends Component {
     });
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (!this.state.mapMounted || !this.props.activity) {
       return;

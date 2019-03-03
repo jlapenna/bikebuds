@@ -89,9 +89,6 @@ class App extends Component {
     );
   }
 
-  /**
-   * @inheritDoc
-   */
   componentWillUnmount() {
     this.unregisterAuthObserver();
     this.unregisterAuthObserver = null;

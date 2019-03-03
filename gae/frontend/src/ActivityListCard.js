@@ -90,9 +90,6 @@ class ActivityListCard extends Component {
     });
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ActivityListCard.componentDidUpdate', prevProps, this.props);
     if (prevProps.activities !== this.props.activities) {

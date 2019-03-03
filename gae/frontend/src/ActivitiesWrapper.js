@@ -38,17 +38,11 @@ class ActivitiesWrapper extends Component {
     this.props.onResponse(response);
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ActivitiesWrapper.componentDidUpdate', prevProps);
     if (
@@ -63,9 +57,6 @@ class ActivitiesWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   render() {
     console.log('ActivitiesWrapper.render', this.state.response);
     return <div className="ActivitiesWrapper" />;

@@ -43,9 +43,6 @@ class GapiWrapper extends Component {
     });
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Listen for sign-in, sign-out
     this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
@@ -68,16 +65,10 @@ class GapiWrapper extends Component {
     });
   }
 
-  /**
-   * @inheritDoc
-   */
   componentWillUnmount() {
     this.unregisterAuthObserver();
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (
       this.state.clientLoaded !== prevState.clientLoaded ||
@@ -107,9 +98,6 @@ class GapiWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   render() {
     return <div className="GapiWrapper" />;
   }

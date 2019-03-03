@@ -87,9 +87,6 @@ class FcmWrapper extends Component {
     }
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.tokenListener = this.props.firebase.messaging.onTokenRefresh(() => {
@@ -105,9 +102,6 @@ class FcmWrapper extends Component {
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentWillUnmount() {
     if (this.tokenListener != null) {
       this.tokenListener();
@@ -117,9 +111,6 @@ class FcmWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('FcmWrapper.componentDidUpdate', prevProps);
     if (this.props.gapiReady && this.state.monitored === undefined) {
@@ -158,9 +149,6 @@ class FcmWrapper extends Component {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   render() {
     return <div className="FcmWrapper" />;
   }

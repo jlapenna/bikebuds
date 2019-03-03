@@ -85,17 +85,11 @@ class MeasuresChart extends Component {
     console.log('MeasuresChart.handleMeasures:', this.state);
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresChart.componentDidUpdate', prevProps);
     if (this.state.measures === undefined && this.props.measures) {

@@ -72,9 +72,6 @@ class ProfileCard extends Component {
       });
   };
 
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     this.setState({});
   }
