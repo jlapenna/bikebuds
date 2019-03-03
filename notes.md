@@ -271,7 +271,7 @@ It was third party cookies. so I set up a firebase custom domain:
 
 # Strava web push.
 
-# Subscribing 
+# Subscribing
 
 curl -G https://api.strava.com/api/v3/push_subscriptions     -d client_id=XXX     -d client_secret=YYY
 
@@ -295,3 +295,13 @@ curl -H 'Content-Type: application/json' -X POST 'http://localhost:8081/services
      "subscription_id": 133263,
      "updates": {}
      }'
+
+# Withings web push.
+
+# Subscribing
+
+One subscription per user, subscribed on every user sync. nokia_client.subscribe()
+
+## Pushing a test event
+
+curl -H 'Content-Type: application/x-www-form-urlencoded' -X POST 'http://localhost:8081/services/withings/events?sub_secret=XXXXXXXXXXXX&service_key=URLSAFE_SERVICE_KEY' -d 'userid=17012450&startdate=1532017199&enddate=1532017200&appli=1'

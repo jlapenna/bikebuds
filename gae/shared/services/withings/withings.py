@@ -17,21 +17,62 @@ import logging
 
 from google.appengine.ext import ndb
 
-from shared.datastore import services
+from shared.config import config
+
+from shared.datastore.admin import SubscriptionEvent
 from shared.datastore.measures import Measure, Series
 
 import nokia
 
 
-class Synchronizer(object):
-    def sync(self, service):
-        client = create_client(service)
-        measures = client.get_measures(lastupdate=0, updatetime=0)
+class Worker(object):
+
+    def __init__(self, service):
+        self.service = service
+        self.client = create_client(service)
+
+    def sync(self):
+        self.sync_measures()
+        self.sync_subscription()
+
+    def sync_measures(self):
+        measures = self.client.get_measures(lastupdate=0, updatetime=0)
 
         @ndb.transactional
         def put_series():
-            Series.entity_from_withings(service.key, measures).put()
+            Series.entity_from_withings(self.service.key, measures).put()
         return put_series()
+
+    def sync_subscription(self):
+        #frontend_url = config.frontend_url
+        frontend_url = 'https://www.bikebuds.cc'
+        callback_url = (
+                '%s/services/withings/events?sub_secret=%s&service_key=%s' % (
+                    frontend_url,
+                    config.withings_creds['sub_secret'],
+                    self.service.key.urlsafe()))
+        # Throws an exception on error... TODO: handle this.
+        result = self.client.subscribe(callback_url, comment=self.service.key.urlsafe())
+        logging.info('Subscription result: %s-> %s', callback_url, result);
+
+
+class EventsWorker(object):
+    def __init__(self, service):
+        self.service = service
+        self.client = create_client(service)
+
+    def sync(self):
+        events = SubscriptionEvent.query(
+                ancestor=self.service.key)  #.order(-ndb.GenericProperty('event_time'))
+        batch = [event for event in events]
+        @ndb.transactional
+        def transact():
+            logging.debug('process_event_batch: %s, %s', self.service.key, len(batch))
+            measures = self.client.get_measures(lastupdate=0, updatetime=0)
+            Series.entity_from_withings(self.service.key, measures).put()
+            ndb.delete_multi((event.key for event in batch))
+        transact()
+
 
 
 def create_client(service):
