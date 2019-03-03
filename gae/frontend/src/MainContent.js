@@ -77,10 +77,9 @@ class MainContent extends React.Component {
           path="/club/:club_id"
           render={thinger => (
             <Club
-              firebaseUser={this.props.firebaseUser}
+              clubId={Number(thinger.match.params.club_id)}
               gapiReady={this.props.gapiReady}
               profile={this.props.profile}
-              clubId={Number(thinger.match.params.club_id)}
             />
           )}
         />

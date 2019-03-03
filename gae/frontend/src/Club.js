@@ -29,24 +29,10 @@ import Typography from '@material-ui/core/Typography';
 
 import ActivityListCard from './ActivityListCard';
 
-class Club extends Component {
+class ClubFetcher extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    gapiReady: PropTypes.bool.isRequired,
-    profile: PropTypes.object.isRequired
-  };
-
-  static styles = {
-    root: {
-      width: '100%'
-    },
-    card: {
-      height: '400px'
-    },
-    media: {
-      height: '176px',
-      width: '360px'
-    }
+    gapiReady: PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -75,21 +61,11 @@ class Club extends Component {
     });
   };
 
-  handleListItemClick = (index, activity) => {
-    console.log('Club.handleListItemClick', index, activity);
-  };
-
-  /**
-   * @inheritDoc
-   */
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
-  /**
-   * @inheritDoc
-   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('Club.componentDidUpdate', prevProps);
     if (
@@ -108,11 +84,38 @@ class Club extends Component {
   }
 
   render() {
-    if (this.state.club === undefined) {
+    return this.props.render(this.state);
+  }
+}
+
+class _ClubWidget extends Component {
+  static styles = {
+    root: {
+      width: '100%'
+    },
+    card: {
+      height: '400px'
+    },
+    media: {
+      height: '176px',
+      width: '360px'
+    }
+  };
+
+  static propTypes = {
+    profile: PropTypes.object.isRequired,
+    activities: PropTypes.array,
+    club: PropTypes.object,
+    error: PropTypes.object
+  };
+
+  render() {
+    console.log('ClubWidget.render', this.props);
+    if (this.props.club === undefined) {
       return null;
     }
-    if (this.state.club === null) {
-      return <React.Fragment>{this.state.error}</React.Fragment>;
+    if (this.props.club === null) {
+      return <React.Fragment>{this.props.error}</React.Fragment>;
     }
 
     return (
@@ -134,13 +137,13 @@ class Club extends Component {
                 property must be specified." */}
               <CardMedia
                 className={this.props.classes.media}
-                image={this.state.club.cover_photo_small}
+                image={this.props.club.cover_photo_small}
                 title="Club Photo"
               >
                 <Avatar
                   className={this.props.classes.avatar}
-                  alt={this.state.club.name}
-                  src={this.state.club.profile_medium}
+                  alt={this.props.club.name}
+                  src={this.props.club.profile_medium}
                 />
               </CardMedia>
               <CardContent className={this.props.classes.content}>
@@ -151,7 +154,7 @@ class Club extends Component {
                   alignItems="center"
                 >
                   <Grid item>
-                    <Typography variant="h5">{this.state.club.name}</Typography>
+                    <Typography variant="h5">{this.props.club.name}</Typography>
                   </Grid>
                   <Grid item>
                     <Grid
@@ -161,7 +164,7 @@ class Club extends Component {
                       justify="space-evenly"
                       alignItems="center"
                     >
-                      {this.state.club.members.map((member, index) => {
+                      {this.props.club.members.map((member, index) => {
                         var url = '';
                         return (
                           <Grid item key={index}>
@@ -193,7 +196,7 @@ class Club extends Component {
             <ActivityListCard
               gapiReady={this.props.gapiReady}
               profile={this.props.profile}
-              activities={this.state.activities}
+              activities={this.props.activities}
               showAthlete={true}
               showDate={true}
             />
@@ -203,4 +206,25 @@ class Club extends Component {
     );
   }
 }
-export default withStyles(Club.styles)(Club);
+export const ClubWidget = withStyles(_ClubWidget.styles)(_ClubWidget);
+
+export default class Club extends Component {
+  static propTypes = {
+    clubId: PropTypes.number.isRequired,
+    gapiReady: PropTypes.bool.isRequired,
+    profile: PropTypes.object.isRequired
+  };
+
+  render() {
+    console.log('Club.render', this.props);
+    return (
+      <ClubFetcher
+        {...this.props}
+        render={state => {
+          console.log('Club.props.render', state);
+          return <ClubWidget {...state} {...this.props} />;
+        }}
+      />
+    );
+  }
+}
