@@ -40,7 +40,6 @@ function delete_old_versions() {
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_virtualenv
   set_prod_environment
 
   if [[ -z "$@" ]]; then

@@ -34,7 +34,6 @@ function main() {
   fi
 
   echo "Using virtual environment at ${env_path}"
-  source "${env_path}/bin/activate"
 
   local api_path="${repo_path}/gae/api"
   local tmp_path=$(mktemp -d);
