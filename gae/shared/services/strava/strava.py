@@ -151,7 +151,7 @@ class EventsWorker(object):
         self.client = ClientWrapper(service)
 
     def sync(self):
-        client.ensure_access()
+        self.client.ensure_access()
 
         events = SubscriptionEvent.query(
                 ancestor=self.service.key).order(-ndb.GenericProperty('event_time'))

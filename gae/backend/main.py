@@ -127,11 +127,11 @@ def process_event():
     service = event_key.parent().get()
     service_name = service.key.id()
     if service_name == 'withings':
-        _do(withings.EventsWorker(service), service_key)
+        _do(withings.EventsWorker(service), service.key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
-        _do(strava.EventsWorker(service), service_key)
+        _do(strava.EventsWorker(service), service.key)
     return 'OK', 200
 
 
