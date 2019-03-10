@@ -104,11 +104,11 @@ def service_sync(service_name):
         return 'OK', 250
 
     if service_name == 'withings':
-        _do(withings.Worker(service), service.key)
+        _do(withings.Worker(service), work_key=service.key)
     elif service_name == 'fitbit':
-        _do(bbfitbit.Worker(service), service.key)
+        _do(bbfitbit.Worker(service), work_key=service.key)
     elif service_name == 'strava':
-        _do(strava.Worker(service), service.key)
+        _do(strava.Worker(service), work_key=service.key)
 
     task_util.maybe_finish_sync_services_and_queue_process(service, state_key)
     return 'OK', 200
@@ -117,7 +117,7 @@ def service_sync(service_name):
 @app.route('/tasks/process', methods=['GET', 'POST'])
 def process():
     """Called after all services for all users have finished syncing."""
-    _do(strava.ClubMembershipsProcessor(), method='process')
+    _do(strava.ClubMembershipsProcessor(), work_key='all', method='process')
     return 'OK', 200
 
 
@@ -127,11 +127,11 @@ def process_event():
     service = event_key.parent().get()
     service_name = service.key.id()
     if service_name == 'withings':
-        _do(withings.EventsWorker(service), service.key)
+        _do(withings.EventsWorker(service), work_key=service.key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
-        _do(strava.EventsWorker(service), service.key)
+        _do(strava.EventsWorker(service), work_key=service.key)
     return 'OK', 200
 
 
@@ -150,20 +150,11 @@ def _do(worker, work_key=None, method='sync'):
                 work_key,
                 sys.exc_info()[1]
                 )
-        msg = 'DeadlineExceeded for %s/%s' % (
+        return 'Sync Failed', 503
+    except Exception, e:
+        msg = '"%s" for %s/%s' % (
+                sys.exc_info()[1],
                 work_name,
                 work_key,
                 )
-        return 'Sync Failed', 503
-    except Exception, e:
-        logging.debug('%s for %s/%s, Originally: %s',
-            sys.exc_info()[0].__name__,
-            work_name,
-            work_key,
-            sys.exc_info()[1]
-            )
-        msg = '%s for %s/%s' % (
-                sys.exc_info()[0].__name__,
-                work_name,
-                work_key)
         raise SyncException, SyncException(msg), sys.exc_info()[2]
