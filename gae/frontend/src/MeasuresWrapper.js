@@ -17,6 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createRequest } from './bikebuds_api';
 import { readableWeight } from './convert';
 
 class MeasuresWrapper extends Component {
@@ -63,7 +64,9 @@ class MeasuresWrapper extends Component {
       this.state.measures === undefined
     ) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds.get_series().then(this.handleSeries);
+      window.gapi.client.bikebuds
+        .get_series(createRequest())
+        .then(this.handleSeries);
     }
   }
 

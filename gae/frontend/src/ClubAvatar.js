@@ -38,9 +38,13 @@ class ClubAvatar extends Component {
   };
 
   render() {
-    var url = '/club/' + this.props.club.id;
+    var pathname = '/club/' + this.props.club.id;
     return (
-      <IconButton component={Link} to={url} alt={this.props.club.name}>
+      <IconButton
+        component={Link}
+        to={{ pathname: pathname, search: window.location.search }}
+        alt={this.props.club.name}
+      >
         <Avatar
           className={this.props.classes.avatar}
           alt={this.props.club.name}

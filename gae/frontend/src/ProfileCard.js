@@ -133,7 +133,7 @@ class ProfileCard extends Component {
             color="primary"
             variant="contained"
             component={Link}
-            to="/signup"
+            to={{ pathname: '/signup', search: window.location.search }}
             disabled={this.state.connectActionPending}
           >
             Connect Services

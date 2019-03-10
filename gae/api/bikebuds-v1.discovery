@@ -375,7 +375,11 @@
     },
     "MainRequestHeader": {
       "id": "MainRequestHeader",
-      "properties": {},
+      "properties": {
+        "impersonate": {
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "MainResponseHeader": {

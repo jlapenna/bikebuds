@@ -27,6 +27,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
+import { createRequest } from './bikebuds_api';
 import ActivityListCard from './ActivityListCard';
 
 class ClubFetcher extends Component {
@@ -75,10 +76,12 @@ class ClubFetcher extends Component {
     ) {
       this.setState({ fetched: true });
       window.gapi.client.bikebuds
-        .get_club({
-          id: this.props.clubId,
-          activities: true
-        })
+        .get_club(
+          createRequest({
+            id: this.props.clubId,
+            activities: true
+          })
+        )
         .then(this.handleClub, this.handleClub);
     }
   }

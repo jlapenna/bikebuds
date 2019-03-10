@@ -42,7 +42,7 @@ from shared.datastore.users import User, PreferencesMessage, ClientMessage, Clie
 
 
 class RequestHeader(messages.Message):
-    pass
+    impersonate = messages.StringField(1)
 
 
 class ResponseHeader(messages.Message):
@@ -134,7 +134,8 @@ class BikebudsApi(remote.Service):
     def get_activities(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
 
         response = ActivitiesResponse(activities=[])
@@ -151,7 +152,8 @@ class BikebudsApi(remote.Service):
     def update_client(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
 
         if request.client.id is None:
             raise endpoints.BadRequestException('No client ID provided.')
@@ -174,7 +176,8 @@ class BikebudsApi(remote.Service):
     def get_club(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
 
         club_entity = ndb.Key(Club, request.id).get()
         if club_entity is None:
@@ -213,14 +216,11 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_series(self, request):
-        logging.info('Beginning auth')
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        logging.info('Beginning claims')
-        claims = auth_util.verify_claims_from_header(self.request_state)
-        logging.info('Finished claims')
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
-        logging.info('Finished user')
 
         if (user.preferences.weight_service ==
                 PreferencesMessage.WeightService.WITHINGS):
@@ -252,7 +252,8 @@ class BikebudsApi(remote.Service):
     def get_preferences(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         return PreferencesResponse(preferences=user.preferences)
 
@@ -265,7 +266,8 @@ class BikebudsApi(remote.Service):
     def update_preferences(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         user.preferences = request.preferences
         user.put()
@@ -280,7 +282,8 @@ class BikebudsApi(remote.Service):
     def get_profile(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
 
         strava = Service.get(user.key, 'strava')
@@ -307,7 +310,8 @@ class BikebudsApi(remote.Service):
     def get_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         service = Service.get(user.key, request.id)
         service_creds = service.get_credentials()
@@ -323,7 +327,8 @@ class BikebudsApi(remote.Service):
     def update_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         service = Service.get(user.key, request.id)
         service_creds = service.get_credentials()
@@ -341,7 +346,8 @@ class BikebudsApi(remote.Service):
     def sync_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         logging.info('Getting %s service info.', request.id)
         service = Service.get(user.key, request.id)
@@ -357,7 +363,8 @@ class BikebudsApi(remote.Service):
     def disconnect_service(self, request):
         if not endpoints.get_current_user():
             raise endpoints.UnauthorizedException('Unable to identify user.')
-        claims = auth_util.verify_claims_from_header(self.request_state)
+        claims = auth_util.verify_claims(self.request_state,
+                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
         logging.info('Getting %s service info.', request.id)
         service = Service.get(user.key, request.id)

@@ -54,7 +54,9 @@ export default class MainContent extends React.Component {
             )}
           />
           <Route>
-            <Redirect to="/signup" />
+            <Redirect
+              to={{ pathname: '/signup', search: window.location.search }}
+            />
           </Route>
         </Switch>
       );

@@ -52,7 +52,9 @@ class Signup extends React.Component {
 
   render() {
     if (this.state.stepperFinished) {
-      return <Redirect to="/" />;
+      return (
+        <Redirect to={{ pathname: '/', search: window.location.search }} />
+      );
     }
 
     return (

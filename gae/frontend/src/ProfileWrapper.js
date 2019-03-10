@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { createRequest } from './bikebuds_api';
+
 export class ProfileState {
   constructor(onUpdated) {
     this._onUpdated = onUpdated;
@@ -67,7 +69,9 @@ export default class ProfileWrapper extends React.Component {
     console.log('ProfileWrapper.componentDidUpdate', prevProps);
     if (this.props.gapiReady && !this.state.fetched) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds.get_profile().then(this.handleProfile);
+      window.gapi.client.bikebuds
+        .get_profile(createRequest())
+        .then(this.handleProfile);
     }
   }
 

@@ -31,6 +31,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
+import { createRequest } from './bikebuds_api';
 import { config } from './config';
 import { createSession } from './session_util';
 
@@ -64,7 +65,7 @@ class ServiceCard extends Component {
       this.state.service.credentials
     ) {
       window.gapi.client.bikebuds
-        .disconnect_service({ id: this.props.serviceName })
+        .disconnect_service(createRequest({ id: this.props.serviceName }))
         .then(response => {
           this.handleService(response);
           this.setState({ connectActionPending: false });
@@ -101,7 +102,7 @@ class ServiceCard extends Component {
   handleSync = () => {
     this.setState({ syncActionPending: true });
     window.gapi.client.bikebuds
-      .sync_service({ id: this.props.serviceName })
+      .sync_service(createRequest({ id: this.props.serviceName }))
       .then(response => {
         this.handleService(response);
         this.setState({ connectActionPending: false });
@@ -120,10 +121,12 @@ class ServiceCard extends Component {
     this.setState(newState);
 
     window.gapi.client.bikebuds
-      .update_service({
-        id: this.props.serviceName,
-        service: { sync_enabled: event.target.checked }
-      })
+      .update_service(
+        createRequest({
+          id: this.props.serviceName,
+          service: { sync_enabled: event.target.checked }
+        })
+      )
       .then(this.handleService);
   };
 
@@ -136,7 +139,7 @@ class ServiceCard extends Component {
     if (this.props.gapiReady && this.state.service === undefined) {
       console.log('ServiceCard.componentDidUpdate: gapiReady and no state');
       window.gapi.client.bikebuds
-        .get_service({ id: this.props.serviceName })
+        .get_service(createRequest({ id: this.props.serviceName }))
         .then(this.handleService);
     }
   }

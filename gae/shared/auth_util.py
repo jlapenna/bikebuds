@@ -25,10 +25,12 @@ requests_toolbelt.adapters.appengine.monkeypatch()
 HTTP_REQUEST = google.auth.transport.requests.Request()
 
 import flask
+import logging
 
 import google.oauth2.id_token
 from firebase_admin import auth
 
+from shared.datastore.users import User
 
 def claims_required(func):
     @functools.wraps(func)
@@ -43,19 +45,33 @@ def claims_required(func):
 
 def verify(request):
     if request.method == 'POST':
-        return verify_claims_from_header(request)
+        return verify_claims(request)
     elif request.method == 'GET':
         return verify_claims_from_cookie(request)
 
 
-def verify_claims_from_header(request):
+def impersonate(claims, uid):
+    if not uid:
+        return claims
+    if not User.get(claims).admin:
+        raise auth.AuthError(401, 'Non-admin cannot impersonate.')
+    return {'sub': uid}
+
+
+def verify_claims(request, impersonate=None):
     """Return valid claims or throw an AuthError."""
     id_token = request.headers['Authorization'].split(' ').pop()
     claims = google.oauth2.id_token.verify_firebase_token(
         id_token, HTTP_REQUEST)
     if not claims:
         raise auth.AuthError(401, 'Unable to find valid token')
-    return claims
+    if not impersonate:
+        return claims
+
+    if User.get(claims).admin:
+        return {'sub': impersonate}
+    else:
+        raise auth.AuthError(401, 'Non-admin cannot impersonate.')
 
 
 def verify_claims_from_cookie(request):

@@ -59,7 +59,7 @@ class DrawerContent extends React.Component {
             button
             key="Home"
             component={NavLink}
-            to="/"
+            to={{ pathname: '/', search: window.location.search }}
             exact
             activeClassName={this.props.classes.active}
           >
@@ -69,7 +69,7 @@ class DrawerContent extends React.Component {
             button
             key="Events"
             component={NavLink}
-            to="/events"
+            to={{ pathname: '/events', search: window.location.search }}
             exact
             activeClassName={this.props.classes.active}
           >
@@ -79,7 +79,7 @@ class DrawerContent extends React.Component {
             button
             key="Settings"
             component={NavLink}
-            to="/settings"
+            to={{ pathname: '/settings', search: window.location.search }}
             exact
             activeClassName={this.props.classes.active}
           >

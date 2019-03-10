@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createRequest } from './bikebuds_api';
+
 class ActivitiesWrapper extends Component {
   static propTypes = {
     onResponse: PropTypes.func.isRequired
@@ -52,7 +54,7 @@ class ActivitiesWrapper extends Component {
     ) {
       this.setState({ fetched: true });
       window.gapi.client.bikebuds
-        .get_activities()
+        .get_activities(createRequest())
         .then(this.handleUpdateRequestState);
     }
   }

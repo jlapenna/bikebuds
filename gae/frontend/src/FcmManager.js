@@ -17,6 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createRequest } from './bikebuds_api';
 import { config } from './config';
 
 class FcmWrapper extends Component {
@@ -142,9 +143,11 @@ class FcmWrapper extends Component {
       });
       console.log('FcmWrapper.componentDidUpdate: update_client');
       window.gapi.client.bikebuds
-        .update_client({
-          client: { id: this.state.fcmToken }
-        })
+        .update_client(
+          createRequest({
+            client: { id: this.state.fcmToken }
+          })
+        )
         .then(this.updateClientState);
     }
   }

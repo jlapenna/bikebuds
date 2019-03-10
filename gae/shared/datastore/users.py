@@ -41,6 +41,7 @@ def default_preferences():
 
 class User(ndb.Model):
     """Holds user info."""
+    admin = ndb.BooleanProperty(default=False)
     name = ndb.StringProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
