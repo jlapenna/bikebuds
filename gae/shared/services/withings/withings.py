@@ -34,7 +34,8 @@ class Worker(object):
 
     def sync(self):
         self.sync_measures()
-        self.sync_subscription()
+        if not config.is_dev:
+            self.sync_subscription()
 
     def sync_measures(self):
         measures = self.client.get_measures(lastupdate=0, updatetime=0)
