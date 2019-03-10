@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import momentTimezone from 'moment-timezone';
 import moment from 'moment';
 import convert from 'convert-units';
+
+export function localMoment(date) {
+  return momentTimezone.tz(date, momentTimezone.tz.guess());
+}
 
 export function readableDuration(seconds, profile) {
   return moment.duration(Number(seconds), 'seconds').format('hh:mm:ss');

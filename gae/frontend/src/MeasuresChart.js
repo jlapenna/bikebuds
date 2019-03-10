@@ -32,6 +32,8 @@ import {
   Label
 } from 'recharts';
 
+import { localMoment } from './convert';
+
 class MeasuresChart extends Component {
   static defaultProps = {
     intervalUnit: 'M',
@@ -82,7 +84,6 @@ class MeasuresChart extends Component {
     this.setState({
       measures: measures
     });
-    console.log('MeasuresChart.handleMeasures:', this.state);
   };
 
   componentDidMount() {
@@ -111,7 +112,7 @@ class MeasuresChart extends Component {
           <XAxis
             dataKey="date"
             tickFormatter={tick =>
-              moment.utc(tick).format(this.props.intervalFormat)
+              localMoment(moment.utc(tick)).format(this.props.intervalFormat)
             }
             tick={{ position: 'bottom', angle: -45 }}
             textAnchor="end"
@@ -141,7 +142,9 @@ class MeasuresChart extends Component {
           <CartesianGrid stroke="#f5f5f5" />
           <Tooltip
             formatter={value => value.toFixed(1)}
-            labelFormatter={value => moment.utc(value).format('LLL')}
+            labelFormatter={value =>
+              localMoment(moment.utc(value)).format('LLL')
+            }
           />
           <Line
             dataKey="weight"
