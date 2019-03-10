@@ -38,12 +38,10 @@ class Worker(object):
             self.sync_subscription()
 
     def sync_measures(self):
-        measures = self.client.get_measures(lastupdate=0, updatetime=0)
-
-        @ndb.transactional
-        def put_series():
-            Series.entity_from_withings(self.service.key, measures).put()
-        return put_series()
+        measures = sorted(
+                self.client.get_measures(lastupdate=0, updatetime=0),
+                key=lambda x: x.date)
+        Series.entity_from_withings(self.service.key, measures).put()
 
     def sync_subscription(self):
         callback_url = (
@@ -76,17 +74,19 @@ class EventsWorker(object):
         self.client = create_client(service)
 
     def sync(self):
-        events = SubscriptionEvent.query(ancestor=self.service.key)
-        batch = [event for event in events]
+        measures = sorted(
+                self.client.get_measures(lastupdate=0, updatetime=0),
+                key=lambda x: x.date)
         @ndb.transactional
         def transact():
-            logging.debug('process_event_batch: %s, %s',
+            # Ensure we actually fetch all pages of the query, use an iterator.
+            batch = [entity.key for entity
+                        in SubscriptionEvent.query(ancestor=self.service.key)]
+            logging.debug('process_event_batch: %s, count: %s',
                     self.service.key, len(batch))
-            measures = self.client.get_measures(lastupdate=0, updatetime=0)
             Series.entity_from_withings(self.service.key, measures).put()
-            ndb.delete_multi((event.key for event in batch))
+            ndb.delete_multi(batch)
         transact()
-
 
 
 def create_client(service):
