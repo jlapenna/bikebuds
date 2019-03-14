@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import ActivityListCard from './ActivityListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
+import MeasuresSummaryCard from './MeasuresSummaryCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
@@ -63,14 +64,9 @@ class Home extends Component {
                 />
               </Grid>
               <Grid item xs={12} lg={4}>
-                <MeasuresCard
-                  gapiReady={this.props.gapiReady}
+                <MeasuresSummaryCard
                   profile={this.props.profile}
                   measures={wrapperState.measures}
-                  title="Weight"
-                  intervalUnit="d"
-                  intervalFormat="MMM D"
-                  intervalCount="30"
                 />
               </Grid>
               <Grid item xs={12}>
