@@ -18,8 +18,8 @@ import momentTimezone from 'moment-timezone';
 import moment from 'moment';
 import convert from 'convert-units';
 
-export function localMoment(date) {
-  return momentTimezone.tz(date, momentTimezone.tz.guess());
+export function localMoment(dateMoment) {
+  return momentTimezone.tz(dateMoment, momentTimezone.tz.guess());
 }
 
 export function readableDuration(seconds, profile) {

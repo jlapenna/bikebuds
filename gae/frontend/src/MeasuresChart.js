@@ -23,6 +23,7 @@ import moment from 'moment';
 
 import {
   ResponsiveContainer,
+  ErrorBar,
   LineChart,
   Line,
   XAxis,
@@ -38,7 +39,8 @@ class MeasuresChart extends Component {
   static defaultProps = {
     intervalUnit: 'M',
     intervalCount: 12,
-    intervalFormat: "MMM 'YY"
+    intervalFormat: "MMM 'YY",
+    tooltipFormat: 'LLL'
   };
 
   static propTypes = {
@@ -56,6 +58,7 @@ class MeasuresChart extends Component {
     super(props);
     this.state = {
       measures: undefined,
+      ticks: [],
       weightDomain: ['dataMin - 1', 'dataMax + 1'],
       fatDomain: ['dataMin - 1', 'dataMax + 1']
     };
@@ -67,22 +70,61 @@ class MeasuresChart extends Component {
       .clone()
       .subtract(this.props.intervalCount, this.props.intervalUnit);
     var measures = [];
+    var ticks = [];
+    var intervalMeasures = [];
     for (var i = 0; i < newMeasures.length; i++) {
       var measure = newMeasures[newMeasures.length - 1 - i];
-      var measureDate = moment.utc(measure.date);
-      if (measureDate <= earliestDate) {
-        break;
-      }
-      if (measureDate <= preferredNextDate) {
-        measures.unshift(measure);
+      var measureDate = moment(Number(measure.date));
+
+      intervalMeasures.unshift(measure);
+
+      if (measureDate < preferredNextDate) {
+        var weightSum = 0;
+        var weightCount = 0;
+        var weightMax = -1;
+        var weightMin = Number.MAX_SAFE_INTEGER;
+        var fatSum = 0;
+        var fatCount = 0;
+        for (var j = 0; j < intervalMeasures.length; j++) {
+          var weight = intervalMeasures[j].weight;
+          if (weight !== undefined) {
+            weightSum += weight;
+            weightCount += 1;
+            weightMax = Math.max(weight, weightMax);
+            weightMin = Math.min(weight, weightMin);
+          }
+          if (intervalMeasures[j].fat_ratio !== undefined) {
+            fatSum += intervalMeasures[j].fat_ratio;
+            fatCount += 1;
+          }
+        }
+        if (weightCount > 0) {
+          var weightAvg = weightSum / weightCount;
+          var newMeasure = {
+            date: preferredNextDate.clone().format('x'),
+            weightAvg: weightAvg,
+            weightError: [weightAvg - weightMin, weightMax - weightAvg]
+          };
+          if (fatCount > 0) {
+            newMeasure['fat_ratio'] = fatSum / fatCount;
+          }
+          measures.unshift(newMeasure);
+        }
+        ticks.unshift(preferredNextDate.clone());
+        intervalMeasures = [];
         preferredNextDate
           .subtract(1, 'seconds')
           .startOf(this.props.intervalUnit);
       }
+      // Break as necessary.
+      if (measureDate <= earliestDate) {
+        break;
+      }
     }
 
     this.setState({
-      measures: measures
+      measures: measures,
+      ticks: ticks
     });
   };
 
@@ -100,7 +142,6 @@ class MeasuresChart extends Component {
 
   render() {
     if (this.state.measures === undefined || this.state.measures.length === 0) {
-      console.log('MeasuresChart.render: no measures');
       return null;
     }
     return (
@@ -110,17 +151,19 @@ class MeasuresChart extends Component {
           margin={{ top: 12, right: 12, left: 12, bottom: 96 }}
         >
           <XAxis
+            type="number"
             dataKey="date"
             tickFormatter={tick =>
-              localMoment(moment.utc(tick)).format(this.props.intervalFormat)
+              localMoment(tick).format(this.props.intervalFormat)
             }
+            ticks={this.state.ticks}
             tick={{ position: 'bottom', angle: -45 }}
+            domain={['dataMin', 'dataMax']}
             textAnchor="end"
-            interval="preserveStartEnd"
             padding={{ left: 12, right: 12 }}
           />
           <YAxis
-            dataKey="weight"
+            dataKey="weightAvg"
             yAxisId={0}
             name="Weight"
             tickFormatter={tick => tick.toFixed(1)}
@@ -143,21 +186,30 @@ class MeasuresChart extends Component {
           <Tooltip
             formatter={value => value.toFixed(1)}
             labelFormatter={value =>
-              localMoment(moment.utc(value)).format('LLL')
+              moment(Number(value)).format(this.props.tooltipFormat)
             }
           />
           <Line
-            dataKey="weight"
+            dataKey="weightAvg"
             name="Weight"
+            type="natural"
             yAxisId={0}
             connectNulls
             isAnimationActive={false}
             stroke="#03dac6"
-          />
+            strokeWidth={2}
+          >
+            <ErrorBar
+              dataKey="weightError"
+              width={4}
+              direction="y"
+              stroke="#03dac6"
+            />
+          </Line>
           <Line
             dataKey="fat_ratio"
             name="Fat %"
-            type="monotone"
+            type="natural"
             yAxisId={1}
             connectNulls
             isAnimationActive={false}

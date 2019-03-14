@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import moment from 'moment';
+
 import { createRequest } from './bikebuds_api';
 import { readableWeight } from './convert';
 
@@ -44,6 +46,7 @@ class MeasuresWrapper extends Component {
       measures = response.result.series.measures;
     }
     for (var measure in measures) {
+      measures[measure].date = moment.utc(measures[measure].date).format('x');
       if (measures[measure].weight !== undefined) {
         measures[measure].weight = readableWeight(
           measures[measure].weight,

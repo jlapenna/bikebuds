@@ -82,6 +82,7 @@ class Home extends Component {
                   intervalUnit="M"
                   intervalFormat="MMM 'YY"
                   intervalCount="120"
+                  tooltipFormat="MMM 'YY"
                 />
               </Grid>
             </Grid>
