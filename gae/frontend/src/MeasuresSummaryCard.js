@@ -33,7 +33,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from 'recharts';
 
 import { localMoment } from './convert';
 
-class _MeasuresSummaryChart extends Component {
+class MeasuresSummaryCard extends Component {
   static propTypes = {
     profile: PropTypes.object.isRequired,
     measures: PropTypes.array
@@ -111,10 +111,7 @@ class _MeasuresSummaryChart extends Component {
     }
   }
 
-  render() {
-    if (this.state.measures === undefined || this.state.measures.length === 0) {
-      return null;
-    }
+  renderChart() {
     return (
       <div className={this.props.classes.root}>
         <Table className={this.props.classes.summaryTable}>
@@ -195,36 +192,16 @@ class _MeasuresSummaryChart extends Component {
       </div>
     );
   }
-}
-const MeasuresSummaryChart = withStyles(_MeasuresSummaryChart.styles)(
-  _MeasuresSummaryChart
-);
-
-class MeasuresSummaryCard extends Component {
-  static propTypes = {
-    profile: PropTypes.object.isRequired,
-    measures: PropTypes.array
-  };
-
-  static styles = {
-    root: {
-      height: '400px'
-    }
-  };
-
-  renderCardContent() {
-    return (
-      <CardContent className={this.props.classes.content}>
-        <Typography variant="h5">Weight</Typography>
-        <MeasuresSummaryChart {...this.props} />
-      </CardContent>
-    );
-  }
 
   render() {
     return (
       <Card className={this.props.classes.root}>
-        {this.renderCardContent()}
+        <CardContent className={this.props.classes.content}>
+          <Typography variant="h5">Weight</Typography>
+          {this.state.measures !== undefined &&
+            this.state.measures.length > 0 &&
+            this.renderChart()}
+        </CardContent>
       </Card>
     );
   }

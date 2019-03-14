@@ -17,11 +17,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import MeasuresChart from './MeasuresChart';
+import MeasuresSummaryCard from './MeasuresSummaryCard';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<MeasuresChart profile={{}} />, div);
+  ReactDOM.render(<MeasuresSummaryCard profile={{}} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });
 
@@ -38,6 +38,9 @@ it('renders measures without crashing', () => {
       weight: 222.3
     }
   ];
-  ReactDOM.render(<MeasuresChart profile={{}} measures={measures} />, div);
+  ReactDOM.render(
+    <MeasuresSummaryCard profile={{}} measures={measures} />,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });
