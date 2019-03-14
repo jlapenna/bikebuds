@@ -57,8 +57,6 @@ class Worker(object):
 
         activities = []
         for activity in self.client.get_activities():
-            if activity.type != 'Ride':
-                continue
             activities.append(activity)
 
         athlete = self.client.get_athlete()
