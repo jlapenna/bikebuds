@@ -25,9 +25,6 @@ from google.appengine.ext.ndb import msgprop
 from endpoints import message_types
 from endpoints import messages
 
-from measurement import measures
-
-from shared.datastore import message_util
 from shared.datastore.athlete_ref import AthleteRef, AthleteRefMessage
 
 

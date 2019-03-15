@@ -24,13 +24,7 @@ from google.appengine.ext.ndb import msgprop
 from endpoints import message_types
 from endpoints import messages
 
-from measurement import measures
-
 import nokia 
-
-from shared.datastore import message_util
-
-_KG_TO_POUNDS = 2.20462262185
 
 
 class MeasureMessage(messages.Message):
@@ -55,7 +49,7 @@ class MeasureMessage(messages.Message):
     pulse_wave_velocity = messages.FloatField(18)  # 91
 
 
-class Measure(object):
+class _Util(object):
 
     @classmethod
     def message_from_withings(cls, measure):
@@ -90,19 +84,6 @@ class Measure(object):
                 fat_ratio=measure['fat'],
                 )
 
-    @classmethod
-    def latest_query(cls, service_key, measure_type):
-        return Measure.query(
-                MeasureMessage.measure_type != None,
-                ancestor=service_key
-                ).order(MeasureMessage.measure_type, -Measure.date)
-
-    @classmethod
-    def fetch_lastupdate(cls, service_key):
-        return Measure.query(
-                ancestor=service_key
-                ).order(-MeasureMessage.date).fetch(1)
-
 
 class SeriesMessage(messages.Message):
     measures = messages.MessageField(MeasureMessage, 2, repeated=True)
@@ -114,19 +95,19 @@ class Series(ndb.Model):
 
     @classmethod
     def entity_from_withings(cls, service_key, measures, id="default"):
-        measures = [Measure.message_from_withings(m) for m in measures]
+        measures = [_Util.message_from_withings(m) for m in measures]
         series = SeriesMessage(measures=measures)
         return Series(id=id, parent=service_key, series=series)
 
     @classmethod
     def entity_from_fitbit_time_series(cls, service_key, measures, id="default"):
-        measures = [Measure.message_from_fitbit_time_series(m) for m in measures]
+        measures = [_Util.message_from_fitbit_time_series(m) for m in measures]
         series = SeriesMessage(measures=measures)
         return Series(id=id, parent=service_key, series=series)
 
     @classmethod
     def entity_from_fitbit_log(cls, service_key, measures, id="default"):
-        measures = [Measure.message_from_fitbit_log(m) for m in measures]
+        measures = [_Util.message_from_fitbit_log(m) for m in measures]
         series = SeriesMessage(measures=measures)
         return Series(id=id, parent=service_key, series=series)
 

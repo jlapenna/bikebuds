@@ -21,7 +21,7 @@ import fitbit
 
 from shared.config import config
 from shared.datastore import services
-from shared.datastore.measures import Measure, Series
+from shared.datastore.measures import Series
 
 
 class Worker(object):

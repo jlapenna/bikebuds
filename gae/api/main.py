@@ -33,7 +33,7 @@ from shared import auth_util
 from shared.config import config
 from shared import task_util
 from shared.datastore.admin import SyncState
-from shared.datastore.measures import Measure, MeasureMessage, Series, SeriesMessage
+from shared.datastore.measures import Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
 from shared.datastore.athletes import Athlete, AthleteMessage
 from shared.datastore.clubs import Club, ClubMessage

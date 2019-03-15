@@ -30,7 +30,7 @@ import nokia
 from shared.config import config
 from shared import task_util
 from shared.datastore.activities import Activity
-from shared.datastore.admin import DatastoreState, SubscriptionEvent, SyncState
+from shared.datastore.admin import DatastoreState, SyncState
 from shared.datastore.athletes import Athlete
 from shared.datastore.clubs import Club
 from shared.datastore.measures import Series
