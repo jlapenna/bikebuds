@@ -32,6 +32,7 @@ class PreferencesMessage(messages.Message):
         FITBIT = 2
     weight_service = messages.EnumField(WeightService, 2,
             default=WeightService.UNKNOWN)
+    daily_weight_notif = messages.BooleanField(3)
 
 
 def default_preferences():

@@ -951,6 +951,9 @@
     "SharedDatastoreUsersPreferencesMessage": {
       "id": "SharedDatastoreUsersPreferencesMessage",
       "properties": {
+        "daily_weight_notif": {
+          "type": "boolean"
+        },
         "units": {
           "default": "UNKNOWN",
           "enum": [

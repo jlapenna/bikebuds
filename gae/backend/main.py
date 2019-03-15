@@ -135,6 +135,20 @@ def process_event():
     return 'OK', 200
 
 
+@app.route('/tasks/process_weight_trend', methods=['GET', 'POST'])
+def process_weight_trend():
+    service_key = ndb.Key(urlsafe=flask.request.values.get('service_key'))
+    service = service_key.get()
+    service_name = service.key.id()
+    if service_name == 'withings':
+        _do(withings.WeightTrendWorker(service), work_key=service.key)
+    elif service_name == 'fitbit':
+        pass
+    elif service_name == 'strava':
+        pass
+    return 'OK', 200
+
+
 def _do(worker, work_key=None, method='sync'):
     work_name = worker.__class__.__name__
     try:

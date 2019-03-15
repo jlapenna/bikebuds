@@ -47,3 +47,36 @@ class SubscriptionEvent(ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
     processing = ndb.BooleanProperty()
+
+
+class Notification(ndb.Expando):
+    client_store = ndb.KeyProperty()
+    success = ndb.BooleanProperty()
+    notification_id = ndb.StringProperty()
+    title = ndb.StringProperty()
+    body = ndb.StringProperty()
+
+
+class FcmMessage(ndb.Model):
+    """Holds data related to a notification.
+    
+    Parent should be the user associated with the event.
+    """
+    _use_memcache = False
+
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    modified = ndb.DateTimeProperty(auto_now=True)
+    notifications = ndb.StructuredProperty(Notification, repeated=True)
+
+    def add_delivery(self, client_store, message, response):
+        self.notifications.append(
+                Notification(client_store=client_store.key,
+                    success=True,
+                    notification_id=response,
+                    title=message.notification.title,
+                    body=message.notification.body))
+
+    def add_failure(self, client_store, message, response):
+        self.notifications.append(Notification(client_store=client_store.key,
+            success=False, title=message.notification.title,
+            body=message.notification.body))

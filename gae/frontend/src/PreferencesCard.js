@@ -22,6 +22,8 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -59,6 +61,14 @@ class PreferencesCard extends Component {
     this.setState({ updatingRemote: false });
   };
 
+  handleNotifChange = event => {
+    this.setState({ updatingRemote: true });
+
+    var newPreferences = cloneDeepWith(this.props.profile.preferences);
+    newPreferences.daily_weight_notif = event.target.checked;
+    this.updatePreferences(newPreferences);
+  };
+
   handleRadioGroupChange = event => {
     this.setState({ updatingRemote: true });
 
@@ -68,10 +78,14 @@ class PreferencesCard extends Component {
     } else if (event.target.name === 'weight_service') {
       newPreferences.weight_service = event.target.value;
     }
+    this.updatePreferences(newPreferences);
+  };
 
-    // Update locally and remote, this will trigger to renders, once for local,
-    // once when the result comes back.
-    //
+  /**
+   * Update locally and remote, this will trigger to renders, once for local,
+   * once when the result comes back.
+   */
+  updatePreferences = newPreferences => {
     // Local
     this.props.profile.updatePreferences({ preferences: newPreferences });
     // Remote
@@ -81,7 +95,7 @@ class PreferencesCard extends Component {
   };
 
   render() {
-    console.log('PreferencesCard.render: ', this.state);
+    console.log('PreferencesCard.render: ', this.state, this.props);
     return (
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
@@ -135,6 +149,26 @@ class PreferencesCard extends Component {
                   label="Withings"
                 />
               </RadioGroup>
+            </FormControl>
+            <FormControl
+              component="fieldset"
+              className={this.props.classes.formControl}
+              disabled={this.state.updatingRemote}
+            >
+              <Typography variant="h5">Notifications</Typography>
+              <FormGroup disabled={this.state.updatingRemote}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={
+                        this.props.profile.preferences.daily_weight_notif
+                      }
+                      onChange={this.handleNotifChange}
+                    />
+                  }
+                  label="Daily Weight Notification"
+                />
+              </FormGroup>
             </FormControl>
           </div>
         </CardContent>

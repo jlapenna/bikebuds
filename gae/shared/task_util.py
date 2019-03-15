@@ -91,3 +91,14 @@ def process_event(event_entity):
             params={
                 'event_key': event_entity.key.urlsafe()}
             )
+
+
+@ndb.transactional
+def process_weight_trend(service):
+    taskqueue.add(
+            url='/tasks/process_weight_trend',
+            target='backend',
+            transactional=True,
+            params={
+                'service_key': service.key.urlsafe()}
+            )
