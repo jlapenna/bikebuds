@@ -53,13 +53,12 @@ class ServiceCard extends Component {
     super(props);
     this.state = {
       service: undefined,
-      syncActionPending: false,
-      connectActionPending: false
+      actionPending: false
     };
   }
 
   handleConnect = () => {
-    this.setState({ connectActionPending: true });
+    this.setState({ actionPending: true });
     if (
       this.state.service.credentials !== undefined &&
       this.state.service.credentials
@@ -68,7 +67,7 @@ class ServiceCard extends Component {
         .disconnect_service(createRequest({ id: this.props.serviceName }))
         .then(response => {
           this.handleService(response);
-          this.setState({ connectActionPending: false });
+          this.setState({ actionPending: false });
         });
     } else {
       createSession(response => {
@@ -81,7 +80,7 @@ class ServiceCard extends Component {
           );
         } else {
           console.log('Unable to create a session.', response);
-          this.setState({ connectActionPending: false });
+          this.setState({ actionPending: false });
         }
       });
     }
@@ -100,12 +99,12 @@ class ServiceCard extends Component {
   };
 
   handleSync = () => {
-    this.setState({ syncActionPending: true });
+    this.setState({ actionPending: true });
     window.gapi.client.bikebuds
       .sync_service(createRequest({ id: this.props.serviceName }))
       .then(response => {
         this.handleService(response);
-        this.setState({ connectActionPending: false });
+        this.setState({ actionPending: false });
       });
     return;
   };
@@ -164,7 +163,7 @@ class ServiceCard extends Component {
               control={
                 <Switch
                   disabled={
-                    this.state.syncActionPending ||
+                    this.state.actionPending ||
                     this.state.service === undefined ||
                     !this.state.service.credentials
                   }
@@ -197,24 +196,24 @@ class ServiceCard extends Component {
           color="primary"
           variant="contained"
           disabled={
-            this.state.syncActionPending ||
+            this.state.actionPending ||
             this.state.service === undefined ||
             !this.state.service.credentials
           }
           onClick={this.handleSync}
         >
           Sync
-          {this.state.syncActionPending && <CircularProgress size={20} />}
+          {this.state.actionPending && <CircularProgress size={20} />}
         </Button>
         <Button
           color="secondary"
           disabled={
-            this.state.connectActionPending || this.state.service === undefined
+            this.state.actionPending || this.state.service === undefined
           }
           onClick={this.handleConnect}
         >
           {connectText}
-          {this.state.connectActionPending && <CircularProgress size={20} />}
+          {this.state.actionPending && <CircularProgress size={20} />}
         </Button>
       </CardActions>
     );
