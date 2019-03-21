@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:bikebuds/bikebuds_util.dart';
+import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:flutter/material.dart';
@@ -28,23 +29,30 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-
   FirebaseState firebase;
   BikebudsState bikebuds;
+  Future<Map<String, dynamic>> config;
+
+  @override
+  void initState() {
+    super.initState();
+    config = loadConfig();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Bikebuds',
-        theme: ThemeData(
-          primaryColor: PRIMARY_COLOR,
-          accentColor: ACCENT_COLOR,
-          buttonColor: PRIMARY_COLOR,
-        ),
-        initialRoute: '/',
-        routes: <String, WidgetBuilder> {
-          '/': (BuildContext context) =>  MainScreen(onSignedIn: _handleSignedIn),
-        },
+      title: 'Bikebuds',
+      theme: ThemeData(
+        primaryColor: PRIMARY_COLOR,
+        accentColor: ACCENT_COLOR,
+        buttonColor: PRIMARY_COLOR,
+      ),
+      initialRoute: '/',
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) =>
+            MainScreen(config: config, onSignedIn: _handleSignedIn),
+      },
     );
   }
 

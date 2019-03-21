@@ -23,9 +23,10 @@ import 'package:bikebuds/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
+  final Future<Map<String, dynamic>> config;
   final onSignedIn;
 
-  MainScreen({Key key, this.onSignedIn}) : super(key: key);
+  MainScreen({Key key, this.config, this.onSignedIn}) : super(key: key);
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -60,7 +61,7 @@ class _MainScreenState extends State<MainScreen> {
     // Set up a bikebuds API client.
     var bikebuds;
     if (signedInState != null && signedInState.signedIn) {
-      bikebuds = BikebudsState(Future(() async => firebase));
+      bikebuds = BikebudsState(widget.config, Future(() async => firebase));
     }
 
     // Notify.

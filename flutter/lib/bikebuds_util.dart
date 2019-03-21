@@ -20,18 +20,22 @@ import 'package:bikebuds_api/bikebuds/v1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BikebudsState {
+  final Future<Map<String, dynamic>> _config;
   final Future<FirebaseState> _firebaseState;
   Future<BikebudsApi> _api;
   StreamSubscription<FirebaseUser> _unsubscribe;
 
-  BikebudsState(firebaseState)
-      : _firebaseState = firebaseState {
+  BikebudsState(config, firebaseState)
+      : _config = config,
+        _firebaseState = firebaseState {
     _firebaseState.then((FirebaseState firebaseState) {
       _unsubscribe = firebaseState.auth.onAuthStateChanged
           .listen(_handleOnAuthStateChanged);
     });
-    _api = Future(
-            () async => BikebudsApi(await loadFromFuture(firebaseState)));
+    _api = Future(() async {
+      return BikebudsApi(await loadFromFuture(_firebaseState),
+          rootUrl: (await _config)['api_url'] + "/_ah/api/");
+    });
   }
 
   _handleOnAuthStateChanged(FirebaseUser user) async {
