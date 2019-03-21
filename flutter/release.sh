@@ -29,6 +29,8 @@ function main() {
   # Verify repo
   local repo_path="$(get_repo_path)";
 
+  set_prod_environment
+
   # Construct version_code.
   local date_string="$(date '+%Y%m%d')"
   local version_code="${date_string}${build_number}"
@@ -58,10 +60,9 @@ function main() {
       --build-number="${version_code}" \
       --build-name="${version_code}"
 
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to build, aborting. (Also, Restoring API)."
-    ./gae/update_api.sh local > /dev/null 2>&1
-    exit 1;
+  local build_code="$?"
+  if [ "$build_code" -ne 0 ]; then
+    echo "Unable to build!"
   fi
   popd
 
@@ -71,10 +72,18 @@ function main() {
   echo "Reverting build.gradle."
   git checkout "${ANDROID_BUILD_GRADLE}"
 
-  echo ""
-  echo "Built ${version_code} at ${repo_path}/${ANDROID_APK_LOCATION}"
-  cat "${ANDROID_RELEASE_OUTPUT_JSON}" \
-      | python -m json.tool | pygmentize -l json
+  # And restore the dev environment config.
+  set_local_environment
+
+  if [ "$build_code" -ne 0 ]; then
+    echo ""
+    echo "Unable to build!"
+  else
+    echo ""
+    echo "Built ${version_code} at ${repo_path}/${ANDROID_APK_LOCATION}"
+    cat "${ANDROID_RELEASE_OUTPUT_JSON}" \
+        | python -m json.tool | pygmentize -l json
+  fi
 }
 
 main "$@"
