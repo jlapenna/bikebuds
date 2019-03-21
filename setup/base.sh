@@ -29,15 +29,18 @@ function verify_deps() {
   fi
 }
 
-function get_repo_path() {
-  verify_deps
-
+function get_repo_path_no_verify() {
   local repo_path=$(readlink -e "$PWD")
   if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
     echo "Must be in the bikebuds code repo. Quitting." >&2
     exit 1;
   fi
   echo "${repo_path}";
+}
+
+function get_repo_path() {
+  verify_deps
+  get_repo_path_no_verify
 }
 
 function get_env_path() {
@@ -75,5 +78,3 @@ function set_prod_environment() {
   ln -sf prod env
   popd
 }
-
-get_repo_path

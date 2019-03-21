@@ -16,8 +16,10 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
+source setup/base.sh
+
 function main() {
-  local repo_path="$(get_repo_path)";
+  local repo_path="$(get_repo_path_no_verify)";
 
   sudo apt install -y python python-dev python-pip
   sudo apt install -y python3 python3-dev
