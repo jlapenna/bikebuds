@@ -71,11 +71,15 @@ def events_post():
     #        'updates': {}
     #        }
 
-    event_json = flask.request.get_json()
-    owner_id = event_json['owner_id']
-    service_key = Athlete.get_by_id(owner_id, keys_only=True).parent()
-    event_entity = SubscriptionEvent(parent=service_key, **event_json)
-    task_util.process_event(event_entity)
+    event_json = None
+    try:
+        event_json = flask.request.get_json()
+        owner_id = event_json['owner_id']
+        service_key = Athlete.get_by_id(owner_id, keys_only=True).parent()
+        event_entity = SubscriptionEvent(parent=service_key, **event_json)
+        task_util.process_event(event_entity)
+    except:
+        logging.exception('Failed while processing %s', event_json)
     return 'OK', 200
 
 
