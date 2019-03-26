@@ -17,19 +17,66 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 
-Future<Map<String, dynamic>> loadConfig() async {
-  return json.decode(await rootBundle.loadString("config.json"));
-}
-
-class ConfigContainer extends InheritedWidget {
+class ConfigContainer extends StatefulWidget {
+  final Widget child;
   final Map<String, dynamic> config;
 
-  ConfigContainer({Key key, @required Widget child, @required this.config})
-      : super(key: key, child: child);
+  ConfigContainer({
+    @required this.child,
+    this.config,
+  });
+
+  static ConfigContainerState of(BuildContext context) {
+    return (context.inheritFromWidgetOfExactType(_InheritedConfigContainer)
+            as _InheritedConfigContainer)
+        .data;
+  }
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+  ConfigContainerState createState() => new ConfigContainerState();
+}
 
-  static ConfigContainer of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(ConfigContainer);
+class ConfigContainerState extends State<ConfigContainer> {
+  Map<String, dynamic> config;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  _loadConfig() async {
+    print('ConfigContainerState._loadConfig');
+    var loadedConfig = json.decode(await rootBundle.loadString("config.json"));
+    setState(() {
+      this.config = loadedConfig;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('ConfigContainerState.build');
+    return new _InheritedConfigContainer(
+      data: this,
+      child: widget.child,
+    );
+  }
+}
+
+class _InheritedConfigContainer extends InheritedWidget {
+  // Data is your entire state. In our case just 'User'
+  final ConfigContainerState data;
+
+  // You must pass through a child and your state.
+  _InheritedConfigContainer({
+    Key key,
+    @required this.data,
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  // This is a built in method which you can use to check if
+  // any state has changed. If not, no reason to rebuild all the widgets
+  // that rely on your state.
+  @override
+  bool updateShouldNotify(_InheritedConfigContainer old) => true;
 }

@@ -31,19 +31,10 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   FirebaseState firebase;
   BikebudsState bikebuds;
-  Future<Map<String, dynamic>> configLoader;
-  Map<String, dynamic> config;
-
-  @override
-  void initState() {
-    super.initState();
-    loadConfig().then((config) => setState(() => this.config = config));
-  }
 
   @override
   Widget build(BuildContext context) {
     return ConfigContainer(
-      config: config,
       child: MaterialApp(
         title: 'Bikebuds',
         theme: ThemeData(
