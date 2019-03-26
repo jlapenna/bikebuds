@@ -40,7 +40,7 @@ Python Cloud Endpoints Frameworks v2.
 
 ### Android
 
-Uses Official Material Components, firebase libraries and play services.
+Uses Official Material Components, firebase libraries and play services. Deprecated.
 
 ### Flutter
 
@@ -239,6 +239,14 @@ local backend.
 
 If you're not jlapenna@ you can stop reading. ;)
 
+### Backend
+
 ```
 ./gae/deploy.sh
+```
+
+### Flutter
+
+```
+./flutter/release.sh
 ```

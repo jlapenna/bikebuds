@@ -305,3 +305,14 @@ One subscription per user, subscribed on every user sync. nokia_client.subscribe
 ## Pushing a test event
 
 curl -H 'Content-Type: application/x-www-form-urlencoded' -X POST 'http://localhost:8081/services/withings/events?sub_secret=XXXXXXXXXXXX&service_key=URLSAFE_SERVICE_KEY' -d 'userid=17012450&startdate=1532017199&enddate=1532017200&appli=1'
+
+# Play Store Automatic publication
+
+## Service account for release management
+
+https://developers.google.com/android-publisher/getting_started#using_a_service_account
+
+1.  Create a role account: https://play.google.com/apps/publish/?account=5211640537439974576#ApiAccessPlace
+2.  Add the user to play store console: https://play.google.com/apps/publish/?account=5211640537439974576#AdminPlace
+    1.  Should be a "Release Manager."
+    2.  Be sure to include the app you intend to manage.

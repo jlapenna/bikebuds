@@ -29,7 +29,7 @@ function main() {
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
 
   echo "Apt installed python2.7, pip 2.x, virtualenv, gradle and gcloud cli."
-  echo "Or it didn't, you might need to install them yourself."
+  echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 
   echo "Install flutter in ~/flutter/sdk, then press enter."

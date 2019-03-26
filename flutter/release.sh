@@ -51,7 +51,6 @@ function main() {
   echo "Modifying API..."
   ./gae/update_api.sh > /dev/null 2>&1
 
-
   echo ""
   echo "Building..."
   pushd flutter
@@ -83,6 +82,11 @@ function main() {
     echo "Built ${version_code} at ${repo_path}/${ANDROID_APK_LOCATION}"
     cat "${ANDROID_RELEASE_OUTPUT_JSON}" \
         | python -m json.tool | pygmentize -l json
+    python flutter/play_upload.py \
+        -p cc.bikebuds \
+        -a flutter/build/app/outputs/apk/release/app-release.apk \
+        -s environments/prod/service_keys/play-developer-api.json \
+        -t internal
   fi
 }
 
