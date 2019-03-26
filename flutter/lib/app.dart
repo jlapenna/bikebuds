@@ -31,28 +31,32 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   FirebaseState firebase;
   BikebudsState bikebuds;
-  Future<Map<String, dynamic>> config;
+  Future<Map<String, dynamic>> configLoader;
+  Map<String, dynamic> config;
 
   @override
   void initState() {
     super.initState();
-    config = loadConfig();
+    loadConfig().then((config) => setState(() => this.config = config));
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Bikebuds',
-      theme: ThemeData(
-        primaryColor: PRIMARY_COLOR,
-        accentColor: ACCENT_COLOR,
-        buttonColor: PRIMARY_COLOR,
+    return ConfigContainer(
+      config: config,
+      child: MaterialApp(
+        title: 'Bikebuds',
+        theme: ThemeData(
+          primaryColor: PRIMARY_COLOR,
+          accentColor: ACCENT_COLOR,
+          buttonColor: PRIMARY_COLOR,
+        ),
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) =>
+              MainScreen(onSignedIn: _handleSignedIn),
+        },
       ),
-      initialRoute: '/',
-      routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) =>
-            MainScreen(config: config, onSignedIn: _handleSignedIn),
-      },
     );
   }
 

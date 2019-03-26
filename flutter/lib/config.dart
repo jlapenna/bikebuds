@@ -20,3 +20,16 @@ import 'package:flutter/widgets.dart';
 Future<Map<String, dynamic>> loadConfig() async {
   return json.decode(await rootBundle.loadString("config.json"));
 }
+
+class ConfigContainer extends InheritedWidget {
+  final Map<String, dynamic> config;
+
+  ConfigContainer({Key key, @required Widget child, @required this.config})
+      : super(key: key, child: child);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+
+  static ConfigContainer of(BuildContext context) =>
+      context.inheritFromWidgetOfExactType(ConfigContainer);
+}

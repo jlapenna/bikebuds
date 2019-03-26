@@ -20,7 +20,7 @@ import 'package:bikebuds_api/bikebuds/v1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BikebudsState {
-  final Future<Map<String, dynamic>> _config;
+  final Map<String, dynamic> _config;
   final Future<FirebaseState> _firebaseState;
   Future<BikebudsApi> _api;
   StreamSubscription<FirebaseUser> _unsubscribe;
@@ -34,7 +34,7 @@ class BikebudsState {
     });
     _api = Future(() async {
       return BikebudsApi(await loadFromFuture(_firebaseState),
-          rootUrl: (await _config)['api_url'] + "/_ah/api/");
+          rootUrl: (_config)['api_url'] + "/_ah/api/");
     });
   }
 

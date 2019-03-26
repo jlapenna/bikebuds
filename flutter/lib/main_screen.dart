@@ -15,18 +15,18 @@
 import 'dart:async';
 
 import 'package:bikebuds/bikebuds_util.dart';
-import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/config.dart';
 import 'package:bikebuds/events_content.dart';
+import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/privacy_util.dart';
 import 'package:bikebuds/settings_content.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  final Future<Map<String, dynamic>> config;
   final onSignedIn;
 
-  MainScreen({Key key, this.config, this.onSignedIn}) : super(key: key);
+  MainScreen({Key key, this.onSignedIn}) : super(key: key);
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -61,7 +61,8 @@ class _MainScreenState extends State<MainScreen> {
     // Set up a bikebuds API client.
     var bikebuds;
     if (signedInState != null && signedInState.signedIn) {
-      bikebuds = BikebudsState(widget.config, Future(() async => firebase));
+      bikebuds = BikebudsState(ConfigContainer.of(this.context).config,
+          Future(() async => firebase));
     }
 
     // Notify.
@@ -80,6 +81,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var config = ConfigContainer.of(context).config;
+    print('MainScreen.build: $config');
     if (signedInState == null) {
       return Scaffold(
         appBar: AppBar(
