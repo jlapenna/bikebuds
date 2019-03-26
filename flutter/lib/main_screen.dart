@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
-
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/events_content.dart';
@@ -35,54 +33,55 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedDrawerItem = 0;
 
-  Future<FirebaseState> firebaseLoader;
-  FirebaseState firebase;
+  bool signingIn = false;
   FirebaseSignInState signedInState;
-
   BikebudsState bikebuds;
 
-  @override
-  void initState() {
-    super.initState();
-    firebaseLoader = loadFirebase(context).then(_onLoaded);
-  }
+  _maybeSignIn(BuildContext context) async {
+    var config = ConfigContainer.of(context).config;
+    var firebase = FirebaseContainer.of(context);
+    print('MainScreen._maybeSignIn: $signingIn, $config, $firebase');
 
-  FutureOr<FirebaseState> _onLoaded(FirebaseState firebase) async {
-    print('Main._onLoaded');
+    // If we don't have the deps we need, we shouldn't sign-in.
+    if (firebase.appNext == null || config == null) {
+      return;
+    }
+    // If we're already signing in, we shouldn't try again.
+    if (signingIn) {
+      print('MainScreen._maybeSignIn: Already signing in.');
+      return;
+    }
 
-    // Ensure we're signed in.
+    // Otherwise, when have the dependencies we need, so we can continue
+    // signing in.
+    signingIn = true;
+
+    // Ensure we're signed in, this is where this method "goes async."
     FirebaseSignInState signedInState = await ensureSignedIn(context, firebase);
-    print('Main._onLoaded: signedIn: ${signedInState?.signedIn}');
+    print('MainScreen._maybeSignIn: signedIn? ${signedInState?.signedIn}');
     if (signedInState == null || !signedInState.signedIn) {
-      Navigator.pop(context);
-      return firebase;
+      //Navigator.pop(context);
+      signingIn = false;
+      return;
     }
 
     // Set up a bikebuds API client.
-    var bikebuds;
-    if (signedInState != null && signedInState.signedIn) {
-      bikebuds = BikebudsState(ConfigContainer.of(this.context).config,
-          Future(() async => firebase));
-    }
+    var bikebuds =
+        BikebudsState(ConfigContainer.of(this.context).config, firebase);
 
     // Notify.
     setState(() {
       this.signedInState = signedInState;
-      this.firebase = firebase;
       this.bikebuds = bikebuds;
     });
-
-    // Notify our parent...
-    widget.onSignedIn(firebase, bikebuds, signedInState);
-
-    // Return a loaded firebase.
-    return firebase;
   }
 
   @override
   Widget build(BuildContext context) {
     var config = ConfigContainer.of(context).config;
-    print('MainScreen.build: $config');
+    var firebase = FirebaseContainer.of(context);
+    print('MainScreen.build: $config, $firebase');
+    _maybeSignIn(context);
     if (signedInState == null) {
       return Scaffold(
         appBar: AppBar(
@@ -96,12 +95,12 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text("Bikebuds"),
       ),
-      drawer: buildDrawer(),
-      body: buildBody(),
+      drawer: buildDrawer(firebase),
+      body: buildBody(firebase),
     );
   }
 
-  Drawer buildDrawer() {
+  Drawer buildDrawer(FirebaseContainerState firebase) {
     if (firebase == null || signedInState == null) {
       return null;
     }
@@ -162,7 +161,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget buildBody() {
+  Widget buildBody(FirebaseContainerState firebase) {
     if (firebase == null || signedInState == null) {
       return GestureDetector(
         child: Center(
@@ -177,7 +176,7 @@ class _MainScreenState extends State<MainScreen> {
 
     switch (_selectedDrawerItem) {
       case 0:
-        return EventsContent(firebase: firebase);
+        return EventsContent();
       case 1:
         return SettingsContent(bikebuds: bikebuds);
       default:

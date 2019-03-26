@@ -34,78 +34,103 @@ class FirebaseSignInState {
   get signedIn => user != null && userNext != null;
 }
 
-class FirebaseState {
-  final FirebaseApp app;
-  final FirebaseAuth auth;
-  final FirebaseMessaging messaging;
+class FirebaseContainer extends StatefulWidget {
+  final Widget child;
+  final Map<String, dynamic> config;
+
+  FirebaseContainer({
+    @required this.child,
+    this.config,
+  });
+
+  static FirebaseContainerState of(BuildContext context) {
+    return (context.inheritFromWidgetOfExactType(_InheritedFirebaseContainer)
+            as _InheritedFirebaseContainer)
+        .data;
+  }
+
+  @override
+  FirebaseContainerState createState() => new FirebaseContainerState();
+}
+
+class FirebaseContainerState extends State<FirebaseContainer> {
+  final FirebaseApp app = FirebaseApp.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseMessaging messaging = FirebaseMessaging();
 
   FirebaseApp appNext;
   FirebaseAuth authNext;
   Firestore firestore;
 
-  FirebaseState(
-      {@required this.app, @required this.auth, @required this.messaging});
-
   @override
-  String toString() {
-    return 'FirebaseState(${app?.name}, ${appNext?.name})';
+  void initState() {
+    super.initState();
+    _loadFirebase();
   }
 
-  registerMessaging() {
-    if (messaging == null) {
-      return;
+  _loadFirebase() async {
+    print('FirebaseContainerState._loadFirebase');
+    var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
+        .loadString("android/app/google-services-next-android.json"));
+    FirebaseOptions options = _toFirebaseOptions(loadedJson);
+    var appNext = await _loadAppNext(options);
+    var authNext = FirebaseAuth.fromApp(appNext);
+    var firestore = Firestore(app: appNext);
+    setState(() {
+      this.appNext = appNext;
+      this.authNext = authNext;
+      this.firestore = firestore;
+    });
+  }
+
+  FirebaseOptions _toFirebaseOptions(dynamic config) {
+    // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
+    return FirebaseOptions(
+        googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],
+        apiKey: config['client'][0]['api_key'][0]
+            ['current_key'], // iOS API Key?
+        bundleID: "bikebuds.cc", // iOS Bundle ID
+        clientID: null, // iOS Client ID
+        trackingID: null, // Analytics Tracking ID
+        gcmSenderID: config['project_info']['project_number'],
+        projectID: config['project_info']['project_id'],
+        androidClientID: config['client'][0]['oauth_client'][0]['client_id'],
+        databaseURL: config['project_info']['firebase_url'],
+        deepLinkURLScheme: null, // Durable Deep Link service
+        storageBucket: config['project_info']['storage_bucket']);
+  }
+
+  Future<FirebaseApp> _loadAppNext(FirebaseOptions options) async {
+    try {
+      return await FirebaseApp.configure(name: "next", options: options);
+    } catch (e) {
+      return await FirebaseApp.appNamed("next");
     }
-    messaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
-      },
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new _InheritedFirebaseContainer(
+      data: this,
+      child: widget.child,
     );
   }
 }
 
-Future<FirebaseState> loadFirebase(BuildContext context) async {
-  print('loadFirebase');
-  var state = _loadDefaultFirebase();
-  var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
-      .loadString("android/app/google-services-next-android.json"));
-  FirebaseOptions options = _toFirebaseOptions(loadedJson);
-  try {
-    state.appNext = await FirebaseApp.configure(name: "next", options: options);
-  } catch (e) {
-    state.appNext = await FirebaseApp.appNamed("next");
-  }
+class _InheritedFirebaseContainer extends InheritedWidget {
+  // Data is your entire state. In our case just 'User'
+  final FirebaseContainerState data;
 
-  state.authNext = FirebaseAuth.fromApp(state.appNext);
-  state.firestore = Firestore(app: state.appNext);
-  print('loadFirebase: $state');
-  return Future.value(state);
-}
+  // You must pass through a child and your state.
+  const _InheritedFirebaseContainer({
+    Key key,
+    @required this.data,
+    @required Widget child,
+  }) : super(key: key, child: child);
 
-FirebaseState _loadDefaultFirebase() {
-  var app = FirebaseApp.instance;
-  var auth = FirebaseAuth.instance;
-  var messaging = FirebaseMessaging();
-  return FirebaseState(app: app, auth: auth, messaging: messaging);
-}
-
-FirebaseOptions _toFirebaseOptions(dynamic config) {
-  // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
-  return FirebaseOptions(
-      googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],
-      apiKey: config['client'][0]['api_key'][0]['current_key'], // iOS API Key?
-      bundleID: "bikebuds.cc", // iOS Bundle ID
-      clientID: null, // iOS Client ID
-      trackingID: null, // Analytics Tracking ID
-      gcmSenderID: config['project_info']['project_number'],
-      projectID: config['project_info']['project_id'],
-      androidClientID: config['client'][0]['oauth_client'][0]['client_id'],
-      databaseURL: config['project_info']['firebase_url'],
-      deepLinkURLScheme: null, // Durable Deep Link service
-      storageBucket: config['project_info']['storage_bucket']);
+  // This is a built in method which you can use to check if
+  // any state has changed. If not, no reason to rebuild all the widgets
+  // that rely on your state.
+  @override
+  bool updateShouldNotify(_InheritedFirebaseContainer old) => true;
 }

@@ -68,7 +68,7 @@ class _InheritedConfigContainer extends InheritedWidget {
   final ConfigContainerState data;
 
   // You must pass through a child and your state.
-  _InheritedConfigContainer({
+  const _InheritedConfigContainer({
     Key key,
     @required this.data,
     @required Widget child,

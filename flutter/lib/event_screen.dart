@@ -22,16 +22,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class EventScreen extends StatefulWidget {
-  final FirebaseState firebase;
   final DocumentSnapshot event;
 
-  EventScreen({this.firebase, this.event});
+  EventScreen({this.event});
 
   @override
   _EventScreenState createState() => _EventScreenState();
 }
 
 class _EventScreenState extends State<EventScreen> {
+  FirebaseContainerState firebase;
+
   DocumentSnapshot event;
 
   Stream<DocumentSnapshot> eventStream;
@@ -64,11 +65,17 @@ class _EventScreenState extends State<EventScreen> {
     eventStreamSubscription = eventStream.listen(eventStreamListener);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    this.firebase = FirebaseContainer.of(context);
+  }
+
   void titleFocusListener() {
     print('EventScreen.titleFocusListener: Focus: ${titleFocusNode.hasFocus}');
     if (!titleFocusNode.hasFocus) {
       // We lost focus.
-      widget.firebase.firestore.runTransaction((Transaction tx) async {
+      firebase.firestore.runTransaction((Transaction tx) async {
         print(
             'EventScreen.titleFocusListener: running transaction "${titleController.text}"');
         await tx.update(widget.event.reference, <String, dynamic>{
@@ -84,7 +91,7 @@ class _EventScreenState extends State<EventScreen> {
         'EventScreen.descriptionFocusListener: Focus: ${descriptionFocusNode.hasFocus}');
     if (!descriptionFocusNode.hasFocus) {
       // We lost focus.
-      widget.firebase.firestore.runTransaction((Transaction tx) async {
+      firebase.firestore.runTransaction((Transaction tx) async {
         print(
             'EventScreen.descriptionFocusListener: running transaction "${descriptionController.text}"');
         await tx.update(widget.event.reference, <String, dynamic>{
@@ -113,7 +120,7 @@ class _EventScreenState extends State<EventScreen> {
 
   void handleStartDateChanged(newStartDate) {
     print('EventScreen.handleStartDateChanged: $newStartDate');
-    widget.firebase.firestore.runTransaction((Transaction tx) async {
+    firebase.firestore.runTransaction((Transaction tx) async {
       print(
           'EventScreen.handleStartDateChanged: running transaction "$newStartDate"');
       await tx.update(widget.event.reference, <String, dynamic>{

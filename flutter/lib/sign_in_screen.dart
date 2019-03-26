@@ -21,22 +21,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 final GoogleSignIn googleSignIn = GoogleSignIn();
 
 class SignInScreen extends StatefulWidget {
-  final FirebaseState firebase;
-
-  SignInScreen(this.firebase, {Key key}) : super(key: key);
-
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
   var signingIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    //doSignIn();
-  }
 
   doSignIn() async {
     print('SignInScreen.doSignIn: $widget.firebase');
@@ -69,16 +59,17 @@ class _SignInScreenState extends State<SignInScreen> {
       idToken: googleAuth.idToken,
     );
 
+    var firebase = FirebaseContainer.of(context);
+
     // Sign in with the "next" firebase project.
     print('SignInScreen.doSignIn: next: signInWithCredential');
     var firebaseNextUser =
-        await widget.firebase.authNext.signInWithCredential(credential);
+        await firebase.authNext.signInWithCredential(credential);
     await firebaseNextUser.getIdToken(refresh: true);
 
     // Sign into the primary project.
     print('SignInScreen.doSignIn: signInWithCredential');
-    var firebaseUser =
-        await widget.firebase.auth.signInWithCredential(credential);
+    var firebaseUser = await firebase.auth.signInWithCredential(credential);
     await firebaseUser.getIdToken(refresh: true);
 
     var state = FirebaseSignInState(firebaseUser, firebaseNextUser);
@@ -132,6 +123,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('SignInScreen.build');
     return Scaffold(
       body: signingIn ? buildSigningIn(context) : buildStartSignIn(context),
     );
@@ -139,7 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
 }
 
 Future<FirebaseSignInState> ensureSignedIn(
-    BuildContext context, FirebaseState firebase) async {
+    BuildContext context, firebase) async {
   var firebaseUserFuture = firebase.auth.currentUser();
   var firebaseNextUserFuture = firebase.authNext.currentUser();
   FirebaseSignInState signInState = FirebaseSignInState(
@@ -156,7 +148,7 @@ Future<FirebaseSignInState> ensureSignedIn(
   return Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => SignInScreen(firebase),
+      builder: (context) => SignInScreen(),
     ),
   );
 }

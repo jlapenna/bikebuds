@@ -29,35 +29,43 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  FirebaseState firebase;
   BikebudsState bikebuds;
 
   @override
   Widget build(BuildContext context) {
     return ConfigContainer(
-      child: MaterialApp(
-        title: 'Bikebuds',
-        theme: ThemeData(
-          primaryColor: PRIMARY_COLOR,
-          accentColor: ACCENT_COLOR,
-          buttonColor: PRIMARY_COLOR,
+      child: FirebaseContainer(
+        child: MaterialApp(
+          title: 'Bikebuds',
+          theme: ThemeData(
+            primaryColor: PRIMARY_COLOR,
+            accentColor: ACCENT_COLOR,
+            buttonColor: PRIMARY_COLOR,
+          ),
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) =>
+                MainScreen(onSignedIn: _handleSignedIn),
+          },
         ),
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) =>
-              MainScreen(onSignedIn: _handleSignedIn),
-        },
       ),
     );
   }
 
-  _handleSignedIn(FirebaseState firebase, BikebudsState bikebuds,
-      FirebaseSignInState signedInState) {
-    print('App._handleSignedIn: $firebase $signedInState');
-    this.firebase = firebase;
+  _handleSignedIn(BikebudsState bikebuds, FirebaseSignInState signedInState) {
     this.bikebuds = bikebuds;
 
     bikebuds.registerClient();
-    firebase.registerMessaging();
+    FirebaseContainer.of(this.context).messaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
   }
 }

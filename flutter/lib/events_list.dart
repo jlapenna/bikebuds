@@ -19,9 +19,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EventsList extends StatefulWidget {
-  final FirebaseState firebase;
-
-  EventsList({this.firebase});
+  EventsList();
 
   @override
   _EventsListState createState() => _EventsListState();
@@ -30,8 +28,9 @@ class EventsList extends StatefulWidget {
 class _EventsListState extends State<EventsList> {
   @override
   Widget build(BuildContext context) {
+    var firebase = FirebaseContainer.of(context);
     return StreamBuilder<QuerySnapshot>(
-        stream: widget.firebase.firestore.collection('events').snapshots(),
+        stream: firebase.firestore.collection('events').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -64,8 +63,7 @@ class _EventsListState extends State<EventsList> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                EventScreen(firebase: widget.firebase, event: event),
+            builder: (context) => EventScreen(event: event),
           ),
         );
       },

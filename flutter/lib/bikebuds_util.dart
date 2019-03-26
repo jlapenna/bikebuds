@@ -21,27 +21,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class BikebudsState {
   final Map<String, dynamic> _config;
-  final Future<FirebaseState> _firebaseState;
+  final FirebaseContainerState _firebase;
   Future<BikebudsApi> _api;
   StreamSubscription<FirebaseUser> _unsubscribe;
 
-  BikebudsState(config, firebaseState)
+  BikebudsState(config, firebase)
       : _config = config,
-        _firebaseState = firebaseState {
-    _firebaseState.then((FirebaseState firebaseState) {
-      _unsubscribe = firebaseState.auth.onAuthStateChanged
-          .listen(_handleOnAuthStateChanged);
-    });
+        _firebase = firebase {
+    _unsubscribe =
+        _firebase.auth.onAuthStateChanged.listen(_handleOnAuthStateChanged);
     _api = Future(() async {
-      return BikebudsApi(await loadFromFuture(_firebaseState),
+      return BikebudsApi(await loadFromState(_firebase),
           rootUrl: (_config)['api_url'] + "/_ah/api/");
     });
   }
 
   _handleOnAuthStateChanged(FirebaseUser user) async {
     print('BikebudsState._handleOnAuthStateChanged: $user');
-    _api =
-        Future(() async => BikebudsApi(await loadFromFuture(_firebaseState)));
+    _api = Future(() async => BikebudsApi(await loadFromState(_firebase)));
   }
 
   dispose() {
@@ -51,7 +48,7 @@ class BikebudsState {
   }
 
   Future<FirebaseUser> get user async {
-    return (await _firebaseState).auth.currentUser();
+    return _firebase.auth.currentUser();
   }
 
   Future<MainProfileResponse> get profile async {
@@ -59,7 +56,7 @@ class BikebudsState {
   }
 
   Future<MainClientResponse> registerClient() async {
-    var firebaseToken = await (await _firebaseState).messaging.getToken();
+    var firebaseToken = await _firebase.messaging.getToken();
     var request = MainUpdateClientRequest()
       ..client = (SharedDatastoreUsersClientMessage()..id = firebaseToken);
     return (await _api).updateClient(request);

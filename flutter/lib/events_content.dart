@@ -13,13 +13,10 @@
 // limitations under the License.
 
 import 'package:bikebuds/events_list.dart';
-import 'package:bikebuds/firebase_util.dart';
 import 'package:flutter/material.dart';
 
 class EventsContent extends StatefulWidget {
-  final FirebaseState firebase;
-
-  EventsContent({this.firebase});
+  EventsContent();
 
   @override
   _EventsContentState createState() => _EventsContentState();
@@ -29,7 +26,7 @@ class _EventsContentState extends State<EventsContent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: EventsList(firebase: widget.firebase),
+      child: EventsList(),
     );
   }
 }
