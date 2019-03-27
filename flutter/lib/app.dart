@@ -16,6 +16,7 @@ import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_screen.dart';
+import 'package:bikebuds/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(App());
@@ -23,48 +24,61 @@ void main() => runApp(App());
 const Color PRIMARY_COLOR = Color(0xFF03dac6);
 const Color ACCENT_COLOR = Color(0xFFff4081);
 
-class App extends StatefulWidget {
-  @override
-  _AppState createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  BikebudsState bikebuds;
-
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConfigContainer(
       child: FirebaseContainer(
-        child: MaterialApp(
-          title: 'Bikebuds',
-          theme: ThemeData(
-            primaryColor: PRIMARY_COLOR,
-            accentColor: ACCENT_COLOR,
-            buttonColor: PRIMARY_COLOR,
+        child: SignInContainer(
+          child: BikebudsApiContainer(
+            child: SignedInApp(),
           ),
-          initialRoute: '/',
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) =>
-                MainScreen(onSignedIn: _handleSignedIn),
-          },
         ),
       ),
     );
   }
+}
 
-  _handleSignedIn(BikebudsState bikebuds, FirebaseSignInState signedInState) {
-    this.bikebuds = bikebuds;
+class SignedInApp extends StatefulWidget {
+  @override
+  _SignedInAppState createState() => _SignedInAppState();
+}
 
-    bikebuds.registerClient();
-    FirebaseContainer.of(this.context).messaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
+class _SignedInAppState extends State<SignedInApp> {
+  @override
+  void didChangeDependencies() {
+    var bikebuds = BikebudsApiContainer.of(context);
+    if (bikebuds.api != null) {
+      var firebase = FirebaseContainer.of(context);
+      print('Messaging.didDependenciesChange: configuring messaging');
+      firebase.messaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+          print('on message $message');
+        },
+        onResume: (Map<String, dynamic> message) async {
+          print('on resume $message');
+        },
+        onLaunch: (Map<String, dynamic> message) async {
+          print('on launch $message');
+        },
+      );
+      bikebuds.registerClient();
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Bikebuds',
+      theme: ThemeData(
+        primaryColor: PRIMARY_COLOR,
+        accentColor: ACCENT_COLOR,
+        buttonColor: PRIMARY_COLOR,
+      ),
+      initialRoute: '/',
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) => MainScreen(),
       },
     );
   }

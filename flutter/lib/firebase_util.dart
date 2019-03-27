@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:bikebuds/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -36,12 +37,8 @@ class FirebaseSignInState {
 
 class FirebaseContainer extends StatefulWidget {
   final Widget child;
-  final Map<String, dynamic> config;
 
-  FirebaseContainer({
-    @required this.child,
-    this.config,
-  });
+  FirebaseContainer({@required this.child});
 
   static FirebaseContainerState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_InheritedFirebaseContainer)
@@ -54,6 +51,8 @@ class FirebaseContainer extends StatefulWidget {
 }
 
 class FirebaseContainerState extends State<FirebaseContainer> {
+  bool _loading = false;
+
   final FirebaseApp app = FirebaseApp.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseMessaging messaging = FirebaseMessaging();
@@ -63,13 +62,17 @@ class FirebaseContainerState extends State<FirebaseContainer> {
   Firestore firestore;
 
   @override
-  void initState() {
-    super.initState();
-    _loadFirebase();
+  void didChangeDependencies() {
+    var config = ConfigContainer.of(context);
+    if (!_loading && config != null) {
+      _loadFirebase();
+    }
+    super.didChangeDependencies();
   }
 
   _loadFirebase() async {
     print('FirebaseContainerState._loadFirebase');
+    _loading = true;
     var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
         .loadString("android/app/google-services-next-android.json"));
     FirebaseOptions options = _toFirebaseOptions(loadedJson);

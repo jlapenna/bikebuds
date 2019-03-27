@@ -25,6 +25,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('ProfileCard.build: ${profile?.athlete}');
     var photoUrl = profile?.athlete?.profile ?? firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
         ? MemoryImage(

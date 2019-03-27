@@ -14,51 +14,97 @@
 
 import 'dart:async';
 
+import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_http_client.dart';
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 
-class BikebudsState {
-  final Map<String, dynamic> _config;
-  final FirebaseContainerState _firebase;
-  Future<BikebudsApi> _api;
-  StreamSubscription<FirebaseUser> _unsubscribe;
+class BikebudsApiContainer extends StatefulWidget {
+  final Widget child;
 
-  BikebudsState(config, firebase)
-      : _config = config,
-        _firebase = firebase {
-    _unsubscribe =
-        _firebase.auth.onAuthStateChanged.listen(_handleOnAuthStateChanged);
-    _api = Future(() async {
-      return BikebudsApi(await loadFromState(_firebase),
-          rootUrl: (_config)['api_url'] + "/_ah/api/");
+  BikebudsApiContainer({@required this.child});
+
+  static BikebudsApiContainerState of(BuildContext context) {
+    return (context.inheritFromWidgetOfExactType(_InheritedBikebudsApiContainer)
+            as _InheritedBikebudsApiContainer)
+        .data;
+  }
+
+  @override
+  BikebudsApiContainerState createState() => new BikebudsApiContainerState();
+}
+
+class BikebudsApiContainerState extends State<BikebudsApiContainer> {
+  bool _loading = false;
+
+  BikebudsApi api;
+
+  @override
+  void didChangeDependencies() {
+    var config = ConfigContainer.of(context).config;
+    var firebase = FirebaseContainer.of(context);
+    var signedIn = SignInContainer.of(context).signInState.signedIn;
+    if (!_loading && config != null && firebase.app != null && signedIn) {
+      _loadBikebudsApi();
+    }
+    super.didChangeDependencies();
+  }
+
+  _loadBikebudsApi() async {
+    print('BikebudsApiContainerState._loadFirebase');
+    _loading = true;
+    var config = ConfigContainer.of(context).config;
+    var firebase = FirebaseContainer.of(context);
+    var api = BikebudsApi(await loadFromState(firebase),
+        rootUrl: (config)['api_url'] + "/_ah/api/");
+    setState(() {
+      this.api = api;
     });
   }
 
-  _handleOnAuthStateChanged(FirebaseUser user) async {
-    print('BikebudsState._handleOnAuthStateChanged: $user');
-    _api = Future(() async => BikebudsApi(await loadFromState(_firebase)));
-  }
-
-  dispose() {
-    if (_unsubscribe != null) {
-      _unsubscribe.cancel();
-    }
+  @override
+  Widget build(BuildContext context) {
+    return new _InheritedBikebudsApiContainer(
+      data: this,
+      child: widget.child,
+    );
   }
 
   Future<FirebaseUser> get user async {
-    return _firebase.auth.currentUser();
+    var firebase = FirebaseContainer.of(context);
+    return firebase.auth.currentUser();
   }
 
   Future<MainProfileResponse> get profile async {
-    return (await _api).getProfile(MainRequest());
+    return api.getProfile(MainRequest());
   }
 
   Future<MainClientResponse> registerClient() async {
-    var firebaseToken = await _firebase.messaging.getToken();
+    var firebase = FirebaseContainer.of(context);
+    var firebaseToken = await firebase.messaging.getToken();
     var request = MainUpdateClientRequest()
       ..client = (SharedDatastoreUsersClientMessage()..id = firebaseToken);
-    return (await _api).updateClient(request);
+    return api.updateClient(request);
   }
+}
+
+class _InheritedBikebudsApiContainer extends InheritedWidget {
+  // Data is your entire state. In our case just 'User'
+  final BikebudsApiContainerState data;
+
+  // You must pass through a child and your state.
+  const _InheritedBikebudsApiContainer({
+    Key key,
+    @required this.data,
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  // This is a built in method which you can use to check if
+  // any state has changed. If not, no reason to rebuild all the widgets
+  // that rely on your state.
+  @override
+  bool updateShouldNotify(_InheritedBikebudsApiContainer old) => true;
 }

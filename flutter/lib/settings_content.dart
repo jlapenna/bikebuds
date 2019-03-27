@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/profile_card.dart';
 import 'package:bikebuds_api/bikebuds/v1.dart';
@@ -19,23 +21,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingsContent extends StatefulWidget {
-  final BikebudsState bikebuds;
-
-  SettingsContent({this.bikebuds});
-
   @override
   _SettingsContentState createState() => _SettingsContentState();
 }
 
 class _SettingsContentState extends State<SettingsContent> {
+  var _loading = false;
   Future<FirebaseUser> userLoader;
   Future<MainProfileResponse> profileLoader;
 
   @override
-  initState() {
-    super.initState();
-    userLoader = widget.bikebuds.user;
-    profileLoader = widget.bikebuds.profile;
+  void didChangeDependencies() {
+    if (!_loading) {
+      _loading = true;
+      userLoader = BikebudsApiContainer.of(context).user;
+      profileLoader = BikebudsApiContainer.of(context).profile;
+    }
+    super.didChangeDependencies();
   }
 
   @override
