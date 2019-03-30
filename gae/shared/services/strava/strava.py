@@ -172,7 +172,7 @@ def process_event_batch(client, service, object_id, object_type, batch):
     operations = [event.aspect_type for event in batch]
 
     if 'delete' in operations:
-        activity_key = ndb.Key(Activity, object_id, parent=service_key)
+        activity_key = ndb.Key(Activity, object_id, parent=service.key)
         result = activity_key.delete()
         logging.debug('delete result: %s -> %s', activity_key, result)
     else:
