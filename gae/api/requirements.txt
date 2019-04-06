@@ -6,7 +6,6 @@ requests-toolbelt
 google-auth
 google-cloud-datastore
 google-endpoints
-google-endpoints-api-management
 
 firebase-admin
 
