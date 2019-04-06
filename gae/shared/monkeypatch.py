@@ -32,6 +32,9 @@ logging.getLogger('stravalib.model.Club').setLevel(logging.WARN)
 
 # Ensure that the requests library uses urlfetch for its network base.
 # https://cloud.google.com/appengine/docs/standard/python/issue-requests#Python_Quotas_and_limits
+import google
+# Don't try to use google libraries installed outside of lib.
+google.__path__ = ['lib/google']
 import google.auth.transport.requests
 import requests_toolbelt.adapters.appengine
 requests_toolbelt.adapters.appengine.monkeypatch()
