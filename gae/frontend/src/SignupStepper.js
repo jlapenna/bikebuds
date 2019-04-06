@@ -19,12 +19,6 @@ import Privacy from './Privacy';
 import ToS from './ToS';
 
 class SignupStepper extends React.Component {
-  static propTypes = {
-    firebaseUser: PropTypes.object.isRequired,
-    gapiReady: PropTypes.bool.isRequired,
-    onFinished: PropTypes.func.isRequired
-  };
-
   static styles = theme => ({
     root: {
       height: '100%'
@@ -46,6 +40,10 @@ class SignupStepper extends React.Component {
       marginRight: theme.spacing.unit
     }
   });
+
+  static propTypes = {
+    onFinished: PropTypes.func.isRequired
+  };
 
   constructor(props) {
     super(props);

@@ -41,24 +41,9 @@ export default class MainContent extends React.Component {
     }
     if (!this.props.profile.signup_complete) {
       return (
-        <Switch>
-          <Route
-            path="/signup"
-            exact
-            render={() => (
-              <Signup
-                firebase={this.props.firebase}
-                firebaseUser={this.props.firebaseUser}
-                gapiReady={this.props.gapiReady}
-              />
-            )}
-          />
-          <Route>
-            <Redirect
-              to={{ pathname: '/signup', search: window.location.search }}
-            />
-          </Route>
-        </Switch>
+        <Route>
+          <Redirect to="/signup" />
+        </Route>
       );
     }
 
@@ -105,16 +90,7 @@ export default class MainContent extends React.Component {
             />
           )}
         />
-        <Route
-          path="/signup"
-          exact
-          render={() => (
-            <Signup
-              firebaseUser={this.props.firebaseUser}
-              gapiReady={this.props.gapiReady}
-            />
-          )}
-        />
+        <Route path="/signup" exact render={() => <Signup />} />
         <Route>
           <Redirect to="/" />
         </Route>

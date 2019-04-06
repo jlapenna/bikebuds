@@ -15,7 +15,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { Redirect } from 'react-router-dom';
 
@@ -24,11 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import SignupStepper from './SignupStepper';
 
 class Signup extends React.Component {
-  static propTypes = {
-    firebaseUser: PropTypes.object.isRequired,
-    gapiReady: PropTypes.bool.isRequired
-  };
-
   static styles = theme => ({
     root: {
       'background-color': 'red',
@@ -57,13 +51,7 @@ class Signup extends React.Component {
       );
     }
 
-    return (
-      <SignupStepper
-        firebaseUser={this.props.firebaseUser}
-        gapiReady={this.props.gapiReady}
-        onFinished={this.handleStepperFinished}
-      />
-    );
+    return <SignupStepper onFinished={this.handleStepperFinished} />;
   }
 }
 export default withStyles(Signup.styles)(Signup);

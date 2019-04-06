@@ -33,6 +33,7 @@ import { FirebaseState } from './firebase_util';
 import Main from './Main';
 import Privacy from './Privacy';
 import SignInScreen from './SignInScreen';
+import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
 class App extends Component {
@@ -112,6 +113,9 @@ class App extends Component {
           </Route>
           <Route path="/services">
             <div>Misconfigured.</div>
+          </Route>
+          <Route path="/signup">
+            <StandaloneSignup />
           </Route>
           <Route>
             <Main
