@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
+import 'package:bikebuds/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 void main() => runApp(App());
 
@@ -45,30 +49,63 @@ class SignedInApp extends StatefulWidget {
 }
 
 class _SignedInAppState extends State<SignedInApp> {
+  final UserModel user = UserModel();
+
+  StreamSubscription<String> _messagingListener;
+
   @override
   void didChangeDependencies() {
     var bikebuds = BikebudsApiContainer.of(context);
+    var firebase = FirebaseContainer.of(context);
     if (bikebuds.api != null) {
-      var firebase = FirebaseContainer.of(context);
-      print('Messaging.didDependenciesChange: configuring messaging');
-      firebase.messaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print('on message $message');
-        },
-        onResume: (Map<String, dynamic> message) async {
-          print('on resume $message');
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          print('on launch $message');
-        },
-      );
-      bikebuds.registerClient();
+      print('SignedInApp.didDependenciesChange: $bikebuds, $firebase');
+      user.updateProfile(bikebuds.profile);
+      user.updateUser(bikebuds.user);
+      if (_messagingListener == null) {
+        _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
+          print('Messaging.onTokenRefresh');
+          return BikebudsApiContainer.of(context).registerClient(token);
+        });
+        firebase.messaging.requestNotificationPermissions();
+        firebase.messaging.configure(
+          onMessage: (Map<String, dynamic> message) async {
+            print('Messaging.onMessage: $message');
+          },
+          onResume: (Map<String, dynamic> message) async {
+            print('Messaging.onResume: $message');
+          },
+          onLaunch: (Map<String, dynamic> message) async {
+            print('Messaging.onLaunch: $message');
+          },
+        );
+      }
     }
     super.didChangeDependencies();
   }
 
   @override
+  void dispose() {
+    if (_messagingListener != null) {
+      _messagingListener.cancel();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print('SignedInApp.build: $user');
+    return ScopedModel<UserModel>(
+      model: user,
+      child: ScopedModelDescendant<UserModel>(
+          builder: (context, child, model) => buildApp(context)),
+    );
+  }
+
+  Widget buildApp(BuildContext context) {
+    // TODO: Check the profile here, look for signup_complete and block
+    // full-app rendering if we aren't signed up.
+    //MainProfileResponse profile = UserModel.of(context)?.profile;
+
     return MaterialApp(
       title: 'Bikebuds',
       theme: ThemeData(
@@ -78,7 +115,9 @@ class _SignedInAppState extends State<SignedInApp> {
       ),
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => MainScreen(),
+        '/': (BuildContext context) {
+          return MainScreen();
+        },
       },
     );
   }

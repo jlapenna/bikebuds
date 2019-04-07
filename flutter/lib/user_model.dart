@@ -12,24 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/profile_card.dart';
-import 'package:bikebuds/user_model.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-class SettingsContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-            return ProfileCard(model.user, model.profile);
-          }),
-        ],
-      ),
-    );
+class UserModel extends Model {
+  MainProfileResponse _profile;
+  FirebaseUser _user;
+
+  MainProfileResponse get profile => _profile;
+  FirebaseUser get user => _user;
+
+  void updateProfile(FutureOr<MainProfileResponse> response) async {
+    _profile = await response;
+
+    notifyListeners();
   }
+
+  void updateUser(FutureOr<FirebaseUser> user) async {
+    _user = await user;
+
+    notifyListeners();
+  }
+
+  static UserModel of(BuildContext context) =>
+      ScopedModel.of<UserModel>(context);
 }

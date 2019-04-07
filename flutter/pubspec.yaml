@@ -56,6 +56,8 @@ dependencies:
 
   url_launcher: ^5.0.1
 
+  scoped_model: ^1.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

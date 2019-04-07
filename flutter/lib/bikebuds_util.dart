@@ -82,11 +82,11 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     return api.getProfile(MainRequest());
   }
 
-  Future<MainClientResponse> registerClient() async {
-    var firebase = FirebaseContainer.of(context);
-    var firebaseToken = await firebase.messaging.getToken();
+  Future<MainClientResponse> registerClient(
+      FutureOr<String> firebaseToken) async {
     var request = MainUpdateClientRequest()
-      ..client = (SharedDatastoreUsersClientMessage()..id = firebaseToken);
+      ..client =
+          (SharedDatastoreUsersClientMessage()..id = await firebaseToken);
     return api.updateClient(request);
   }
 }
