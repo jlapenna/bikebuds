@@ -75,7 +75,11 @@ def events_post():
     try:
         event_json = flask.request.get_json()
         owner_id = event_json['owner_id']
-        service_key = Athlete.get_by_id(owner_id, keys_only=True).parent()
+        athlete_key = Athlete.get_by_id(owner_id, keys_only=True)
+        if athlete_key is None:
+            logging.warn('Received event for %s but missing Athlete', owner_id)
+            return 'OK', 200
+        service_key = athlete_key.parent()
         event_entity = SubscriptionEvent(parent=service_key, **event_json)
         task_util.process_event(event_entity)
     except:
