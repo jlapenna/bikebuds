@@ -70,10 +70,13 @@ def events_post():
     #        'appli': 1,
     #        }
 
-    service_key = ndb.Key(urlsafe=flask.request.args.get('service_key'))
-    event_data = flask.request.form.to_dict()
-    event_entity = SubscriptionEvent(parent=service_key, **event_data)
-    task_util.process_event(event_entity)
+    try:
+        service_key = ndb.Key(urlsafe=flask.request.args.get('service_key'))
+        event_data = flask.request.form.to_dict()
+        event_entity = SubscriptionEvent(parent=service_key, **event_data)
+        task_util.process_event(event_entity)
+    except:
+        logging.exception('Failed while processing %s', event_data)
     return 'OK', 200
 
 def test(**kwargs):
