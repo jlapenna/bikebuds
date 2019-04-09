@@ -25,14 +25,24 @@ import { config, nextConfig } from './config';
 
 export class FirebaseState {
   constructor(enableMessaging) {
-    this.app = firebase.initializeApp(config);
+    try {
+      this.app = firebase.initializeApp(config);
+    } catch (err) {
+      console.warn('FirebaseState: Tried to re-initialize app: %s', err);
+      this.app = firebase.app();
+    }
     this.auth = firebase.auth();
 
     if (enableMessaging) {
       this.messaging = firebase.messaging();
     }
 
-    this.appNext = firebase.initializeApp(nextConfig, 'next');
+    try {
+      this.appNext = firebase.initializeApp(nextConfig, 'next');
+    } catch (err) {
+      console.warn('FirebaseState: Tried to re-initialize next app: %s', err);
+      this.app = firebase.app('next');
+    }
     this.authNext = firebase.auth(this.appNext);
     this.firestore = firebase.firestore(this.appNext);
   }
