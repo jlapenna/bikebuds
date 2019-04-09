@@ -126,6 +126,11 @@ def process_event():
     event_key = ndb.Key(urlsafe=flask.request.values.get('event_key'))
     service = event_key.parent().get()
     service_name = service.key.id()
+    
+    if service.get_credentials() is None:
+        logging.warn('Cannot process event %s, no credentials', event_key)
+        return 'OK', 200
+
     if service_name == 'withings':
         _do(withings.EventsWorker(service), work_key=service.key)
     elif service_name == 'fitbit':
