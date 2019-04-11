@@ -419,6 +419,9 @@
         },
         "header": {
           "$ref": "MainRequestHeader"
+        },
+        "previous_id": {
+          "type": "string"
         }
       },
       "type": "object"
@@ -942,6 +945,10 @@
     "SharedDatastoreUsersClientMessage": {
       "id": "SharedDatastoreUsersClientMessage",
       "properties": {
+        "active": {
+          "default": "true",
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         }

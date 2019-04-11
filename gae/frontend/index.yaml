@@ -52,6 +52,16 @@ indexes:
   - name: start_date
     direction: desc
 
+- kind: ClientStore
+  ancestor: yes
+  properties:
+  - name: client.active
+
+- kind: ClientStore
+  ancestor: yes
+  properties:
+  - name: client.deactivated
+
 - kind: Service
   properties:
   - name: sync_enabled

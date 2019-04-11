@@ -124,11 +124,12 @@ class Main extends Component {
             gapiReady={this.state.gapiReady}
             profile={this.state.profile}
           />
-          <FcmManager
-            firebase={this.props.firebase}
-            gapiReady={this.state.gapiReady}
-            onMessage={this.handleFcmMessage}
-          />
+          {this.state.gapiReady && this.props.firebase !== undefined && (
+            <FcmManager
+              firebase={this.props.firebase}
+              onMessage={this.handleFcmMessage}
+            />
+          )}
           <AppBar className={this.props.classes.appBar} position="fixed">
             <Toolbar>
               <IconButton

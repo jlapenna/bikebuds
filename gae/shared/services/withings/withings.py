@@ -129,8 +129,8 @@ class WeightTrendWorker(object):
             latest_weight = Weight(kg=latest_weight.weight).lb
 
         # Send notifications
-        clients = ClientStore.query(ancestor=user.key)
-        def notif_fn(latest_weight, client_store=None):
+        clients = fcm_util.active_clients(user.key)
+        def notif_fn(latest_weight, client=None):
             return messaging.Message(
                     notification=messaging.Notification(
                         title='Weight Trend',
@@ -142,9 +142,9 @@ class WeightTrendWorker(object):
                             color='#f45342'
                             ),
                         ),
-                    token=client_store.client.id,
+                    token=client.id,
                     )
-        fcm_util.send(user, clients, notif_fn, latest_weight)
+        fcm_util.send(user.key, clients, notif_fn, latest_weight)
 
     def _weight_trend(self, series):
         today = datetime.datetime.utcnow()

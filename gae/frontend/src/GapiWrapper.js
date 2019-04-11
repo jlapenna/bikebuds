@@ -80,6 +80,7 @@ class GapiWrapper extends Component {
         this.bikebudsLoaded === undefined
       ) {
         this.setState({ bikebudsLoaded: false });
+        console.log('GapiWrapper.loading: ', this.state.bikebudsDiscovery);
         window.gapi.client.load(this.state.bikebudsDiscovery).then(() => {
           this.setState({ bikebudsLoaded: true });
         });

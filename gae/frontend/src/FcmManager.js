@@ -20,10 +20,9 @@ import React, { Component } from 'react';
 import { createRequest } from './bikebuds_api';
 import { config } from './config';
 
-class FcmWrapper extends Component {
+class FcmManager extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    gapiReady: PropTypes.bool.isRequired,
     onMessage: PropTypes.func,
     onReady: PropTypes.func
   };
@@ -31,51 +30,47 @@ class FcmWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      monitored: undefined,
       registered: undefined,
       updated: undefined,
-      fcmToken: undefined,
+      fcmToken: localStorage.getItem('fcmToken'),
       client: undefined
     };
+    console.log('FcmManager.constructor: ', this.state.fcmToken);
 
     this.tokenListener = null;
     this.messageListener = null;
   }
 
   registerFcm = () => {
-    console.log('FcmWrapper.registerFcm');
+    console.log('FcmManager.registerFcm');
     if (config.vapidKey !== undefined) {
       this.props.firebase.messaging.usePublicVapidKey(config.vapidKey);
     }
     this.props.firebase.messaging
       .requestPermission()
       .then(() => {
-        console.log('FcmWrapper.registerFcm: got token');
+        console.log('FcmManager.registerFcm: granted permission');
         return this.props.firebase.messaging.getToken();
       })
       .then(token => {
-        console.log('FcmWrapper.registerFcm: token set');
+        console.log('FcmManager.registerFcm: got token');
+        localStorage.setItem('fcmToken', token);
         this.setState({
           fcmToken: token,
           registered: true
         });
       })
       .catch(error => {
+        localStorage.setItem('fcmToken', null);
         this.setState({
           fcmToken: null
         });
-        if (error.code === 'messaging/permission-blocked') {
-          console.log(
-            'FcmWrapper: Please Unblock Notification Request Manually'
-          );
-        } else {
-          console.log('FcmWrapper: Error Occurred', error);
-        }
+        console.log('FcmManager: Error: ', error);
       });
   };
 
-  updateClientState = response => {
-    console.log('FcmWrapper.updateClientState:', response.result);
+  handleUpdateClient = response => {
+    console.log('FcmManager.handleUpdateClient:', response.result);
     if (response.result === undefined) {
       return;
     }
@@ -89,17 +84,24 @@ class FcmWrapper extends Component {
   };
 
   componentDidMount() {
-    // Triggers componentDidUpdate on mount.
-    this.tokenListener = this.props.firebase.messaging.onTokenRefresh(() => {
-      console.log('FcmWrapper.onTokenRefresh');
-      this.registerFcm();
+    console.log('FcmManager.componentDidMount');
+    // onTokenRefresh is only called when firebase gives the app a new token,
+    // which isn't every reload, but during an "app install" so to speak.
+    this.tokenListener = this.props.firebase.messaging.onTokenRefresh(token => {
+      console.log('FcmManager.onTokenRefresh:', token);
+      localStorage.setItem('fcmToken', token);
+      this.setState({
+        fcmToken: token
+      });
     });
     this.messageListener = this.props.firebase.messaging.onMessage(payload => {
-      console.log('FcmWrapper.onMessage', payload);
+      console.log('FcmManager.onMessage', payload);
       if (this.props.onMessage !== undefined) {
         this.props.onMessage(payload);
       }
     });
+
+    // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
@@ -113,47 +115,29 @@ class FcmWrapper extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('FcmWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.monitored === undefined) {
-      console.log('FcmWrapper.componentDidUpdate: monitoring');
-      this.setState({
-        monitored: false
-      });
-    }
-
-    if (
-      this.props.gapiReady &&
-      this.state.fcmToken === undefined &&
-      this.state.registered === undefined
-    ) {
-      console.log('FcmWrapper.componentDidUpdate: register');
+    console.log('FcmManager.componentDidUpdate');
+    if (this.state.registered === undefined) {
+      console.log('FcmManager.componentDidUpdate: Registering');
       this.setState({
         registered: false
       });
       this.registerFcm();
     }
 
-    if (
-      this.props.gapiReady &&
-      this.state.fcmToken &&
-      this.state.updated === undefined
-    ) {
-      this.setState({
-        updated: false
-      });
-      console.log('FcmWrapper.componentDidUpdate: update_client');
+    if (this.state.fcmToken !== prevState.fcmToken) {
       window.gapi.client.bikebuds
         .update_client(
           createRequest({
-            client: { id: this.state.fcmToken }
+            client: { id: this.state.fcmToken },
+            previous_id: prevState.fcmToken
           })
         )
-        .then(this.updateClientState);
+        .then(this.handleUpdateClient);
     }
   }
 
   render() {
-    return <div className="FcmWrapper" />;
+    return <div className="FcmManager" />;
   }
 }
-export default FcmWrapper;
+export default FcmManager;

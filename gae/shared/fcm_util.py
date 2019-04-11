@@ -19,27 +19,32 @@ from google.appengine.ext import ndb
 from firebase_admin import messaging
 
 from shared.datastore.admin import FcmMessage
+from shared.datastore.users import ClientStore
+
+def active_clients(user_key):
+    return [c for c in ClientStore.query(ClientStore.client.active != False,
+            ancestor=user_key)]
 
 @ndb.transactional
-def send(user, clients, notif_fn, *args, **kwargs):
+def send(user_key, clients, notif_fn, *args, **kwargs):
     """Sends a notification.
 
     Args:
         user: User - The entity being sent the notification.
         clients: [ClientStore] - Clients to send the notification.
         notif_fn: function - *args and **kwargs are passed to this function,
-            a client_store will be passed as an additional kwarg.
+            a ClientMessage will be passed as a 'client' kwarg.
     """
-    notification = FcmMessage(parent=user.key)
+    notification = FcmMessage(parent=user_key)
+    logging.debug('Sending notification to %s clients', len(clients))
     for client_store in clients:
-        message = notif_fn(*args, client_store=client_store, **kwargs) 
+        message = notif_fn(*args, client=client_store.client, **kwargs) 
         try:
             response = messaging.send(message)
-            logging.debug('WeightTrendWorker: %s daily_weight_notif: sent: %s -> %s',
-                    user.key, message, response)
+            logging.debug('fcm_util.send: Success: %s, %s, %s', user_key, message,
+                    response)
             notification.add_delivery(client_store, message, response)
         except messaging.ApiCallError, e:
-            logging.error('WeightTrendWorker: %s daily_weight_notif: failed: %s',
-                    user.key, e)
+            logging.error('fcm_util.send: Failure: %s, %s', user_key, e)
             notification.add_failure(client_store, message, e)
     notification.put()

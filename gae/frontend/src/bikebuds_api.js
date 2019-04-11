@@ -15,12 +15,19 @@
  */
 
 export function createRequest(request) {
-  var base = {
-    header: {
-      impersonate: new URLSearchParams(window.location.search).get(
-        'impersonate'
-      )
+  var impersonate = new URLSearchParams(window.location.search).get(
+    'impersonate'
+  );
+  if (impersonate !== null) {
+    if (request === undefined) {
+      request = {};
     }
-  };
-  return { ...base, ...request };
+    var header = request['header'];
+    if (header === undefined) {
+      header = {};
+    }
+    header['impersonate'] = impersonate;
+  }
+  console.log('createRequest: ', request);
+  return request;
 }

@@ -60,17 +60,26 @@ class User(ndb.Model):
 
 class ClientMessage(messages.Message):
     id = messages.StringField(1)
+    active = messages.BooleanField(2, default=True)
 
 
 class ClientStore(ndb.Model):
     """Holds client info."""
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
-    client = msgprop.MessageProperty(ClientMessage)
+    client = msgprop.MessageProperty(ClientMessage, indexed_fields=['active'])
 
     @classmethod
     def update(cls, user_key, client_message):
         client_key = cls.get_key(user_key, client_message.id)
+        client_store = cls(key=client_key, client=client_message)
+        client_store.put()
+        return client_store
+
+    @classmethod
+    def deactivate(cls, user_key, client_id):
+        client_key = cls.get_key(user_key, client_id)
+        client_message = ClientMessage(id=client_id, active=False)
         client_store = cls(key=client_key, client=client_message)
         client_store.put()
         return client_store

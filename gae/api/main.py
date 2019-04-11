@@ -30,8 +30,9 @@ from endpoints import remote
 from firebase_admin import messaging
 
 from shared import auth_util
-from shared.config import config
+from shared import fcm_util
 from shared import task_util
+from shared.config import config
 from shared.datastore.admin import SyncState
 from shared.datastore.measures import Series, SeriesMessage
 from shared.datastore.activities import Activity, ActivityMessage
@@ -66,6 +67,7 @@ class ActivitiesResponse(messages.Message):
 class UpdateClientRequest(messages.Message):
     header = messages.MessageField(RequestHeader, 1)
     client = messages.MessageField(ClientMessage, 2)
+    previous_id = messages.StringField(3)
 
 
 class ClientResponse(messages.Message):
@@ -159,11 +161,21 @@ class BikebudsApi(remote.Service):
             raise endpoints.BadRequestException('No client ID provided.')
 
         user = User.get(claims)
-        client_store = ClientStore.update(user.key, request.client)
 
-        deferred.defer(ack_fcm_update, client_store.client.id)
-
-        return ClientResponse(client=client_store.client)
+        @ndb.transactional
+        def transact():
+            client_store = ClientStore.update(user.key, request.client)
+            def notif_fn(client=None):
+                return messaging.Message(
+                        data={'state': 'updated'},
+                        token=client.id,
+                        )
+            fcm_util.send(user.key, [client_store], notif_fn)
+            if (request.previous_id != None
+                    and client_store.client.id != request.previous_id):
+                ClientStore.deactivate(user.key, request.previous_id)
+            return ClientResponse(client=client_store.client)
+        return transact()
 
     @endpoints.method(
         endpoints.ResourceContainer(Request,
@@ -372,15 +384,5 @@ class BikebudsApi(remote.Service):
         return ServiceResponse(service=Service.to_message(service))
 
 
-def ack_fcm_update(token):
-    message = messaging.Message(
-            data={'state': 'updated'},
-            token=token,
-            )
-    try:
-        response = messaging.send(message)
-        logging.debug('Successfully sent message: %s', response)
-    except messaging.ApiCallError, e:
-        logging.info('Error: %s', e);
 
 api = endpoints.api_server([BikebudsApi])

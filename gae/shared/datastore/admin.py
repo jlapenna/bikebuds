@@ -49,12 +49,19 @@ class SubscriptionEvent(ndb.Expando):
     processing = ndb.BooleanProperty()
 
 
-class Notification(ndb.Expando):
+class Message(ndb.Expando):
+    id = ndb.StringProperty()
     client_store = ndb.KeyProperty()
     success = ndb.BooleanProperty()
-    notification_id = ndb.StringProperty()
+
+
+class Notification(Message):
     title = ndb.StringProperty()
     body = ndb.StringProperty()
+
+
+class Data(Message):
+    pass
 
 
 class FcmMessage(ndb.Model):
@@ -66,17 +73,38 @@ class FcmMessage(ndb.Model):
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
-    notifications = ndb.StructuredProperty(Notification, repeated=True)
+    messages = ndb.StructuredProperty(Message, repeated=True)
 
     def add_delivery(self, client_store, message, response):
-        self.notifications.append(
-                Notification(client_store=client_store.key,
-                    success=True,
-                    notification_id=response,
-                    title=message.notification.title,
-                    body=message.notification.body))
+        if message.data is not None:
+            self.messages.append(
+                    Data(
+                        id=response,
+                        client_store=client_store.key,
+                        success=True))
+        elif message.notification is not None:
+            self.messages.append(
+                    Notification(
+                        id=response,
+                        client_store=client_store.key,
+                        success=True,
+                        title=message.notification.title,
+                        body=message.notification.body))
+        else:
+            logging.error('Cannot add delivery of unknown message type')
 
     def add_failure(self, client_store, message, response):
-        self.notifications.append(Notification(client_store=client_store.key,
-            success=False, title=message.notification.title,
-            body=message.notification.body))
+        if message.data is not None:
+            self.messages.append(
+                    Data(
+                        client_store=client_store.key,
+                        success=False))
+        elif message.notification is not None:
+            self.messages.append(
+                    Notification(
+                        client_store=client_store.key,
+                        success=False,
+                        title=message.notification.title,
+                        body=message.notification.body))
+        else:
+            logging.error('Cannot add failure of unknown message type')
