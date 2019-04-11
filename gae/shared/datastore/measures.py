@@ -91,7 +91,7 @@ class SeriesMessage(messages.Message):
 
 class Series(ndb.Model):
     """Holds a series of measures."""
-    series = msgprop.MessageProperty(SeriesMessage, indexed=['measures.measure_type', 'measures.date'])
+    series = msgprop.MessageProperty(SeriesMessage)
 
     @classmethod
     def entity_from_withings(cls, service_key, measures, id="default"):
