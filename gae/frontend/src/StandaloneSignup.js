@@ -16,8 +16,6 @@
 
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router } from 'react-router-dom';
-
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -47,7 +45,7 @@ class StandaloneSignup extends Component {
 
   render() {
     return (
-      <Router>
+      <React.Fragment>
         <div className={this.props.classes.root}>
           <AppBar className={this.props.classes.appBar} position="fixed">
             <Toolbar>
@@ -65,7 +63,7 @@ class StandaloneSignup extends Component {
             <Signup />
           </main>
         </div>
-      </Router>
+      </React.Fragment>
     );
   }
 }

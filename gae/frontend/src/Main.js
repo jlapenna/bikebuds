@@ -17,8 +17,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router } from 'react-router-dom';
-
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
@@ -122,7 +120,7 @@ class Main extends Component {
 
   render() {
     return (
-      <Router>
+      <React.Fragment>
         <div className={this.props.classes.root}>
           <GapiWrapper
             onReady={this.handleGapiReady}
@@ -207,7 +205,7 @@ class Main extends Component {
             />
           </main>
         </div>
-      </Router>
+      </React.Fragment>
     );
   }
 }
