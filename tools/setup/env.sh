@@ -71,7 +71,7 @@ function main() {
   echo ""
   echo "Initializing npm packages for frontend."
   pushd gae/frontend
-  npm install
+  HUSKY_SKIP_INSTALL=true npm install
   popd
 }
 

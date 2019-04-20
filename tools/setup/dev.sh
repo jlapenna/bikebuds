@@ -21,6 +21,10 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path_no_verify)";
 
+  echo "Setting up your git repository."
+  git config core.hooksPath tools/githooks
+
+  echo "Installing the correct packages with apt"
   sudo apt install -y python python-dev python-pip
   sudo apt install -y python3 python3-dev
   sudo apt install -y virtualenv
