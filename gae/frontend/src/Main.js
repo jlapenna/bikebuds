@@ -104,6 +104,11 @@ class Main extends Component {
     this.setState({ gapiReady: true });
   };
 
+  handleGapiFailed = () => {
+    console.log('Main.handleGapiFailed');
+    this.setState({ gapiReady: false });
+  };
+
   handleProfileUpdated = profile => {
     console.log('Main.handleProfileUpdated', profile);
     this.setState({
@@ -119,7 +124,10 @@ class Main extends Component {
     return (
       <Router>
         <div className={this.props.classes.root}>
-          <GapiWrapper onReady={this.handleGapiReady} />
+          <GapiWrapper
+            onReady={this.handleGapiReady}
+            onFailed={this.handleGapiFailed}
+          />
           <ProfileWrapper
             gapiReady={this.state.gapiReady}
             profile={this.state.profile}

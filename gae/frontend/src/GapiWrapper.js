@@ -31,24 +31,46 @@ class GapiWrapper extends Component {
       bikebudsDiscovery: undefined,
       bikebudsLoaded: undefined,
       bikebudsReady: false,
-      authDict: undefined
+      authDict: undefined,
+      failed: false
     };
-    this.onGapiLoaded = this.onGapiLoaded.bind(this);
   }
 
   /** Load the gapi client after the library is loaded. */
-  onGapiLoaded() {
-    window.gapi.load('client', () => {
-      this.setState({ clientLoaded: true });
+  onGapiLoaded = () => {
+    window.gapi.load('client', {
+      callback: () => {
+        console.log('GapiWrapper.onGapiLoaded: client loaded.');
+        this.setState({ clientLoaded: true });
+      },
+      onerror: () => {
+        // Handle loading error.
+        console.log('GapiWrapper.onGapiLoaded: failed to load!');
+        this.setState({ failed: true });
+      },
+      timeout: 5000, // 5 seconds.
+      ontimeout: () => {
+        // Handle timeout.
+        console.log(
+          'GapiWrapper.onGapiLoaded: could not load in a timely manner!'
+        );
+        this.setState({ failed: true });
+      }
     });
-  }
+  };
 
   componentDidMount() {
     // Listen for sign-in, sign-out
     this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
-      user.getIdToken(true).then(idToken => {
-        this.setState({ authDict: { access_token: idToken } });
-      });
+      user
+        .getIdToken(true)
+        .then(idToken => {
+          this.setState({ authDict: { access_token: idToken } });
+        })
+        .catch(err => {
+          console.log('GapiWrapper.getIdToken: failed', err);
+          this.setState({ failed: true });
+        });
     });
 
     // Load up the google-api library and a client.
@@ -70,6 +92,17 @@ class GapiWrapper extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevState.failed !== this.state.failed && this.state.failed) {
+      // Notify the parent whenever a failure occurs, because we never set
+      // failed false, this will only happen once.
+      if (this.props.onFailed !== undefined) {
+        this.props.onFailed();
+      }
+    }
+    if (this.state.failed) {
+      console.log('GapiWrapper.componentDidUpdate: permanently failed.');
+      return;
+    }
     if (
       this.state.clientLoaded !== prevState.clientLoaded ||
       this.state.bikebudsDiscovery !== prevState.bikebudsDiscovery
