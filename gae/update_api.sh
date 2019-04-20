@@ -1,7 +1,7 @@
 #!/bin/bash
 # Update API.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 API="bikebuds"
 VERSION="v1"

@@ -16,7 +16,7 @@
 
 # Update firebase services in prod.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

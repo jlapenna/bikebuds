@@ -16,7 +16,7 @@
 
 # Run a ipython interpreter inside the same virutal env appengine does.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

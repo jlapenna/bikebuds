@@ -16,7 +16,7 @@
 
 # Build a production apk.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 ANDROID_BUILD_GRADLE="flutter/android/app/build.gradle"
 ANDROID_APK_LOCATION="flutter/build/app/outputs/apk/release/app-release.apk"

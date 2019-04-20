@@ -78,13 +78,13 @@ From the root directory:
 
 ```
 # Ensure you have the right apps on your machine to do development.
-./setup/dev.sh  # Installs pre-reqs
+./tools/setup/dev.sh  # Installs pre-reqs
 
 # Ensure the source tree links to the proper configs, so you can compile.
-./setup/env.sh  # Sets up 
+./tools/setup/env.sh  # Sets up 
 ```
 
-After running `setup/dev.sh`, you need to edit a file because of the way our
+After running `tools/setup/dev.sh`, you need to edit a file because of the way our
 spec file is generated. You'll want to apply this diff:
 ```
 diff --git a/lib/src/dart_resources.dart b/lib/src/dart_resources.dart
@@ -232,7 +232,7 @@ Set up port-forwards on your android device so the flutter app can talk to the
 local backend.
 
 ```
-./setup/android.sh
+./flutter/local.sh
 ```
 
 ## Production

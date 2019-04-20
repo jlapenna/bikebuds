@@ -16,7 +16,7 @@
 
 # Deploy the service to appengine, rewriting code to support production.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 function delete_old_versions() {
   # From: https://almcc.me/blog/2017/05/04/removing-older-versions-on-google-app-engine/

@@ -16,7 +16,7 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 REPO_PATH="$(get_repo_path)";
 

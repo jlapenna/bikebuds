@@ -16,7 +16,7 @@
 
 # Run a local instance, rewriting code for local development.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 function main() {
   local repo_path="$(get_repo_path)";

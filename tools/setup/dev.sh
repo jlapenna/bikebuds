@@ -16,7 +16,7 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
-source setup/base.sh
+source tools/scripts/base.sh
 
 function main() {
   local repo_path="$(get_repo_path_no_verify)";
@@ -46,7 +46,7 @@ function main() {
   echo "Now make sure dart, flutter, and android tools are in your path, then press enter."
   read
 
-  echo "Run setup/discapis.sh, after ensuring your path is set up correctly."
+  echo "Run tools/setup/discapis.sh, after ensuring your path is set up correctly."
 }
 
 main "$@"
