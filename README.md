@@ -121,6 +121,14 @@ index 9ed04ae..0d180f3 100644
      encodeQueryParam(MethodParameter param) {
 ```
 
+#### Git Hooks
+
+`dev.sh` sets the repo's core.hooksPath to tools/githooks. Hooks include:
+
+1.  husky -- Run all affected tests in the frontend project.
+2.  flutter test -- Run all tests for the flutter app.
+
+
 ### Evironment Configs
 
 The setup script directs you to clone some environment git repos. There are two,
