@@ -35,9 +35,11 @@ from shared.datastore.athletes import Athlete
 from shared.datastore.clubs import Club
 from shared.datastore.measures import Series
 from shared.datastore.services import Service
-from shared.services.withings import withings
-from shared.services.bbfitbit import bbfitbit
-from shared.services.strava import strava
+
+from services.bbfitbit import bbfitbit
+from services.strava import strava
+from services.withings import withings
+
 
 # Flask setup
 app = flask.Flask(__name__)
