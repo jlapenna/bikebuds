@@ -157,7 +157,9 @@ get_measures returns NokiaMeasureGroup.
 
 # SSL CERTIFICATE 
 
-```text
+To create a cert and validate we own its domain:
+
+```shell
 ./certbot-auto --manual certonly -d '*.bikebuds.cc';
 rm -rf bikebuds.cc-cert/;
 sudo cp -Lr /etc/letsencrypt/live/bikebuds.cc bikebuds.cc-cert;
@@ -165,12 +167,26 @@ sudo chown -R jlapenna bikebuds.cc-cert;
 openssl rsa \
     -in bikebuds.cc-cert/privkey.pem \
     -out bikebuds.cc-cert/privkey_rsa.pem;
-gcloud app ssl-certificates create \
+```
+
+To update the cert on gcp:
+
+```shell
+gcloud app ssl-certificates update 12362252 \
     --display-name star-dot-bikebuds.cc \
     --certificate bikebuds.cc-cert/fullchain.pem \
     --private-key bikebuds.cc-cert/privkey_rsa.pem;
-gcloud app domain-mappings update '*.bikebuds.cc' \
-    --certificate-id XXXXXXXXXXX
+```
+
+To create a new cert and associated mapping:
+
+```shell
+#gcloud app ssl-certificates create \
+#    --display-name star-dot-bikebuds.cc \
+#    --certificate bikebuds.cc-cert/fullchain.pem \
+#    --private-key bikebuds.cc-cert/privkey_rsa.pem;
+#gcloud app domain-mappings update '*.bikebuds.cc' \
+#    --certificate-id 12362252;
 ```
 
 ## Proper configuration:
