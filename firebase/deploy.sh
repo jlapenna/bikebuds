@@ -21,8 +21,6 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_virtualenv
-
   pushd firebase/bikebuds-next;
   firebase deploy --only firestore:rules,indexes
   popd
