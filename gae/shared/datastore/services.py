@@ -108,7 +108,7 @@ class ServiceCredentials(ndb.Expando):
             updated = True
             service_creds = ServiceCredentials(
                     id=service.key.id(), parent=service.key)
-        for k, v in new_credentials.iteritems():
+        for k, v in new_credentials.items():
             updated = True
             setattr(service_creds, k, v)
         if updated:

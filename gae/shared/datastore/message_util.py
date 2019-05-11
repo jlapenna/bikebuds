@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from future.utils import raise_
 import sys
 
 def to_message(cls, entity, convert_fn, *args, **kwargs):
@@ -30,5 +31,5 @@ def to_message(cls, entity, convert_fn, *args, **kwargs):
         except Exception, e:
             msg = 'Unable to convert: %s (%s) -> %s' % (
                     key, value, sys.exc_info()[1])
-            raise Exception, Exception(msg), sys.exc_info()[2]
+            raise_(Exception, msg, sys.exc_info()[2])
     return cls(**attributes)

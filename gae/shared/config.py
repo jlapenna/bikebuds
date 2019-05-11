@@ -19,7 +19,7 @@ import os
 class _Config(object):
     def __init__(self):
         base_config = json.load(open('lib/env/config.json'))
-        for key, value in base_config.iteritems():
+        for key, value in base_config.items():
             setattr(self, key, value)
 
         self.is_dev = _devOrProd(True, False)
