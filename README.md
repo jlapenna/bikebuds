@@ -258,3 +258,10 @@ If you're not jlapenna@ you can stop reading. ;)
 ```
 ./flutter/release.sh
 ```
+
+## Python Client
+
+A python client exists in gae/client. You can use it from the root directory, like so:
+
+```
+```

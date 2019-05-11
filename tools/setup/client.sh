@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2019 Google LLC
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,20 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Run a ipython interpreter inside the same virutal env appengine does.
+# Dependencies for development, in order to start a dev server, for example.
 
 source tools/scripts/base.sh
 
+
 function main() {
   local repo_path="$(get_repo_path)";
+  local client_path="${repo_path}/gae/client"
 
-  activate_env
+  echo ""
+  echo "Installing client dependencies."
+  activate_client_virtualenv
+  pip3 install -r "${client_path}/requirements.txt"
+  deactivate
 
-  pip2 install ipython >/dev/null
-
-  ipython "$@"
-
+  echo ""
+  echo "Linking environments."
+  rm -rf "${client_path}/lib"
+  mkdir "${client_path}/lib"
+  pushd "$client_path/lib"
+  ln -sf ../../../environments/env
+  popd
 }
 
 main "$@"
-

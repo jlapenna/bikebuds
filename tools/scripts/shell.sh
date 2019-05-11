@@ -18,15 +18,17 @@
 
 source tools/scripts/base.sh
 
-REPO_PATH="$(get_repo_path)";
+export REPO_PATH="$(get_repo_path)";
 
 function source_files() {
   find . \
     \( \
     -path './appengine_env' -o \
+    -path './client_env' -o \
     -path './flutter/build' -o \
     -path './gae/api/lib' -o \
     -path './gae/backend/lib' -o \
+    -path './gae/client/lib' -o \
     -path './gae/frontend/build' -o \
     -path './gae/frontend/lib' -o \
     -path './gae/frontend/node_modules' \

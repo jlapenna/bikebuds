@@ -116,7 +116,7 @@ function main() {
   git reset HEAD~
 
   # And restore the dev environment config.
-  set_local_environment
+  set_dev_environment
 }
 
 main "$@"

@@ -1,0 +1,11 @@
+iPython
+
+# Talks to the datastore
+google-cloud-datastore
+
+# Talks oauth
+google_auth_oauthlib
+
+# Talks to the bikebuds API
+pyswagger
+requests

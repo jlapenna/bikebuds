@@ -21,7 +21,11 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  activate_virtualenv
+  echo ""
+  echo "Installing libraries into virtualenv."
+  activate_server_virtualenv
+  pip2 install ipython grpcio
+  deactivate
 
   echo ""
   echo "Setting up environments."

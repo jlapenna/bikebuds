@@ -72,7 +72,7 @@ function main() {
   git checkout "${ANDROID_BUILD_GRADLE}"
 
   # And restore the dev environment config.
-  set_local_environment
+  set_dev_environment
 
   if [ "$build_code" -ne 0 ]; then
     echo ""

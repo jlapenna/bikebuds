@@ -19,20 +19,20 @@
 source tools/scripts/base.sh
 
 function main() {
-  local repo_path="$(get_repo_path_no_verify)";
+  local repo_path="$(get_repo_path)";
 
   echo "Setting up your git repository."
   git config core.hooksPath tools/githooks
 
   echo "Installing the correct packages with apt"
   sudo apt install -y python python-dev python-pip
-  sudo apt install -y python3 python3-dev
+  sudo apt install -y python3 python3-dev python3-pip
   sudo apt install -y virtualenv
   sudo apt install -y gradle
   sudo apt install -y google-cloud-sdk-app-engine-python \
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
 
-  echo "Apt installed python2.7, pip 2.x, virtualenv, gradle and gcloud cli."
+  echo "Apt installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 

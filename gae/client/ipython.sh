@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,33 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Run a local instance, rewriting code for local development.
+# Dependencies for development, in order to start a dev server, for example.
 
 source tools/scripts/base.sh
 
 function main() {
-  local repo_path="$(get_repo_path)";
+  local repo_path="$(get_repo_path)"; 
+  local client_path="${repo_path}/gae/client"
 
-  activate_gae_virtualenv
-  set_dev_environment
+  activate_client_virtualenv
 
-  pushd gae/frontend;
-  BROWSER=none npm start &
-  popd
+  load_config
 
-  # Enable debug logs: --dev_appserver_log_level=debug \
+  if [[ "" != "${CONFIG_datastore_emulator_host}" ]]; then
+    echo "Running against the local datastore.";
+    export DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}";
+    export DATASTORE_PROJECT_ID="${CONFIG_project_id}";
+  fi
 
-  dev_appserver.py \
-    -A bikebuds-test \
-    --log_level=debug \
-    --support_datastore_emulator=1 \
-    --datastore_emulator_port=8090 \
-    --specified_service_ports=default:8081,api:8082,backend:8083 \
-    gae/frontend/app.yaml \
-    gae/api/app.yaml \
-    gae/backend/app.yaml \
-    ;
-  fg;
+  pushd "${client_path}"
+  ipython --InteractiveShellApp.exec_files="['startup.py']" $@
 }
 
 main "$@"
