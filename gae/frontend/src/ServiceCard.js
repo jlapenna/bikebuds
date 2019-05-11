@@ -76,7 +76,7 @@ class ServiceCard extends Component {
             config.frontendUrl +
               '/services/' +
               this.props.serviceName +
-              '/init?dest=/services/frontend'
+              '/init?dest=/settings'
           );
         } else {
           console.log('Unable to create a session.', response);
