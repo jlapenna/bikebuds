@@ -39,11 +39,23 @@ function main() {
   local tmp_path=$(mktemp -d);
   local zipfile="${API}-${VERSION}.zip"
   local zip_path="${tmp_path}/${API}-${VERSION}.zip"
+  local spec_path="${api_path}/${API}${VERSION}openapi.json"
   local discovery_path="${api_path}/${API}-${VERSION}.discovery"
 
   # These commands do accept -a but it doesn't seem to actually respect that
   # flag completely, as evidenced by failures not finding files from /lib/...
   pushd "${api_path}"
+
+  echo "Generating openapi spec for python."
+  python "${api_path}/lib/endpoints/endpointscfg.py" get_openapi_spec main.BikebudsApi \
+      -a "${api_path}" \
+      --hostname "${hostname}" \
+      -o "${api_path}" \
+     ;
+  if [[ "$?" != 0 || ! -e "${spec_path}" ]]; then
+    echo "spec file not created."
+    exit 1;
+  fi
 
   echo "Generating discovery doc for javascript and dart."
   python "lib/endpoints/endpointscfg.py" get_discovery_doc main.BikebudsApi \

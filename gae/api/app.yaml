@@ -27,6 +27,13 @@ handlers:
   http_headers:
     Access-Control-Allow-Origin: '*'
 
+- url: /bikebudsv1openapi.json
+  static_files: bikebudsv1openapi.json
+  upload: bikebudsv1openapi.json
+  expiration: 0m
+  http_headers:
+    Access-Control-Allow-Origin: '*'
+
 env_variables:
   # Firebase
   FIREBASE_PROJECT_ID: 'bikebuds-app'
