@@ -123,7 +123,7 @@ class UpdateServiceRequest(messages.Message):
         # Using this (per some documentation...) is wrong...
         #'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
         )},
-    audiences={'firebase': config.project_id}
+    audiences={'firebase': [config.project_id]}
     )
 class BikebudsApi(remote.Service):
 
