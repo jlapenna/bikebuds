@@ -60,14 +60,32 @@ def impersonate(claims, uid):
 
 def verify_claims(request, impersonate=None):
     """Return valid claims or throw an AuthError."""
+    if 'Authorization' not in request.headers:
+        raise auth.AuthError(401, 'Unable to find bearer in headers')
     id_token = request.headers['Authorization'].split(' ').pop()
-    claims = google.oauth2.id_token.verify_firebase_token(
-        id_token, HTTP_REQUEST)
+
+    claims = None
+    if 'UseAltAuth' in request.headers:
+        # This is a standard oauth token from my python client.
+        claims = google.oauth2.id_token.verify_oauth2_token(
+            id_token, HTTP_REQUEST)
+        # The claims have an email address that we have verified. Use that to
+        # find the firebase user.
+        if claims['iss'] == 'https://accounts.google.com':
+            firebase_user = auth.get_user_by_email(claims['email'])
+            claims = {'sub': firebase_user.uid}
+    else:
+        # This is a firebase token.
+        claims = google.oauth2.id_token.verify_firebase_token(
+            id_token, HTTP_REQUEST)
+
     if not claims:
-        raise auth.AuthError(401, 'Unable to find valid token')
+        raise auth.AuthError(401, 'Unable to validate id_token')
+
     if not impersonate:
         return claims
 
+    # We're impersonating someone.
     if User.get(claims).admin:
         return {'sub': impersonate}
     else:

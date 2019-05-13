@@ -708,6 +708,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -749,6 +753,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -778,6 +786,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -807,6 +819,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -836,6 +852,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -871,6 +891,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -906,6 +930,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -941,6 +969,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -970,6 +1002,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -999,6 +1035,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -1034,6 +1074,10 @@
           {
             "api_key": [],
             "firebase-d667da81": []
+          },
+          {
+            "api_key": [],
+            "google_id_token-a2d2554c": []
           }
         ]
       }
@@ -1065,6 +1109,21 @@
       "x-google-audiences": "bikebuds-test",
       "x-google-issuer": "https://securetoken.google.com/bikebuds-test",
       "x-google-jwks_uri": "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    },
+    "google_id_token": {
+      "authorizationUrl": "",
+      "flow": "implicit",
+      "type": "oauth2",
+      "x-google-issuer": "https://accounts.google.com",
+      "x-google-jwks_uri": "https://www.googleapis.com/service_accounts/v1/metadata/raw/federated-signon@system.gserviceaccount.com"
+    },
+    "google_id_token-a2d2554c": {
+      "authorizationUrl": "",
+      "flow": "implicit",
+      "type": "oauth2",
+      "x-google-audiences": "443176458138-dsvtl7ulc9m933fofel08t20eb909fna.apps.googleusercontent.com",
+      "x-google-issuer": "https://accounts.google.com",
+      "x-google-jwks_uri": "https://www.googleapis.com/service_accounts/v1/metadata/raw/federated-signon@system.gserviceaccount.com"
     }
   },
   "swagger": "2.0"

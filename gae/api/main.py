@@ -117,13 +117,22 @@ class UpdateServiceRequest(messages.Message):
 @endpoints.api(
     name='bikebuds',
     version='v1',
-    issuers={'firebase': endpoints.Issuer(
-        config.issuer,
-        'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
-        # Using this (per some documentation...) is wrong...
-        #'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
-        )},
-    audiences={'firebase': [config.project_id]}
+    issuers={
+        'firebase': endpoints.Issuer(
+            'https://securetoken.google.com/' + config.project_id,
+            'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+            # Using this (per some documentation...) is wrong...
+            #'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+            ),
+        'google_id_token': endpoints.Issuer(
+            'https://accounts.google.com',
+            'https://www.googleapis.com/service_accounts/v1/metadata/raw/federated-signon@system.gserviceaccount.com',
+            ),
+        },
+    audiences={
+        'firebase': [config.project_id],
+        'google_id_token': [config.python_client_testing_client_id],
+        }
     )
 class BikebudsApi(remote.Service):
 
@@ -134,8 +143,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_activities(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -152,8 +161,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def update_client(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
 
@@ -186,8 +195,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_club(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
 
@@ -228,8 +237,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_series(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -262,8 +271,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_preferences(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -276,8 +285,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def update_preferences(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -292,8 +301,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_profile(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -320,8 +329,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def get_service(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -337,8 +346,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def update_service(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -356,8 +365,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def sync_service(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
@@ -373,8 +382,8 @@ class BikebudsApi(remote.Service):
         http_method='POST',
         api_key_required=True)
     def disconnect_service(self, request):
-        if not endpoints.get_current_user():
-            raise endpoints.UnauthorizedException('Unable to identify user.')
+        logging.debug('User: endpoints.get_current_user: %s',
+                endpoints.get_current_user())
         claims = auth_util.verify_claims(self.request_state,
                 impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
