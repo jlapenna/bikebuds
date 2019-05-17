@@ -59,7 +59,7 @@ function set_prod_environment() {
 
 
 function get_client_virtualenv_path() {
-  local env_path=$(readlink -e "$(get_repo_path)/client_env")
+  local env_path=$(readlink -e "$(get_repo_path)/client")
   if [[ ! -e "$env_path" ]]; then
     echo "Unable to locate the virtual environment. Quitting." >&2
     exit 1;
@@ -79,7 +79,7 @@ function activate_client_virtualenv() {
 }
 
 function get_gae_virtualenv_path() {
-  local env_path=$(readlink -e "$(get_repo_path)/appengine_env")
+  local env_path=$(readlink -e "$(get_repo_path)/environments/virtual/gae")
   if [[ ! -e "$env_path" ]]; then
     echo "Unable to locate the virtual environment. Quitting." >&2
     exit 1;

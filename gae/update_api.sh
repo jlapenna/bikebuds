@@ -27,7 +27,7 @@ function main() {
     exit 1;
   fi
 
-  local env_path=$(readlink -f "${repo_path}/appengine_env")
+  local env_path=$(readlink -f "${repo_path}/environments/virtual/gae")
   if [ "$?" -ne 0 ]; then
     echo "Unable to locate the virtual environment"
     exit 1;
