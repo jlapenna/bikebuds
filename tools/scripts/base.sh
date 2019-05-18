@@ -97,3 +97,23 @@ function activate_gae_virtualenv() {
     exit 2;
   fi
 }
+
+function get_gae3_virtualenv_path() {
+  local env_path=$(readlink -e "$(get_repo_path)/environments/virtual/gae3")
+  if [[ ! -e "$env_path" ]]; then
+    echo "Unable to locate the virtual environment. Quitting." >&2
+    exit 1;
+  fi
+  echo "${env_path}";
+}
+
+function activate_gae3_virtualenv() {
+  local env_path="$(get_gae3_virtualenv_path)";
+  echo "Activating virtual environment at ${env_path}"
+  virtualenv --python python3 "${env_path}" >/dev/null 2>&1
+  source "${env_path}/bin/activate"
+  if [ "$?" -ne 0 ]; then
+    echo "Unable to setup virtual environment. Quitting." >&2
+    exit 2;
+  fi
+}

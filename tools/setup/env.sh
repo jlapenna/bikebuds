@@ -22,14 +22,20 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   echo ""
+  echo "Setting up virtual environments."
+  mkdir environments >/dev/null 2>&1;
+  mkdir environments/virtual/client >/dev/null 2>&1;
+  mkdir environments/virtual/gae >/dev/null 2>&1;
+  mkdir environments/virtual/gae3 >/dev/null 2>&1;
+
+  echo ""
   echo "Installing libraries into virtualenv."
-  activate_server_virtualenv
+  activate_gae_virtualenv
   pip2 install ipython grpcio
   deactivate
 
   echo ""
-  echo "Setting up environments."
-  mkdir environments >/dev/null 2>&1;
+  echo "Setting up config environments."
   pushd environments;
   if [[ ! -d "dev" ]]; then
     echo "TODO: Please install the dev config git repo, then press enter."
