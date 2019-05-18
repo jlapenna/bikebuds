@@ -25,7 +25,7 @@ function main() {
   set_dev_environment
 
   pushd gae/frontend;
-  BROWSER=none npm start &
+  PORT=8080 BROWSER=none npm start &
   popd
 
   # Enable debug logs: --dev_appserver_log_level=debug \

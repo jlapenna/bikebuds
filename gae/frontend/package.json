@@ -26,7 +26,7 @@
   },
   "repository": "github:jlapenna/bikebuds",
   "scripts": {
-    "start": "PORT=8080 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:staged": "CI=true react-scripts test --env=jsdom --findRelatedTests",
