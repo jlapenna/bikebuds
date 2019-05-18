@@ -18,17 +18,24 @@ import os
 
 class _Config(object):
     def __init__(self):
-        base_config = json.load(open('lib/env/config.json'))
+        base_path = 'lib/env'
+        if not os.path.exists('base_path'):
+            base_path = 'env/'
+        base_config = json.load(open(os.path.join(base_path, 'config.json')))
         for key, value in base_config.items():
             setattr(self, key, value)
 
         self.origins = _devOrProd(
-            [self.devserver_url, self.frontend_url, self.api_url, self.backend_url],
+            [self.devserver_url, self.frontend_url, self.api_url, self.backend_url,
+             self.devserver3_url, self.frontend3_url, self.api3_url, self.backend3_url],
             [self.frontend_url, self.api_url, self.backend_url])
 
-        self.fitbit_creds = json.load(open('lib/env/service_keys/fitbit.json'))
-        self.strava_creds = json.load(open('lib/env/service_keys/strava.json'))
-        self.withings_creds = json.load(open('lib/env/service_keys/withings.json'))
+        self.fitbit_creds = json.load(open(os.path.join(base_path,
+            'service_keys/fitbit.json')))
+        self.strava_creds = json.load(open(os.path.join(base_path,
+            'service_keys/strava.json')))
+        self.withings_creds = json.load(open(os.path.join(base_path,
+            'service_keys/withings.json')))
 
 
 def _devOrProd(dev, prod):
