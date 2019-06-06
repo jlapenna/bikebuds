@@ -57,14 +57,14 @@ class PreferencesCard extends Component {
 
   handlePreferences = response => {
     console.log('PreferencesCard.updatePreferenceState', response);
-    this.props.profile.updatePreferences(response.result);
+    this.props.profile.updatePreferences(response.body);
     this.setState({ updatingRemote: false });
   };
 
   handleNotifChange = event => {
     this.setState({ updatingRemote: true });
 
-    var newPreferences = cloneDeepWith(this.props.profile.preferences);
+    var newPreferences = cloneDeepWith(this.props.profile.user.properties.preferences);
     newPreferences.daily_weight_notif = event.target.checked;
     this.updatePreferences(newPreferences);
   };
@@ -72,7 +72,7 @@ class PreferencesCard extends Component {
   handleRadioGroupChange = event => {
     this.setState({ updatingRemote: true });
 
-    var newPreferences = cloneDeepWith(this.props.profile.preferences);
+    var newPreferences = cloneDeepWith(this.props.profile.user.properties.preferences);
     if (event.target.name === 'units') {
       newPreferences.units = event.target.value;
     } else if (event.target.name === 'weight_service') {
@@ -88,9 +88,15 @@ class PreferencesCard extends Component {
   updatePreferences = newPreferences => {
     // Local
     this.props.profile.updatePreferences({ preferences: newPreferences });
+
     // Remote
-    window.gapi.client.bikebuds
-      .update_preferences(createRequest({ preferences: newPreferences }))
+    this.props.apiClient.bikebuds
+      .update_preferences(createRequest({
+        payload: {
+          preferences: newPreferences
+        }
+      })
+      )
       .then(this.handlePreferences);
   };
 
@@ -110,7 +116,7 @@ class PreferencesCard extends Component {
                 aria-label="Measurement Units"
                 name="units"
                 className={this.props.classes.group}
-                value={this.props.profile.preferences.units}
+                value={this.props.profile.user.properties.preferences.units}
                 onChange={this.handleRadioGroupChange}
               >
                 <FormControlLabel
@@ -135,7 +141,7 @@ class PreferencesCard extends Component {
                 aria-label="Weight Service"
                 name="weight_service"
                 className={this.props.classes.group}
-                value={this.props.profile.preferences.weight_service}
+                value={this.props.profile.user.properties.preferences.weight_service}
                 onChange={this.handleRadioGroupChange}
               >
                 <FormControlLabel
@@ -161,7 +167,7 @@ class PreferencesCard extends Component {
                   control={
                     <Switch
                       checked={
-                        this.props.profile.preferences.daily_weight_notif
+                        this.props.profile.user.properties.preferences.daily_weight_notif
                       }
                       onChange={this.handleNotifChange}
                     />

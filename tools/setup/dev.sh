@@ -31,6 +31,7 @@ function main() {
   sudo apt install -y gradle
   sudo apt install -y google-cloud-sdk-app-engine-python \
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
+  sudo apt install -y jq
 
   echo "Apt installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
@@ -50,7 +51,12 @@ function main() {
   echo "Now make sure dart, flutter, and android tools are in your path, then press enter."
   read
 
-  echo "Run tools/setup/discapis.sh, after ensuring your path is set up correctly."
+  echo "Downloading an openapi-generator for dart."
+  git clone https://github.com/openapitools/openapi-generator generated/openapi-generator
+  pushd generated/openapi-generator
+  mvn clean package
+  popd
+
 }
 
 main "$@"

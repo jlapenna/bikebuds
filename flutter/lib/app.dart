@@ -64,7 +64,7 @@ class _SignedInAppState extends State<SignedInApp> {
       if (_messagingListener == null) {
         _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
           print('Messaging.onTokenRefresh');
-          return BikebudsApiContainer.of(context).registerClient(token);
+          BikebudsApiContainer.of(context).registerClient(token);
         });
         firebase.messaging.requestNotificationPermissions();
         firebase.messaging.configure(
@@ -104,7 +104,7 @@ class _SignedInAppState extends State<SignedInApp> {
   Widget buildApp(BuildContext context) {
     // TODO: Check the profile here, look for signup_complete and block
     // full-app rendering if we aren't signed up.
-    //MainProfileResponse profile = UserModel.of(context)?.profile;
+    //User user = UserModel.of(context)?.bikebudsUser;
 
     return MaterialApp(
       title: 'Bikebuds',

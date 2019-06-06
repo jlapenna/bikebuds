@@ -332,3 +332,11 @@ https://developers.google.com/android-publisher/getting_started#using_a_service_
 2.  Add the user to play store console: https://play.google.com/apps/publish/?account=5211640537439974576#AdminPlace
     1.  Should be a "Release Manager."
     2.  Be sure to include the app you intend to manage.
+
+# Cloud Tasks
+
+Not supported locally.
+
+```
+gcloud --project=bikebuds-app tasks queues create default
+```

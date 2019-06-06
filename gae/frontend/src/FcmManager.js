@@ -23,6 +23,7 @@ import { config } from './config';
 class FcmManager extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
+    apiClient: PropTypes.object.isRequired,
     onMessage: PropTypes.func,
     onReady: PropTypes.func
   };
@@ -61,30 +62,34 @@ class FcmManager extends Component {
         });
       })
       .catch(error => {
+        console.log('FcmManager: Error: ', error);
         localStorage.setItem('fcmToken', null);
         this.setState({
           fcmToken: null
         });
-        console.log('FcmManager: Error: ', error);
       });
   };
 
   handleUpdateClient = response => {
-    console.log('FcmManager.handleUpdateClient:', response.result);
-    if (response.result === undefined) {
+    console.log('FcmManager.handleUpdateClient:', response.body);
+    if (response.body === undefined) {
       return;
     }
     this.setState({
-      client: response.result.client,
+      client: response.body.client,
       updated: true
     });
     if (this.props.onReady !== undefined) {
-      this.props.onReady(response.result.client);
+      this.props.onReady(response.body.client);
     }
   };
 
   componentDidMount() {
     console.log('FcmManager.componentDidMount');
+    if (config.isDev && config.fakeUser) {
+      // No push messages when running with fake users.
+      return;
+    }
     // onTokenRefresh is only called when firebase gives the app a new token,
     // which isn't every reload, but during an "app install" so to speak.
     this.tokenListener = this.props.firebase.messaging.onTokenRefresh(token => {
@@ -116,6 +121,10 @@ class FcmManager extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('FcmManager.componentDidUpdate');
+    if (config.isDev && config.fakeUser) {
+      // No push messages when running with fake users.
+      return;
+    }
     if (this.state.registered === undefined) {
       console.log('FcmManager.componentDidUpdate: Registering');
       this.setState({
@@ -124,12 +133,17 @@ class FcmManager extends Component {
       this.registerFcm();
     }
 
-    if (this.state.fcmToken !== prevState.fcmToken) {
-      window.gapi.client.bikebuds
+    if (
+      this.state.fcmToken !== prevState.fcmToken &&
+      this.state.fcmToken != null
+    ) {
+      this.props.apiClient.bikebuds
         .update_client(
           createRequest({
-            client: { id: this.state.fcmToken },
-            previous_id: prevState.fcmToken
+            payload: {
+              client: { token: this.state.fcmToken },
+              previous_token: prevState.fcmToken
+            }
           })
         )
         .then(this.handleUpdateClient);

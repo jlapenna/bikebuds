@@ -27,7 +27,7 @@ import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
   static propTypes = {
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object
   };
 
@@ -39,7 +39,7 @@ class Home extends Component {
   handleActivitiesResponse = response => {
     console.log('Home.onActivitiesReady', response);
     this.setState({
-      activities: response.result.activities
+      activities: response.body
     });
   };
 
@@ -48,16 +48,16 @@ class Home extends Component {
       <div>
         <MeasuresWrapper
           profile={this.props.profile}
-          gapiReady={this.props.gapiReady}
+          apiClient={this.props.apiClient}
           render={wrapperState => (
             <Grid container spacing={24}>
               <Grid item xs={12} lg={8}>
                 <ActivitiesWrapper
-                  gapiReady={this.props.gapiReady}
+                  apiClient={this.props.apiClient}
                   onResponse={this.handleActivitiesResponse}
                 />
                 <ActivityListCard
-                  gapiReady={this.props.gapiReady}
+                  apiClient={this.props.apiClient}
                   profile={this.props.profile}
                   activities={this.state.activities}
                   showDate={true}
@@ -71,7 +71,7 @@ class Home extends Component {
               </Grid>
               <Grid item xs={12}>
                 <MeasuresCard
-                  gapiReady={this.props.gapiReady}
+                  apiClient={this.props.apiClient}
                   profile={this.props.profile}
                   measures={wrapperState.measures}
                   title="Historical Weight"

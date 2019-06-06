@@ -26,7 +26,12 @@ import {
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MuiThemeProvider } from '@material-ui/core/styles';
+
+import 'typeface-roboto';
+
 import theme from './theme';
+
+import { config } from './config';
 
 import { FirebaseState } from './firebase_util';
 
@@ -62,6 +67,22 @@ class App extends Component {
   }
 
   componentDidMount() {
+    if (config.isDev && config.fakeUser) {
+      console.log('App: Warning: Using Fake User.');
+      const firebaseUser = {
+        displayName: 'Fake User',
+        photoUrl: '/logo-round.svg'
+      };
+      this.setState({
+        isSignedIn: true,
+        firebaseUser: firebaseUser,
+        isSignedInNext: true,
+        firebaseUserNext: firebaseUser
+      });
+      return;
+    }
+
+    console.log('App: Using Real Auth');
     this.unregisterAuthObserver = this.state.firebase.onAuthStateChanged(
       firebaseUser => {
         console.log('App.onAuthStateChanged: ', firebaseUser);
@@ -91,8 +112,10 @@ class App extends Component {
   }
 
   componentWillUnmount() {
-    this.unregisterAuthObserver();
-    this.unregisterAuthObserver = null;
+    if (!!this.unregisterAuthObserver) {
+      this.unregisterAuthObserver();
+      this.unregisterAuthObserver = null;
+    }
   }
 
   renderSignedInRouter() {

@@ -14,26 +14,26 @@
 
 import 'dart:async';
 
-import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:bikebuds_api/api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class UserModel extends Model {
-  MainProfileResponse _profile;
-  FirebaseUser _user;
+  Profile _profile;
+  FirebaseUser _firebaseUser;
 
-  MainProfileResponse get profile => _profile;
-  FirebaseUser get user => _user;
+  Profile get profile => _profile;
+  FirebaseUser get firebaseUser => _firebaseUser;
 
-  void updateProfile(FutureOr<MainProfileResponse> response) async {
+  void updateProfile(FutureOr<Profile> response) async {
     _profile = await response;
 
     notifyListeners();
   }
 
   void updateUser(FutureOr<FirebaseUser> user) async {
-    _user = await user;
+    _firebaseUser = await user;
 
     notifyListeners();
   }

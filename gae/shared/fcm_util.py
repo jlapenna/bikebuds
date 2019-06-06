@@ -14,37 +14,39 @@
 
 import logging
 
-from google.appengine.ext import ndb
+from google.cloud.datastore.entity import Entity
 
 from firebase_admin import messaging
 
-from shared.datastore.admin import FcmMessage
-from shared.datastore.users import ClientStore
+from shared import ds_util
+
 
 def active_clients(user_key):
-    return [c for c in ClientStore.query(ClientStore.client.active != False,
-            ancestor=user_key)]
+    query = ds_util.client.query(kind='ClientState', ancestor=user_key)
+    query.add_filter('active', '!=', False)
+    return [c for c in query.fetch()]
 
-@ndb.transactional
+
 def send(user_key, clients, notif_fn, *args, **kwargs):
     """Sends a notification.
 
     Args:
         user: User - The entity being sent the notification.
-        clients: [ClientStore] - Clients to send the notification.
+        clients: [ClientState] - Clients to send the notification.
         notif_fn: function - *args and **kwargs are passed to this function,
             a ClientMessage will be passed as a 'client' kwarg.
     """
-    notification = FcmMessage(parent=user_key)
-    logging.debug('Sending notification to %s clients', len(clients))
-    for client_store in clients:
-        message = notif_fn(*args, client=client_store.client, **kwargs) 
-        try:
-            response = messaging.send(message)
-            logging.debug('fcm_util.send: Success: %s, %s, %s', user_key, message,
-                    response)
-            notification.add_delivery(client_store, message, response)
-        except messaging.ApiCallError, e:
-            logging.error('fcm_util.send: Failure: %s, %s', user_key, e)
-            notification.add_failure(client_store, message, e)
-    notification.put()
+    with ds_util.client.transaction():
+        fcm_message = Entity(ds_util.cient.key('FcmMessage', parent=user_key))
+        logging.debug('Sending notification to %s clients', len(clients))
+        for client_state in clients:
+            message = notif_fn(*args, client=client_state.client, **kwargs)
+            try:
+                response = messaging.send(message)
+                logging.debug('fcm_util.send: Success: %s, %s, %s', user_key, message,
+                        response)
+                fcm_message.add_delivery(client_state, message, response)
+            except messaging.ApiCallError as e:
+                logging.error('fcm_util.send: Failure: %s, %s', user_key, e)
+                fcm_message.add_failure(client_state, message, e)
+        ds_util.client.put(fcm_message)

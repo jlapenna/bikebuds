@@ -60,11 +60,11 @@ class ServiceCard extends Component {
   handleConnect = () => {
     this.setState({ actionPending: true });
     if (
-      this.state.service.credentials !== undefined &&
-      this.state.service.credentials
+      this.state.service.properties.credentials !== undefined &&
+      this.state.service.properties.credentials
     ) {
-      window.gapi.client.bikebuds
-        .disconnect_service(createRequest({ id: this.props.serviceName }))
+      this.props.apiClient.bikebuds
+        .disconnect_service(createRequest({ name: this.props.serviceName }))
         .then(response => {
           this.handleService(response);
           this.setState({ actionPending: false });
@@ -87,21 +87,22 @@ class ServiceCard extends Component {
   };
 
   handleService = response => {
-    response.result.service.sync_date = response.result.service.sync_successful
-      ? moment.utc(response.result.service.sync_date)
+    response.body.properties.sync_date = (
+      response.body.properties.sync_successful && !!response.body.properties.sync_date)
+      ? moment.utc(response.body.properties.sync_date)
       : null;
-    response.result.service.created = moment.utc(response.result.created);
-    response.result.service.modified = moment.utc(response.result.modified);
+    response.body.properties.created = moment.utc(response.body.properties.created);
+    response.body.properties.modified = moment.utc(response.body.properties.modified);
     this.setState({
-      service: response.result.service
+      service: response.body
     });
-    console.log('ServiceCard.handleService', response.result);
+    console.log('ServiceCard.handleService', response.body);
   };
 
   handleSync = () => {
     this.setState({ actionPending: true });
-    window.gapi.client.bikebuds
-      .sync_service(createRequest({ id: this.props.serviceName }))
+    this.props.apiClient.bikebuds
+      .sync_service(createRequest({ name: this.props.serviceName }))
       .then(response => {
         this.handleService(response);
         this.setState({ actionPending: false });
@@ -113,16 +114,15 @@ class ServiceCard extends Component {
     if (!this.state.service) {
       return;
     }
-    var checked = event.target.checked;
     var newState = { service: cloneDeepWith(this.state.service) };
-    newState.service.sync_enabled = checked;
+    newState.service.sync_enabled = event.target.checked;
 
     this.setState(newState);
 
-    window.gapi.client.bikebuds
+    this.props.apiClient.bikebuds
       .update_service(
         createRequest({
-          id: this.props.serviceName,
+          name: this.props.serviceName,
           service: { sync_enabled: event.target.checked }
         })
       )
@@ -135,10 +135,10 @@ class ServiceCard extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ServiceCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.state.service === undefined) {
-      console.log('ServiceCard.componentDidUpdate: gapiReady and no state');
-      window.gapi.client.bikebuds
-        .get_service(createRequest({ id: this.props.serviceName }))
+    if (this.props.apiClient && this.state.service === undefined) {
+      console.log('ServiceCard.componentDidUpdate: apiClient and no state');
+      this.props.apiClient.bikebuds
+        .get_service(createRequest({ name: this.props.serviceName }))
         .then(this.handleService);
     }
   }
@@ -149,10 +149,10 @@ class ServiceCard extends Component {
         <Grid container direction="column" justify="center" alignItems="center">
           <Grid className={this.props.classes.cardContentItem} item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.service && this.state.service.sync_date != null ? (
+            {(this.state.service && this.state.service.properties.sync_date != null) ? (
               <i>
                 Last sync:{' '}
-                <Moment fromNow>{this.state.service.sync_date}</Moment>
+                <Moment fromNow>{this.state.service.properties.sync_date}</Moment>
               </i>
             ) : (
               <i>&#8203;</i>
@@ -165,11 +165,11 @@ class ServiceCard extends Component {
                   disabled={
                     this.state.actionPending ||
                     this.state.service === undefined ||
-                    !this.state.service.credentials
+                    !this.state.service.properties.credentials
                   }
                   checked={
                     this.state.service !== undefined &&
-                    this.state.service.sync_enabled
+                    this.state.service.properties.sync_enabled
                   }
                   onChange={this.handleSyncSwitchChange}
                   value="sync_enabled"
@@ -185,7 +185,7 @@ class ServiceCard extends Component {
 
   renderCardActions() {
     var connectText;
-    if (this.state.service === undefined || !this.state.service.credentials) {
+    if (this.state.service === undefined || !this.state.service.properties.credentials) {
       connectText = 'Connect';
     } else {
       connectText = 'Disconnect';
@@ -198,7 +198,7 @@ class ServiceCard extends Component {
           disabled={
             this.state.actionPending ||
             this.state.service === undefined ||
-            !this.state.service.credentials
+            !this.state.service.properties.credentials
           }
           onClick={this.handleSync}
         >

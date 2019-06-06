@@ -21,6 +21,7 @@ import { createRequest } from './bikebuds_api';
 
 class ActivitiesWrapper extends Component {
   static propTypes = {
+    apiClient: PropTypes.object.isRequired,
     onResponse: PropTypes.func.isRequired
   };
 
@@ -33,7 +34,7 @@ class ActivitiesWrapper extends Component {
   }
 
   handleUpdateRequestState = response => {
-    console.log('ActivitiesWrapper.handleUpdateRequestState:', response.result);
+    console.log('ActivitiesWrapper.handleUpdateRequestState:', response.body);
     this.setState({
       response: response
     });
@@ -48,12 +49,12 @@ class ActivitiesWrapper extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('ActivitiesWrapper.componentDidUpdate', prevProps);
     if (
-      this.props.gapiReady &&
+      this.props.apiClient &&
       !this.state.fetched &&
       this.state.response === undefined
     ) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds
+      this.props.apiClient.bikebuds
         .get_activities(createRequest())
         .then(this.handleUpdateRequestState);
     }

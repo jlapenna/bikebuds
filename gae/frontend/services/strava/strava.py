@@ -16,20 +16,19 @@ import json
 import logging
 import os
 
-from google.appengine.api import taskqueue
-
 import flask
 from flask_cors import cross_origin
+
+from google.cloud.datastore.entity import Entity
 
 import stravalib
 
 from shared import auth_util
 from shared import task_util
 from shared.config import config
-from shared.datastore.admin import SubscriptionEvent
-from shared.datastore.athletes import Athlete
-from shared.datastore.services import Service
-from shared.datastore.users import User
+from shared.datastore.athlete import Athlete
+from shared.datastore.service import Service
+from shared.datastore.user import User
 
 
 SERVICE_NAME = 'strava'
@@ -75,23 +74,27 @@ def events_post():
     try:
         event_json = flask.request.get_json()
         owner_id = event_json['owner_id']
-        athlete_key = Athlete.get_by_id(owner_id, keys_only=True)
-        if athlete_key is None:
+
+        athlete = Athlete.get_by_id(owner_id)
+        if athlete is None:
             logging.warn('Received event for %s but missing Athlete', owner_id)
             return 'OK', 200
-        service_key = athlete_key.parent()
-        event_entity = SubscriptionEvent(parent=service_key, **event_json)
-        task_util.process_event(event_entity)
+
+        service_key = athlete.key.parent
+        event_entity = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
+        event_entity.update(event_json)
+        #task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_json)
     return 'OK', 200
 
 
 @module.route('/services/strava/init', methods=['GET', 'POST'])
+#@cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def init(claims):
     user = User.get(claims)
-    service = Service.get(user.key, SERVICE_NAME)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
@@ -102,7 +105,7 @@ def init(claims):
 @auth_util.claims_required
 def redirect(claims):
     user = User.get(claims)
-    service = Service.get(user.key, SERVICE_NAME)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
@@ -112,8 +115,9 @@ def redirect(claims):
             client_id=config.strava_creds['client_id'],
             client_secret=config.strava_creds['client_secret'],
             code=code)
+    creds_dict = dict(creds)
 
-    service_creds = service.update_credentials(dict(creds))
+    service_creds = Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
 
@@ -136,6 +140,3 @@ def get_auth_url_response(dest):
         return flask.jsonify({'redirect_url': url})
     else:
         return flask.redirect(url)
-
-def update_creds():
-    pass

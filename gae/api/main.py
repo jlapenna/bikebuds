@@ -1,397 +1,524 @@
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Bikebuds API."""
-
-from shared import monkeypatch
-
-import logging
 import datetime
+import logging
 
-from google.appengine.ext import deferred
-from google.appengine.ext import ndb
+import flask
+from flask import Flask
+from flask_cors import CORS
+from flask_restplus import Api, Resource, fields
 
-import endpoints
-from endpoints import message_types
-from endpoints import messages
-from endpoints import remote
-
-from firebase_admin import messaging
+from google.cloud.datastore.entity import Entity
+from google.cloud.datastore import helpers
 
 from shared import auth_util
-from shared import fcm_util
+from shared import ds_util
+from shared import logging_util
 from shared import task_util
 from shared.config import config
-from shared.datastore.admin import SyncState
-from shared.datastore.measures import Series, SeriesMessage
-from shared.datastore.activities import Activity, ActivityMessage
-from shared.datastore.athletes import Athlete, AthleteMessage
-from shared.datastore.clubs import Club, ClubMessage
-from shared.datastore.services import Service, ServiceMessage, ServiceCredentials
-from shared.datastore.users import User, PreferencesMessage, ClientMessage, ClientStore
+from flask_cors import cross_origin
+
+from shared.datastore.athlete import Athlete
+from shared.datastore.client_state import ClientState
+from shared.datastore.club import Club
+from shared.datastore.user import User
+from shared.datastore.service import Service
+from shared.datastore.series import Series
+
+app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
+CORS(app, origins=config.origins)
+
+# https://flask-restplus.readthedocs.io/en/stable/swagger.html#documenting-authorizations
+# https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
+authorizations = {
+    'api_key': {
+        'name': 'key',
+        'in': 'query',
+        'type': 'apiKey',
+    },
+    'firebase': {
+        'authorizationUrl': '',
+        'flow': 'implicit',
+        'type': 'oauth2',
+        'x-google-issuer': 'https://securetoken.google.com/' + config.project_id,
+        'x-google-jwks_uri': 'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+    }
+}
+api = Api(app, version='1.0', title='Bikebuds API',
+    description='A Bikebuds API',
+    security=list(authorizations.keys()),
+    authorizations=authorizations,
+    default='bikebuds'
+)
+app.config.SWAGGER_UI_DOC_EXPANSION = 'list'
+app.config.SWAGGER_UI_OPERATION_ID = True
+
+key_model = api.model('EntityKey', {
+    'path': fields.Raw,
+})
 
 
-class RequestHeader(messages.Message):
-    impersonate = messages.StringField(1)
+def WrapEntity(entity):
+    if entity is None:
+        return None
+    return {'key': entity.key, 'properties': entity}
 
 
-class ResponseHeader(messages.Message):
-    pass
+def EntityModel(nested_model):
+    return api.model(nested_model.name + 'Entity', {
+        'key': fields.Nested(key_model),
+        'properties': fields.Nested(nested_model)
+    })
 
 
-class Request(messages.Message):
-    header = messages.MessageField(RequestHeader, 1)
+class CredentialsField(fields.Raw):
+    def format(self, value):
+        return 'credentials' is not None
+
+service_model = api.model('Service', {
+    'created': fields.DateTime,
+    'modified': fields.DateTime,
+    'sync_date': fields.DateTime,
+    'sync_enabled': fields.Boolean(default=False),
+    'sync_successful': fields.Boolean(default=False),
+    'credentials': CredentialsField(default=False)
+})
+service_entity_model = EntityModel(service_model)
+
+measure_model = api.model('Measure', {
+    'date': fields.DateTime,
+    'weight': fields.Float,
+    'height': fields.Float,
+    'fat_free_mass': fields.Float,
+    'fat_ratio': fields.Float,
+    'fat_mass_weight': fields.Float,
+    'diastolic_blood_pressure': fields.Integer,
+    'systolic_blood_pressure': fields.Integer,
+    'heart_pulse': fields.Integer,
+    'temperature': fields.Float,
+    'spo2': fields.Float,
+    'body_temperature': fields.Float,
+    'skin_temperature': fields.Float,
+    'muscle_mass': fields.Float,
+    'hydration': fields.Float,
+    'bone_mass': fields.Float,
+    'pulse_wave_velocity': fields.Float,
+})
+
+series_model = api.model('Series', {
+    'measures': fields.List(
+        fields.Nested(measure_model, skip_none=True), default=tuple())
+})
+series_entity_model = EntityModel(series_model)
+
+geo_point_model = api.model('GeoPoint', {
+    'latitude': fields.String,
+    'longitude': fields.String,
+    })
+
+map_model = api.model('MapDetail', {
+    'id': fields.String,
+    'summary_polyline': fields.String,
+    'polyline': fields.String,
+    })
+
+member_model = api.model('Member', {
+    'firstname': fields.String,
+    'lastname': fields.String,
+    'profile_medium': fields.String,
+})
+
+club_model = api.model('Club', {
+    'admin' : fields.Boolean,
+    'city' : fields.String,
+    'club_type' : fields.String,
+    'country' : fields.String,
+    'cover_photo' : fields.String,
+    'cover_photo_small' : fields.String,
+    'description' : fields.String,
+    'featured' : fields.Boolean,
+    'id' : fields.Integer,
+    'member_count' : fields.Integer,
+    'members' : fields.List(fields.Nested(member_model), default=tuple()),
+    'membership' : fields.String,
+    'name' : fields.String,
+    'owner' : fields.Boolean,
+    'private' : fields.Boolean,
+    'profile' : fields.String,
+    'profile_medium' : fields.String,
+    'sport_type' : fields.String,
+    'state' : fields.String,
+    'url' : fields.String,
+})
+club_entity_model = EntityModel(club_model)
+
+athlete_model = api.model('Athlete', {
+    'admin': fields.String,
+    'agreed_to_terms': fields.String,
+    'approve_followers': fields.String,
+    'athlete_type': fields.String,
+    'badge_type_id': fields.String,
+    'bikes': fields.String,
+    'city': fields.String,
+    'clubs': fields.List(fields.Nested(club_model)),
+    'country': fields.String,
+    'created_at': fields.String,
+    'date_preference': fields.String,
+    'dateofbirth': fields.String,
+    'description': fields.String,
+    'email': fields.String,
+    'email_facebook_twitter_friend_joins': fields.String,
+    'email_kom_lost': fields.String,
+    'email_language': fields.String,
+    'email_send_follower_notices': fields.String,
+    'facebook_sharing_enabled': fields.String,
+    'firstname': fields.String,
+    'follower': fields.String,
+    'follower_count': fields.String,
+    'follower_request_count': fields.String,
+    'friend': fields.String,
+    'friend_count': fields.String,
+    'ftp': fields.String,
+    'global_privacy': fields.String,
+    'instagram_username': fields.String,
+    'lastname': fields.String,
+    'max_heartrate': fields.String,
+    'measurement_preference': fields.String,
+    'membership': fields.String,
+    'mutual_friend_count': fields.String,
+    'offer_in_app_payment': fields.String,
+    'owner': fields.String,
+    'plan': fields.String,
+    'premium': fields.Boolean,
+    'premium_expiration_date': fields.String,
+    'profile': fields.String,
+    'profile_medium': fields.String,
+    'profile_original': fields.String,
+    'receive_comment_emails': fields.String,
+    'receive_follower_feed_emails': fields.String,
+    'receive_kudos_emails': fields.String,
+    'receive_newsletter': fields.String,
+    'sample_race_distance': fields.String,
+    'sample_race_time': fields.String,
+    'sex': fields.String,
+    'shoes': fields.String,
+    'state': fields.String,
+    'subscription_permissions': fields.String,
+    'super_user': fields.String,
+    'updated_at': fields.String,
+    'username': fields.String,
+    'weight': fields.String,
+})
+athlete_entity_model = EntityModel(athlete_model)
+
+activity_model = api.model('Activity', {
+    'id': fields.String,
+    'athlete': fields.Nested(athlete_model),
+    'average_temp': fields.Integer,
+    'has_heartrate': fields.Boolean,
+    'start_date_local': fields.DateTime,
+    'guid': fields.String,
+    'upload_id': fields.String,
+    'has_kudoed': fields.Boolean,
+    'segment_efforts': fields.String,
+    'max_watts': fields.String,
+    'instagram_primary_photo': fields.String,
+    'timezone': fields.String,
+    'name': fields.String,
+    'splits_standard': fields.String,
+    'start_latlng': fields.Nested(geo_point_model),
+    'distance': fields.Float,
+    'total_photo_count': fields.Integer,
+    'gear_id': fields.String,
+    'photos': fields.String,
+    'weighted_average_watts': fields.String,
+    'elapsed_time': fields.Integer,
+    'description': fields.String,
+    'achievement_count': fields.Integer,
+    'kudos_count': fields.Integer,
+    'average_watts': fields.Float,
+    'pr_count': fields.Integer,
+    'start_date':  fields.DateTime,
+    'device_name': fields.String,
+    'utc_offset': fields.Integer,
+    'workout_type': fields.String,
+    'manual': fields.Boolean,
+    'external_id': fields.String,
+    'laps': fields.String,
+    'end_latlng': fields.Nested(geo_point_model),
+    'partner_logo_url': fields.String,
+    'average_cadence': fields.Float,
+    'commute': fields.Boolean,
+    'average_heartrate': fields.String,
+    'from_accepted_tag': fields.Boolean,
+    'athlete_count': fields.Integer,
+    'location_city': fields.String,
+    'photo_count': fields.Integer,
+    'max_speed': fields.Float,
+    'splits_metric': fields.String,
+    'kilojoules': fields.Float,
+    'location_state': fields.String,
+    'trainer': fields.String,
+    'comment_count': fields.Integer,
+    'suffer_score': fields.String,
+    'device_watts': fields.Boolean,
+    'flagged': fields.Boolean,
+    'gear': fields.String,
+    'highlighted_kudosers': fields.String,
+    'partner_brand_tag': fields.String,
+    'calories': fields.String,
+    'moving_time': fields.Integer,
+    'average_speed': fields.Float,
+    'total_elevation_gain': fields.Float,
+    'type': fields.String,
+    'segment_leaderboard_opt_out': fields.String,
+    'embed_token': fields.String,
+    'map': fields.Nested(map_model),
+})
+activity_entity_model = EntityModel(activity_model)
+
+preferences_model = api.model('Preferences', {
+    'units': fields.String,
+    'weight_service': fields.String,
+    'daily_weight_notif': fields.Boolean
+})
+
+user_model = api.model('User', {
+    'created': fields.DateTime,
+    'modified': fields.DateTime,
+    'admin': fields.Boolean(default=False),
+    'preferences': fields.Nested(preferences_model),
+})
+user_entity_model = EntityModel(user_model)
+
+profile_model = api.model('Profile', {
+    'user': fields.Nested(user_entity_model),
+    'signup_complete': fields.Boolean(default=False),
+    'athlete': fields.Nested(athlete_entity_model)
+})
+
+client_state_model = api.model('ClientState', {
+    'token': fields.String,
+    'active': fields.Boolean,
+})
+client_state_entity_model = EntityModel(client_state_model)
 
 
-class Response(messages.Message):
-    """A proto Message that contains a simple string field."""
-    header = messages.MessageField(ResponseHeader, 1)
-
-
-class ActivitiesResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    activities = messages.MessageField(ActivityMessage, 2, repeated=True)
-
-
-class UpdateClientRequest(messages.Message):
-    header = messages.MessageField(RequestHeader, 1)
-    client = messages.MessageField(ClientMessage, 2)
-    previous_id = messages.StringField(3)
-
-
-class ClientResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    client = messages.MessageField(ClientMessage, 2)
-
-
-class ClubResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    club = messages.MessageField(ClubMessage, 2)
-    activities = messages.MessageField(ActivityMessage, 3, repeated=True)
-
-
-class SeriesResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    series = messages.MessageField(SeriesMessage, 2)
-
-
-class PreferencesResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    preferences = messages.MessageField(PreferencesMessage, 2)
-
-
-class UpdatePreferencesRequest(messages.Message):
-    header = messages.MessageField(RequestHeader, 1)
-    preferences = messages.MessageField(PreferencesMessage, 2)
-
-
-class ProfileResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    created = message_types.DateTimeField(2)
-    preferences = messages.MessageField(PreferencesMessage, 3)
-    athlete = messages.MessageField(AthleteMessage, 4)
-    signup_complete = messages.BooleanField(5)
-
-
-class ServiceResponse(messages.Message):
-    header = messages.MessageField(ResponseHeader, 1)
-    service = messages.MessageField(ServiceMessage, 2)
-
-
-class UpdateServiceRequest(messages.Message):
-    header = messages.MessageField(RequestHeader, 1)
-    service = messages.MessageField(ServiceMessage, 2)
-
-
-@endpoints.api(
-    name='bikebuds',
-    version='v1',
-    issuers={
-        'firebase': endpoints.Issuer(
-            'https://securetoken.google.com/' + config.project_id,
-            'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
-            # Using this (per some documentation...) is wrong...
-            #'https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com'
-            ),
-        'google_id_token': endpoints.Issuer(
-            'https://accounts.google.com',
-            'https://www.googleapis.com/service_accounts/v1/metadata/raw/federated-signon@system.gserviceaccount.com',
-            ),
-        },
-    audiences={
-        'firebase': [config.project_id],
-        'google_id_token': [config.python_client_testing_client_id],
-        }
-    )
-class BikebudsApi(remote.Service):
-
-    @endpoints.method(
-        endpoints.ResourceContainer(Request),
-        ActivitiesResponse,
-        path='activities',
-        http_method='POST',
-        api_key_required=True)
-    def get_activities(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+@api.route('/activities')
+class ActivitiesResource(Resource):
+    @api.doc('get_activities')
+    @api.marshal_with(activity_entity_model, as_list=True)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
+        service = Service.get('strava', parent=user.key)
+        activities_query = ds_util.client.query(
+                kind='Activity', ancestor=service.key, order=['-start_date'])
+        activities = [WrapEntity(a) for a in activities_query.fetch()]
+        return activities
 
-        response = ActivitiesResponse(activities=[])
-        for activity in Activity.query(ancestor=user.key).order(-Activity.start_date):
-            response.activities.append(activity.activity)
-        return response
 
-    @endpoints.method(
-        UpdateClientRequest,
-        ClientResponse,
-        path='update_client',
-        http_method='POST',
-        api_key_required=True)
-    def update_client(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+@api.route('/client/<client_id>')
+class ClientResource(Resource):
+    @api.doc('get_client')
+    @api.marshal_with(client_state_entity_model)
+    def get(self, client_id):
+        claims = auth_util.verify_claims(flask.request)
+        user = User.get(claims)
+        return WrapEntity(ClientState.get(client_id, parent=user.key))
 
-        if request.client.id is None:
-            raise endpoints.BadRequestException('No client ID provided.')
+
+@api.route('/update_client')
+class ClientResource(Resource):
+    @api.doc('update_client', body=client_state_model)
+    @api.marshal_with(client_state_model)
+    def post(self):
+        claims = auth_util.verify_claims(flask.request)
+        user = User.get(claims)
+        existing_client = ClientState.get(
+                api.payload['token'], parent=user.key)
+        existing_client.update(api.payload)
+        ds_util.client.put(existing_client)
+        return WrapEntity(existing_client)
+
+
+@api.route('/club/<club_id>')
+class ClubResource(Resource):
+    @api.doc('get_club')
+    @api.marshal_with(club_entity_model)
+    def get(self, club_id):
+        club_id = int(club_id)
+        claims = auth_util.verify_claims(flask.request)
 
         user = User.get(claims)
+        strava = Service.get('strava', parent=user.key)
+        athlete = Athlete.get_private(strava.key)
+        if athlete is None:
+            flask.abort(500)
 
-        @ndb.transactional
-        def transact():
-            client_store = ClientStore.update(user.key, request.client)
-            def notif_fn(client=None):
-                return messaging.Message(
-                        data={'state': 'updated'},
-                        token=client.id,
-                        )
-            fcm_util.send(user.key, [client_store], notif_fn)
-            if (request.previous_id != None
-                    and client_store.client.id != request.previous_id):
-                ClientStore.deactivate(user.key, request.previous_id)
-            return ClientResponse(client=client_store.client)
-        return transact()
+        # Find the user's club reference.
+        club = Club.get(club_id, parent=strava.key)
+        if club is None:
+            flask.abort(404)
 
-    @endpoints.method(
-        endpoints.ResourceContainer(Request,
-            id=messages.IntegerField(1),
-            activities=messages.BooleanField(2)),
-        ClubResponse,
-        path='club/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def get_club(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+        return WrapEntity(club)
 
-        club_entity = ndb.Key(Club, request.id).get()
-        if club_entity is None:
-            raise endpoints.BadRequestException('No such club.')
 
-        user_key = User.get_key(claims)
-        strava_key = Service.get_key(user_key, 'strava')
-        athlete_entity = Athlete.get_private(strava_key)
-        if athlete_entity is None:
-            raise endpoints.BadRequestException('Incomplete user.')
+@api.route('/club/<club_id>/activities')
+class ClubActivitiesResource(Resource):
+    @api.doc('get_club_activities')
+    @api.marshal_with(activity_entity_model, as_list=True)
+    def get(self, club_id):
+        club_id = int(club_id)
+        claims = auth_util.verify_claims(flask.request)
 
-        for member in club_entity.club.members:
-            logging.debug('%s vs %s', member.id, athlete_entity.key.id())
-            if member.id == athlete_entity.key.id():
-                break
-        else:
-            raise endpoints.UnauthorizedException('No access to club.')
-
-        activities = []
-        if request.activities:
-            two_weeks = datetime.datetime.now() - datetime.timedelta(days=14)
-            members = [member.id for member in club_entity.club.members]
-            logging.debug('%s: %s', two_weeks, members)
-            activity_query = Activity.query(
-                    Activity.activity.athlete.id.IN(members),
-                    Activity.start_date > two_weeks
-                    ).order(-Activity.start_date)
-            activities = [a.activity for a in activity_query.fetch()]
-
-        return ClubResponse(club=club_entity.club, activities=activities)
-
-    @endpoints.method(
-        endpoints.ResourceContainer(Request),
-        SeriesResponse,
-        path='series',
-        http_method='POST',
-        api_key_required=True)
-    def get_series(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
         user = User.get(claims)
+        strava = Service.get('strava', parent=user.key)
+        athlete = Athlete.get_private(strava.key)
+        if athlete is None:
+            flask.abort(500)
 
-        if (user.preferences.weight_service ==
-                PreferencesMessage.WeightService.WITHINGS):
-            weight_service = 'withings'
-        elif (user.preferences.weight_service ==
-                PreferencesMessage.WeightService.FITBIT):
-            weight_service = 'fitbit'
-        else:
-            weight_service = 'withings'
+        club = Club.get(club_id, parent=strava.key)
+        if club is None:
+            flask.abort(404)
 
-        logging.info('Beginning series')
-        series_entity = Series.get_default(Service.get_key(user.key, weight_service))
-        if series_entity is None or series_entity.series is None:
-            logging.info('Finished request (no result)')
-            return SeriesResponse()
-        logging.info('Finished series')
+        # Find all the users in the club.
+        athletes_query = ds_util.client.query(kind='Athlete')
+        athletes_query.add_filter('clubs.id', '=', club_id)
+        athletes_query.keys_only()
+        athlete_keys = [a for a in athletes_query.fetch()]
+        logging.warn('Athletes found: %s', len(athlete_keys))
 
-        try:
-            return SeriesResponse(series=series_entity.series)
-        finally:
-            logging.info('Finished request')
+        # Find all their activities in the past two weeks.
+        two_weeks = datetime.datetime.now() - datetime.timedelta(days=14)
+        all_activities = []
+        for athlete in athlete_keys:
+            activities_query = ds_util.client.query(kind='Activity',
+                    ancestor=athlete.key.parent)
+            activities_query.add_filter('start_date', '>', two_weeks)
+            all_activities = [WrapEntity(a) for a in activities_query.fetch()]
 
-    @endpoints.method(
-        Request,
-        PreferencesResponse,
-        path='preferences',
-        http_method='POST',
-        api_key_required=True)
-    def get_preferences(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+        return sorted(all_activities,
+                key=lambda value: value['start_date'],
+                reverse=True)
+
+
+@api.route('/user')
+class UserResource(Resource):
+    @api.doc('get_user')
+    @api.marshal_with(user_entity_model)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        return PreferencesResponse(preferences=user.preferences)
+        return WrapEntity(user)
 
-    @endpoints.method(
-        UpdatePreferencesRequest,
-        PreferencesResponse,
-        path='update_preferences',
-        http_method='POST',
-        api_key_required=True)
-    def update_preferences(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+
+@api.route('/preferences')
+class PreferencesResource(Resource):
+    @api.doc('update_preferences', body=preferences_model)
+    @api.marshal_with(preferences_model)
+    def post(self):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        user.preferences = request.preferences
-        user.put()
-        return PreferencesResponse(preferences=user.preferences)
+        user['preferences'].update(
+                api.payload['preferences'])
+        ds_util.client.put(user)
+        return user['preferences']
 
-    @endpoints.method(
-        Request,
-        ProfileResponse,
-        path='profile',
-        http_method='POST',
-        api_key_required=True)
-    def get_profile(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+
+@api.route('/profile')
+class ProfileResource(Resource):
+    @api.doc('get_profile')
+    @api.marshal_with(profile_model)
+    def get(self):
+        logging.warn('Before claims')
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
+        strava = Service.get('strava', parent=user.key)
+        strava_connected = ('credentials' in strava
+                and strava['credentials'] is not None)
+        athlete = Athlete.get_private(strava.key)
 
-        strava = Service.get(user.key, 'strava')
-        strava_connected = strava.credentials is not None
-        
-        athlete_message = None
-        if strava_connected:
-            athlete_entity = Athlete.get_private(strava.key)
-            if athlete_entity is not None:
-                athlete_message = athlete_entity.athlete
+        return dict(
+                user=WrapEntity(user),
+                athlete=WrapEntity(athlete),
+                signup_complete=strava_connected
+                )
 
-        return ProfileResponse(
-                created=user.created,
-                preferences=user.preferences,
-                athlete=athlete_message,
-                signup_complete=strava_connected)
 
-    @endpoints.method(
-        endpoints.ResourceContainer(Request, id=messages.StringField(1)),
-        ServiceResponse,
-        path='service/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def get_service(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+@api.route('/series')
+class SeriesResource(Resource):
+    @api.doc('get_series')
+    @api.marshal_with(series_entity_model)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        service = Service.get(user.key, request.id)
-        service_creds = service.get_credentials()
-        return ServiceResponse(service=Service.to_message(service))
+        service_name = user['preferences']['weight_service'].lower()
+        series = Series.get(service_name,
+                ds_util.client.key('Service', service_name, parent=user.key))
+        return WrapEntity(series)
 
-    @endpoints.method(
-        endpoints.ResourceContainer(UpdateServiceRequest,
-            id=messages.StringField(1)),
-        ServiceResponse,
-        path='update_service/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def update_service(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+
+@api.route('/service/<name>')
+class ServiceResource(Resource):
+    @api.doc('get_service')
+    @api.marshal_with(service_entity_model)
+    def get(self, name):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        service = Service.get(user.key, request.id)
-        service_creds = service.get_credentials()
-        if request.service.sync_enabled is not None:
-            service.sync_enabled = request.service.sync_enabled
-            service.put()
-        return ServiceResponse(service=Service.to_message(service))
+        service = Service.get(name, parent=user.key)
+        return WrapEntity(service)
 
-    @endpoints.method(
-        endpoints.ResourceContainer(Request, id=messages.StringField(1)),
-        ServiceResponse,
-        path='service_sync/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def sync_service(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+    @api.doc('update_service', body=service_entity_model)
+    @api.marshal_with(service_entity_model)
+    def post(self):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        logging.info('Getting %s service info.', request.id)
-        service = Service.get(user.key, request.id)
-        task_util.sync_service(service)
-        return ServiceResponse(service=Service.to_message(service))
+        service = Service.get(name, parent=user.key)
+        service.update(api.payload)
+        ds_util.client.put(service)
+        return WrapEntity(service)
 
-    @endpoints.method(
-        endpoints.ResourceContainer(Request, id=messages.StringField(2)),
-        ServiceResponse,
-        path='service_disconnect/{id}',
-        http_method='POST',
-        api_key_required=True)
-    def disconnect_service(self, request):
-        logging.debug('User: endpoints.get_current_user: %s',
-                endpoints.get_current_user())
-        claims = auth_util.verify_claims(self.request_state,
-                impersonate=getattr(request.header, 'impersonate', None))
+
+@api.route('/sync/<name>')
+class SyncResource(Resource):
+    @api.doc('sync_service')
+    @api.marshal_with(service_entity_model)
+    def get(self, name):
+        claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        logging.info('Getting %s service info.', request.id)
-        service = Service.get(user.key, request.id)
-        service.clear_credentials()
-        return ServiceResponse(service=Service.to_message(service))
+        service = Service.get('strava', parent=user.key)
+
+        task_result = task_util.sync_service(service)
+        return WrapEntity(service)
 
 
+@app.before_request
+def before():
+    logging_util.before()
 
-api = endpoints.api_server([BikebudsApi])
+
+@app.after_request
+def after(response):
+    return logging_util.after(response)
+
+
+if __name__ == '__main__':
+    host, port = config.api_url[7:].split(':')
+    app.run(host='localhost', port=port, debug=True)
+else:
+    # When run under dev_appserver it is not '__main__'.
+    logging_util.debug_logging()

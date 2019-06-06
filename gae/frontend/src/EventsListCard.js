@@ -44,7 +44,7 @@ class EventsListCard extends Component {
   };
 
   static propTypes = {
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     query: PropTypes.object.isRequired
   };
 
@@ -95,7 +95,7 @@ class EventsListCard extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('EventsListCard.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && this.unsubscribe === undefined) {
+    if (this.props.apiClient && this.unsubscribe === undefined) {
       console.log(
         'EventsListCard.componentDidUpdate: subscribing to: ',
         this.props.query

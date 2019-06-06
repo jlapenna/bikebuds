@@ -26,7 +26,7 @@ class SettingsContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-            return ProfileCard(model.user, model.profile);
+            return ProfileCard(model.firebaseUser, model.profile);
           }),
         ],
       ),

@@ -30,6 +30,8 @@ function main() {
     echo "Running against the local datastore.";
     export DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}";
     export DATASTORE_PROJECT_ID="${CONFIG_project_id}";
+    export DATASTORE_EMULATOR_HOST_PATH=${EMULATOR_HOST}/datastore
+    export DATASTORE_HOST=${EMULATOR_HOST}
   fi
 
   pushd "${client_path}"

@@ -36,7 +36,7 @@ class Events extends Component {
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    gapiReady: PropTypes.bool.isRequired
+    apiClient: PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -48,7 +48,7 @@ class Events extends Component {
   render() {
     return (
       <div className={this.props.classes.root}>
-        <EventsListCard gapiReady={this.props.gapiReady} query={this.query} />
+        <EventsListCard apiClient={this.props.apiClient} query={this.query} />
         <Fab
           color="primary"
           aria-label="Add"

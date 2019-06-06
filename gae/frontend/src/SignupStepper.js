@@ -177,13 +177,19 @@ class SignupStepper extends React.Component {
 
   componentDidMount() {
     let params = new URLSearchParams(window.location.search);
-    let startingService = params.get('service');
-    for (var i = 0; i < this.state.steps.length; i++) {
-      if (this.state.steps[i].serviceName === startingService) {
-        this.setState({
-          activeStepIndex: i + 1
-        });
-        break;
+    if (!!params.get('skipTos')) {
+      this.setState({
+        activeStepIndex: 3
+      });
+    } else {
+      let startingService = params.get('service');
+      for (var i = 0; i < this.state.steps.length; i++) {
+        if (this.state.steps[i].serviceName === startingService) {
+          this.setState({
+            activeStepIndex: i + 1
+          });
+          break;
+        }
       }
     }
   }

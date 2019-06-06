@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:bikebuds/profile_card.dart';
-import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:bikebuds_api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -25,11 +25,11 @@ void main() {
     // Build our app and trigger a frame.
 
     FirebaseUserMock mockFirebaseUser = newFirebaseUserMock();
-    MainProfileResponse fakeProfileResponse = newProfileResponse();
+    Profile fakeUser = newProfile();
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileCard(mockFirebaseUser, fakeProfileResponse),
+        home: ProfileCard(mockFirebaseUser, fakeUser),
       ),
     );
 

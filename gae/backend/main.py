@@ -12,29 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from shared import monkeypatch
-
 import datetime
 import logging
 import sys
-
-from google.appengine.api import taskqueue
-from google.appengine.ext import ndb
 
 from urllib3.exceptions import TimeoutError
 
 import flask
 
-import nokia
+from google.cloud.datastore.entity import Entity
 
 from shared.config import config
+from shared import auth_util
+from shared import ds_util
+from shared import logging_util
 from shared import task_util
-from shared.datastore.activities import Activity
-from shared.datastore.admin import DatastoreState, SyncState
-from shared.datastore.athletes import Athlete
-from shared.datastore.clubs import Club
-from shared.datastore.measures import Series
-from shared.datastore.services import Service
+from shared.datastore.service import Service
+from shared.datastore.user import User
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
@@ -49,6 +43,27 @@ class SyncException(Exception):
     pass
 
 
+@app.route('/test', methods=['POST'])
+def test_trigger():
+    claims = auth_util.verify(flask.request)
+    user = User.get(claims)
+
+    e = Entity(ds_util.client.key('Task'))
+    e.update({'param1': 'value1'})
+    e['param2'] = 'value2'
+
+    task_result = task_util.test(e)
+    logging.debug('Enqueued Task: %s', task_result)
+    return 'OK', 200
+
+
+@app.route('/tasks/test', methods=['POST'])
+def test_task():
+    entity = task_util.get_payload(flask.request)
+    logging.info('/tasks/test: %s', entity)
+    return 'OK', 200
+
+
 def _do_cleanup(version, datastore_state, cleanup_fn):
     if config.is_dev or (datastore_state.version < version):
         logging.info(
@@ -61,10 +76,10 @@ def _do_cleanup(version, datastore_state, cleanup_fn):
 
 
 @app.route('/tasks/cleanup', methods=['GET'])
-def cleanup():
-    result = DatastoreState.query().fetch(1)
+def cleanup_task():
+    result = ds_util.client.query(kind='DatastoreState').fetch()
     if len(result) == 0:
-        datastore_state = DatastoreState()
+        datastore_state = Entity(ds_util.client.key('DatastoreState'))
     else:
         datastore_state = result[0]
 
@@ -72,36 +87,42 @@ def cleanup():
     #def cleanup():
     #    ndb.delete_multi(Activity.query().fetch(keys_only=True))
     #_do_cleanup(7, datastore_state, cleanup)
-    def cleanup():
-        services = Service.query(Service.credentials != None)
-        for service in services:
-            if service.key.id() == 'withings':
-                w = withings.Worker(service)
-                w.remove_subscriptions()
-    _do_cleanup(9, datastore_state, cleanup)
 
     return 'OK', 200
 
 
+@app.route('/sync/<name>', methods=['POST'])
+def sync_trigger(name):
+    claims = auth_util.verify(flask.request)
+    user = User.get(claims)
+
+    task_result = task_util.sync_service(Service.get(name, parent=user.key))
+    return 'OK', 200
+
+
 @app.route('/tasks/sync', methods=['GET'])
-def sync():
-    services = [
-            service for service in Service.query(
-                Service.credentials != None,
-                Service.sync_enabled == True,
-                Service.syncing == False
-                )]
+def sync_task():
+    services_query = ds_util.client.query(kind='Service')
+    services_query.add_filter('credentials', '!=', None)
+    services_query.add_filter('sync_enabled', '==', True)
+    services_query.add_filter('syncing', '==', False)
+    services = [service for service in services_query.fetch()]
     task_util.sync_services(services)
     return 'OK', 200
 
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
-def service_sync(service_name):
-    state_key = ndb.Key(urlsafe=flask.request.values.get('state_key'))
-    service = ndb.Key(urlsafe=flask.request.values.get('service_key')).get()
-    user_key = service.key.parent()
-    service_creds = service.get_credentials()
-    if service_creds is None:
+def service_sync_task(service_name):
+    params = task_util.get_payload(flask.request)
+    state_key = params['state_key']
+    service = ds_util.client.get(params['service_key'])
+    user_key = service.key.parent
+
+    if state_key is None:
+        logging.info('Invalid state_key. params: %s', params)
+        return 'OK', 503
+
+    if service['credentials'] is None:
         logging.info('No creds: %s', service.key)
         return 'OK', 250
 
@@ -117,19 +138,20 @@ def service_sync(service_name):
 
 
 @app.route('/tasks/process', methods=['GET', 'POST'])
-def process():
+def process_task():
     """Called after all services for all users have finished syncing."""
     _do(strava.ClubMembershipsProcessor(), work_key='all', method='process')
     return 'OK', 200
 
 
 @app.route('/tasks/process_event', methods=['GET', 'POST'])
-def process_event():
-    event_key = ndb.Key(urlsafe=flask.request.values.get('event_key'))
-    service = event_key.parent().get()
+def process_event_task():
+    params = task_util.get_payload(flask.request)
+    event_key = params['event_key']
+    service = ds_util.client.get(event_key.parent)
     service_name = service.key.id()
     
-    if service.get_credentials() is None:
+    if service['credentials'] is None:
         logging.warn('Cannot process event %s, no credentials', event_key)
         return 'OK', 200
 
@@ -143,8 +165,9 @@ def process_event():
 
 
 @app.route('/tasks/process_weight_trend', methods=['GET', 'POST'])
-def process_weight_trend():
-    service_key = ndb.Key(urlsafe=flask.request.values.get('service_key'))
+def process_weight_trend_task():
+    params = task_util.get_payload(flask.request)
+    service_key = params['service_key']
     service = service_key.get()
     service_name = service.key.id()
     if service_name == 'withings':
@@ -164,7 +187,7 @@ def _do(worker, work_key=None, method='sync'):
         sync_successful = True
         logging.info('Worker completed: %s/%s', work_name, work_key)
         return 'OK', 200
-    except TimeoutError, e:
+    except TimeoutError as e:
         logging.debug('%s for %s/%s, Originally: %s',
                 sys.exc_info()[0].__name__,
                 work_name,
@@ -172,10 +195,28 @@ def _do(worker, work_key=None, method='sync'):
                 sys.exc_info()[1]
                 )
         return 'Sync Failed', 503
-    except Exception, e:
+    except Exception as e:
         msg = '"%s" for %s/%s' % (
                 sys.exc_info()[1],
                 work_name,
                 work_key,
                 )
-        raise SyncException, SyncException(msg), sys.exc_info()[2]
+        raise SyncException(msg).with_traceback(sys.exc_info()[2])
+
+
+@app.before_request
+def before():
+    logging_util.before()
+
+
+@app.after_request
+def after(response):
+    return logging_util.after(response)
+
+
+if __name__ == '__main__':
+    host, port = config.backend_url[7:].split(':')
+    app.run(host='localhost', port=port, debug=True)
+else:
+    # When run under dev_appserver it is not '__main__'.
+    logging_util.debug_logging()

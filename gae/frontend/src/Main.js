@@ -30,9 +30,9 @@ import { withStyles } from '@material-ui/core/styles';
 
 import DrawerContent from './DrawerContent';
 import FcmManager from './FcmManager';
-import GapiWrapper from './GapiWrapper';
 import MainContent from './MainContent';
 import ProfileWrapper, { ProfileState } from './ProfileWrapper';
+import SwagWrapper from './SwagWrapper';
 
 const drawerWidth = 240;
 
@@ -88,8 +88,9 @@ class Main extends Component {
     super(props);
     this.state = {
       mobileOpen: false,
-      gapiReady: false,
-      profile: new ProfileState(this.handleProfileUpdated)
+      apiClient: null,
+      profile: new ProfileState(this.handleProfileUpdated),
+      swagClient: null
     };
   }
 
@@ -97,14 +98,18 @@ class Main extends Component {
     this.setState(state => ({ mobileOpen: !state.mobileOpen }));
   };
 
-  handleGapiReady = () => {
-    console.log('Main.handleGapiReady');
-    this.setState({ gapiReady: true });
+  handleSwagReady = client => {
+    console.log('Main.handleSwagReady: ', client);
+    this.setState({
+      apiClient: client.apis
+    });
   };
 
-  handleGapiFailed = () => {
-    console.log('Main.handleGapiFailed');
-    this.setState({ gapiReady: false });
+  handleSwagFailed = () => {
+    console.log('Main.handleSwagFailed');
+    this.setState({
+      apiClient: undefined
+    });
   };
 
   handleProfileUpdated = profile => {
@@ -122,17 +127,20 @@ class Main extends Component {
     return (
       <React.Fragment>
         <div className={this.props.classes.root}>
-          <GapiWrapper
-            onReady={this.handleGapiReady}
-            onFailed={this.handleGapiFailed}
+          <SwagWrapper
+            onReady={this.handleSwagReady}
+            onFailed={this.handleSwagFailed}
           />
-          <ProfileWrapper
-            gapiReady={this.state.gapiReady}
-            profile={this.state.profile}
-          />
-          {this.state.gapiReady && this.props.firebase !== undefined && (
+          {this.state.apiClient && (
+            <ProfileWrapper
+              apiClient={this.state.apiClient}
+              profile={this.state.profile}
+            />
+          )}
+          {this.state.apiClient && this.props.firebase !== undefined && (
             <FcmManager
               firebase={this.props.firebase}
+              apiClient={this.state.apiClient}
               onMessage={this.handleFcmMessage}
             />
           )}
@@ -196,13 +204,15 @@ class Main extends Component {
           </nav>
           <main className={this.props.classes.main}>
             <div className={this.props.classes.toolbar} />
-            <MainContent
-              className={this.props.classes.mainContent}
-              firebase={this.props.firebase}
-              firebaseUser={this.props.firebaseUser}
-              gapiReady={this.state.gapiReady}
-              profile={this.state.profile}
-            />
+            {this.state.apiClient && (
+              <MainContent
+                className={this.props.classes.mainContent}
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+                apiClient={this.state.apiClient}
+                profile={this.state.profile}
+              />
+            )}
           </main>
         </div>
       </React.Fragment>

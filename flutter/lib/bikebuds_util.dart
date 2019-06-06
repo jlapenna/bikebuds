@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
+import "dart:async";
 
-import 'package:bikebuds/config.dart';
-import 'package:bikebuds/firebase_http_client.dart';
-import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/sign_in_screen.dart';
-import 'package:bikebuds_api/bikebuds/v1.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
+import "package:bikebuds/config.dart";
+import "package:bikebuds/firebase_util.dart";
+import "package:bikebuds/sign_in_screen.dart";
+import "package:bikebuds_api/api.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:flutter/widgets.dart";
+
+var f = defaultApiClient;
 
 class BikebudsApiContainer extends StatefulWidget {
   final Widget child;
@@ -54,12 +55,24 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
   }
 
   _loadBikebudsApi() async {
-    print('BikebudsApiContainerState._loadFirebase');
+    print("BikebudsApiContainerState._loadFirebase");
     _loading = true;
     var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
-    var api = BikebudsApi(await loadFromState(firebase),
-        rootUrl: (config)['api_url'] + "/_ah/api/");
+    //var api = BikebudsApi(await loadFromState(firebase),
+    //    rootUrl: (config)["api_url"] + "/_ah/api/");
+    var apiClient = ApiClient(basePath: (config)["api_url"]);
+
+    // Set an API Key.
+    ApiKeyAuth apiKeyAuth = apiClient.getAuthentication("api_key");
+    apiKeyAuth.apiKey = (await firebase.app.options).apiKey;
+
+    // Set an access token.
+    var firebaseUser = await firebase.auth.currentUser();
+    OAuth oAuth = apiClient.getAuthentication("firebase");
+    oAuth.accessToken = await firebaseUser.getIdToken(refresh: true);
+
+    var api = BikebudsApi(apiClient);
     setState(() {
       this.api = api;
     });
@@ -78,21 +91,18 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     return firebase.auth.currentUser();
   }
 
-  Future<MainProfileResponse> get profile async {
-    return api.getProfile(MainRequest());
+  Future<Profile> get profile async {
+    return api.getProfile(xFields: "*");
   }
 
-  Future<MainClientResponse> registerClient(
-      FutureOr<String> firebaseToken) async {
-    var request = MainUpdateClientRequest()
-      ..client =
-          (SharedDatastoreUsersClientMessage()..id = await firebaseToken);
-    return api.updateClient(request);
+  Future<ClientState> registerClient(FutureOr<String> firebaseToken) async {
+    var client = ClientState()..token = await firebaseToken;
+    return api.updateClient(client, xFields: "*");
   }
 }
 
 class _InheritedBikebudsApiContainer extends InheritedWidget {
-  // Data is your entire state. In our case just 'User'
+  // Data is your entire state. In our case just "User"
   final BikebudsApiContainerState data;
 
   // You must pass through a child and your state.

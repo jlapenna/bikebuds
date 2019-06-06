@@ -22,6 +22,8 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "^2.1.8",
     "recharts": "^1.5.0",
+    "swagger-client": "^3.8.25",
+    "typeface-roboto": "0.0.54",
     "typescript": "^3.4.2"
   },
   "repository": "github:jlapenna/bikebuds",

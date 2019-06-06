@@ -34,8 +34,8 @@ import { readableDistance, readableDuration, readableSpeed } from './convert';
 
 /*
   path={[
-    { lat: props.activity.start_latlng.latitude, lng: props.activity.start_latlng.longitude },
-    { lat: props.activity.end_latlng.latitude, lng: props.activity.end_latlng.longitude }
+    { lat: props.activity.properties.start_latlng.latitude, lng: props.activity.properties.start_latlng.longitude },
+    { lat: props.activity.properties.end_latlng.latitude, lng: props.activity.properties.end_latlng.longitude }
   ]}
 */
 
@@ -110,9 +110,9 @@ class _ActivityMap extends Component {
       this.props.activity !== prevProps.activity
     ) {
       var decodedPolyline = [];
-      if (this.props.activity.map.summary_polyline) {
+      if (this.props.activity.properties.map.summary_polyline) {
         decodedPolyline = window.google.maps.geometry.encoding.decodePath(
-          this.props.activity.map.summary_polyline
+          this.props.activity.properties.map.summary_polyline
         );
       }
 
@@ -197,12 +197,12 @@ class ActivityDetail extends Component {
     }
 
     const distance = readableDistance(
-      this.props.activity.distance,
+      this.props.activity.properties.distance,
       this.props.profile
     );
-    const duration = readableDuration(this.props.activity.moving_time);
+    const duration = readableDuration(this.props.activity.properties.moving_time);
     const average_speed = readableSpeed(
-      this.props.activity.average_speed,
+      this.props.activity.properties.average_speed,
       this.props.profile
     );
     return (
@@ -225,7 +225,7 @@ class ActivityDetail extends Component {
               <div className={this.props.classes.activitySummaryItem}>
                 <Typography variant="subtitle1">Calories</Typography>
                 <Typography variant="h4">
-                  {this.props.activity.kilojoules}
+                  {this.props.activity.properties.kilojoules}
                 </Typography>
               </div>
             </Hidden>

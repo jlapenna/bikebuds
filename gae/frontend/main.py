@@ -12,57 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from shared import monkeypatch
-
 import datetime
-import json
 import logging
-import os
 
 import flask
-import flask_cors
+from flask_cors import CORS
 from flask_cors import cross_origin
 
 from firebase_admin import auth
 
 from shared import auth_util
-
+from shared import logging_util
 from shared.config import config
-from shared.datastore import services
-from shared.datastore import users
 
-from services.bbfitbit import bbfitbit as fitbit
+from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
 
-# Flask setup
 app = flask.Flask(__name__)
-app.register_blueprint(fitbit.module)
+app.register_blueprint(bbfitbit.module)
 app.register_blueprint(strava.module)
 app.register_blueprint(withings.module)
-flask_cors.CORS(app, origins=config.origins)
-
-
-SERVICE_NAMES = (
-        withings.SERVICE_NAME,
-        strava.SERVICE_NAME,
-        fitbit.SERVICE_NAME
-        )
+CORS(app, origins=config.origins)
 
 
 @app.route('/services/redirect', methods=['GET'])
+@cross_origin(supports_credentials=True, origins=config.origins)
 def redirect():
     dest = flask.request.args.get('dest', '')
     return flask.redirect(config.devserver_url + dest)
 
 
-@app.route('/services/session', methods=['POST'])
+@app.route('/services/session', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True, origins=config.origins)
 @auth_util.claims_required
 def create_session(claims):
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
-    user = users.User.get(claims)
-
     try:
         id_token = flask.request.headers['Authorization'].split(' ').pop()
         expires_in = datetime.timedelta(minutes=10)
@@ -73,6 +58,23 @@ def create_session(claims):
         response.set_cookie('session', session_cookie, expires=expires, httponly=True)
         logging.info(response)
         return response
-    except auth.AuthError, e:
-        logging.error(e)
-        return flask.abort(401, 'Failed to create a session cookie')
+    except auth.AuthError as e:
+        flask.abort(401, 'Failed to create a session cookie')
+
+
+@app.before_request
+def before():
+    logging_util.before()
+
+
+@app.after_request
+def after(response):
+    return logging_util.after(response)
+
+
+if __name__ == '__main__':
+    host, port = config.frontend_url[7:].split(':')
+    app.run(host='localhost', port=port, debug=True)
+else:
+    # When run under dev_appserver it is not '__main__'.
+    logging_util.debug_logging()

@@ -12,10 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configures the backend to use vendored libraries
-# https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27#vendoring
+from google.cloud.datastore.entity import Entity
 
-from google.appengine.ext import vendor
+import nokia
 
-# Add any libraries installed in the "lib" folder.
-vendor.add('lib')
+from shared import ds_util
+
+
+class ClientState(object):
+    """Its a series!"""
+
+    @classmethod
+    def get(cls, name, parent=None):
+        key = ds_util.client.key('ClientState', name, parent=parent)
+        client_state = ds_util.client.get(key)
+        if client_state:
+            return client_state
+        client_state = Entity(key)
+        client_state['active'] = True
+        ds_util.client.put(client_state)
+        return client_state

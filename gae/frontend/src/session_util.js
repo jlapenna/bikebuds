@@ -19,6 +19,9 @@ import firebase from 'firebase/app';
 import { config } from './config';
 
 export function createSession(responseCallback) {
+  if (config.is_dev && config.fake_user) {
+    responseCallback({ status: 200 });
+  }
   firebase
     .auth()
     .currentUser.getIdToken()

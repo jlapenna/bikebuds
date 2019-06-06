@@ -25,7 +25,7 @@ import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
   static propTypes = {
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object,
     profile: PropTypes.object
   };
@@ -37,33 +37,33 @@ class Settings extends Component {
           <Grid item xs={12} sm={12}>
             <ProfileCard
               firebaseUser={this.props.firebaseUser}
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <PreferencesCard
               firebaseUser={this.props.firebaseUser}
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ServiceCard
               serviceName="fitbit"
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ServiceCard
               serviceName="strava"
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ServiceCard
               serviceName="withings"
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
             />
           </Grid>
         </Grid>

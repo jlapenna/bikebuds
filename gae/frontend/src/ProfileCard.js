@@ -82,7 +82,7 @@ class ProfileCard extends Component {
     }
     return (
       <React.Fragment>
-        {this.props.profile.athlete.clubs !== undefined &&
+        {!!this.props.profile.athlete.clubs &&
           this.props.profile.athlete.clubs.map((club, index) => {
             return (
               <Grid item key={index}>

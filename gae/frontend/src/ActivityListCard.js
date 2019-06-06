@@ -130,17 +130,17 @@ class ActivityListCard extends Component {
           <List>
             {this.props.activities.map((activity, index) => {
               var fullName = undefined;
-              if (this.props.showAthlete && activity.athlete !== undefined) {
-                if (activity.athlete.firstname !== undefined) {
-                  fullName = activity.athlete.firstname;
+              if (this.props.showAthlete && activity.properties.athlete !== undefined) {
+                if (activity.properties.athlete.firstname !== undefined) {
+                  fullName = activity.properties.athlete.firstname;
                 }
-                if (activity.athlete.lastname !== undefined) {
-                  fullName = fullName + ' ' + activity.athlete.lastname;
+                if (activity.properties.athlete.lastname !== undefined) {
+                  fullName = fullName + ' ' + activity.properties.athlete.lastname;
                 }
               }
               var startDate = undefined;
               if (this.props.showDate) {
-                startDate = moment(activity.start_date_local).format('LLL');
+                startDate = moment(activity.properties.start_date_local).format('LLL');
               }
 
               var secondary = undefined;
@@ -157,7 +157,7 @@ class ActivityListCard extends Component {
                   onClick={this.handleListItemClick.bind(this, index, activity)}
                   selected={this.state.selectedIndex === index}
                 >
-                  <ListItemText primary={activity.name} secondary={secondary} />
+                  <ListItemText primary={activity.properties.name} secondary={secondary} />
                 </ListItem>
               );
             })}

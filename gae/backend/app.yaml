@@ -12,30 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python27
-api_version: 1
+runtime: python37
 service: backend
-threadsafe: true
-
-builtins:
-- deferred: on
-
-libraries:
-- name: pycrypto
-  version: latest
-- name: ssl
-  version: latest
 
 handlers:
 - url: /.*
-  script: main.app
-  login: admin
+  script: auto
   secure: always
   redirect_http_response_code: 301
-
-- url: /_ah/queue/deferred
-  script: google.appengine.ext.deferred.deferred.application
-  login: admin
 
 env_variables:
   # Firebase

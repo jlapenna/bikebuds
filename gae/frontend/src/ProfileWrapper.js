@@ -28,23 +28,21 @@ export class ProfileState {
   update(result) {
     console.log('ProfileState.update: ', result);
     this.fetched = true;
-    this.created = result.created;
-    this.preferences = result.preferences;
-    this.athlete = result.athlete;
     this.signup_complete = result.signup_complete;
+    this.user = result.user;
+    this.athlete = result.athlete;
     this._onUpdated(this);
   }
 
   updatePreferences(result) {
-    console.log('ProfileState.updatePreferences: ', result);
-    this.preferences = result.preferences;
+    this.user.properties.preferences = result;
     this._onUpdated(this);
   }
 }
 
 export default class ProfileWrapper extends React.Component {
   static propTypes = {
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object.isRequired
   };
 
@@ -55,23 +53,26 @@ export default class ProfileWrapper extends React.Component {
     };
   }
 
-  handleProfile = response => {
-    console.log('ProfileWrapper.handleProfile:', response.result);
-    this.props.profile.update(response.result);
-  };
-
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ProfileWrapper.componentDidUpdate', prevProps);
-    if (this.props.gapiReady && !this.state.fetched) {
+    console.log(
+      'ProfileWrapper.componentDidUpdate: props',
+      this.props,
+      'state',
+      this.state
+    );
+    if (this.props.apiClient && !this.state.fetched) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds
+      this.props.apiClient.bikebuds
         .get_profile(createRequest())
-        .then(this.handleProfile);
+        .then(response => {
+          console.log('ProfileWrapper: response: ', response);
+          this.props.profile.update(response.body);
+        });
     }
   }
 

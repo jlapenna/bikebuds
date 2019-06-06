@@ -27,7 +27,7 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <Events firebase={firebase} gapiReady={true} />
+      <Events firebase={firebase} apiClient={{}} />
     </Router>,
     div
   );

@@ -64,6 +64,9 @@ export function readableWeight(weight, profile) {
   if (weight === undefined) {
     return undefined;
   }
+  if (weight === null) {
+    return null;
+  }
   if (getUnitPref(profile) === 'IMPERIAL') {
     return Number(
       convert(weight)
@@ -80,8 +83,8 @@ function getUnitPref(profile) {
   if (profile === undefined) {
     return undefined;
   }
-  if (profile.preferences === undefined) {
+  if (profile.user === undefined) {
     return undefined;
   }
-  return profile.preferences.units;
+  return profile.user.properties.preferences.units;
 }

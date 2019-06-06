@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:bikebuds_api/api.dart';
 
-MainProfileResponse newProfileResponse() {
-  MainProfileResponse fakeProfileResponse = MainProfileResponse.fromJson({
+Profile newProfile() {
+  Profile fakeUser = Profile.fromJson({
     'athlete': {
-      'city': 'San Francisco',
+      'properties': {
+        'city': 'San Francisco',
+      }
     },
   });
-  return fakeProfileResponse;
+  return fakeUser;
 }

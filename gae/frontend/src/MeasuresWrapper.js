@@ -39,11 +39,8 @@ class MeasuresWrapper extends Component {
   handleSeries = response => {
     console.log('MeasuresWrapper.handleSeries:', response);
     var measures = [];
-    if (
-      response.result.series !== undefined &&
-      response.result.series.measures !== undefined
-    ) {
-      measures = response.result.series.measures;
+    if (!!response.body && response.body.properties.measures !== undefined) {
+      measures = response.body.properties.measures;
     }
     for (var measure in measures) {
       measures[measure].date = moment.utc(measures[measure].date).format('x');
@@ -62,12 +59,12 @@ class MeasuresWrapper extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('MeasuresWrapper.componentDidUpdate', prevProps);
     if (
-      this.props.gapiReady &&
+      this.props.apiClient &&
       !this.state.fetched &&
       this.state.measures === undefined
     ) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds
+      this.props.apiClient.bikebuds
         .get_series(createRequest())
         .then(this.handleSeries);
     }

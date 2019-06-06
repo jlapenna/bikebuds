@@ -26,8 +26,8 @@ function load_config() {
 function verify_deps() {
   for dep in "${@}"; do 
     if [[ ! "$(command -v $dep)" ]]; then
-      echo "Error: $dep is not installed. Quitting." >&2
-      exit 1
+      echo "Error: $dep is not installed." >&2
+      return 1
     fi
   done
 }
@@ -35,8 +35,8 @@ function verify_deps() {
 function get_repo_path() {
   local repo_path=$(readlink -e "$PWD")
   if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo. Quitting." >&2
-    exit 1;
+    echo "Must be in the bikebuds code repo." >&2
+    return 1;
   fi
   echo "${repo_path}";
 }
@@ -57,63 +57,44 @@ function set_prod_environment() {
   popd
 }
 
+function activate_virtualenv() {
+  local env_name="$1"
+  local python="$2"
+  local env_path=$(readlink -f "$(get_repo_path)/environments/virtual/${env_name}")
 
-function get_client_virtualenv_path() {
-  local env_path=$(readlink -e "$(get_repo_path)/client")
-  if [[ ! -e "$env_path" ]]; then
-    echo "Unable to locate the virtual environment. Quitting." >&2
-    exit 1;
+  #echo "Installing virtual environment at ${env_path}"
+  #virtualenv --python "${python}" "${env_path}"
+  
+  echo "Activating virtual environment at ${env_path}"
+  source "${env_path}/bin/activate"
+  if [ "$?" -ne 0 ]; then
+    echo "Unable to setup virtual environment." >&2
+    return 2;
   fi
-  echo "${env_path}";
 }
 
 function activate_client_virtualenv() {
-  local env_path="$(get_client_virtualenv_path)";
-  echo "Activating virtual environment at ${env_path}"
-  virtualenv --python python3 "${env_path}" >/dev/null 2>&1
-  source "${env_path}/bin/activate"
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to setup virtual environment. Quitting." >&2
-    exit 2;
-  fi
-}
-
-function get_gae_virtualenv_path() {
-  local env_path=$(readlink -e "$(get_repo_path)/environments/virtual/gae")
-  if [[ ! -e "$env_path" ]]; then
-    echo "Unable to locate the virtual environment. Quitting." >&2
-    exit 1;
-  fi
-  echo "${env_path}";
+  activate_virtualenv client python3
+  return $?
 }
 
 function activate_gae_virtualenv() {
-  local env_path="$(get_gae_virtualenv_path)";
-  echo "Activating virtual environment at ${env_path}"
-  virtualenv --python python2 "${env_path}" >/dev/null 2>&1
-  source "${env_path}/bin/activate"
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to setup virtual environment. Quitting." >&2
-    exit 2;
-  fi
-}
-
-function get_gae3_virtualenv_path() {
-  local env_path=$(readlink -e "$(get_repo_path)/environments/virtual/gae3")
-  if [[ ! -e "$env_path" ]]; then
-    echo "Unable to locate the virtual environment. Quitting." >&2
-    exit 1;
-  fi
-  echo "${env_path}";
+  activate_virtualenv gae python2
+  return $?
 }
 
 function activate_gae3_virtualenv() {
-  local env_path="$(get_gae3_virtualenv_path)";
-  echo "Activating virtual environment at ${env_path}"
-  virtualenv --python python3 "${env_path}" >/dev/null 2>&1
-  source "${env_path}/bin/activate"
-  if [ "$?" -ne 0 ]; then
-    echo "Unable to setup virtual environment. Quitting." >&2
-    exit 2;
-  fi
+  activate_virtualenv gae3 python3
+  return $?
+}
+
+function setup_datastore_emulator() {
+  load_config
+  echo "Running against the local datastore.";
+  export DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}";
+  export DATASTORE_PROJECT_ID="${CONFIG_project_id}";
+  export DATASTORE_DATASET="${CONFIG_project_id}";
+  export DATASTORE_EMULATOR_HOST_PATH=${CONFIG_datastore_emulator_host}/datastore
+  export DATASTORE_HOST=${CONFIG_datastore_emulator_host}
+  export DATASTORE_PORT="$(echo ${CONFIG_datastore_emulator_host} | cut -d':' -f2)"
 }

@@ -25,6 +25,18 @@ import { config, nextConfig } from './config';
 
 export class FirebaseState {
   constructor(enableMessaging) {
+    /*
+    if (config.isDev && config.fakeUser) {
+      // No push messages when running with fake users.
+      this.app = null;
+      this.auth = null;
+      this.messaging = null;
+      this.appNext = null;
+      this.authNext = null;
+      this.firestore = null;
+      return;
+    }
+    */
     try {
       this.app = firebase.initializeApp(config);
     } catch (err) {

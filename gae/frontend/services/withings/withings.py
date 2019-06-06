@@ -16,19 +16,19 @@ import json
 import logging
 import os
 
-from google.appengine.ext import ndb
-
 import flask
 from flask_cors import cross_origin
+
+from google.cloud.datastore.entity import Entity
+from google.cloud.datastore.key import Key
 
 import nokia 
 
 from shared import auth_util
 from shared import task_util
 from shared.config import config
-from shared.datastore.admin import SubscriptionEvent
-from shared.datastore.services import Service
-from shared.datastore.users import User
+from shared.datastore.service import Service
+from shared.datastore.user import User
 
 
 SERVICE_NAME = 'withings'
@@ -70,24 +70,24 @@ def events_post():
     #        'appli': 1,
     #        }
 
+    event_data = None
     try:
-        service_key = ndb.Key(urlsafe=flask.request.args.get('service_key'))
+        service_key = Key.from_legacy_urlsafe(
+                flask.request.args.get('service_key'))
         event_data = flask.request.form.to_dict()
-        event_entity = SubscriptionEvent(parent=service_key, **event_data)
+
+        event_entity = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
+        event_entity.update(event_data)
         task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_data)
     return 'OK', 200
 
-def test(**kwargs):
-    logging.info('kwargs: %s', kwargs)
-
-
 @module.route('/services/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
     user = User.get(claims)
-    service = Service.get(user.key, SERVICE_NAME)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
@@ -98,7 +98,7 @@ def init(claims):
 @auth_util.claims_required
 def redirect(claims):
     user = User.get(claims)
-    service = Service.get(user.key, SERVICE_NAME)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
@@ -116,7 +116,7 @@ def redirect(claims):
             client_id=creds.client_id,
             consumer_secret=creds.consumer_secret)
 
-    service_creds = service.update_credentials(creds_dict)
+    service_creds = Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
 

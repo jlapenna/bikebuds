@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds_api/bikebuds/v1.dart';
+import 'package:bikebuds_api/api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ProfileCard extends StatelessWidget {
   final FirebaseUser firebaseUser;
-  final MainProfileResponse profile;
+  final Profile profile;
+  final User uu = null;
 
   ProfileCard(this.firebaseUser, this.profile);
 
   @override
   Widget build(BuildContext context) {
     print('ProfileCard.build: ${profile?.athlete}');
-    var photoUrl = profile?.athlete?.profile ?? firebaseUser?.photoUrl;
+    var photoUrl =
+        profile?.athlete?.properties?.profileMedium ?? firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
         ? MemoryImage(
             kTransparentImage,
@@ -39,7 +41,7 @@ class ProfileCard extends StatelessWidget {
     String name = firebaseUser == null
         ? ""
         : (firebaseUser?.displayName ?? firebaseUser?.email);
-    var city = profile?.athlete?.city ?? "";
+    var city = profile?.athlete?.properties?.city ?? "";
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

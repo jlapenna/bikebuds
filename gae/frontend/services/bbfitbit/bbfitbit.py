@@ -19,13 +19,15 @@ import os
 import flask
 from flask_cors import cross_origin
 
+from google.cloud.datastore.entity import Entity
+
 import fitbit
 
 from shared import auth_util
 from shared import task_util
 from shared.config import config
-from shared.datastore import services
-from shared.datastore import users
+from shared.datastore.service import Service
+from shared.datastore.user import User
 
 
 SERVICE_NAME = 'fitbit'
@@ -38,19 +40,19 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
 @module.route('/services/fitbit/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
-    user = users.User.get(claims)
-    service = services.Service.get(user.key, SERVICE_NAME)
+    user = User.get(claims)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
 
 
 @module.route('/services/fitbit/redirect', methods=['GET'])
-@cross_origin(origins=['https://www.fitbit.com'])
+#@cross_origin(origins=['https://www.fitbit.com'])
 @auth_util.claims_required
 def redirect(claims):
-    user = users.User.get(claims)
-    service = services.Service.get(user.key, SERVICE_NAME)
+    user = User.get(claims)
+    service = Service.get(SERVICE_NAME, parent=user.key)
 
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
@@ -61,7 +63,7 @@ def redirect(claims):
             redirect_uri=get_redirect_uri(dest))
     creds = auth_client.fetch_access_token(code)
 
-    service_creds = service.update_credentials(creds)
+    service_creds = Service.update_credentials(service, creds)
 
     task_util.sync_service(service)
 

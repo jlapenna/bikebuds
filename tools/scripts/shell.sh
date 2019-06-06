@@ -23,14 +23,15 @@ export REPO_PATH="$(get_repo_path)";
 function source_files() {
   find . \
     \( \
-    -path './environments/virtual' -o \
-    -path './flutter/build' -o \
-    -path './gae/api/lib' -o \
-    -path './gae/backend/lib' -o \
-    -path './gae/client/lib' -o \
-    -path './gae/frontend/build' -o \
-    -path './gae/frontend/lib' -o \
-    -path './gae/frontend/node_modules' \
+    -path "./$(realpath --relative-to=. $REPO_PATH/environments/virtual)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/client/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/build)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
     \) -prune -o \
     \( \
         -name '*.sh' -o \

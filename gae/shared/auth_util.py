@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,28 +16,36 @@
 
 import functools
 
-# Use the App Engine Requests adapter. This makes sure that Requests uses
-# URLFetch. This needs to be ordered the way it is, for some reason.
-# https://github.com/firebase/firebase-admin-python/issues/185
-import google.auth.transport.requests
-import requests_toolbelt.adapters.appengine
-requests_toolbelt.adapters.appengine.monkeypatch()
-HTTP_REQUEST = google.auth.transport.requests.Request()
-
 import flask
 import logging
 
 import google.oauth2.id_token
-from firebase_admin import auth
+import google.auth.transport
 
-from shared.datastore.users import User
+import firebase_admin
+from firebase_admin import auth
+from firebase_admin import credentials
+FIREBASE_ADMIN_CREDS = credentials.Certificate(
+        'env/service_keys/firebase-adminsdk.json')
+firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
+
+from shared.config import config
+
+
+def fake_claims():
+    if config.is_dev and config.fake_user:
+        logging.warn('Using Fake User')
+        return {'sub': config.fake_user}
+    else:
+        return None
+
 
 def claims_required(func):
     @functools.wraps(func)
     def wrapper():
         try:
             claims = verify(flask.request)
-        except auth.AuthError, e:
+        except auth.AuthError as e:
             return e.message, e.code
         return func(claims)
     return wrapper
@@ -50,25 +58,20 @@ def verify(request):
         return verify_claims_from_cookie(request)
 
 
-def impersonate(claims, uid):
-    if not uid:
-        return claims
-    if not User.get(claims).admin:
-        raise auth.AuthError(401, 'Non-admin cannot impersonate.')
-    return {'sub': uid}
-
-
 def verify_claims(request, impersonate=None):
     """Return valid claims or throw an AuthError."""
+    if config.is_dev and config.fake_user:
+        return fake_claims()
+
     if 'Authorization' not in request.headers:
-        raise auth.AuthError(401, 'Unable to find bearer in headers')
+        flask.abort(401, 'Unable to find bearer in headers')
     id_token = request.headers['Authorization'].split(' ').pop()
 
     claims = None
     if 'UseAltAuth' in request.headers:
         # This is a standard oauth token from my python client.
-        claims = google.oauth2.id_token.verify_oauth2_token(
-            id_token, HTTP_REQUEST)
+        claims = google.oauth2.id_token.verify_oauth2_token(id_token,
+                google.auth.transport.requests.Request())
         # The claims have an email address that we have verified. Use that to
         # find the firebase user.
         if claims['iss'] == 'https://accounts.google.com':
@@ -76,30 +79,28 @@ def verify_claims(request, impersonate=None):
             claims = {'sub': firebase_user.uid}
     else:
         # This is a firebase token.
-        claims = google.oauth2.id_token.verify_firebase_token(
-            id_token, HTTP_REQUEST)
+        claims = google.oauth2.id_token.verify_firebase_token(id_token,
+                google.auth.transport.requests.Request())
+        firebase_user = auth.get_user(claims['sub'])
 
     if not claims:
-        raise auth.AuthError(401, 'Unable to validate id_token')
+        flask.abort(401, 'Unable to validate id_token')
 
-    if not impersonate:
-        return claims
-
-    # We're impersonating someone.
-    if User.get(claims).admin:
-        return {'sub': impersonate}
-    else:
-        raise auth.AuthError(401, 'Non-admin cannot impersonate.')
+    return claims
 
 
 def verify_claims_from_cookie(request):
     """Return valid claims or throw an AuthError."""
+    if config.is_dev and config.fake_user:
+        return fake_claims()
+
     session_cookie = request.cookies.get('session')
     # Verify the session cookie. In this case an additional check is added to
     # detect if the user's Firebase session was revoked, user deleted/disabled,
     # etc.
     try:
+        logging.info('verify_claims_from_cookie')
         return auth.verify_session_cookie(session_cookie, check_revoked=True)
-    except ValueError, e:
-        raise auth.AuthError(401, 'Unable to validate cookie')
+    except ValueError as e:
+        flask.abort(401, 'Unable to validate cookie')
 

@@ -15,14 +15,11 @@
 import datetime
 import logging
 
-from google.appengine.ext import ndb
-
 import fitbit
 
+from shared import ds_util
 from shared.config import config
-from shared.datastore import services
-from shared.datastore.measures import Series
-
+from shared.datastore.series import Series
 
 class Worker(object):
 
@@ -33,11 +30,9 @@ class Worker(object):
     def sync(self):
         measures = self.client.time_series('body/weight', period='max')
 
-        @ndb.transactional
-        def put_series():
-            Series.entity_from_fitbit_time_series(
-                    self.service.key, measures['body-weight']).put()
-        return put_series()
+        series = Series.to_entity(measures['body-weight'],
+                self.service.key.name, parent=self.service.key)
+        ds_util.client.put(series)
 
 
 def create_client(service):
@@ -46,9 +41,9 @@ def create_client(service):
     return fitbit.Fitbit(
             config.fitbit_creds['client_id'],
             config.fitbit_creds['client_secret'],
-            access_token=service.get_credentials().access_token,
-            refresh_token=service.get_credentials().refresh_token,
-            expires_at=service.get_credentials().expires_at,
+            access_token=service['credentials']['access_token'],
+            refresh_token=service['credentials']['refresh_token'],
+            expires_at=service['credentials']['expires_at'],
             redirect_uri=get_redirect_uri('frontend'),
             refresh_cb=refresh_callback,
             system=fitbit.Fitbit.METRIC)

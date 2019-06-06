@@ -27,7 +27,7 @@ firebase.initializeApp(config);
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
-    <SignupStepper firebaseUser={{}} gapiReady={false} onFinished={() => {}} />,
+    <SignupStepper firebaseUser={{}} apiClient={null} onFinished={() => {}} />,
     div
   );
   ReactDOM.unmountComponentAtNode(div);

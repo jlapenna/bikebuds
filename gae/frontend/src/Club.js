@@ -33,7 +33,7 @@ import ActivityListCard from './ActivityListCard';
 class ClubFetcher extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    gapiReady: PropTypes.bool.isRequired
+    apiClient: PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -46,19 +46,30 @@ class ClubFetcher extends Component {
     };
   }
 
-  handleClub = response => {
-    console.log('Club.handleClub:', response);
-    if (response.status === 400) {
+  handleActivities = response => {
+    console.log('Club.handleActivities:', response);
+    if (response.status !== 200) {
       this.setState({
-        club: null,
-        activities: null,
-        error: response.statusText
+        activities: null
       });
       return;
     }
     this.setState({
-      club: response.result.club,
-      activities: response.result.activities
+      activities: response.body
+    });
+  };
+
+  handleClub = response => {
+    console.log('Club.handleClub:', response);
+    if (response.status !== 200) {
+      this.setState({
+        club: null,
+        error: response.message
+      });
+      return;
+    }
+    this.setState({
+      club: response.body
     });
   };
 
@@ -70,19 +81,25 @@ class ClubFetcher extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     console.log('Club.componentDidUpdate', prevProps);
     if (
-      this.props.gapiReady &&
+      this.props.apiClient &&
       !this.state.fetched &&
       this.state.club === undefined
     ) {
       this.setState({ fetched: true });
-      window.gapi.client.bikebuds
+      this.props.apiClient.bikebuds
         .get_club(
           createRequest({
-            id: this.props.clubId,
-            activities: true
+            club_id: this.props.clubId
           })
         )
         .then(this.handleClub, this.handleClub);
+      this.props.apiClient.bikebuds
+        .get_club_activities(
+          createRequest({
+            club_id: this.props.clubId
+          })
+        )
+        .then(this.handleActivities, this.handleActivities);
     }
   }
 
@@ -109,7 +126,7 @@ class _ClubWidget extends Component {
     profile: PropTypes.object.isRequired,
     activities: PropTypes.array,
     club: PropTypes.object,
-    error: PropTypes.object
+    error: PropTypes.string
   };
 
   render() {
@@ -197,7 +214,7 @@ class _ClubWidget extends Component {
             md={9}
           >
             <ActivityListCard
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               profile={this.props.profile}
               activities={this.props.activities}
               showAthlete={true}
@@ -214,17 +231,15 @@ export const ClubWidget = withStyles(_ClubWidget.styles)(_ClubWidget);
 export default class Club extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object.isRequired
   };
 
   render() {
-    console.log('Club.render', this.props);
     return (
       <ClubFetcher
         {...this.props}
         render={state => {
-          console.log('Club.props.render', state);
           return <ClubWidget {...state} {...this.props} />;
         }}
       />

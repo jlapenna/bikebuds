@@ -23,14 +23,14 @@ function delete_old_versions() {
   local service=$1
   local max_versions=$2
 
-  local versions=$(gcloud app versions list --service default --sort-by '~version' --filter="version.servingStatus='STOPPED'" --format 'value(version.id)' | sort -r)
+  local versions=$(gcloud --project=bikebuds-app app versions list --service default --sort-by '~version' --filter="version.servingStatus='STOPPED'" --format 'value(version.id)' | sort -r)
   local count=0
   echo "Keeping the $max_versions latest versions of the $1 service"
   for version in $versions; do
     ((count++))
     if [ $count -gt $max_versions ]; then
       echo "Going to delete version $version of the $service service."
-      gcloud app versions delete $version --service $service -q
+      gcloud --project=bikebuds-app app versions delete $version --service $service -q
     else
       echo "Going to keep version $version of the $service service."
     fi
@@ -54,9 +54,6 @@ function main() {
   git add .
   git commit --allow-empty -a -m"Working Set: ${date}";
 
-  # Make sure that all our code talks to a prod instance, (don't pass "local").
-  ./gae/update_api.sh
-
   # Make sure we're not using cached pyc.
   find ./ -iname '*.py[co]' -delete
 
@@ -67,25 +64,18 @@ function main() {
     popd
   fi
 
-  # In order to include /lib/ in our uploaded source, we need to manipulate the
-  # gae gitignore to strip it right before upload
-  sed -i '/\/lib/d' gae/.gitignore
-  git add . >/dev/null
-  git commit --allow-empty -a -m"Include lib: ${date}" >/dev/null
-
   git push --force production master
 
   # Generate source contexts for debugging.
   for service in $services; do
-    gcloud debug source gen-repo-info-file \
+    gcloud --project=bikebuds-app debug source gen-repo-info-file \
         --output-directory=gae/$service \
-        --source-directory=gae/$service;
+        ;
     cat gae/$service/source-context.json
   done;
 
   # Deploy apps
-  yes|gcloud app deploy \
-    gae/frontend/cron.yaml \
+  yes|gcloud --project=bikebuds-app app deploy \
     gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
@@ -104,9 +94,6 @@ function main() {
 
   # Remove the generated source contexts
   rm gae/*/source-context.json >/dev/null 2>&1
-
-  # Break apart the include lib commit.
-  git reset HEAD~
 
   # And then check that out, effectively reverting to the working set.
   git checkout .

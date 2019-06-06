@@ -15,6 +15,7 @@
  */
 
 export function createRequest(request) {
+  /*
   var impersonate = new URLSearchParams(window.location.search).get(
     'impersonate'
   );
@@ -25,9 +26,12 @@ export function createRequest(request) {
     var header = request['header'];
     if (header === undefined) {
       header = {};
+      request['header'] = header;
     }
     header['impersonate'] = impersonate;
   }
+  request = { payload: request };
   console.log('createRequest: ', request);
+  */
   return request;
 }

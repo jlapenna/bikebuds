@@ -29,7 +29,7 @@ export default class MainContent extends React.Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    gapiReady: PropTypes.bool.isRequired,
+    apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object
   };
 
@@ -54,7 +54,7 @@ export default class MainContent extends React.Component {
           render={thinger => (
             <Club
               clubId={Number(thinger.match.params.club_id)}
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           )}
@@ -64,7 +64,7 @@ export default class MainContent extends React.Component {
           exact
           render={() => (
             <Home
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           )}
@@ -75,7 +75,7 @@ export default class MainContent extends React.Component {
           render={() => (
             <Events
               firebase={this.props.firebase}
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
             />
           )}
         />
@@ -84,7 +84,7 @@ export default class MainContent extends React.Component {
           exact
           render={() => (
             <Settings
-              gapiReady={this.props.gapiReady}
+              apiClient={this.props.apiClient}
               firebaseUser={this.props.firebaseUser}
               profile={this.props.profile}
             />

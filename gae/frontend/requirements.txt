@@ -1,16 +1,24 @@
-Flask
-flask-cors
+# main.py
+Flask==1.0.3
+Flask-Cors==3.0.7
+flask-restplus==0.12.1
 
-requests
-requests-toolbelt
+requests==2.22.0
+requests-toolbelt==0.9.1
 
-google-auth
-google-cloud-datastore
-google-endpoints
+# auth_util3.py
+firebase-admin==2.17.0
+google-auth==1.6.3
+google-auth-httplib2==0.0.3
+google-auth-oauthlib==0.3.0
 
-firebase-admin
+# ds_helper.py
+google-cloud-datastore==1.8.0
 
-stravalib
-nokia
-fitbit
-measurement
+# task_util.py
+google-cloud-tasks==1.1.0
+
+# /services/
+fitbit==0.3.1
+stravalib==0.10.2
+git+git://github.com/jlapenna/python-nokia
