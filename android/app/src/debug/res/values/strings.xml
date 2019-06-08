@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="frontend_url">http://localhost:8081</string>
-    <string name="api_url">http://localhost:8082</string>
-    <string name="backend_url">http://localhost:8083</string>
-</resources>
