@@ -29,9 +29,9 @@ function main() {
   mkdir environments/virtual/gae3 >/dev/null 2>&1;
 
   echo ""
-  echo "Installing libraries into virtualenv."
+  echo "Installing libraries into 'gae' virtualenv."
   activate_gae_virtualenv
-  pip2 install ipython grpcio
+  pip2 install ipython inotify
   deactivate
 
   echo ""
