@@ -55,14 +55,15 @@ function main() {
   dev_appserver.py \
     -A $CONFIG_project_id \
     --log_level=debug \
-    --dev_appserver_log_level=debug \
     --support_datastore_emulator=1 \
     --datastore_emulator_port=${DATASTORE_PORT} \
     --specified_service_ports=default:8081,api:8082,backend:8083 \
+    --env_var=FLASK_ENV=development \
     gae/frontend/app.yaml \
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
+    # --dev_appserver_log_level=debug \
 }
 
 main "$@"
