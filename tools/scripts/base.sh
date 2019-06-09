@@ -47,6 +47,9 @@ function set_dev_environment() {
   rm env
   ln -sf dev env
   popd
+
+  echo "Wiping flutter build cache."
+  rm -rf flutter/build/
 }
 
 function set_prod_environment() {
@@ -55,6 +58,9 @@ function set_prod_environment() {
   rm env
   ln -sf prod env
   popd
+
+  echo "Wiping flutter build cache."
+  rm -rf flutter/build/
 }
 
 function activate_virtualenv() {
