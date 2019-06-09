@@ -59,7 +59,7 @@ function main() {
     --datastore_emulator_port=${DATASTORE_PORT} \
     --specified_service_ports=default:8081,api:8082,backend:8083 \
     --env_var=FLASK_ENV=development \
-    gae/frontend/app.yaml \
+    gae/frontend/app-local.yaml \
     gae/api/app.yaml \
     gae/backend/app.yaml \
     ;
