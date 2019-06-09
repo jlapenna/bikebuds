@@ -37,6 +37,8 @@ from shared.datastore.user import User
 from shared.datastore.service import Service
 from shared.datastore.series import Series
 
+logging_util.silence_logs()
+
 app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 CORS(app, origins=config.origins)

@@ -29,6 +29,8 @@ from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
 
+logging_util.silence_logs()
+
 app = flask.Flask(__name__)
 app.register_blueprint(bbfitbit.module)
 app.register_blueprint(strava.module)

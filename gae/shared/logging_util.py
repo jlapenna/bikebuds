@@ -48,3 +48,10 @@ def after(response):
     except:
         logging.warn('response: could not parse')
     return response
+
+
+def silence_logs():
+    logging.getLogger('oauth2client.contrib.multistore_file').setLevel(logging.ERROR)
+    logging.getLogger('stravalib.model.Activity').setLevel(logging.WARN)
+    logging.getLogger('stravalib.model.Athlete').setLevel(logging.WARN)
+    logging.getLogger('stravalib.model.Club').setLevel(logging.WARN)

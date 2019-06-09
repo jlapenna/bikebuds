@@ -34,8 +34,8 @@ from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
 
+logging_util.silence_logs()
 
-# Flask setup
 app = flask.Flask(__name__)
 
 
