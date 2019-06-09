@@ -29,6 +29,8 @@ from shared.datastore.series import Series
 from shared.datastore.user import User
 from shared.datastore.service import Service
 
+from services.withings.client import create_client
+
 
 class Worker(object):
 
@@ -88,95 +90,18 @@ class EventsWorker(object):
         series = Series.to_entity(measures, self.service.key.name,
                 parent=self.service.key)
 
-        user = ds_util.client.get(self.service.key.parent)
+        query = ds_util.client.query(
+                kind='SubscriptionEvent', ancestor=self.service.key)
+        query.keys_only()
+        batch = [entity.key for entity in query.fetch()]
+        logging.debug('process_event_batch: %s, count: %s',
+                self.service.key, len(batch))
+        ds_util.client.put(series)
+        ds_util.client.delete_multi(batch)
 
-        with ds_util.client.transaction():
-            # Ensure we actually fetch all pages of the query, use an iterator.
-            query = ds_util.client.query(
-                    kind='SubscriptionEvent', ancestor=self.service.key)
-            batch = [entity.key for entity in query.fetch()]
-            logging.debug('process_event_batch: %s, count: %s',
-                    self.service.key, len(batch))
-            ds_util.client.put(series)
-            ds_util.client.delete_multi(batch)
+        user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
+            logging.debug('EventsWorker: %s daily_weight_notif: queued.', user.key)
             task_util.process_weight_trend(self.service)
-
-
-class WeightTrendWorker(object):
-
-    def __init__(self, service):
-        self.service = service
-        self.client = create_client(service)
-
-    def sync(self):
-        user = ds_util.client.get(self.service.key.parent)
-        if not user['preferences']['daily_weight_notif']:
-            logging.debug('WeightTrendWorker: %s daily_weight_notif: not enabled.', user.key)
-            return
-        to_imperial = user['preferences']['units'] == PreferencesMessage.Unit.IMPERIAL
-
-        # Trends calculation
-        series_entity = Series.get(self.service.key, 'withings')
-        weight_trend = self._weight_trend(series_entity)
-        if not weight_trend:
-            logging.debug('WeightTrendWorker: %s daily_weight_notif: no trend', user.key)
-            return
-        logging.debug('WeightTrendWorker: %s daily_weight_notif: %s.', user.key, weight_trend)
-        latest_weight = weight_trend[-1]
-        if to_imperial:
-            latest_weight = Weight(kg=latest_weight.weight).lb
-
-        # Send notifications
-        clients = fcm_util.active_clients(user.key)
-        def notif_fn(latest_weight, client=None):
-            return messaging.Message(
-                    notification=messaging.Notification(
-                        title='Weight Trend',
-                        body='Today %.1f' % (latest_weight,),
-                        ),
-                    android=messaging.AndroidConfig(
-                        priority='normal',
-                        notification=messaging.AndroidNotification(
-                            color='#f45342'
-                            ),
-                        ),
-                    token=client.id,
-                    )
-        fcm_util.send(user.key, clients, notif_fn, latest_weight)
-
-    def _weight_trend(self, series):
-        today = datetime.datetime.utcnow()
-        week_ago = today - datetime.timedelta(days=7)
-        month_ago = today - datetime.timedelta(days=30)
-        six_months_ago = today - datetime.timedelta(days=183)
-        year_ago = today - datetime.timedelta(days=365)
-        ticks = [year_ago, six_months_ago, month_ago, week_ago, today]
-        ticks_index = len(ticks) - 1
-        measures = []
-        new_measures = series.series.measures
-        for measure in reversed(new_measures):
-            if measure.date <= ticks[ticks_index]:
-                measures.insert(0, measure)
-                ticks_index -= 1
-            if measure.date <= year_ago:
-                break
-        return measures
-
-
-def create_client(service):
-    creds = nokia.NokiaCredentials(
-            access_token=service['credentials'].get('access_token'),
-            token_expiry=service['credentials'].get('token_expiry'),
-            token_type=service['credentials'].get('token_type'),
-            refresh_token=service['credentials'].get('refresh_token'),
-            user_id=service['credentials'].get('user_id'),
-            client_id=service['credentials'].get('client_id'),
-            consumer_secret=service['credentials'].get('consumer_secret')
-            )
-    def refresh_callback(new_credentials):
-        logging.warn('REFRESHING CREDENTIALS: %s, %s', creds, new_credentials);
-        updated_credentials = Service.update_credentials(service, new_credentials)
-        for k, v in updated_credentials.items():
-            setattr(creds, k, v)
-    return nokia.NokiaApi(creds, refresh_cb=refresh_callback)
+        else:
+            logging.debug('EventsWorker: %s daily_weight_notif: not enabled.', user.key)

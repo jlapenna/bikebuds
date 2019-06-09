@@ -75,8 +75,10 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
 
         # Add the payload to the request.
         task['app_engine_http_request']['body'] = converted_payload
-    logging.info('Queueing task: %s', task)
+        logging.debug('Added payload to task: %s', task)
 
+    logging.info('Queueing task: %s',
+            task['app_engine_http_request']['relative_uri'])
     if config.is_dev:
         # Override when running locally.
         if service == 'default':

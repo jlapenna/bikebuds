@@ -32,6 +32,7 @@ from shared.datastore.user import User
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
+from services.withings.weight_trend_notif import WeightTrendWorker
 from services.withings import withings
 
 logging_util.silence_logs()
@@ -162,11 +163,11 @@ def process_event_task():
         return 'OK', 200
 
     if service_name == 'withings':
+        ds_util.client.put(event)
         _do(withings.EventsWorker(service), work_key=service.key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
-        # TODO: refactor to do this inline.
         ds_util.client.put(event)
         _do(strava.EventsWorker(service), work_key=service.key)
     return 'OK', 200
@@ -179,7 +180,7 @@ def process_weight_trend_task():
     service = service_key.get()
     service_name = service.key.id()
     if service_name == 'withings':
-        _do(withings.WeightTrendWorker(service), work_key=service.key)
+        _do(WeightTrendWorker(service), work_key=service.key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':

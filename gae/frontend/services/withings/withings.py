@@ -85,6 +85,7 @@ def events_post():
         logging.exception('Failed while processing %s', event_data)
     return 'OK', 200
 
+
 @module.route('/services/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
