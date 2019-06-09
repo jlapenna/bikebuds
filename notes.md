@@ -206,9 +206,11 @@ bikebuds.cc                        AUTOMATIC            11114599
 
 * "Server key (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/settings/cloudmessaging/android:cc.bikebuds
 * "Web General Key" -> https://console.firebase.google.com/u/0/project/bikebuds-app/settings/general/android:cc.bikebuds
-* "Web client (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProvidera Web SDK
+* "Web client (auto created by Google Service)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProvider Web SDK
 * "Android Client (App Signing Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
 * "Android Client (Upload Key)" -> https://console.firebase.google.com/u/0/project/bikebuds-app/authentication/providers -> GoogleProviderWhitelist
+
+Due to cross-auth, make sure that your firebase "-next" project's Google auth provider whitelists the "Web Client (auto created by Google Service)" oauth2 client id.
 
 # Stackdriver
 
