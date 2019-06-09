@@ -104,16 +104,16 @@ class SignInContainerState extends State<SignInContainer> {
 
     var firebase = FirebaseContainer.of(context);
 
+    // Sign into the primary project.
+    print('SignInScreen.doSignIn: signInWithCredential');
+    var firebaseUser = await firebase.auth.signInWithCredential(credential);
+    await firebaseUser.getIdToken(refresh: true);
+
     // Sign in with the "next" firebase project.
     print('SignInScreen.doSignIn: next: signInWithCredential');
     var firebaseNextUser =
         await firebase.authNext.signInWithCredential(credential);
     await firebaseNextUser.getIdToken(refresh: true);
-
-    // Sign into the primary project.
-    print('SignInScreen.doSignIn: signInWithCredential');
-    var firebaseUser = await firebase.auth.signInWithCredential(credential);
-    await firebaseUser.getIdToken(refresh: true);
 
     setState(() {
       this.signingIn = false;

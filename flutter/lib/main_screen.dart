@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/config.dart';
 import 'package:bikebuds/events_content.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/privacy_util.dart';
@@ -29,9 +28,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
-    print('MainScreen.build: $config, $firebase');
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),

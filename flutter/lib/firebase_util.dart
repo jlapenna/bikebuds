@@ -90,8 +90,7 @@ class FirebaseContainerState extends State<FirebaseContainer> {
     // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
     return FirebaseOptions(
         googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],
-        apiKey: config['client'][0]['api_key'][0]
-            ['current_key'], // iOS API Key?
+        apiKey: config['client'][0]['api_key'][0]['current_key'], // iOS Key?
         bundleID: "bikebuds.cc", // iOS Bundle ID
         clientID: null, // iOS Client ID
         trackingID: null, // Analytics Tracking ID
