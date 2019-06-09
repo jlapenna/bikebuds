@@ -89,6 +89,12 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
     return _client.create_task(_parent, task)
 
 
+def _params_entity(**kwargs):
+    params_entity = Entity(ds_util.client.key('TaskParams'))
+    params_entity.update(**kwargs)
+    return params_entity
+
+
 def sync_service(service):
     sync_services([service])
 
@@ -112,7 +118,7 @@ def sync_services(services):
             tasks.append({
                 'relative_uri': '/tasks/service_sync/' + service.key.name,
                 'service': 'backend',
-                'entity': params_entity(state_key=state.key, service_key=service.key)
+                'entity': _params_entity(state_key=state.key, service_key=service.key)
                 })
             logging.warn('Added: %s', tasks[-1])
 
@@ -156,7 +162,7 @@ def maybe_finish_sync_services_and_queue_process(service, state_key):
             _queue_task(**{
                 'relative_uri': '/tasks/process',
                 'service': 'backend',
-                'entity': params_entity(state_key=state.key)
+                'entity': _params_entity(state_key=state.key)
                 })
     if not config.is_dev:
         with ds_util.client.transaction():
@@ -165,11 +171,17 @@ def maybe_finish_sync_services_and_queue_process(service, state_key):
         do()
 
 
-def params_entity(**kwargs):
-    params_entity = Entity(ds_util.client.key('TaskParams'))
-    params_entity.update(**kwargs)
-    return params_entity
+def process_event(event):
+    _queue_task(**{
+        'relative_uri': '/tasks/process_event',
+        'service': 'backend',
+        'entity': _params_entity(event=event)
+        })
 
 
-def test(entity=None):
-    return _queue_task(entity=entity, relative_uri='/tasks/test', service='backend')
+def process_weight_trend(service):
+    _queue_task(**{
+        'relative_uri': '/tasks/process_weight_trend',
+        'service': 'backend',
+        'entity': _params_entity(service_key=service.key)
+        })

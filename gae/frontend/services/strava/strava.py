@@ -24,6 +24,7 @@ from google.cloud.datastore.entity import Entity
 import stravalib
 
 from shared import auth_util
+from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.athlete import Athlete
@@ -80,10 +81,11 @@ def events_post():
             logging.warn('Received event for %s but missing Athlete', owner_id)
             return 'OK', 200
 
-        service_key = athlete.key.parent
-        event_entity = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
+        event_entity = Entity(
+                ds_util.client.key('SubscriptionEvent',
+                    parent=athlete.key.parent))
         event_entity.update(event_json)
-        #task_util.process_event(event_entity)
+        task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_json)
     return 'OK', 200

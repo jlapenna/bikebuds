@@ -25,6 +25,7 @@ from google.cloud.datastore.key import Key
 import nokia 
 
 from shared import auth_util
+from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.service import Service
@@ -76,7 +77,8 @@ def events_post():
                 flask.request.args.get('service_key'))
         event_data = flask.request.form.to_dict()
 
-        event_entity = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
+        event_entity = Entity(
+                ds_util.client.key('SubscriptionEvent', parent=service_key))
         event_entity.update(event_data)
         task_util.process_event(event_entity)
     except:

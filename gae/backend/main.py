@@ -153,9 +153,9 @@ def process_task():
 @app.route('/tasks/process_event', methods=['GET', 'POST'])
 def process_event_task():
     params = task_util.get_payload(flask.request)
-    event_key = params['event_key']
-    service = ds_util.client.get(event_key.parent)
-    service_name = service.key.id()
+    event = params['event']
+    service = ds_util.client.get(event.key.parent)
+    service_name = service.key.name
     
     if service['credentials'] is None:
         logging.warn('Cannot process event %s, no credentials', event_key)
@@ -166,6 +166,8 @@ def process_event_task():
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
+        # TODO: refactor to do this inline.
+        ds_util.client.put(event)
         _do(strava.EventsWorker(service), work_key=service.key)
     return 'OK', 200
 

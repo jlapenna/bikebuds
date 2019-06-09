@@ -85,7 +85,8 @@ class EventsWorker(object):
         measures = sorted(
                 self.client.get_measures(lastupdate=0, updatetime=0),
                 key=lambda x: x.date)
-        series = Series.to_entity(self.service.key, measures)
+        series = Series.to_entity(measures, self.service.key.name,
+                parent=self.service.key)
 
         user = ds_util.client.get(self.service.key.parent)
 
@@ -98,7 +99,7 @@ class EventsWorker(object):
                     self.service.key, len(batch))
             ds_util.client.put(series)
             ds_util.client.delete_multi(batch)
-        if user.preferences.daily_weight_notif:
+        if user['preferences']['daily_weight_notif']:
             task_util.process_weight_trend(self.service)
 
 
@@ -110,10 +111,10 @@ class WeightTrendWorker(object):
 
     def sync(self):
         user = ds_util.client.get(self.service.key.parent)
-        if not user.preferences.daily_weight_notif:
+        if not user['preferences']['daily_weight_notif']:
             logging.debug('WeightTrendWorker: %s daily_weight_notif: not enabled.', user.key)
             return
-        to_imperial = user.preferences.units == PreferencesMessage.Unit.IMPERIAL
+        to_imperial = user['preferences']['units'] == PreferencesMessage.Unit.IMPERIAL
 
         # Trends calculation
         series_entity = Series.get(self.service.key, 'withings')
@@ -164,8 +165,15 @@ class WeightTrendWorker(object):
 
 
 def create_client(service):
-
-    creds = nokia.NokiaCredentials(**service['credentials'])
+    creds = nokia.NokiaCredentials(
+            access_token=service['credentials'].get('access_token'),
+            token_expiry=service['credentials'].get('token_expiry'),
+            token_type=service['credentials'].get('token_type'),
+            refresh_token=service['credentials'].get('refresh_token'),
+            user_id=service['credentials'].get('user_id'),
+            client_id=service['credentials'].get('client_id'),
+            consumer_secret=service['credentials'].get('consumer_secret')
+            )
     def refresh_callback(new_credentials):
         logging.warn('REFRESHING CREDENTIALS: %s, %s', creds, new_credentials);
         updated_credentials = Service.update_credentials(service, new_credentials)

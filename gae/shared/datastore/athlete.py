@@ -25,8 +25,8 @@ class Athlete(object):
     @classmethod
     def get_by_id(cls, strava_id):
         athlete_query = ds_util.client.query(kind='Athlete')
-        athlete_query.filter('id', '=', strava_id)
-        athletes = athlete_query.fetch()
+        athlete_query.add_filter('id', '=', strava_id)
+        athletes = [a for a in athlete_query.fetch()]
         if len(athletes) == 0:
             return None
         elif len(athletes) > 1:

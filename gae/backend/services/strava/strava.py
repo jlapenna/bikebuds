@@ -129,7 +129,7 @@ class ClubActivitiesProcessor(object):
         for athlete_entity in athlete_entities:
             for club in athlete_entity.clubs:
                 club_to_users[club.key.id].add(athlete_entity.key.id)
-        for club_id, members in club_to_users.iteritems():
+        for club_id, members in club_to_users.items():
             athletes_in_club_query = ds_util.client.query(
                     kind='Athlete', order=['id'])
             athletes_in_club_query.add_filter('id', '=', members);
@@ -165,12 +165,12 @@ class EventsWorker(object):
         self.client.ensure_access()
 
         query = ds_util.client.query(kind='SubscriptionEvent',
-                ancestor=self.service.key, order='-event_time')
+                ancestor=self.service.key, order=['-event_time'])
         events = query.fetch()
         batches = collections.defaultdict(list)
         for event in events:
-            batches[(event.object_id, event.object_type)].append(event)
-        for (object_id, object_type), batch in batches.iteritems():
+            batches[(event['object_id'], event['object_type'])].append(event)
+        for (object_id, object_type), batch in batches.items():
             process_event_batch(
                     self.client, self.service, object_id, object_type, batch)
 
@@ -183,13 +183,14 @@ def process_event_batch(client, service, object_id, object_type, batch):
             logging.warn('Update object_type not implemented: %s', object_type)
             return
 
-        operations = [event.aspect_type for event in batch]
+        operations = [event['aspect_type'] for event in batch]
 
         if 'delete' in operations:
             activity_key = ds_util.client.key('Activity', object_id, parent=service.key)
             result = activity_key.delete()
             logging.debug('delete result: %s -> %s', activity_key, result)
         else:
+            logging.debug('fetching: %s', object_id)
             activity = client.get_activity(object_id)
             activity_entity = Activity.to_entity(activity, parent=service.key)
             # get_activity returns a MetaAthelte, which only has an athlete id,
