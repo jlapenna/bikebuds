@@ -84,43 +84,6 @@ From the root directory:
 ./tools/setup/env.sh  # Sets up 
 ```
 
-After running `tools/setup/dev.sh`, you need to edit a file because of the way our
-spec file is generated. You'll want to apply this diff:
-```
-diff --git a/lib/src/dart_resources.dart b/lib/src/dart_resources.dart
-index 9ed04ae..0d180f3 100644
---- a/lib/src/dart_resources.dart
-+++ b/lib/src/dart_resources.dart
-@@ -218,20 +218,15 @@ class DartResourceMethod {
-     validatePathParam(MethodParameter param) {
-       templateVars[param.jsonName] = param.name;
- 
--      if (param.required) {
--        if (param.type is UnnamedArrayType) {
--          params.writeln(
--              '    if (${param.name} == null || ${param.name}.isEmpty) {');
--        } else {
--          params.writeln('    if (${param.name} == null) {');
--        }
--        params.writeln('      throw new ${imports.core.ref()}ArgumentError'
--            '("Parameter ${param.name} is required.");');
--        params.writeln('    }');
-+      if (param.type is UnnamedArrayType) {
-+        params.writeln(
-+            '    if (${param.name} == null || ${param.name}.isEmpty) {');
-       } else {
--        // Is this an error?
--        throw 'non-required path parameter';
-+        params.writeln('    if (${param.name} == null) {');
-       }
-+      params.writeln('      throw new ${imports.core.ref()}ArgumentError'
-+          '("Parameter ${param.name} is required.");');
-+      params.writeln('    }');
-     }
- 
-     encodeQueryParam(MethodParameter param) {
-```
-
 #### Git Hooks
 
 `dev.sh` sets the repo's core.hooksPath to tools/githooks. Hooks include:
@@ -231,7 +194,7 @@ Whenever you add a new API method or modify its signature, be sure to generate
 new API specs:
 
 ```
-./gae/update_api.sh local
+./gae/update_api.sh
 ```
 
 ### Local flutter development
@@ -264,4 +227,5 @@ If you're not jlapenna@ you can stop reading. ;)
 A python client exists in gae/client. You can use it from the root directory, like so:
 
 ```
+gae/client/ipython.sh
 ```
