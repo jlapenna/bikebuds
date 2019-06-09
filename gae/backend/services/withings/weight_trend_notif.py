@@ -23,6 +23,7 @@ import nokia
 from shared import ds_util
 from shared import fcm_util
 from shared.datastore.series import Series
+from shared.datastore.user import Preferences
 
 from services.withings.client import create_client
 
@@ -38,10 +39,10 @@ class WeightTrendWorker(object):
         if not user['preferences']['daily_weight_notif']:
             logging.debug('WeightTrendWorker: %s daily_weight_notif: not enabled.', user.key)
             return
-        to_imperial = user['preferences']['units'] == PreferencesMessage.Unit.IMPERIAL
+        to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
 
         # Trends calculation
-        series_entity = Series.get(self.service.key, 'withings')
+        series_entity = Series.get('withings', self.service.key)
         weight_trend = self._weight_trend(series_entity)
         if not weight_trend:
             logging.debug('WeightTrendWorker: %s daily_weight_notif: no trend', user.key)
@@ -49,7 +50,7 @@ class WeightTrendWorker(object):
         logging.debug('WeightTrendWorker: %s daily_weight_notif: %s.', user.key, weight_trend)
         latest_weight = weight_trend[-1]
         if to_imperial:
-            latest_weight = Weight(kg=latest_weight.weight).lb
+            latest_weight = Weight(kg=latest_weight['weight']).lb
 
         # Send notifications
         clients = fcm_util.active_clients(user.key)
@@ -65,12 +66,12 @@ class WeightTrendWorker(object):
                             color='#f45342'
                             ),
                         ),
-                    token=client.id,
+                    token=client['token'],
                     )
         fcm_util.send(user.key, clients, notif_fn, latest_weight)
 
     def _weight_trend(self, series):
-        today = datetime.datetime.utcnow()
+        today = datetime.datetime.now(datetime.timezone.utc)
         week_ago = today - datetime.timedelta(days=7)
         month_ago = today - datetime.timedelta(days=30)
         six_months_ago = today - datetime.timedelta(days=183)
@@ -78,11 +79,12 @@ class WeightTrendWorker(object):
         ticks = [year_ago, six_months_ago, month_ago, week_ago, today]
         ticks_index = len(ticks) - 1
         measures = []
-        new_measures = series.series.measures
-        for measure in reversed(new_measures):
-            if measure.date <= ticks[ticks_index]:
+        for measure in reversed(series['measures']):
+            logging.debug('DATE: %s, %s', measure['date'], (measure['date'].tzinfo == None))
+            logging.debug('TICK: %s, %s', ticks[ticks_index], (ticks[ticks_index].tzinfo == None))
+            if measure['date'] <= ticks[ticks_index]:
                 measures.insert(0, measure)
                 ticks_index -= 1
-            if measure.date <= year_ago:
+            if measure['date'] <= year_ago:
                 break
         return measures

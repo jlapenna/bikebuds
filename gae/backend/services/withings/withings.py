@@ -94,14 +94,14 @@ class EventsWorker(object):
                 kind='SubscriptionEvent', ancestor=self.service.key)
         query.keys_only()
         batch = [entity.key for entity in query.fetch()]
-        logging.debug('process_event_batch: %s, count: %s',
+        logging.debug('EventsWorker: process_event_batch: %s, count: %s',
                 self.service.key, len(batch))
         ds_util.client.put(series)
         ds_util.client.delete_multi(batch)
 
         user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
-            logging.debug('EventsWorker: %s daily_weight_notif: queued.', user.key)
+            logging.debug('EventsWorker: daily_weight_notif: queued: %s', user.key)
             task_util.process_weight_trend(self.service)
         else:
-            logging.debug('EventsWorker: %s daily_weight_notif: not enabled.', user.key)
+            logging.debug('EventsWorker: daily_weight_notif: not enabled: %s', user.key)

@@ -44,6 +44,17 @@ class SyncException(Exception):
     pass
 
 
+@app.route('/weight_notify', methods=['POST'])
+def weight_notify_trigger():
+    claims = auth_util.verify(flask.request)
+    user = User.get(claims)
+    service = Service.get('withings', parent=user.key)
+
+    task_result = task_util.process_weight_trend(service)
+    logging.debug('Enqueued Task: %s', task_result)
+    return 'OK', 200
+
+
 @app.route('/test', methods=['POST'])
 def test_trigger():
     claims = auth_util.verify(flask.request)
@@ -177,10 +188,10 @@ def process_event_task():
 def process_weight_trend_task():
     params = task_util.get_payload(flask.request)
     service_key = params['service_key']
-    service = service_key.get()
-    service_name = service.key.id()
+    service = ds_util.client.get(service_key)
+    service_name = service.key.name
     if service_name == 'withings':
-        _do(WeightTrendWorker(service), work_key=service.key)
+        _do(WeightTrendWorker(service), work_key=service_key)
     elif service_name == 'fitbit':
         pass
     elif service_name == 'strava':
