@@ -51,17 +51,12 @@ class Worker(object):
     def sync_activities(self):
         self.client.ensure_access()
 
-        activities = []
-        for activity in self.client.get_activities():
-            activities.append(activity)
-
         athlete = self.client.get_athlete()
 
-        with ds_util.client.transaction():
-            ds_util.client.put_multi(
+        for activity in self.client.get_activities():
+            ds_util.client.put(
                     Activity.to_entity(activity, parent=self.service.key,
-                        detailed_athlete=athlete)
-                    for activity in activities)
+                        detailed_athlete=athlete))
 
     def sync_clubs(self):
         self.client.ensure_access()

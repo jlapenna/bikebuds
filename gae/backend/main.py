@@ -113,15 +113,18 @@ def sync_task():
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync_task(service_name):
+    logging.warn('Starting service_sync')
     params = task_util.get_payload(flask.request)
     state_key = params['state_key']
     service = ds_util.client.get(params['service_key'])
     user_key = service.key.parent
 
+    logging.warn('Validating state key')
     if state_key is None:
         logging.info('Invalid state_key. params: %s', params)
-        return 'OK', 503
+        return 'Invalid state_key', 503
 
+    logging.warn('Validating credentials')
     if service['credentials'] is None:
         logging.info('No creds: %s', service.key)
         return 'OK', 250
@@ -131,9 +134,12 @@ def service_sync_task(service_name):
     elif service_name == 'fitbit':
         _do(bbfitbit.Worker(service), work_key=service.key)
     elif service_name == 'strava':
+        logging.warn('doing work')
         _do(strava.Worker(service), work_key=service.key)
 
+    logging.warn('Finishing work')
     task_util.maybe_finish_sync_services_and_queue_process(service, state_key)
+    logging.warn('Finished work')
     return 'OK', 200
 
 
