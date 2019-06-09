@@ -56,7 +56,7 @@ def create_session(claims):
         session_cookie = auth.create_session_cookie(id_token, expires_in=expires_in)
 
         response = flask.make_response(flask.jsonify({'status': 'success'}))
-        expires = datetime.datetime.now() + expires_in
+        expires = datetime.datetime.now(datetime.timezone.utc) + expires_in
         response.set_cookie('session', session_cookie, expires=expires, httponly=True)
         logging.info(response)
         return response

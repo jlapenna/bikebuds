@@ -107,14 +107,15 @@ def sync_services(services):
     # values yet, so the other server can't read them if they get processed
     # before the transaction completes.
     def do():
-        state = Entity(ds_util.client.key('SyncState', datetime.datetime.utcnow().isoformat()))
+        state = Entity(ds_util.client.key('SyncState',
+            datetime.datetime.now(datetime.timezone.utc).isoformat()))
         state['completed_tasks'] = 0
         ds_util.client.put(state)
 
         tasks = []
         for service in services:
             user_key = service.key.parent
-            service['sync_date'] = datetime.datetime.now()
+            service['sync_date'] = datetime.datetime.now(datetime.timezone.utc)
             service['syncing'] = True
 
             tasks.append({

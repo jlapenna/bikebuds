@@ -405,7 +405,7 @@ class ClubActivitiesResource(Resource):
         logging.warn('Athletes found: %s', len(athlete_keys))
 
         # Find all their activities in the past two weeks.
-        two_weeks = datetime.datetime.now() - datetime.timedelta(days=14)
+        two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=14)
         all_activities = []
         for athlete in athlete_keys:
             activities_query = ds_util.client.query(kind='Activity',
