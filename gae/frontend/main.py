@@ -74,9 +74,10 @@ def after(response):
     return logging_util.after(response)
 
 
+logging_util.debug_logging()
 if __name__ == '__main__':
     host, port = config.frontend_url[7:].split(':')
     app.run(host='localhost', port=port, debug=True)
 else:
     # When run under dev_appserver it is not '__main__'.
-    logging_util.debug_logging()
+    pass

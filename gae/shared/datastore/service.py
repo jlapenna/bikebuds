@@ -34,7 +34,7 @@ class Service(object):
 
     @classmethod
     def update_credentials(cls, service, new_credentials):
-        logging.warn('Updating credentials: %s -> %s', service, new_credentials)
+        logging.debug('Updating credentials: %s', service.key)
         updated = False
         if 'credentials' not in service:
             service['credentials'] = {}
@@ -42,8 +42,8 @@ class Service(object):
             updated = True
             service['credentials'].update(new_credentials)
         if updated:
-            logging.warn('updating service: %s', service)
+            logging.debug('Putting service: %s', service)
             result = ds_util.client.put(service)
         else:
-            logging.warn('unchanged service: %s', service)
+            logging.debug('Unchanged service: %s', service)
         return service['credentials']

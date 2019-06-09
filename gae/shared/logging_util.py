@@ -17,36 +17,47 @@
 import flask
 import logging
 
+
+# Alias our logger for later hacks.
+bb_logger = logging.getLogger()
+
+
+def all_logging():
+    # Standardize default logging.
+    logging.basicConfig(
+            format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s] %(message)s')
+
 def debug_logging():
+    all_logging()
+
     # dev_appserver doesn't seem to properly set up logging.
-    logging.getLogger().setLevel(logging.DEBUG)
+    bb_logger.setLevel(logging.DEBUG)
 
     # From: https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    gunicorn_logger.setLevel(logging.DEBUG)
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.setLevel(logging.DEBUG)
+    #gunicorn_logger = logging.getLogger('gunicorn.error')
+    #gunicorn_logger.setLevel(logging.DEBUG)
+    #werkzeug_logger = logging.getLogger('werkzeug')
+    #werkzeug_logger.setLevel(logging.DEBUG)
 
 
 # From: https://stackoverflow.com/a/39734260
-# Useful warnging interceptor to log all values posted to the endpoint
+# Useful debugging interceptor to log all values posted to the endpoint
 def before():
     query = 'query: '
     headers = 'headers: '
     if len(flask.request.values) == 0:
         query += '(None)'
-    for key in flask.request.values:
-        query += '%s:%s, ' % (key, flask.request.values[key])
-    for k, v in flask.request.headers.items():
-        headers += '%s:%s, ' % (k, v)
-    logging.warn('%s; %s', query, headers)
+    query += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.values.items()])
+    headers += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.headers.items()])
+    bb_logger.debug('%s %s: %s; %s', flask.request.method, flask.request.path, query, headers)
 
-# Useful warnging interceptor to log all endpoint responses
+# Useful debugging interceptor to log all endpoint responses
 def after(response):
     try:
-        logging.warn('response: %s, %s', response.status, response.data.decode('utf-8'))
+        bb_logger.debug('%s: response: %s, %s', flask.request.path,
+                response.status, response.data.decode('utf-8'))
     except:
-        logging.warn('response: could not parse')
+        bb_logger.debug('%s: response: could not parse', flask.request.path)
     return response
 
 
