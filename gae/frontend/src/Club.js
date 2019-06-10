@@ -27,7 +27,6 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import { createRequest } from './bikebuds_api';
 import ActivityListCard from './ActivityListCard';
 
 class ClubFetcher extends Component {
@@ -87,18 +86,10 @@ class ClubFetcher extends Component {
     ) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds
-        .get_club(
-          createRequest({
-            club_id: this.props.clubId
-          })
-        )
+        .get_club({ club_id: this.props.clubId })
         .then(this.handleClub, this.handleClub);
       this.props.apiClient.bikebuds
-        .get_club_activities(
-          createRequest({
-            club_id: this.props.clubId
-          })
-        )
+        .get_club_activities({ club_id: this.props.clubId })
         .then(this.handleActivities, this.handleActivities);
     }
   }

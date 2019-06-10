@@ -31,7 +31,7 @@ import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-import { createRequest } from './bikebuds_api';
+import { createPayload } from './bikebuds_api';
 
 class PreferencesCard extends Component {
   static styles = theme => ({
@@ -64,7 +64,9 @@ class PreferencesCard extends Component {
   handleNotifChange = event => {
     this.setState({ updatingRemote: true });
 
-    var newPreferences = cloneDeepWith(this.props.profile.user.properties.preferences);
+    var newPreferences = cloneDeepWith(
+      this.props.profile.user.properties.preferences
+    );
     newPreferences.daily_weight_notif = event.target.checked;
     this.updatePreferences(newPreferences);
   };
@@ -72,7 +74,9 @@ class PreferencesCard extends Component {
   handleRadioGroupChange = event => {
     this.setState({ updatingRemote: true });
 
-    var newPreferences = cloneDeepWith(this.props.profile.user.properties.preferences);
+    var newPreferences = cloneDeepWith(
+      this.props.profile.user.properties.preferences
+    );
     if (event.target.name === 'units') {
       newPreferences.units = event.target.value;
     } else if (event.target.name === 'weight_service') {
@@ -91,11 +95,10 @@ class PreferencesCard extends Component {
 
     // Remote
     this.props.apiClient.bikebuds
-      .update_preferences(createRequest({
-        payload: {
+      .update_preferences(
+        createPayload({
           preferences: newPreferences
-        }
-      })
+        })
       )
       .then(this.handlePreferences);
   };
@@ -141,7 +144,9 @@ class PreferencesCard extends Component {
                 aria-label="Weight Service"
                 name="weight_service"
                 className={this.props.classes.group}
-                value={this.props.profile.user.properties.preferences.weight_service}
+                value={
+                  this.props.profile.user.properties.preferences.weight_service
+                }
                 onChange={this.handleRadioGroupChange}
               >
                 <FormControlLabel
@@ -167,7 +172,8 @@ class PreferencesCard extends Component {
                   control={
                     <Switch
                       checked={
-                        this.props.profile.user.properties.preferences.daily_weight_notif
+                        this.props.profile.user.properties.preferences
+                          .daily_weight_notif
                       }
                       onChange={this.handleNotifChange}
                     />

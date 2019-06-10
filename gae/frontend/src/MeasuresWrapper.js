@@ -19,7 +19,6 @@ import React, { Component } from 'react';
 
 import moment from 'moment';
 
-import { createRequest } from './bikebuds_api';
 import { readableWeight } from './convert';
 
 class MeasuresWrapper extends Component {
@@ -64,9 +63,7 @@ class MeasuresWrapper extends Component {
       this.state.measures === undefined
     ) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds
-        .get_series(createRequest())
-        .then(this.handleSeries);
+      this.props.apiClient.bikebuds.get_series({}).then(this.handleSeries);
     }
   }
 

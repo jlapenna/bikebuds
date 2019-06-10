@@ -25,11 +25,11 @@ void main() {
     // Build our app and trigger a frame.
 
     FirebaseUserMock mockFirebaseUser = newFirebaseUserMock();
-    Profile fakeUser = newProfile();
+    Profile fakeProfile = newProfileFake();
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileCard(mockFirebaseUser, fakeUser),
+        home: ProfileCard(mockFirebaseUser, fakeProfile),
       ),
     );
 

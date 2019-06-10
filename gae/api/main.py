@@ -347,16 +347,17 @@ class ClientResource(Resource):
 @api.route('/update_client')
 class ClientResource(Resource):
     @api.doc('update_client', body=client_state_model)
-    @api.marshal_with(client_state_model)
+    @api.marshal_with(client_state_entity_model)
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        new_client = api.payload['client']
+        logging.debug('update_client: api.payload: %s', api.payload)
+        new_client = api.payload
         existing_client = ClientState.get(new_client['token'], parent=user.key)
         existing_client.update(new_client)
         existing_client['modified'] = datetime.datetime.now(
                 datetime.timezone.utc)
-        logging.debug('New Client: %s, Updated Client: %s', new_client, existing_client)
+        logging.debug('update_client: New: %s, Updated: %s', new_client, existing_client)
         ds_util.client.put(existing_client)
         return WrapEntity(existing_client)
 

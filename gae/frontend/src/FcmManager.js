@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { createRequest } from './bikebuds_api';
+import { createPayload } from './bikebuds_api';
 import { config } from './config';
 
 class FcmManager extends Component {
@@ -139,11 +139,8 @@ class FcmManager extends Component {
     ) {
       this.props.apiClient.bikebuds
         .update_client(
-          createRequest({
-            payload: {
-              client: { token: this.state.fcmToken },
-              previous_token: prevState.fcmToken
-            }
+          createPayload({
+            client: { token: this.state.fcmToken }
           })
         )
         .then(this.handleUpdateClient);

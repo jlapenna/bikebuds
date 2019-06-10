@@ -64,7 +64,11 @@ class _SignedInAppState extends State<SignedInApp> {
       if (_messagingListener == null) {
         _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
           print('Messaging.onTokenRefresh');
-          BikebudsApiContainer.of(context).registerClient(token);
+          BikebudsApiContainer.of(context)
+              .registerClient(token)
+              .then((response) {
+            print('app: registerClient response: $response');
+          });
         });
         firebase.messaging.requestNotificationPermissions();
         firebase.messaging.configure(

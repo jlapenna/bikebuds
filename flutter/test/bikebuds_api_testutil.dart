@@ -14,10 +14,15 @@
 
 import 'package:bikebuds_api/api.dart';
 
-Profile newProfile() {
+Profile newProfileFake() {
   Profile fakeUser = Profile.fromJson({
-    'athlete': {
+    'user': {
       'properties': {
+        'preferences': <String, dynamic>{'units': 'IMPERIAL'}
+      }
+    },
+    'athlete': {
+      'properties': <String, dynamic>{
         'city': 'San Francisco',
       }
     },

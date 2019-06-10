@@ -26,8 +26,10 @@ it('renders without crashing', () => {
     displayName: 'Display Name',
     photoUrl: '/logo-round.svg'
   };
+  // this.props.profile.user.properties.preferences.units
   const profile = new ProfileState();
-  profile.preferences = {};
+  profile.user = { properties: { preferences: { units: 'IMPERIAL' } } };
+  profile.athlete = { properties: {} };
   ReactDOM.render(
     <PreferencesCard firebaseUser={firebaseUser} profile={profile} />,
     div

@@ -17,8 +17,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { createRequest } from './bikebuds_api';
-
 class ActivitiesWrapper extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
@@ -55,7 +53,7 @@ class ActivitiesWrapper extends Component {
     ) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds
-        .get_activities(createRequest())
+        .get_activities({})
         .then(this.handleUpdateRequestState);
     }
   }

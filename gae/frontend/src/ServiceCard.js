@@ -31,7 +31,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-import { createRequest } from './bikebuds_api';
+import { createPayload } from './bikebuds_api';
 import { config } from './config';
 import { createSession } from './session_util';
 
@@ -64,7 +64,7 @@ class ServiceCard extends Component {
       this.state.service.properties.credentials
     ) {
       this.props.apiClient.bikebuds
-        .disconnect_service(createRequest({ name: this.props.serviceName }))
+        .disconnect_service({ name: this.props.serviceName })
         .then(response => {
           this.handleService(response);
           this.setState({ actionPending: false });
@@ -87,12 +87,17 @@ class ServiceCard extends Component {
   };
 
   handleService = response => {
-    response.body.properties.sync_date = (
-      response.body.properties.sync_successful && !!response.body.properties.sync_date)
-      ? moment.utc(response.body.properties.sync_date)
-      : null;
-    response.body.properties.created = moment.utc(response.body.properties.created);
-    response.body.properties.modified = moment.utc(response.body.properties.modified);
+    response.body.properties.sync_date =
+      response.body.properties.sync_successful &&
+      !!response.body.properties.sync_date
+        ? moment.utc(response.body.properties.sync_date)
+        : null;
+    response.body.properties.created = moment.utc(
+      response.body.properties.created
+    );
+    response.body.properties.modified = moment.utc(
+      response.body.properties.modified
+    );
     this.setState({
       service: response.body
     });
@@ -102,7 +107,7 @@ class ServiceCard extends Component {
   handleSync = () => {
     this.setState({ actionPending: true });
     this.props.apiClient.bikebuds
-      .sync_service(createRequest({ name: this.props.serviceName }))
+      .sync_service({ name: this.props.serviceName })
       .then(response => {
         this.handleService(response);
         this.setState({ actionPending: false });
@@ -121,7 +126,7 @@ class ServiceCard extends Component {
 
     this.props.apiClient.bikebuds
       .update_service(
-        createRequest({
+        createPayload({
           name: this.props.serviceName,
           service: { sync_enabled: event.target.checked }
         })
@@ -138,7 +143,7 @@ class ServiceCard extends Component {
     if (this.props.apiClient && this.state.service === undefined) {
       console.log('ServiceCard.componentDidUpdate: apiClient and no state');
       this.props.apiClient.bikebuds
-        .get_service(createRequest({ name: this.props.serviceName }))
+        .get_service({ name: this.props.serviceName })
         .then(this.handleService);
     }
   }
@@ -149,10 +154,13 @@ class ServiceCard extends Component {
         <Grid container direction="column" justify="center" alignItems="center">
           <Grid className={this.props.classes.cardContentItem} item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {(this.state.service && this.state.service.properties.sync_date != null) ? (
+            {this.state.service &&
+            this.state.service.properties.sync_date != null ? (
               <i>
                 Last sync:{' '}
-                <Moment fromNow>{this.state.service.properties.sync_date}</Moment>
+                <Moment fromNow>
+                  {this.state.service.properties.sync_date}
+                </Moment>
               </i>
             ) : (
               <i>&#8203;</i>
@@ -185,7 +193,10 @@ class ServiceCard extends Component {
 
   renderCardActions() {
     var connectText;
-    if (this.state.service === undefined || !this.state.service.properties.credentials) {
+    if (
+      this.state.service === undefined ||
+      !this.state.service.properties.credentials
+    ) {
       connectText = 'Connect';
     } else {
       connectText = 'Disconnect';

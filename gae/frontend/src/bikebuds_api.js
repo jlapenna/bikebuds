@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export function createRequest(request) {
+export function createPayload(request) {
   /*
   var impersonate = new URLSearchParams(window.location.search).get(
     'impersonate'
@@ -31,7 +31,7 @@ export function createRequest(request) {
     header['impersonate'] = impersonate;
   }
   request = { payload: request };
-  console.log('createRequest: ', request);
+  console.log('createPayload: ', request);
   */
-  return request;
+  return { payload: request };
 }

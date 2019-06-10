@@ -95,9 +95,12 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     return api.getProfile(xFields: "*");
   }
 
-  Future<ClientState> registerClient(FutureOr<String> firebaseToken) async {
+  Future<ClientStateEntity> registerClient(FutureOr<String> firebaseToken) async {
     var client = ClientState()..token = await firebaseToken;
-    return api.updateClient(client, xFields: "*");
+    return api.updateClient(client, xFields: "*").then((response) {
+      print('bikebuds_util: registerClient: response: $response');
+      return response;
+    });
   }
 }
 

@@ -17,8 +17,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { createRequest } from './bikebuds_api';
-
 export class ProfileState {
   constructor(onUpdated) {
     this._onUpdated = onUpdated;
@@ -67,12 +65,10 @@ export default class ProfileWrapper extends React.Component {
     );
     if (this.props.apiClient && !this.state.fetched) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds
-        .get_profile(createRequest())
-        .then(response => {
-          console.log('ProfileWrapper: response: ', response);
-          this.props.profile.update(response.body);
-        });
+      this.props.apiClient.bikebuds.get_profile({}).then(response => {
+        console.log('ProfileWrapper: response: ', response);
+        this.props.profile.update(response.body);
+      });
     }
   }
 

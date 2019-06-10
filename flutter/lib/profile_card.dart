@@ -20,13 +20,14 @@ import 'package:transparent_image/transparent_image.dart';
 class ProfileCard extends StatelessWidget {
   final FirebaseUser firebaseUser;
   final Profile profile;
-  final User uu = null;
 
   ProfileCard(this.firebaseUser, this.profile);
 
   @override
   Widget build(BuildContext context) {
-    print('ProfileCard.build: ${profile?.athlete}');
+    print('ProfileCard.build: profile: $profile');
+    print('ProfileCard.build: profile.user: ${profile?.user}');
+    print('ProfileCard.build: profile.athlete: ${profile?.athlete}');
     var photoUrl =
         profile?.athlete?.properties?.profileMedium ?? firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
