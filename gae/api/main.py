@@ -351,12 +351,12 @@ class ClientResource(Resource):
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        existing_client = ClientState.get(
-                api.payload['token'], parent=user.key)
-        existing_client.update(api.payload)
+        new_client = api.payload['client']
+        existing_client = ClientState.get(new_client['token'], parent=user.key)
+        existing_client.update(new_client)
         existing_client['modified'] = datetime.datetime.now(
                 datetime.timezone.utc)
-        logging.debug('Update: %s, Updated: %s', api.payload, existing_client)
+        logging.debug('New Client: %s, Updated Client: %s', new_client, existing_client)
         ds_util.client.put(existing_client)
         return WrapEntity(existing_client)
 

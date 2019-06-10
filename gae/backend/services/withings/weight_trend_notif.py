@@ -39,7 +39,7 @@ class WeightTrendWorker(object):
     def sync(self):
         user = ds_util.client.get(self.service.key.parent)
         if not user['preferences']['daily_weight_notif']:
-            logging.debug('WeightTrendWorker: %s daily_weight_notif: not enabled.', user.key)
+            logging.debug('WeightTrendWorker: daily_weight_notif: not enabled: %s', user.key)
             return
         to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
 
@@ -47,8 +47,20 @@ class WeightTrendWorker(object):
         series_entity = Series.get('withings', self.service.key)
         weight_trend = self._weight_trend(series_entity)
 
-        # TODO: Guess a good time frame...
-        time_frame = 'a week ago'
+        time_frame = None
+        if 'a week ago' in weight_trend:
+            time_frame = 'a week ago'
+        elif 'a month ago' in weight_trend:
+            time_frame = 'a month ago'
+        elif 'six months ago' in weight_trend:
+            time_frame = 'six months ago'
+        elif 'a year ago' in weight_trend:
+            time_frame = 'a year ago'
+
+        if time_frame is None:
+            logging.debug(
+                    'WeightTrendWorker: daily_weight_notif: no timeframe: %s', user.key)
+            return
 
         latest_weight = weight_trend['latest'][1]['weight']
         if to_imperial:

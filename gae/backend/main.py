@@ -166,6 +166,7 @@ def process_task():
 def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']
+    logging.debug('Processing Event: %s', event)
     service = ds_util.client.get(event.key.parent)
     service_name = service.key.name
     
