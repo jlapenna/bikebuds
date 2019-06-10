@@ -18,6 +18,10 @@
 
 source tools/scripts/base.sh
 
+function cleanup_ctrl_c() {
+  echo "Trapped and ignored ctrl+c"
+}
+
 function delete_old_versions() {
   # From: https://almcc.me/blog/2017/05/04/removing-older-versions-on-google-app-engine/
   local service=$1
@@ -53,6 +57,9 @@ function main() {
   # safe-keeping.
   git add .
   git commit --allow-empty -a -m"Working Set: ${date}";
+
+  # Trap ctrl c while we're in the middle of playing git shenanigans.
+  trap ctrl_c INT
 
   # Make sure we're not using cached pyc.
   find ./ -iname '*.py[co]' -delete
@@ -94,6 +101,9 @@ function main() {
 
   # Remove the generated source contexts
   rm gae/*/source-context.json >/dev/null 2>&1
+
+  # Untrap ctrl_c.
+  trap INT
 
   # And then check that out, effectively reverting to the working set.
   git checkout .
