@@ -69,7 +69,8 @@ def main():
   parser.add_argument('-p', '--package', required=True, help='The package name. Example: com.android.sample')
   parser.add_argument('-s', '--service', required=True, help='The service account json file.')
   parser.add_argument('-a', '--apk', required=True, help='The path to the APK file to upload.')
-  parser.add_argument('-t', '--track', choices=['alpha', 'beta', 'production','rollout'], default='alpha')
+  parser.add_argument('-t', '--track',
+          choices=['internal', 'alpha', 'beta', 'production','rollout'], default='alpha')
   args = parser.parse_args()
 
   upload(args.package, args.service, args.apk, args.track)
