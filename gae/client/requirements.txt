@@ -12,3 +12,6 @@ requests
 
 # tasks_util.py
 google-cloud-tasks
+
+# For natural language dates and such
+Babel

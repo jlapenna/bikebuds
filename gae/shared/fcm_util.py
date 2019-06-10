@@ -27,6 +27,13 @@ def active_clients(user_key):
     return [c for c in query.fetch()]
 
 
+def best_clients(user_key):
+    query = ds_util.client.query(kind='ClientState', ancestor=user_key,
+            order=['-modified'])
+    query.add_filter('active', '=', True)
+    return [c for c in query.fetch(1)]
+
+
 def send(user_key, clients, notif_fn, *args, **kwargs):
     """Sends a notification.
 

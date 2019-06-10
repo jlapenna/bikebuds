@@ -24,3 +24,6 @@ measurement==2.0.1
 
 # task_util.py
 google-cloud-tasks==1.1.0
+
+# For natural language dates and such
+Babel

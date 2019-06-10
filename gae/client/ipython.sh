@@ -23,6 +23,7 @@ function main() {
   local client_path="${repo_path}/gae/client"
 
   activate_client_virtualenv
+  pip install -r ${client_path}/requirements.txt
 
   load_config
 

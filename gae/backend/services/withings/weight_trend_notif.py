@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import datetime
 import logging
 
 from firebase_admin import messaging
 
+from babel.dates import format_datetime, format_date
 from measurement.measures import Weight
 import nokia
 
@@ -41,24 +43,42 @@ class WeightTrendWorker(object):
             return
         to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
 
-        # Trends calculation
+        # Calculate the trend.
         series_entity = Series.get('withings', self.service.key)
         weight_trend = self._weight_trend(series_entity)
-        if not weight_trend:
-            logging.debug('WeightTrendWorker: %s daily_weight_notif: no trend', user.key)
-            return
-        logging.debug('WeightTrendWorker: %s daily_weight_notif: %s.', user.key, weight_trend)
-        latest_weight = weight_trend[-1]
+
+        # TODO: Guess a good time frame...
+        time_frame = 'a week ago'
+
+        latest_weight = weight_trend['latest'][1]['weight']
         if to_imperial:
-            latest_weight = Weight(kg=latest_weight['weight']).lb
+            latest_weight = Weight(kg=latest_weight).lb
+        time_frame_weight = weight_trend[time_frame][1]['weight']
+
+        if to_imperial:
+            time_frame_weight = Weight(kg=time_frame_weight).lb
+        time_frame_date = weight_trend[time_frame][1]['date']
+
+        delta = latest_weight - time_frame_weight
+        unit = 'kg'
+        if to_imperial:
+            unit = 'lbs'
+        if delta > 0:
+            title = 'Down %.1f %s from %s' % (abs(delta), unit, time_frame)
+        if delta == 0:
+            title = 'Weight unchanged since last week'
+        else:
+            title = 'Up %.1f %s from %s' % (abs(delta), unit, time_frame)
+        body = 'You were %.1f %s on %s' % (time_frame_weight, unit,
+                format_date(time_frame_date.date(), format='medium'))
 
         # Send notifications
-        clients = fcm_util.active_clients(user.key)
-        def notif_fn(latest_weight, client=None):
+        clients = fcm_util.best_clients(user.key)
+        def notif_fn(client=None):
             return messaging.Message(
                     notification=messaging.Notification(
-                        title='Weight Trend',
-                        body='Today %.1f' % (latest_weight,),
+                        title=title,
+                        body=body,
                         ),
                     android=messaging.AndroidConfig(
                         priority='normal',
@@ -68,23 +88,33 @@ class WeightTrendWorker(object):
                         ),
                     token=client['token'],
                     )
-        fcm_util.send(user.key, clients, notif_fn, latest_weight)
+        fcm_util.send(user.key, clients, notif_fn)
 
     def _weight_trend(self, series):
+        """Find a series of weights across various time intervals.
+
+        Returns: {'time_frame': [time_frame_date, measure]}
+        """
+
         today = datetime.datetime.now(datetime.timezone.utc)
-        week_ago = today - datetime.timedelta(days=7)
-        month_ago = today - datetime.timedelta(days=30)
-        six_months_ago = today - datetime.timedelta(days=183)
-        year_ago = today - datetime.timedelta(days=365)
-        ticks = [year_ago, six_months_ago, month_ago, week_ago, today]
-        ticks_index = len(ticks) - 1
-        measures = []
-        for measure in reversed(series['measures']):
-            logging.debug('DATE: %s, %s', measure['date'], (measure['date'].tzinfo == None))
-            logging.debug('TICK: %s, %s', ticks[ticks_index], (ticks[ticks_index].tzinfo == None))
-            if measure['date'] <= ticks[ticks_index]:
-                measures.insert(0, measure)
-                ticks_index -= 1
-            if measure['date'] <= year_ago:
-                break
-        return measures
+
+        trend = [
+                ('a year_ago', today - datetime.timedelta(days=365)),
+                ('six months ago', today - datetime.timedelta(days=183)),
+                ('a month ago', today - datetime.timedelta(days=30)),
+                ('a week ago', today - datetime.timedelta(days=7)),
+                ('latest', datetime.datetime.now(datetime.timezone.utc)),
+                ]
+
+        trend_result = {}
+
+        trend_index = 0
+        time_frame, tick = trend[trend_index]
+        for measure in series['measures']:
+            if measure['date'] > tick:
+                # we've come newer than the tick, we need a smaller tick.
+                trend_index += 1
+                time_frame, tick = trend[trend_index]
+            if measure['date'] <= tick:
+                trend_result[time_frame] = tick, measure
+        return trend_result

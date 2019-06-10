@@ -315,6 +315,7 @@ profile_model = api.model('Profile', {
 client_state_model = api.model('ClientState', {
     'token': fields.String,
     'active': fields.Boolean,
+    'type': fields.String,
 })
 client_state_entity_model = EntityModel(client_state_model)
 
@@ -353,6 +354,9 @@ class ClientResource(Resource):
         existing_client = ClientState.get(
                 api.payload['token'], parent=user.key)
         existing_client.update(api.payload)
+        existing_client['modified'] = datetime.datetime.now(
+                datetime.timezone.utc)
+        logging.debug('Update: %s, Updated: %s', api.payload, existing_client)
         ds_util.client.put(existing_client)
         return WrapEntity(existing_client)
 
