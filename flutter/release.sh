@@ -48,10 +48,6 @@ function main() {
       "${ANDROID_BUILD_GRADLE}"
 
   echo ""
-  echo "Modifying API..."
-  ./gae/update_api.sh > /dev/null 2>&1
-
-  echo ""
   echo "Building..."
   pushd flutter
   flutter build apk \
@@ -64,9 +60,6 @@ function main() {
     echo "Unable to build!"
   fi
   popd
-
-  echo "Restoring API..."
-  ./gae/update_api.sh local > /dev/null 2>&1
 
   echo "Reverting build.gradle."
   git checkout "${ANDROID_BUILD_GRADLE}"
