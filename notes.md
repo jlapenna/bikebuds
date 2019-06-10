@@ -281,11 +281,11 @@ It was third party cookies. so I set up a firebase custom domain:
 3. Find the POST request `token?key=...`_and `copy as cuRL.`
 4. Execute the curl command to get an auth token:
 
-       AUTH_TOKEN=$(curl 'https://securetoken.googleapis.com/v1/token?key=AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU' -H 'Referer: http://localhost:8080/' -H 'Origin: http://localhost:8080' -H 'X-Client-Version: Chrome/JsCore/5.5.9/FirebaseCore-web' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 ^Cfari/537.36' -H 'Content-Type: application/x-www-form-urlencoded' --data 'grant_type=refresh_token&refresh_token=thiswillbeaverylongstringthatyoullgetanduseits' --compressed|python -c 'import sys; import json; print json.load(sys.stdin)["access_token"];')
+       AUTH_TOKEN=$(curl 'https://securetoken.googleapis.com/v1/token?key=XXXXXXX' -H 'Referer: http://localhost:8080/' -H 'Origin: http://localhost:8080' -H 'X-Client-Version: Chrome/JsCore/5.5.9/FirebaseCore-web' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 ^Cfari/537.36' -H 'Content-Type: application/x-www-form-urlencoded' --data 'grant_type=refresh_token&refresh_token=thiswillbeaverylongstringthatyoullgetanduseits' --compressed|python -c 'import sys; import json; print json.load(sys.stdin)["access_token"];')
 
 5. Execute your API request:
 
-       curl 'http://localhost:8082/_ah/api/bikebuds/v1/series?key=AIzaSyCpP9LrZJLnK2UlOYKjRHXijZQHzwGjpPU' -X POST -H "Authorization: Bearer $AUTH_TOKEN"
+       curl 'http://localhost:8082/_ah/api/bikebuds/v1/series?key=XXXXXXXX' -X POST -H "Authorization: Bearer $AUTH_TOKEN"
 
 # Strava web push.
 
