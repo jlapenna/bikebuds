@@ -166,20 +166,36 @@ def process_task():
 def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']
-    logging.debug('Processing Event: %s', event)
-    service = ds_util.client.get(event.key.parent)
-    service_name = service.key.name
+    logging.debug('Processing Event: %s', event.key)
+
+    service_key = event.key.parent
+    user_key = service_key.parent
+    user = ds_util.client.get(user_key)
+
+    # First try to get the service using the event key's service.
+    # If this event is coming from an old subscription / secret url, which
+    # embeds a service_key in it, then we might get these.
+    service = ds_util.client.get(service_key)
+    if service is None:
+        # The event & Service we received might no longer have a User associated
+        # with it. (Old subscriptions?) In which case, we have to use the user &
+        # service name in a "Series.get" lookup rather than directly using the key.
+        service = Service.get(service_key.name, parent=user_key)
     
-    if service['credentials'] is None:
+    if service is None:
+        logging.warn('Cannot process event %s, no service', event_key)
+        return 'OK', 200
+    
+    if 'credentials' not in service:
         logging.warn('Cannot process event %s, no credentials', event_key)
         return 'OK', 200
 
-    if service_name == 'withings':
+    if service_key.name == 'withings':
         ds_util.client.put(event)
         _do(withings.EventsWorker(service), work_key=service.key)
-    elif service_name == 'fitbit':
+    elif service_key.name == 'fitbit':
         pass
-    elif service_name == 'strava':
+    elif service_key.name == 'strava':
         ds_util.client.put(event)
         _do(strava.EventsWorker(service), work_key=service.key)
     return 'OK', 200
