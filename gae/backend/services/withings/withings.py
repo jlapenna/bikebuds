@@ -41,6 +41,7 @@ class Worker(object):
     def sync(self):
         self.sync_measures()
         if not config.is_dev:
+            self.remove_subscriptions()
             self.sync_subscription()
 
     def sync_measures(self):
