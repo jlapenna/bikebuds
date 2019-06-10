@@ -79,9 +79,12 @@ def verify_claims(request, impersonate=None):
             claims = {'sub': firebase_user.uid}
     else:
         # This is a firebase token.
-        claims = google.oauth2.id_token.verify_firebase_token(id_token,
-                google.auth.transport.requests.Request())
-        firebase_user = auth.get_user(claims['sub'])
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(id_token,
+                    google.auth.transport.requests.Request())
+            firebase_user = auth.get_user(claims['sub'])
+        except ValueError as e:
+            flask.abort(403, 'id_token already expired.')
 
     if not claims:
         flask.abort(401, 'Unable to validate id_token')
