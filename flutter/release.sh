@@ -22,6 +22,11 @@ ANDROID_BUILD_GRADLE="flutter/android/app/build.gradle"
 ANDROID_APK_LOCATION="flutter/build/app/outputs/apk/release/app-release.apk"
 ANDROID_RELEASE_OUTPUT_JSON="flutter/build/app/outputs/apk/release/output.json"
 
+function ctrl_c() {
+  echo "Trapped and ignored ctrl+c"
+}
+trap ctrl_c INT
+
 function main() {
   # Args
   local build_number="$(printf '%02d' $1)"
@@ -61,12 +66,6 @@ function main() {
   fi
   popd
 
-  echo "Reverting build.gradle."
-  git checkout "${ANDROID_BUILD_GRADLE}"
-
-  # And restore the dev environment config.
-  set_dev_environment
-
   if [ "$build_code" -ne 0 ]; then
     echo ""
     echo "Unable to build!"
@@ -81,6 +80,12 @@ function main() {
         -s environments/prod/service_keys/play-developer-api.json \
         -t internal
   fi
+
+  echo "Reverting build.gradle."
+  git checkout "${ANDROID_BUILD_GRADLE}"
+
+  # And restore the dev environment config.
+  set_dev_environment
 }
 
 main "$@"
