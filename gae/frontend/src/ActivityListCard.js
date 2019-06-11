@@ -22,6 +22,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -130,17 +131,23 @@ class ActivityListCard extends Component {
           <List>
             {this.props.activities.map((activity, index) => {
               var fullName = undefined;
-              if (this.props.showAthlete && activity.properties.athlete !== undefined) {
+              if (
+                this.props.showAthlete &&
+                activity.properties.athlete !== undefined
+              ) {
                 if (activity.properties.athlete.firstname !== undefined) {
                   fullName = activity.properties.athlete.firstname;
                 }
                 if (activity.properties.athlete.lastname !== undefined) {
-                  fullName = fullName + ' ' + activity.properties.athlete.lastname;
+                  fullName =
+                    fullName + ' ' + activity.properties.athlete.lastname;
                 }
               }
               var startDate = undefined;
               if (this.props.showDate) {
-                startDate = moment(activity.properties.start_date_local).format('LLL');
+                startDate = moment(activity.properties.start_date_local).format(
+                  'LLL'
+                );
               }
 
               var secondary = undefined;
@@ -157,7 +164,10 @@ class ActivityListCard extends Component {
                   onClick={this.handleListItemClick.bind(this, index, activity)}
                   selected={this.state.selectedIndex === index}
                 >
-                  <ListItemText primary={activity.properties.name} secondary={secondary} />
+                  <ListItemText
+                    primary={activity.properties.name}
+                    secondary={secondary}
+                  />
                 </ListItem>
               );
             })}
@@ -186,6 +196,7 @@ class ActivityListCard extends Component {
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
+          {this.props.activities === undefined && <LinearProgress />}
           {this.renderCardContent()}
         </CardContent>
       </Card>

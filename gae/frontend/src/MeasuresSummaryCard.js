@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -198,6 +199,7 @@ class MeasuresSummaryCard extends Component {
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Weight</Typography>
+          {this.state.measures === undefined && <LinearProgress />}
           {this.state.measures !== undefined &&
             this.state.measures.length > 0 &&
             this.renderChart()}

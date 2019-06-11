@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 
 import moment from 'moment';
@@ -227,6 +228,7 @@ class MeasuresCard extends Component {
           {this.props.title !== undefined && (
             <Typography variant="h5">{this.props.title}</Typography>
           )}
+          {this.state.measures === undefined && <LinearProgress />}
           {this.state.measures !== undefined &&
             this.state.measures.length > 0 &&
             this.renderChart()}

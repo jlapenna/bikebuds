@@ -24,6 +24,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
@@ -154,6 +155,7 @@ class ServiceCard extends Component {
         <Grid container direction="column" justify="center" alignItems="center">
           <Grid className={this.props.classes.cardContentItem} item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
+            {this.state.service === undefined && <LinearProgress />}
             {this.state.service &&
             this.state.service.properties.sync_date != null ? (
               <i>
