@@ -516,7 +516,7 @@ class SyncResource(Resource):
     def get(self, name):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        service = Service.get('strava', parent=user.key)
+        service = Service.get(name, parent=user.key)
 
         task_result = task_util.sync_service(service)
         return WrapEntity(service)
