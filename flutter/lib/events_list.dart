@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/date_util.dart';
 import 'package:bikebuds/event_screen.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import 'date_util.dart';
 
 class EventsList extends StatefulWidget {
   EventsList();
@@ -53,9 +54,10 @@ class _EventsListState extends State<EventsList> {
   }
 
   Widget buildItem(DocumentSnapshot event) {
+//    var startDate = event['start-date'];
     var startDate = event['start_date'] == null
         ? null
-        : dateTimeFormat.format(event['start_date']);
+        : dateTimeFormat.format(event['start_date'].toDate());
     return ListTile(
       title: Text(event['title']),
       subtitle: Text(startDate),

@@ -124,7 +124,7 @@ class _EventScreenState extends State<EventScreen> {
       print(
           'EventScreen.handleStartDateChanged: running transaction "$newStartDate"');
       await tx.update(widget.event.reference, <String, dynamic>{
-        'start_date': newStartDate,
+        'start_date': Timestamp.fromDate(newStartDate),
       });
       print('EventScreen.handleStartDateChanged: completed transaction.');
     });
@@ -193,8 +193,8 @@ class _EventScreenState extends State<EventScreen> {
               format: dateTimeFormat,
               onChanged: handleStartDateChanged,
               editable: false,
-              initialDate: widget.event['start_date'],
-              initialValue: widget.event['start_date'],
+              initialDate: widget.event['start_date'].toDate(),
+              initialValue: widget.event['start_date'].toDate(),
               inputType: InputType.both,
               style: Theme.of(context).textTheme.body1,
               decoration: InputDecoration(
