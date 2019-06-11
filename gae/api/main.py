@@ -90,6 +90,15 @@ class CredentialsField(fields.Raw):
     def format(self, value):
         return 'credentials' is not None
 
+
+class DateTimeNaive(fields.DateTime):
+    def parse(self, value):
+       parsed_value = super().parse(value)
+       if parsed_value is not None:
+           parsed_value = parsed_value.replace(tzinfo=None)
+       return parsed_value
+
+
 service_model = api.model('Service', {
     'created': fields.DateTime,
     'modified': fields.DateTime,
@@ -231,7 +240,7 @@ activity_model = api.model('Activity', {
     'athlete': fields.Nested(athlete_model),
     'average_temp': fields.Integer,
     'has_heartrate': fields.Boolean,
-    'start_date_local': fields.DateTime,
+    'start_date_local': DateTimeNaive,
     'guid': fields.String,
     'upload_id': fields.String,
     'has_kudoed': fields.Boolean,

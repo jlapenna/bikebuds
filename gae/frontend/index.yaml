@@ -11,6 +11,10 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
+- kind: "Activity"
+  ancestor: yes
+  properties:
+  - name: "start_date"
 - kind: "ClientState"
   ancestor: yes
   properties:
@@ -22,7 +26,3 @@ indexes:
   properties:
   - name: "event_time"
     direction: desc
-- kind: "Activity"
-  ancestor: yes
-  properties:
-  - name: "start_date"
