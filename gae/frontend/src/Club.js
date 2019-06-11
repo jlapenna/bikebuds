@@ -27,7 +27,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import ActivityListCard from './ActivityListCard';
+import ActivitiesListCard from './ActivitiesListCard';
 
 class ClubFetcher extends Component {
   static propTypes = {
@@ -204,7 +204,7 @@ class _ClubWidget extends Component {
             xs={12}
             md={9}
           >
-            <ActivityListCard
+            <ActivitiesListCard
               apiClient={this.props.apiClient}
               profile={this.props.profile}
               activities={this.props.activities}

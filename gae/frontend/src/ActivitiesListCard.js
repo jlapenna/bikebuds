@@ -32,7 +32,7 @@ import moment from 'moment';
 
 import ActivityDetail from './ActivityDetail';
 
-class ActivityListCard extends Component {
+class ActivitiesListCard extends Component {
   static styles = {
     root: {
       height: '400px'
@@ -54,7 +54,7 @@ class ActivityListCard extends Component {
 
   constructor(props) {
     super(props);
-    console.log('ActivityListCard: ', props);
+    console.log('ActivitiesListCard: ', props);
     if (
       this.props.activities !== undefined &&
       this.props.activities.length > 0
@@ -69,7 +69,7 @@ class ActivityListCard extends Component {
   }
 
   handleListItemClick = (index, activity) => {
-    console.log('ActivityListCard.handleListItemClick: ', index, activity);
+    console.log('ActivitiesListCard.handleListItemClick: ', index, activity);
     this.setState({
       selectedActivity: activity,
       selectedIndex: index
@@ -77,7 +77,7 @@ class ActivityListCard extends Component {
   };
 
   handleUpdateActivities = activities => {
-    console.log('ActivityListCard.handleUpdateActivities: ');
+    console.log('ActivitiesListCard.handleUpdateActivities: ');
     activities = activities || [];
 
     if (activities.length > 0) {
@@ -92,10 +92,10 @@ class ActivityListCard extends Component {
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ActivityListCard.componentDidUpdate', prevProps, this.props);
+    console.log('ActivitiesListCard.componentDidUpdate', prevProps, this.props);
     if (prevProps.activities !== this.props.activities) {
       console.log(
-        'ActivityListCard.componentDidUpdate: new activities props',
+        'ActivitiesListCard.componentDidUpdate: new activities props',
         this.props.activities
       );
     }
@@ -203,4 +203,4 @@ class ActivityListCard extends Component {
     );
   }
 }
-export default withStyles(ActivityListCard.styles)(ActivityListCard);
+export default withStyles(ActivitiesListCard.styles)(ActivitiesListCard);

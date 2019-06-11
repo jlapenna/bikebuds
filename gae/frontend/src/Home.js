@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
-import ActivityListCard from './ActivityListCard';
+import ActivitiesListCard from './ActivitiesListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
 import MeasuresSummaryCard from './MeasuresSummaryCard';
@@ -56,7 +56,7 @@ class Home extends Component {
                   apiClient={this.props.apiClient}
                   onResponse={this.handleActivitiesResponse}
                 />
-                <ActivityListCard
+                <ActivitiesListCard
                   apiClient={this.props.apiClient}
                   profile={this.props.profile}
                   activities={this.state.activities}
