@@ -89,7 +89,7 @@ def _do_cleanup(version, datastore_state, cleanup_fn):
 
 @app.route('/tasks/cleanup', methods=['GET'])
 def cleanup_task():
-    result = ds_util.client.query(kind='DatastoreState').fetch()
+    result = [r for r in ds_util.client.query(kind='DatastoreState').fetch()]
     if len(result) == 0:
         datastore_state = Entity(ds_util.client.key('DatastoreState'))
     else:
