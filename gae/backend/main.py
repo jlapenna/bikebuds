@@ -146,7 +146,6 @@ def service_sync_task(service_name):
     elif service_name == 'fitbit':
         _do(bbfitbit.Worker(service), work_key=service.key)
     elif service_name == 'strava':
-        logging.warn('doing work')
         _do(strava.Worker(service), work_key=service.key)
 
     logging.warn('Finishing work')
