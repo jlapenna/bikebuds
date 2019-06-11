@@ -183,11 +183,11 @@ def process_event_task():
         service = Service.get(service_key.name, parent=user_key)
     
     if service is None:
-        logging.warn('Cannot process event %s, no service', event_key)
+        logging.warn('Cannot process event %s, no service', event.key)
         return 'OK', 200
     
     if 'credentials' not in service:
-        logging.warn('Cannot process event %s, no credentials', event_key)
+        logging.warn('Cannot process event %s, no credentials', event.key)
         return 'OK', 200
 
     if service_key.name == 'withings':
