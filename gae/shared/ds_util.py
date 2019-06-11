@@ -15,6 +15,7 @@
 import os
 
 from google.cloud.datastore import Client
+from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
 from google.oauth2.service_account import Credentials
 

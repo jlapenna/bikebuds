@@ -15,10 +15,13 @@
 import datetime
 import logging
 import sys
+from urllib.parse import urlencode
+
+from google.cloud.datastore.entity import Entity
 
 from firebase_admin import messaging
-
 from measurement.measures import Weight
+from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, MissingTokenError
 import nokia
 
 from shared import ds_util
@@ -39,10 +42,17 @@ class Worker(object):
         self.client = create_client(service)
 
     def sync(self):
-        self.sync_measures()
-        if not config.is_dev:
-            self.remove_subscriptions()
+        try:
+            #self.sync_measures()
             self.sync_subscription()
+        except TokenExpiredError as e:
+            logging.exception('Token Expired Error: service: %s, wiping creds',
+                    self.service['credentials']);
+            Service.update_credentials(self.service, None)
+        except MissingTokenError as e:
+            logging.exception('Missing Token Error: service: %s, wiping creds',
+                    self.service['credentials']);
+            Service.update_credentials(self.service, None)
 
     def sync_measures(self):
         logging.warn('sync_measures')
@@ -54,28 +64,52 @@ class Worker(object):
         return ds_util.client.put(series)
 
     def sync_subscription(self):
-        callback_url = (
-                '%s/services/withings/events?sub_secret=%s&service_key=%s' % (
-                    config.frontend_url,
-                    config.withings_creds['sub_secret'],
-                    self.service.key.to_legacy_urlsafe()))
+        query_string = urlencode({
+                'sub_secret': config.withings_creds['sub_secret'],
+                'service_key': self.service.key.to_legacy_urlsafe()
+        })
+        callbackurl = (
+                'https://www.bikebuds.cc/services/withings/events?%s' %
+                (query_string,))
+        comment = self.service.key.to_legacy_urlsafe().decode()
+        is_subscribed = self.client.is_subscribed(callbackurl)
+        logging.debug('Current sub: %s is_subscribed: %s', callbackurl, is_subscribed)
+        
+        # Existing subs.
         subscriptions = self.client.list_subscriptions()
-        if not subscriptions:
-            logging.info('Subscribing: %s to %s',
-                    self.service.key, callback_url)
-            result = self.client.subscribe(
-                    callback_url, comment=self.service.key.to_legacy_urlsafe())
-            logging.info('Subscribed: %s to %s -> %s',
-                    self.service.key, callback_url, result)
-
-    def remove_subscriptions(self):
-        subscriptions = self.client.list_subscriptions()
+        current_sub = None
         for sub in subscriptions:
-            logging.info('Unsubscribing: %s', sub)
+            logging.debug('Examining sub: %s', sub)
+            if 'bikebuds.cc' in sub['callbackurl']:
+                # This is a bikebuds subscription.
+                if sub['callbackurl'] == callbackurl:
+                    logging.debug('Found our sub: %s', sub)
+                    current_sub = sub
+                    continue
+                # This sub is bikebuds, but we don't recognize it.
+                try:
+                    self.client.unsubscribe(sub['callbackurl'])
+                    logging.info('Unsubscribed: %s', sub)
+                except Exception as e:
+                    logging.exception('Unsubscribe failed: %s', sub)
+                sub_key = ds_util.client.key('WithingsSubscription',
+                        sub['callbackurl'], parent=self.service.key)
+                ds_util.client.delete(sub_key)
+
+        # After previous cleanup, see if we need to re-subscribed:
+        is_subscribed = self.client.is_subscribed(callbackurl)
+        if is_subscribed:
+            logging.info('Already have a sub, not re-registering.')
+        else:
             try:
-                result = self.client.unsubscribe(sub['callbackurl'])
+                self.client.subscribe(callbackurl, comment=comment)
+                logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
+                sub_entity = Entity(ds_util.client.key('WithingsSubscription',
+                    comment, parent=self.service.key))
+                sub_entity.update({'callbackurl': callbackurl, 'comment': comment})
+                ds_util.client.put(sub_entity)
             except Exception as e:
-                logging.warn('Unsubscribe failed: %s', sub)
+                logging.exception('Subscribe failed: %s, %s', callbackurl, comment)
 
 
 class EventsWorker(object):

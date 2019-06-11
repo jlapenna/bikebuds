@@ -21,6 +21,9 @@ import logging
 # Alias our logger for later hacks.
 bb_logger = logging.getLogger()
 
+LOG_HEADERS = False
+LOG_QUERY = False
+
 
 def all_logging():
     # Standardize default logging.
@@ -45,10 +48,16 @@ def debug_logging():
 def before():
     query = 'query: '
     headers = 'headers: '
-    if len(flask.request.values) == 0:
+    if not LOG_QUERY:
+        query += '(skipped)'
+    elif len(flask.request.values) == 0:
         query += '(None)'
-    query += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.values.items()])
-    headers += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.headers.items()])
+    else:
+        query += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.values.items()])
+    if not LOG_HEADERS:
+        headers += '(skipped)'
+    else:
+        headers += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.headers.items()])
     bb_logger.debug('%s %s: %s; %s', flask.request.method, flask.request.path, query, headers)
 
 # Useful debugging interceptor to log all endpoint responses
@@ -62,7 +71,13 @@ def after(response):
 
 
 def silence_logs():
-    logging.getLogger('oauth2client.contrib.multistore_file').setLevel(logging.ERROR)
-    logging.getLogger('stravalib.model.Activity').setLevel(logging.WARN)
-    logging.getLogger('stravalib.model.Athlete').setLevel(logging.WARN)
-    logging.getLogger('stravalib.model.Club').setLevel(logging.WARN)
+    logs_to_silence = [
+        'urllib3.connectionpool',
+        'requests_oauthlib.oauth2_session',
+        'oauth2client.contrib.multistore_file',
+        'stravalib.model.Activity',
+        'stravalib.model.Athlete',
+        'stravalib.model.Club'
+    ]
+    for log in logs_to_silence:
+        logging.getLogger(log).setLevel(logging.ERROR)

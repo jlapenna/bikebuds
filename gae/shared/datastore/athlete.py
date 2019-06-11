@@ -19,6 +19,7 @@ from google.cloud.datastore.entity import Entity
 from shared import ds_util
 from shared.datastore.strava.converters import StravaConverters
 
+
 class Athlete(object):
     """Its a athlete!"""
 
@@ -40,7 +41,7 @@ class Athlete(object):
         if len(result) == 0:
             return None
         elif len(result) > 1:
-            raise Error('Too may athletes for user: %s', service_key.parent)
+            raise Exception('Too may athletes for user: %s', service_key.parent)
         else:
             return result[0]
 

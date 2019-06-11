@@ -11,16 +11,16 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
-- kind: "Activity"
-  ancestor: yes
-  properties:
-  - name: "start_date"
 - kind: "ClientState"
   ancestor: yes
   properties:
   - name: "active"
   - name: "modified"
     direction: desc
+- kind: "Activity"
+  ancestor: yes
+  properties:
+  - name: "start_date"
 - kind: "SubscriptionEvent"
   ancestor: yes
   properties:

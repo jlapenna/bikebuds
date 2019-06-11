@@ -45,6 +45,7 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
     """
     with ds_util.client.transaction():
         fcm_message = Entity(ds_util.client.key('FcmSendEvent', parent=user_key))
+        fcm_message['messages'] = []
         logging.debug('Sending notification to %s clients', len(clients))
         for client_state in clients:
             message = notif_fn(*args, client=client_state, **kwargs)
@@ -52,26 +53,30 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
                 response = messaging.send(message)
                 logging.debug('fcm_util.send: Success: %s, %s, %s', user_key, message,
                         response)
-                _add_delivery(fcm_message, client_state, message, response, success=True)
-            except messaging.ApiCallError as e:
-                logging.error('fcm_util.send: Failure: %s, %s', user_key, e)
-                _add_delivery(fcm_message, client_state, message, e, success=False)
-        ds_util.client.put(fcm_message)
+                _add_delivery(fcm_message, client_state, message, response)
+            except Exception as e:
+                logging.exception('fcm_util.send: Failure: %s', user_key)
+                _add_delivery(fcm_message, client_state, message, e)
+            logging.exception('fcm_util.send: Finished message: %s', message)
+        try:
+            ds_util.client.put(fcm_message)
+        except Exception as e:
+            logging.exception('Unable to put FCM message: %s', fcm_message)
 
 
-def _add_delivery(fcm_message, client_store, message, response, success=False):
-    fcm_message['messages'] = []
+def _add_delivery(fcm_message, client_store, message, response):
+    success = not isinstance(response, Exception)
     if message.data is not None:
         e = Entity(ds_util.client.key('Data'))
         e.update(dict(
-            response=response,
+            response=str(response),
             client_store=client_store.key,
             success=success))
         fcm_message['messages'].append(e)
     elif message.notification is not None:
         e = Entity(ds_util.client.key('Notification'))
         e.update(dict(
-            response=response,
+            response=str(response),
             client_store=client_store.key,
             success=success,
             title=message.notification.title,

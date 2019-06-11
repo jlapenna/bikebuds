@@ -15,3 +15,9 @@ google-cloud-tasks
 
 # For natural language dates and such
 Babel
+
+# /services/                                                                                                                           
+fitbit==0.3.1
+stravalib==0.10.2
+git+git://github.com/jlapenna/python-nokia
+measurement==2.0.1
