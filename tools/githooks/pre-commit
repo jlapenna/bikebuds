@@ -19,6 +19,32 @@ debug() {
   [ "${HUSKY_DEBUG}" = "true" ] && echo "husky:debug $1"
 }
 
+function ctrl_c() {
+  echo "Trapped and ignored ctrl+c"
+}
+trap ctrl_c INT
+
+########################################
+# Stash all changes not part of the commit, only test the changing code.
+# https://stackoverflow.com/questions/20479794/how-do-i-properly-git-stash-pop-in-pre-commit-hooks-to-get-a-clean-working-tree
+old_stash=$(git rev-parse -q --verify refs/stash)
+git stash save -q --keep-index
+new_stash=$(git rev-parse -q --verify refs/stash)
+
+# If there were no changes (e.g., `--amend` or `--allow-empty`)
+# then nothing was stashed, and we should skip everything,
+# including the tests themselves.  (Presumably the tests passed
+# on the previous commit, so there is no need to re-run them.)
+if [ "$old_stash" = "$new_stash" ]; then
+    echo "pre-commit script: no changes to test"
+    sleep 1 # XXX hack, editor may erase message
+    exit 0
+fi
+
+########################################
+# Use husky to test the react web app.
+husky_result=0;
+
 debug "$hookName hook started..."
 
 if ! command -v node >/dev/null 2>&1; then
@@ -35,41 +61,36 @@ if [ -f "$scriptPath" ]; then
   fi
   echo "Running husky hooks."
   gae/frontend/node_modules/run-node/run-node "$scriptPath" $hookName "$gitParams"
+  husky_result=$?;
 else
   echo "Can't find Husky, skipping $hookName hook"
   echo "You can reinstall it using 'npm install husky --save-dev' or delete this hook"
 fi
 
-# Based on https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
 
-echo "Running additional hooks."
+########################################
+# Test the flutter app
+flutter_result=0;
 
-# https://prettier.io/docs/en/precommit.html
-py_files=$(git diff --cached --name-only --diff-filter=ACM "*.py" | sed 's| |\\ |g')
-
-# https://stackoverflow.com/questions/20479794/how-do-i-properly-git-stash-pop-in-pre-commit-hooks-to-get-a-clean-working-tree
-# Stash changes not part of the commit.
-old_stash=$(git rev-parse -q --verify refs/stash)
-git stash save -q --keep-index
-new_stash=$(git rev-parse -q --verify refs/stash)
-
-# If there were no changes (e.g., `--amend` or `--allow-empty`)
-# then nothing was stashed, and we should skip everything,
-# including the tests themselves.  (Presumably the tests passed
-# on the previous commit, so there is no need to re-run them.)
-if [ "$old_stash" = "$new_stash" ]; then
-    echo "pre-commit script: no changes to test"
-    sleep 1 # XXX hack, editor may erase message
-    exit 0
-fi
-
-# Test prospective commit
 pushd flutter
 flutter test
-result=$?;
+flutter_result=$?;
 popd
 
-# Restore changes
+########################################
+# TODO: Sanitize or fix python.
+# https://prettier.io/docs/en/precommit.html
+py_result=0;
+
+py_files=$(git diff --cached --name-only --diff-filter=ACM "*.py" | sed 's| |\\ |g')
+
+
+########################################
+# Restore the git adjustments made before running the tests.
+
 git reset --hard -q && git stash apply --index -q && git stash drop -q
 
-exit ${result}
+if [[ ${husky_result} > 0 || ${flutter_result} > 0 || ${py_result} > 0 ]]; then
+  echo "Abandoming the commit. Fix the above errors and try again."
+  exit 10;
+fi
