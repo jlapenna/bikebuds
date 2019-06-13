@@ -80,7 +80,8 @@ def events_post():
         event_data = flask.request.form.to_dict()
 
         event_entity = Entity(
-                ds_util.client.key('SubscriptionEvent', parent=service_key))
+                ds_util.client.key('SubscriptionEvent', parent=service_key),
+                exclude_from_indexes=['updates'])
         event_entity.update(event_data)
         task_util.process_event(event_entity)
     except:

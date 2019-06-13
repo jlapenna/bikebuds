@@ -20,13 +20,13 @@ import pytz
 
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.helpers import GeoPoint
+from sortedcontainers import SortedSet
 
 from shared import ds_util
 
 
 class _ActivityConverter(object):
-
-    ALL_FIELDS = [
+    __ALL_FIELDS = SortedSet([
             'achievement_count',
             'activity_hash',
             'athlete',
@@ -100,13 +100,12 @@ class _ActivityConverter(object):
             'utc_offset',
             'weighted_average_watts',
             'workout_type',
-            ]
-    EXCLUDE_FROM_INDEXES = ALL_FIELDS - [
-            # Fields that /are/ included in indexes.
+            ])
+    __INCLUDE_IN_INDEXES = SortedSet([
             'id',
             'start_date',
-            ]
-    STORED_FIELDS = [
+            ])
+    __STORED_FIELDS = SortedSet([
             'athlete',
             'average_speed',
             'distance',
@@ -120,7 +119,9 @@ class _ActivityConverter(object):
             'start_date',
             'start_date_local',
             'start_latlng',
-            ]
+            ])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
 
     @classmethod
@@ -195,8 +196,7 @@ class _ActivityConverter(object):
 
 
 class _AthleteConverter(object):
-
-    ALL_FIELDS = [
+    __ALL_FIELDS = SortedSet([
             'admin',
             'agreed_to_terms',
             'approve_followers',
@@ -253,18 +253,20 @@ class _AthleteConverter(object):
             'updated_at',
             'username',
             'weight',
-            ]
-    EXCLUDE_FROM_INDEXES = ALL_FIELDS - [
+            ])
+    __INCLUDE_IN_INDEXES = SortedSet([
             # Fields that /are/ included in indexes.
             'id',
             # 'clubs.id' ??
-            ]
-    STORED_FIELDS = ((
+            ])
+    __STORED_FIELDS = SortedSet([
             'city',
             'firstname',
             'lastname'
             'profileMedium',
-            ]
+            ])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
     def to_entity(cls, athlete, parent=None, sub_ref=False):
@@ -304,7 +306,7 @@ class _AthleteConverter(object):
 
 
 class _ClubConverter(object):
-    ALL_FIELDS = [
+    __ALL_FIELDS = SortedSet([
             'admin',
             'city',
             'club_type',
@@ -325,13 +327,15 @@ class _ClubConverter(object):
             'state',
             'url',
             'verified',
-            ]
-    EXCLUDE_FROM_INDEXES = ALL_FIELDS - [
+            ])
+    __INCLUDE_IN_INDEXES = SortedSet([
             # Fields that /are/ included in indexes.
             'id',
-            ]
-    STORED_FIELDS = [
-            ]
+            ])
+    __STORED_FIELDS = SortedSet([
+            ])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
     def to_entity(cls, club, parent=None, sub_ref=False):

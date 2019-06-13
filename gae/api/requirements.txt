@@ -21,3 +21,6 @@ git+git://github.com/jlapenna/python-nokia
 
 # For natural language dates and such
 Babel
+
+# Utility
+sortedcontainers
