@@ -366,7 +366,8 @@ class ClientResource(Resource):
         existing_client.update(new_client)
         existing_client['modified'] = datetime.datetime.now(
                 datetime.timezone.utc)
-        logging.debug('update_client: New: %s, Updated: %s', new_client, existing_client)
+        logging.debug('update_client: New: %s, Updated: %s', new_client,
+                existing_client)
         ds_util.client.put(existing_client)
         return WrapEntity(existing_client)
 
@@ -449,8 +450,7 @@ class PreferencesResource(Resource):
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        user['preferences'].update(
-                api.payload['preferences'])
+        user['preferences'].update(api.payload)
         ds_util.client.put(user)
         return user['preferences']
 
@@ -500,13 +500,17 @@ class ServiceResource(Resource):
 
     @api.doc('update_service', body=service_entity_model)
     @api.marshal_with(service_entity_model, skip_none=True)
-    def post(self):
+    def post(self, name):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        service = Service.get(name, parent=user.key)
-        service.update(api.payload)
-        ds_util.client.put(service)
-        return WrapEntity(service)
+        logging.debug('update_service: api.payload: %s', api.payload)
+        new_service = api.payload
+        existing_service = Service.get(name, parent=user.key)
+        existing_service.update(new_service)
+        logging.debug('update_service: New: %s, Updated: %s', new_service,
+                existing_service)
+        ds_util.client.put(existing_service)
+        return WrapEntity(existing_service)
 
 
 @api.route('/sync/<name>')

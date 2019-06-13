@@ -31,8 +31,6 @@ import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-import { createPayload } from './bikebuds_api';
-
 class PreferencesCard extends Component {
   static styles = theme => ({
     root: {
@@ -95,11 +93,7 @@ class PreferencesCard extends Component {
 
     // Remote
     this.props.apiClient.bikebuds
-      .update_preferences(
-        createPayload({
-          preferences: newPreferences
-        })
-      )
+      .update_preferences({ payload: newPreferences })
       .then(this.handlePreferences);
   };
 

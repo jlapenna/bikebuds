@@ -32,7 +32,6 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
-import { createPayload } from './bikebuds_api';
 import { config } from './config';
 import { createSession } from './session_util';
 
@@ -126,12 +125,10 @@ class ServiceCard extends Component {
     this.setState(newState);
 
     this.props.apiClient.bikebuds
-      .update_service(
-        createPayload({
-          name: this.props.serviceName,
-          service: { sync_enabled: event.target.checked }
-        })
-      )
+      .update_service({
+        name: this.props.serviceName,
+        payload: { sync_enabled: event.target.checked }
+      })
       .then(this.handleService);
   };
 
