@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
@@ -43,6 +44,11 @@ class StandaloneSignup extends Component {
     }
   });
 
+  static propTypes = {
+    firebase: PropTypes.object.isRequired,
+    firebaseUser: PropTypes.object.isRequired
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -60,7 +66,10 @@ class StandaloneSignup extends Component {
           </AppBar>
           <main className={this.props.classes.main}>
             <div className={this.props.classes.toolbar} />
-            <Signup />
+            <Signup
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+            />
           </main>
         </div>
       </React.Fragment>

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import { Redirect } from 'react-router-dom';
@@ -30,6 +31,11 @@ class Signup extends React.Component {
       height: '100%'
     }
   });
+
+  static propTypes = {
+    firebase: PropTypes.object.isRequired,
+    firebaseUser: PropTypes.object.isRequired
+  };
 
   constructor(props) {
     super(props);
@@ -51,7 +57,11 @@ class Signup extends React.Component {
       );
     }
 
-    return <SignupStepper onFinished={this.handleStepperFinished} />;
+    return <SignupStepper
+      firebase={this.props.firebase}
+      firebaseUser={this.props.firebaseUser}
+      onFinished={this.handleStepperFinished}
+    />;
   }
 }
 export default withStyles(Signup.styles)(Signup);

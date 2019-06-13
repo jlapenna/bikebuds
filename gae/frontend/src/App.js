@@ -138,7 +138,12 @@ class App extends Component {
             <div>Misconfigured.</div>
           </Route>
           <Route path="/signup">
-            <StandaloneSignup />
+            <StandaloneSignup
+              firebase={this.state.firebase}
+              firebaseUser={
+                this._isSignedIn() ? this.state.firebaseUser : undefined
+              }
+            />
           </Route>
           <Route>
             <Main
