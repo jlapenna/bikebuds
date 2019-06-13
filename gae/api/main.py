@@ -163,7 +163,7 @@ club_model = api.model('Club', {
     'featured' : fields.Boolean,
     'id' : fields.Integer,
     'member_count' : fields.Integer,
-    'members' : fields.List(fields.Nested(member_model), default=tuple()),
+    'members' : fields.List(fields.Nested(member_model, skip_none=True), default=tuple()),
     'membership' : fields.String,
     'name' : fields.String,
     'owner' : fields.Boolean,
@@ -184,7 +184,7 @@ athlete_model = api.model('Athlete', {
     'badge_type_id': fields.String,
     'bikes': fields.String,
     'city': fields.String,
-    'clubs': fields.List(fields.Nested(club_model)),
+    'clubs': fields.List(fields.Nested(club_model, skip_none=True)),
     'country': fields.String,
     'created_at': fields.String,
     'date_preference': fields.String,
@@ -237,7 +237,7 @@ athlete_entity_model = EntityModel(athlete_model)
 
 activity_model = api.model('Activity', {
     'id': fields.String,
-    'athlete': fields.Nested(athlete_model),
+    'athlete': fields.Nested(athlete_model, skip_none=True),
     'average_temp': fields.Integer,
     'has_heartrate': fields.Boolean,
     'start_date_local': DateTimeNaive,
@@ -250,7 +250,7 @@ activity_model = api.model('Activity', {
     'timezone': fields.String,
     'name': fields.String,
     'splits_standard': fields.String,
-    'start_latlng': fields.Nested(geo_point_model),
+    'start_latlng': fields.Nested(geo_point_model, skip_none=True),
     'distance': fields.Float,
     'total_photo_count': fields.Integer,
     'gear_id': fields.String,
@@ -269,7 +269,7 @@ activity_model = api.model('Activity', {
     'manual': fields.Boolean,
     'external_id': fields.String,
     'laps': fields.String,
-    'end_latlng': fields.Nested(geo_point_model),
+    'end_latlng': fields.Nested(geo_point_model, skip_none=True),
     'partner_logo_url': fields.String,
     'average_cadence': fields.Float,
     'commute': fields.Boolean,
@@ -297,7 +297,7 @@ activity_model = api.model('Activity', {
     'type': fields.String,
     'segment_leaderboard_opt_out': fields.String,
     'embed_token': fields.String,
-    'map': fields.Nested(map_model),
+    'map': fields.Nested(map_model, skip_none=True),
 })
 activity_entity_model = EntityModel(activity_model)
 
@@ -311,14 +311,14 @@ user_model = api.model('User', {
     'created': fields.DateTime,
     'modified': fields.DateTime,
     'admin': fields.Boolean(default=False),
-    'preferences': fields.Nested(preferences_model),
+    'preferences': fields.Nested(preferences_model, skip_none=True),
 })
 user_entity_model = EntityModel(user_model)
 
 profile_model = api.model('Profile', {
-    'user': fields.Nested(user_entity_model),
+    'user': fields.Nested(user_entity_model, skip_none=True),
     'signup_complete': fields.Boolean(default=False),
-    'athlete': fields.Nested(athlete_entity_model)
+    'athlete': fields.Nested(athlete_entity_model, skip_none=True)
 })
 
 client_state_model = api.model('ClientState', {
@@ -332,7 +332,7 @@ client_state_entity_model = EntityModel(client_state_model)
 @api.route('/activities')
 class ActivitiesResource(Resource):
     @api.doc('get_activities')
-    @api.marshal_with(activity_entity_model, as_list=True)
+    @api.marshal_with(activity_entity_model, skip_none=True, as_list=True)
     def get(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -346,7 +346,7 @@ class ActivitiesResource(Resource):
 @api.route('/client/<client_id>')
 class ClientResource(Resource):
     @api.doc('get_client')
-    @api.marshal_with(client_state_entity_model)
+    @api.marshal_with(client_state_entity_model, skip_none=True)
     def get(self, client_id):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -356,7 +356,7 @@ class ClientResource(Resource):
 @api.route('/update_client')
 class ClientResource(Resource):
     @api.doc('update_client', body=client_state_model)
-    @api.marshal_with(client_state_entity_model)
+    @api.marshal_with(client_state_entity_model, skip_none=True)
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -374,7 +374,7 @@ class ClientResource(Resource):
 @api.route('/club/<club_id>')
 class ClubResource(Resource):
     @api.doc('get_club')
-    @api.marshal_with(club_entity_model)
+    @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
         club_id = int(club_id)
         claims = auth_util.verify_claims(flask.request)
@@ -396,7 +396,7 @@ class ClubResource(Resource):
 @api.route('/club/<club_id>/activities')
 class ClubActivitiesResource(Resource):
     @api.doc('get_club_activities')
-    @api.marshal_with(activity_entity_model, as_list=True)
+    @api.marshal_with(activity_entity_model, skip_none=True, as_list=True)
     def get(self, club_id):
         club_id = int(club_id)
         claims = auth_util.verify_claims(flask.request)
@@ -435,7 +435,7 @@ class ClubActivitiesResource(Resource):
 @api.route('/user')
 class UserResource(Resource):
     @api.doc('get_user')
-    @api.marshal_with(user_entity_model)
+    @api.marshal_with(user_entity_model, skip_none=True)
     def get(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -445,7 +445,7 @@ class UserResource(Resource):
 @api.route('/preferences')
 class PreferencesResource(Resource):
     @api.doc('update_preferences', body=preferences_model)
-    @api.marshal_with(preferences_model)
+    @api.marshal_with(preferences_model, skip_none=True)
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -458,7 +458,7 @@ class PreferencesResource(Resource):
 @api.route('/profile')
 class ProfileResource(Resource):
     @api.doc('get_profile')
-    @api.marshal_with(profile_model)
+    @api.marshal_with(profile_model, skip_none=True)
     def get(self):
         logging.warn('Before claims')
         claims = auth_util.verify_claims(flask.request)
@@ -478,7 +478,7 @@ class ProfileResource(Resource):
 @api.route('/series')
 class SeriesResource(Resource):
     @api.doc('get_series')
-    @api.marshal_with(series_entity_model)
+    @api.marshal_with(series_entity_model, skip_none=True)
     def get(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -491,7 +491,7 @@ class SeriesResource(Resource):
 @api.route('/service/<name>')
 class ServiceResource(Resource):
     @api.doc('get_service')
-    @api.marshal_with(service_entity_model)
+    @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -499,7 +499,7 @@ class ServiceResource(Resource):
         return WrapEntity(service)
 
     @api.doc('update_service', body=service_entity_model)
-    @api.marshal_with(service_entity_model)
+    @api.marshal_with(service_entity_model, skip_none=True)
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
@@ -512,7 +512,7 @@ class ServiceResource(Resource):
 @api.route('/sync/<name>')
 class SyncResource(Resource):
     @api.doc('sync_service')
-    @api.marshal_with(service_entity_model)
+    @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
