@@ -426,11 +426,11 @@ class ClubActivitiesResource(Resource):
             activities_query = ds_util.client.query(kind='Activity',
                     ancestor=athlete.key.parent)
             activities_query.add_filter('start_date', '>', two_weeks)
-            all_activities = [WrapEntity(a) for a in activities_query.fetch()]
+            all_activities = [a for a in activities_query.fetch()]
 
-        return sorted(all_activities,
+        return [WrapEntity(a) for a in sorted(all_activities,
                 key=lambda value: value['start_date'],
-                reverse=True)
+                reverse=True)]
 
 
 @api.route('/user')
