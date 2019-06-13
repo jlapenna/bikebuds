@@ -36,12 +36,13 @@ import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
   static propTypes = {
-    firebaseUser: PropTypes.object.isRequired
+    firebaseUser: PropTypes.object.isRequired,
+    profile: PropTypes.object
   };
 
   static styles = {
     root: {
-      height: 300
+      'min-height': 356
     },
     avatar: {
       width: 128,
@@ -114,6 +115,13 @@ class ProfileCard extends Component {
             <Grid item>
               <Typography variant="h5">
                 {this.props.firebaseUser.displayName}
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Typography variant="h6">
+                {!!this.props.profile.athlete.properties.city
+                    ? (<span>{this.props.profile.athlete.properties.city}</span>)
+                    : (<span>&#8203;</span>)}
               </Typography>
             </Grid>
             <Grid item>

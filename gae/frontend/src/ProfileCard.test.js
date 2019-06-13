@@ -27,9 +27,12 @@ it('renders without crashing', () => {
     displayName: 'Display Name',
     photoUrl: '/logo-round.svg'
   };
+  const profile = {
+    athlete: {properties: {'city': 'San Francisco'}},
+  }
   ReactDOM.render(
     <Router>
-      <ProfileCard firebaseUser={firebaseUser} />
+      <ProfileCard firebaseUser={firebaseUser} profile={profile} />
     </Router>,
     div
   );
