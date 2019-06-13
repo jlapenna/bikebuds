@@ -24,7 +24,7 @@ import Club, { ClubWidget } from './Club';
 it('renders without crashing', () => {
   const profile = {};
   const activities = [];
-  const club = { members: [] };
+  const club = { properties: { members: [] } };
 
   const div = document.createElement('div');
   ReactDOM.render(
