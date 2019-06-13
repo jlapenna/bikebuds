@@ -124,15 +124,14 @@ class EventsWorker(object):
                 key=lambda x: x.date)
         series = Series.to_entity(measures, self.service.key.name,
                 parent=self.service.key)
+        ds_util.client.put(series)
 
         query = ds_util.client.query(
                 kind='SubscriptionEvent', ancestor=self.service.key)
         query.keys_only()
-        batch = [entity.key for entity in query.fetch()]
         logging.debug('EventsWorker: process_event_batch: %s, count: %s',
-                self.service.key, len(batch))
-        ds_util.client.put(series)
-        ds_util.client.delete_multi(batch)
+                self.service.key)
+        ds_util.client.delete_multi(query.fetch())
 
         user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
