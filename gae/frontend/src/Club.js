@@ -148,13 +148,13 @@ class _ClubWidget extends Component {
                 property must be specified." */}
               <CardMedia
                 className={this.props.classes.media}
-                image={this.props.club.cover_photo_small}
+                image={this.props.club.properties.cover_photo_small}
                 title="Club Photo"
               >
                 <Avatar
                   className={this.props.classes.avatar}
-                  alt={this.props.club.name}
-                  src={this.props.club.profile_medium}
+                  alt={this.props.club.properties.name}
+                  src={this.props.club.properties.profile_medium}
                 />
               </CardMedia>
               <CardContent className={this.props.classes.content}>
@@ -165,7 +165,7 @@ class _ClubWidget extends Component {
                   alignItems="center"
                 >
                   <Grid item>
-                    <Typography variant="h5">{this.props.club.name}</Typography>
+                    <Typography variant="h5">{this.props.club.properties.name}</Typography>
                   </Grid>
                   <Grid item>
                     <Grid
@@ -175,7 +175,7 @@ class _ClubWidget extends Component {
                       justify="space-evenly"
                       alignItems="center"
                     >
-                      {this.props.club.members.map((member, index) => {
+                      {this.props.club.properties.members.map((member, index) => {
                         var url = '';
                         return (
                           <Grid item key={index}>
