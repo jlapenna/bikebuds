@@ -37,7 +37,7 @@ class Worker(object):
 
 def create_client(service):
     def refresh_callback(new_credentials):
-        service.update_credentials(new_credentials)
+        Service.update_credentials(service, new_credentials)
     return fitbit.Fitbit(
             config.fitbit_creds['client_id'],
             config.fitbit_creds['client_secret'],
