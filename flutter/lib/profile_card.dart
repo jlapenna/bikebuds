@@ -20,14 +20,12 @@ import 'package:transparent_image/transparent_image.dart';
 class ProfileCard extends StatelessWidget {
   final FirebaseUser firebaseUser;
   final Profile profile;
+  final ClientStateEntity clientState;
 
-  ProfileCard(this.firebaseUser, this.profile);
+  ProfileCard(this.firebaseUser, this.profile, [this.clientState]);
 
   @override
   Widget build(BuildContext context) {
-    print('ProfileCard.build: profile: $profile');
-    print('ProfileCard.build: profile.user: ${profile?.user}');
-    print('ProfileCard.build: profile.athlete: ${profile?.athlete}');
     var photoUrl =
         profile?.athlete?.properties?.profileMedium ?? firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
@@ -39,10 +37,13 @@ class ProfileCard extends StatelessWidget {
       backgroundImage: profilePhoto,
       radius: 64,
     );
-    String name = firebaseUser == null
+    var name = firebaseUser == null
         ? ""
-        : (firebaseUser?.displayName ?? firebaseUser?.email);
+        : firebaseUser?.displayName ?? firebaseUser?.email;
+
     var city = profile?.athlete?.properties?.city ?? "";
+
+    var registered = clientState?.properties?.token == null ? "" : "Registered";
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -52,7 +53,8 @@ class ProfileCard extends StatelessWidget {
             avatar,
             Text(name),
             Text(city),
-//        Text(registered),
+            Text(registered),
+            RaisedButton(onPressed: () {}, child: Text("Connect Services")),
           ],
         ),
       ),

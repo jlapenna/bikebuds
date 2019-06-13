@@ -42,6 +42,7 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
   bool _loading = false;
 
   BikebudsApi api;
+  ClientStateEntity _client = null;
 
   @override
   void didChangeDependencies() {
@@ -95,10 +96,18 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     return api.getProfile(xFields: "*");
   }
 
-  Future<ClientStateEntity> registerClient(FutureOr<String> firebaseToken) async {
+  ClientStateEntity get clientState {
+    return _client;
+  }
+
+  Future<ClientStateEntity> registerClient(
+      FutureOr<String> firebaseToken) async {
     var client = ClientState()..token = await firebaseToken;
     return api.updateClient(client, xFields: "*").then((response) {
       print('bikebuds_util: registerClient: response: $response');
+      setState(() {
+        _client = response;
+      });
       return response;
     });
   }

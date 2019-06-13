@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/profile_card.dart';
 import 'package:bikebuds/user_model.dart';
 import 'package:flutter/material.dart';
@@ -20,13 +21,15 @@ import 'package:scoped_model/scoped_model.dart';
 class SettingsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var bikebuds = BikebudsApiContainer.of(context);
     return Center(
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-            return ProfileCard(model.firebaseUser, model.profile);
+            return ProfileCard(
+                model.firebaseUser, model.profile, bikebuds.clientState);
           }),
         ],
       ),
