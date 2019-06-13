@@ -16,6 +16,7 @@ import 'package:bikebuds/events_content.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/privacy_util.dart';
 import 'package:bikebuds/settings_content.dart';
+import 'package:bikebuds/signup_content.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -101,6 +102,8 @@ class _MainScreenState extends State<MainScreen> {
         return EventsContent();
       case 1:
         return SettingsContent();
+      case 1:
+        return SignupContent();
       default:
         return Container();
     }
