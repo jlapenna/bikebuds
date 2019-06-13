@@ -67,6 +67,15 @@ class _MainScreenState extends State<MainScreen> {
                     });
                   },
                 ),
+                ListTile(
+                  title: Text('Signup'),
+                  onTap: () {
+                    setState(() {
+                      _selectedDrawerItem = 2;
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
               ],
             ),
           ),
@@ -102,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
         return EventsContent();
       case 1:
         return SettingsContent();
-      case 1:
+      case 2:
         return SignupContent();
       default:
         return Container();

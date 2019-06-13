@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:bikebuds/config.dart';
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class SignupContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var config = ConfigContainer.of(context);
+    var initialUrl = config.config['frontend_url'] + '/signup';
+    if (config.config['is_dev']) {
+      initialUrl = config.config['devserver_url'] + '/signup';
+    }
+    print('SignupContent: build: $initialUrl');
     return Center(
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          WebView(
-            initialUrl: 'https://flutter.io',
-            javascriptMode: JavascriptMode.unrestricted,
-          )
-        ],
-      ),
-    );
+        child: WebView(
+            initialUrl: initialUrl,
+            javascriptMode: JavascriptMode.unrestricted));
   }
 }
