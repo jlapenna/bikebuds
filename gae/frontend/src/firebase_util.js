@@ -46,7 +46,11 @@ export class FirebaseState {
     this.auth = firebase.auth();
 
     if (enableMessaging) {
-      this.messaging = firebase.messaging();
+      try {
+        this.messaging = firebase.messaging();
+      } catch (err) {
+        console.warn('FirebaseState: Failed to set up messaging.');
+      }
     }
 
     try {
