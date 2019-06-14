@@ -15,6 +15,20 @@ indexes:
   ancestor: yes
   properties:
   - name: "start_date"
+- kind: "Athlete"
+  properties:
+  - name: "club.id"
+  - name: "firstname"
+  - name: "lastname"
+- kind: "Athlete"
+  properties:
+  - name: "firstname"
+  - name: "lastname"
+- kind: "Athlete"
+  properties:
+  - name: "clubs.id"
+  - name: "firstname"
+  - name: "lastname"
 - kind: "ClientState"
   ancestor: yes
   properties:

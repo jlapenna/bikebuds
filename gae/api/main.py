@@ -389,6 +389,11 @@ class ClubResource(Resource):
         if club is None:
             flask.abort(404)
 
+        athlete_query = ds_util.client.query(kind='Athlete',
+                order=['firstname', 'lastname'])
+        athlete_query.add_filter('clubs.id', '=', club_id)
+        club['members'] = [a for a in athlete_query.fetch()]
+
         return WrapEntity(club)
 
 
