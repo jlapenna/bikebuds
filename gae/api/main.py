@@ -141,7 +141,7 @@ geo_point_model = api.model('GeoPoint', {
     'longitude': fields.String,
     })
 
-map_model = api.model('MapDetail', {
+map_model = api.model('PolylineMap', {
     'id': fields.String,
     'polyline': fields.String,
     'summary_polyline': fields.String,
@@ -205,6 +205,7 @@ athlete_model = api.model('Athlete', {
     'friend_count': fields.String,
     'ftp': fields.String,
     'global_privacy': fields.String,
+    'id': fields.Integer,
     'instagram_username': fields.String,
     'lastname': fields.String,
     'max_heartrate': fields.String,
@@ -264,7 +265,7 @@ activity_model = api.model('Activity', {
     'has_heartrate': fields.Boolean,
     'has_kudoed': fields.Boolean,
     'highlighted_kudosers': fields.String,
-    'id': fields.String,
+    'id': fields.Integer,
     'instagram_primary_photo': fields.String,
     'kilojoules': fields.Float,
     'kudos_count': fields.Integer,
