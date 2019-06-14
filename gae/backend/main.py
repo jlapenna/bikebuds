@@ -40,10 +40,6 @@ logging_util.silence_logs()
 app = flask.Flask(__name__)
 
 
-class SyncException(Exception):
-    pass
-
-
 @app.route('/weight_notify', methods=['POST'])
 def weight_notify_trigger():
     claims = auth_util.verify(flask.request)
@@ -232,12 +228,7 @@ def _do(worker, work_key=None, method='sync'):
                 )
         return 'Sync Failed', 503
     except Exception as e:
-        msg = '"%s" for %s/%s' % (
-                sys.exc_info()[1],
-                work_name,
-                work_key,
-                )
-        raise SyncException(msg).with_traceback(sys.exc_info()[2])
+        raise e.with_traceback(sys.exc_info()[2])
 
 
 @app.before_request
