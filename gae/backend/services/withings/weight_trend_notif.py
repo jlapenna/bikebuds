@@ -128,5 +128,6 @@ class WeightTrendWorker(object):
                 trend_index += 1
                 time_frame, tick = trend[trend_index]
             if measure['date'] <= tick:
-                trend_result[time_frame] = tick, measure
+                if 'weight' in measure:
+                    trend_result[time_frame] = tick, measure
         return trend_result
