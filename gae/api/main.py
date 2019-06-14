@@ -68,10 +68,6 @@ api = Api(app, version='1.0', title='Bikebuds API',
 app.config.SWAGGER_UI_DOC_EXPANSION = 'list'
 app.config.SWAGGER_UI_OPERATION_ID = True
 
-key_model = api.model('EntityKey', {
-    'path': fields.Raw,
-})
-
 
 def WrapEntity(entity):
     if entity is None:
@@ -99,34 +95,39 @@ class DateTimeNaive(fields.DateTime):
        return parsed_value
 
 
+key_model = api.model('EntityKey', {
+    'path': fields.Raw,
+})
+
+
 service_model = api.model('Service', {
     'created': fields.DateTime,
+    'credentials': CredentialsField(default=False),
     'modified': fields.DateTime,
     'sync_date': fields.DateTime,
     'sync_enabled': fields.Boolean(default=False),
     'sync_successful': fields.Boolean(default=False),
-    'credentials': CredentialsField(default=False)
 })
 service_entity_model = EntityModel(service_model)
 
 measure_model = api.model('Measure', {
-    'date': fields.DateTime,
-    'weight': fields.Float,
-    'height': fields.Float,
-    'fat_free_mass': fields.Float,
-    'fat_ratio': fields.Float,
-    'fat_mass_weight': fields.Float,
-    'diastolic_blood_pressure': fields.Integer,
-    'systolic_blood_pressure': fields.Integer,
-    'heart_pulse': fields.Integer,
-    'temperature': fields.Float,
-    'spo2': fields.Float,
     'body_temperature': fields.Float,
-    'skin_temperature': fields.Float,
-    'muscle_mass': fields.Float,
-    'hydration': fields.Float,
     'bone_mass': fields.Float,
+    'date': fields.DateTime,
+    'diastolic_blood_pressure': fields.Integer,
+    'fat_free_mass': fields.Float,
+    'fat_mass_weight': fields.Float,
+    'fat_ratio': fields.Float,
+    'heart_pulse': fields.Integer,
+    'height': fields.Float,
+    'hydration': fields.Float,
+    'muscle_mass': fields.Float,
     'pulse_wave_velocity': fields.Float,
+    'skin_temperature': fields.Float,
+    'spo2': fields.Float,
+    'systolic_blood_pressure': fields.Integer,
+    'temperature': fields.Float,
+    'weight': fields.Float,
 })
 
 series_model = api.model('Series', {
@@ -142,8 +143,8 @@ geo_point_model = api.model('GeoPoint', {
 
 map_model = api.model('MapDetail', {
     'id': fields.String,
-    'summary_polyline': fields.String,
     'polyline': fields.String,
+    'summary_polyline': fields.String,
     })
 
 member_model = api.model('Member', {
@@ -236,94 +237,94 @@ athlete_model = api.model('Athlete', {
 athlete_entity_model = EntityModel(athlete_model)
 
 activity_model = api.model('Activity', {
-    'id': fields.String,
-    'athlete': fields.Nested(athlete_model, skip_none=True),
-    'average_temp': fields.Integer,
-    'has_heartrate': fields.Boolean,
-    'start_date_local': DateTimeNaive,
-    'guid': fields.String,
-    'upload_id': fields.String,
-    'has_kudoed': fields.Boolean,
-    'segment_efforts': fields.String,
-    'max_watts': fields.String,
-    'instagram_primary_photo': fields.String,
-    'timezone': fields.String,
-    'name': fields.String,
-    'splits_standard': fields.String,
-    'start_latlng': fields.Nested(geo_point_model, skip_none=True),
-    'distance': fields.Float,
-    'total_photo_count': fields.Integer,
-    'gear_id': fields.String,
-    'photos': fields.String,
-    'weighted_average_watts': fields.String,
-    'elapsed_time': fields.Integer,
-    'description': fields.String,
     'achievement_count': fields.Integer,
-    'kudos_count': fields.Integer,
-    'average_watts': fields.Float,
-    'pr_count': fields.Integer,
-    'start_date':  fields.DateTime,
-    'device_name': fields.String,
-    'utc_offset': fields.Integer,
-    'workout_type': fields.String,
-    'manual': fields.Boolean,
-    'external_id': fields.String,
-    'laps': fields.String,
-    'end_latlng': fields.Nested(geo_point_model, skip_none=True),
-    'partner_logo_url': fields.String,
-    'average_cadence': fields.Float,
-    'commute': fields.Boolean,
-    'average_heartrate': fields.String,
-    'from_accepted_tag': fields.Boolean,
+    'athlete': fields.Nested(athlete_model, skip_none=True),
     'athlete_count': fields.Integer,
-    'location_city': fields.String,
-    'photo_count': fields.Integer,
-    'max_speed': fields.Float,
-    'splits_metric': fields.String,
-    'kilojoules': fields.Float,
-    'location_state': fields.String,
-    'trainer': fields.String,
-    'comment_count': fields.Integer,
-    'suffer_score': fields.String,
-    'device_watts': fields.Boolean,
-    'flagged': fields.Boolean,
-    'gear': fields.String,
-    'highlighted_kudosers': fields.String,
-    'partner_brand_tag': fields.String,
-    'calories': fields.String,
-    'moving_time': fields.Integer,
+    'average_cadence': fields.Float,
+    'average_heartrate': fields.String,
     'average_speed': fields.Float,
-    'total_elevation_gain': fields.Float,
-    'type': fields.String,
-    'segment_leaderboard_opt_out': fields.String,
+    'average_temp': fields.Integer,
+    'average_watts': fields.Float,
+    'calories': fields.String,
+    'comment_count': fields.Integer,
+    'commute': fields.Boolean,
+    'description': fields.String,
+    'device_name': fields.String,
+    'device_watts': fields.Boolean,
+    'distance': fields.Float,
+    'elapsed_time': fields.Integer,
     'embed_token': fields.String,
+    'end_latlng': fields.Nested(geo_point_model, skip_none=True),
+    'external_id': fields.String,
+    'flagged': fields.Boolean,
+    'from_accepted_tag': fields.Boolean,
+    'gear': fields.String,
+    'gear_id': fields.String,
+    'guid': fields.String,
+    'has_heartrate': fields.Boolean,
+    'has_kudoed': fields.Boolean,
+    'highlighted_kudosers': fields.String,
+    'id': fields.String,
+    'instagram_primary_photo': fields.String,
+    'kilojoules': fields.Float,
+    'kudos_count': fields.Integer,
+    'laps': fields.String,
+    'location_city': fields.String,
+    'location_state': fields.String,
+    'manual': fields.Boolean,
     'map': fields.Nested(map_model, skip_none=True),
+    'max_speed': fields.Float,
+    'max_watts': fields.String,
+    'moving_time': fields.Integer,
+    'name': fields.String,
+    'partner_brand_tag': fields.String,
+    'partner_logo_url': fields.String,
+    'photo_count': fields.Integer,
+    'photos': fields.String,
+    'pr_count': fields.Integer,
+    'segment_efforts': fields.String,
+    'segment_leaderboard_opt_out': fields.String,
+    'splits_metric': fields.String,
+    'splits_standard': fields.String,
+    'start_date':  fields.DateTime,
+    'start_date_local': DateTimeNaive,
+    'start_latlng': fields.Nested(geo_point_model, skip_none=True),
+    'suffer_score': fields.String,
+    'timezone': fields.String,
+    'total_elevation_gain': fields.Float,
+    'total_photo_count': fields.Integer,
+    'trainer': fields.String,
+    'type': fields.String,
+    'upload_id': fields.String,
+    'utc_offset': fields.Integer,
+    'weighted_average_watts': fields.String,
+    'workout_type': fields.String,
 })
 activity_entity_model = EntityModel(activity_model)
 
 preferences_model = api.model('Preferences', {
+    'daily_weight_notif': fields.Boolean,
     'units': fields.String,
     'weight_service': fields.String,
-    'daily_weight_notif': fields.Boolean
 })
 
 user_model = api.model('User', {
+    'admin': fields.Boolean(default=False),
     'created': fields.DateTime,
     'modified': fields.DateTime,
-    'admin': fields.Boolean(default=False),
     'preferences': fields.Nested(preferences_model, skip_none=True),
 })
 user_entity_model = EntityModel(user_model)
 
 profile_model = api.model('Profile', {
-    'user': fields.Nested(user_entity_model, skip_none=True),
+    'athlete': fields.Nested(athlete_entity_model, skip_none=True),
     'signup_complete': fields.Boolean(default=False),
-    'athlete': fields.Nested(athlete_entity_model, skip_none=True)
+    'user': fields.Nested(user_entity_model, skip_none=True),
 })
 
 client_state_model = api.model('ClientState', {
-    'token': fields.String,
     'active': fields.Boolean,
+    'token': fields.String,
     'type': fields.String,
 })
 client_state_entity_model = EntityModel(client_state_model)
