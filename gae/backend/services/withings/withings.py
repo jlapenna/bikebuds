@@ -68,9 +68,8 @@ class Worker(object):
                 'sub_secret': config.withings_creds['sub_secret'],
                 'service_key': self.service.key.to_legacy_urlsafe()
         })
-        callbackurl = (
-                'https://www.bikebuds.cc/services/withings/events?%s' %
-                (query_string,))
+        callbackurl = '%s/services/withings/events?%s' % (
+            config.frontend_url, query_string)
         comment = self.service.key.to_legacy_urlsafe().decode()
         is_subscribed = self.client.is_subscribed(callbackurl)
         logging.debug('Current sub: %s is_subscribed: %s', callbackurl, is_subscribed)

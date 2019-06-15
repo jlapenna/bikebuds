@@ -11,6 +11,11 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
+- kind: "Athlete"
+  properties:
+  - name: "clubs.id"
+  - name: "firstname"
+  - name: "lastname"
 - kind: "Activity"
   ancestor: yes
   properties:
@@ -22,11 +27,6 @@ indexes:
   - name: "lastname"
 - kind: "Athlete"
   properties:
-  - name: "firstname"
-  - name: "lastname"
-- kind: "Athlete"
-  properties:
-  - name: "clubs.id"
   - name: "firstname"
   - name: "lastname"
 - kind: "ClientState"
