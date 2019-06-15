@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import logging
 
 from google.cloud.datastore.entity import Entity
@@ -45,6 +46,7 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
     """
     with ds_util.client.transaction():
         fcm_message = Entity(ds_util.client.key('FcmSendEvent', parent=user_key))
+        fcm_message['date'] = datetime.datetime.utcnow()
         fcm_message['messages'] = []
         logging.debug('Sending notification to %s clients', len(clients))
         for client_state in clients:
