@@ -188,9 +188,9 @@ def process_event_batch(client, service, object_id, object_type, batch):
         if 'delete' in operations:
             activity_key = ds_util.client.key('Activity', object_id, parent=service.key)
             result = activity_key.delete()
-            logging.debug('delete result: %s -> %s', activity_key, result)
+            logging.debug('Deleted: Entity: %s', activity_key)
         else:
-            logging.debug('fetching: %s', object_id)
+            logging.debug('Fetching: %s', object_id)
             activity = client.get_activity(object_id)
             activity_entity = Activity.to_entity(activity, parent=service.key)
             # get_activity returns a MetaAthelte, which only has an athlete id,
