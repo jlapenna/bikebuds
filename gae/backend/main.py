@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+try:
+  import googleclouddebugger
+  googleclouddebugger.enable()
+except ImportError:
+  pass
+
 import datetime
 import logging
 import sys
@@ -161,7 +167,8 @@ def process_task():
 def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']
-    logging.debug('Processing Event: %s', event.key)
+    logging.info('Processing Event: Key: %s', event.key)
+    logging.debug('Processing Event: Entity: %s', event)
 
     service_key = event.key.parent
     user_key = service_key.parent
