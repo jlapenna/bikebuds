@@ -131,7 +131,7 @@ class EventsWorker(object):
         query = ds_util.client.query(
                 kind='SubscriptionEvent', ancestor=self.service.key)
         query.keys_only()
-        ds_util.client.delete_multi(query.fetch())
+        ds_util.client.delete_multi(e.key for e in query.fetch())
 
         user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
