@@ -118,6 +118,7 @@ class EventsWorker(object):
         self.client = create_client(service)
 
     def sync(self):
+        logging.debug('EventsWorker: sync: %s', self.service.key)
         measures = sorted(
                 self.client.get_measures(lastupdate=0, updatetime=0),
                 key=lambda x: x.date)
@@ -128,8 +129,6 @@ class EventsWorker(object):
         query = ds_util.client.query(
                 kind='SubscriptionEvent', ancestor=self.service.key)
         query.keys_only()
-        logging.debug('EventsWorker: process_event_batch: %s, count: %s',
-                self.service.key)
         ds_util.client.delete_multi(query.fetch())
 
         user = ds_util.client.get(self.service.key.parent)
