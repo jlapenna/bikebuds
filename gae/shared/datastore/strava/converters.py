@@ -121,7 +121,6 @@ class _ActivityConverter(object):
 
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
-
     @classmethod
     def to_entity(cls, activity, parent=None, detailed_athlete=None):
         properties_dict = activity.to_dict()
@@ -164,10 +163,8 @@ class _ActivityConverter(object):
                     longitude=activity.end_latlng.lon)
 
         if activity.map is not None:
-            properties_dict['map'] = dict(
-                    polyline=activity.map.polyline,
-                    summary_polyline=activity.map.summary_polyline,
-            )
+            properties_dict['map'] = _PolylineMapConverter.to_entity(
+                    activity.map)
 
         if activity.average_speed is not None:
             properties_dict['average_speed'] = activity.average_speed.num
@@ -187,7 +184,7 @@ class _ActivityConverter(object):
         entity = Entity(
                 ds_util.client.key('Activity', activity.id, parent=parent),
                 exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES)
-        entity.update(**properties_dict)
+        entity.update(properties_dict)
         #entity.update(**dict(
         #    (k, v) for k, v in properties_dict.items() if k in [STORED_FIELDS]))
         return entity
@@ -288,7 +285,8 @@ class _AthleteConverter(object):
 
         # Some values are entities in and of themselves.
         if athlete.clubs is not None:
-            properties_dict['clubs'] = [_ClubConverter.to_entity(club) for club in athlete.clubs]
+            properties_dict['clubs'] = [_ClubConverter.to_entity(club)
+                    for club in athlete.clubs]
 
         if athlete.id is None:
             entity = Entity(ds_util.client.key('Athlete'),
@@ -297,7 +295,7 @@ class _AthleteConverter(object):
             entity = Entity(
                     ds_util.client.key('Athlete', athlete.id, parent=parent),
                     exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES)
-        entity.update(**properties_dict)
+        entity.update(properties_dict)
         #entity.update(**dict(
         #    (k, v) for k, v in properties_dict.items() if k in [STORED_FIELDS]))
         return entity
@@ -343,9 +341,36 @@ class _ClubConverter(object):
         entity = Entity(
                 ds_util.client.key('Club', club.id, parent=parent),
                 exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES)
-        entity.update(**properties_dict)
+        entity.update(properties_dict)
         #entity.update(**dict(
         #    (k, v) for k, v in properties_dict.items() if k in [STORED_FIELDS]))
+        return entity
+
+
+class _PolylineMapConverter(object):
+    __ALL_FIELDS = SortedSet([
+            'id',
+            'polyline',
+            'summary_polyline',
+            ])
+    __INCLUDE_IN_INDEXES = SortedSet([
+            'id',
+            ])
+    __STORED_FIELDS = SortedSet([
+            'polyline',
+            'summary_polyline',
+            ])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod
+    def to_entity(cls, polyline_map, parent=None):
+        entity = Entity(
+                ds_util.client.key('PolylineMap', parent=parent),
+                exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES)
+        entity['id'] = polyline_map.id
+        entity['polyline'] = polyline_map.polyline
+        entity['summary_polyline'] = polyline_map.polyline
         return entity
 
 
@@ -353,3 +378,4 @@ class StravaConverters(object):
     Activity = _ActivityConverter
     Athlete = _AthleteConverter
     Club = _ClubConverter
+    PolylineMap = _PolylineMapConverter

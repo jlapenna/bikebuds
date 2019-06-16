@@ -50,8 +50,8 @@ class Service(object):
             service['credentials'].update(new_credentials)
             updated = True
         if updated:
-            logging.debug('Putting service: %s', service)
+            logging.info('Updated service credentials: %s', service.key)
             ds_util.client.put(service)
         else:
-            logging.debug('Unchanged service: %s', service)
+            logging.info('Unchanged service credentials: %s', service.key)
         return service['credentials']
