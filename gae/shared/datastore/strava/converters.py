@@ -68,8 +68,6 @@ class _ActivityConverter(object):
             'location_state',
             'manual',
             'map',
-            'map.polyline',
-            'map.summary',
             'max_heartrate',
             'max_speed',
             'max_watts',
