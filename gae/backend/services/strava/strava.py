@@ -199,7 +199,8 @@ def process_event_batch(client, service, object_id, object_type, batch):
             activity_entity.athlete = athlete_entity
             ds_util.client.put(activity_entity)
             activity_key = activity_entity.key
-            logging.debug('create result: %s -> %s', activity.id, activity_key)
+            logging.info('Created: %s -> %s', activity.id, activity_key)
+            logging.debug('Created: Entity: %s', activity_entity)
 
         ds_util.client.delete_multi((event.key for event in batch))
 
