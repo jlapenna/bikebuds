@@ -196,7 +196,7 @@ def process_event_batch(client, service, object_id, object_type, batch):
             # get_activity returns a MetaAthelte, which only has an athlete id,
             # replace from the stored athlete entity.
             athlete_entity = Athlete.get_private(service.key)
-            activity_entity.athlete = athlete_entity
+            activity_entity['athlete'] = athlete_entity
             ds_util.client.put(activity_entity)
             activity_key = activity_entity.key
             logging.info('Created: %s -> %s', activity.id, activity_key)
