@@ -79,7 +79,7 @@ class Worker(object):
         current_sub = None
         for sub in subscriptions:
             logging.debug('Examining sub: %s', sub)
-            if 'bikebuds.cc' in sub['callbackurl']:
+            if config.frontend_url in sub['callbackurl']:
                 # This is a bikebuds subscription.
                 if sub['callbackurl'] == callbackurl:
                     logging.debug('Found our sub: %s', sub)
@@ -99,6 +99,8 @@ class Worker(object):
         is_subscribed = self.client.is_subscribed(callbackurl)
         if is_subscribed:
             logging.info('Already have a sub, not re-registering.')
+        elif config.is_dev:
+            logging.info('Dev server. Not registering a subscription')
         else:
             try:
                 self.client.subscribe(callbackurl, comment=comment)
