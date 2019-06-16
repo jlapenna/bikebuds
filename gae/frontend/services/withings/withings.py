@@ -29,6 +29,7 @@ from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.service import Service
+from shared.datastore.subscription_event import SubscriptionEvent
 from shared.datastore.user import User
 
 
@@ -79,10 +80,8 @@ def events_post():
 
         event_data = flask.request.form.to_dict()
 
-        event_entity = Entity(
-                ds_util.client.key('SubscriptionEvent', parent=service_key),
-                exclude_from_indexes=['updates'])
-        event_entity.update(event_data)
+        event_entity = SubscriptionEvent.to_entity(event_data,
+                parent=service_key)
         task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_data)

@@ -29,6 +29,7 @@ from shared import task_util
 from shared.config import config
 from shared.datastore.athlete import Athlete
 from shared.datastore.service import Service
+from shared.datastore.subscription_event import SubscriptionEvent
 from shared.datastore.user import User
 
 
@@ -81,10 +82,8 @@ def events_post():
             logging.warn('Received event for %s but missing Athlete', owner_id)
             return 'OK', 200
 
-        event_entity = Entity(
-                ds_util.client.key('SubscriptionEvent',
-                    parent=athlete.key.parent))
-        event_entity.update(event_json)
+        event_entity = SubscriptionEvent.to_entity(event_data,
+                parent=service_key)
         task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_json)
