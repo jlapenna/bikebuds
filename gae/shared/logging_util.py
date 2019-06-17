@@ -23,6 +23,7 @@ bb_logger = logging.getLogger()
 
 LOG_HEADERS = False
 LOG_QUERY = False
+LOG_RESPONSES = False
 
 
 def all_logging():
@@ -60,10 +61,15 @@ def before():
         headers += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.headers.items()])
     bb_logger.debug('%s %s: %s; %s', flask.request.method, flask.request.path, query, headers)
 
+
 # Useful debugging interceptor to log all endpoint responses
 def after(response):
-    if flask.request.path in [
-            '/swagger.json'
+    if not LOG_RESPONSES:
+        body = ''
+    elif flask.request.path in [
+            '/activities',
+            '/swagger.json',
+            '/series'
             ]:
         body = len(response.data.decode('utf-8'))
     else:
