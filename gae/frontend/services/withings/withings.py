@@ -76,13 +76,14 @@ def events_post():
     try:
         service_key = Key.from_legacy_urlsafe(
                 flask.request.args.get('service_key'))
-        logging.debug('Withings Event from Service: %s', service_key)
+        logging.debug('Withings Event for: %s', service_key)
 
         event_data = flask.request.form.to_dict()
 
         event_entity = SubscriptionEvent.to_entity(event_data,
                 parent=service_key)
         task_util.process_event(event_entity)
+        logging.info('Queued Withings event for: %s', service_key)
     except:
         logging.exception('Failed while processing %s', event_data)
     return 'OK', 200

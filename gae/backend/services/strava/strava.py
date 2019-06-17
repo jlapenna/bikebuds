@@ -111,7 +111,7 @@ class ClubMembershipsProcessor(object):
         clubs_to_put = []
         club_query = ds_util.client.query(kind='Club')
         for club_entity in club_query.fetch():
-            logging.info('Joining club: %s', club_entity.key.id)
+            logging.debug('Joining club: %s', club_entity.key.id)
             athletes_query = ds_util.client.query(kind='Athlete')
             athletes_query.add_filter('clubs.id', '=', club_entity.key.id)
             club_entity.members = [athlete_entity for athlete_entity in
@@ -177,7 +177,8 @@ class EventsWorker(object):
 
 def process_event_batch(client, service, object_id, object_type, batch):
     with ds_util.client.transaction():
-        logging.debug('process_event_batch:  %s, %s, %s', service.key, object_id, len(batch))
+        logging.debug('process_event_batch:  %s, %s, %s',
+                service.key, object_id, len(batch))
 
         if object_type != 'activity':
             logging.warn('Update object_type not implemented: %s', object_type)
@@ -188,9 +189,8 @@ def process_event_batch(client, service, object_id, object_type, batch):
         if 'delete' in operations:
             activity_key = ds_util.client.key('Activity', object_id, parent=service.key)
             result = activity_key.delete()
-            logging.debug('Deleted: Entity: %s', activity_key)
+            logging.info('Deleted: Entity: %s', activity_key)
         else:
-            logging.debug('Fetching: %s', object_id)
             activity = client.get_activity(object_id)
             activity_entity = Activity.to_entity(activity, parent=service.key)
             # get_activity returns a MetaAthelte, which only has an athlete id,
@@ -200,7 +200,6 @@ def process_event_batch(client, service, object_id, object_type, batch):
             ds_util.client.put(activity_entity)
             activity_key = activity_entity.key
             logging.info('Created: %s -> %s', activity.id, activity_key)
-            logging.debug('Created: Entity: %s', activity_entity)
 
         ds_util.client.delete_multi((event.key for event in batch))
 
@@ -214,13 +213,12 @@ class ClientWrapper(object):
                 rate_limiter=(lambda x=None: None))
 
     def ensure_access(self):
-        """Ensure that an access token is good for at least another 60 seconds."""
+        """Ensure that an access token is good for at least 60 more seconds."""
         now = time.time()
         expires_around = self._service['credentials']['expires_at'] - 60
         if time.time() > expires_around:
             seconds_ago = now - expires_around
-            logging.info('Access expired %s ago; fetching a new one.',
-                    seconds_ago)
+            logging.info('Access expired %s ago; fetching new', seconds_ago)
             self._refresh_credentials()
 
     def __getattr__(self, attr):

@@ -55,7 +55,6 @@ class Worker(object):
             Service.update_credentials(self.service, None)
 
     def sync_measures(self):
-        logging.warn('sync_measures')
         measures = sorted(
                 self.client.get_measures(lastupdate=0, updatetime=0),
                 key=lambda x: x.date)
@@ -72,7 +71,8 @@ class Worker(object):
             config.frontend_url, query_string)
         comment = self.service.key.to_legacy_urlsafe().decode()
         is_subscribed = self.client.is_subscribed(callbackurl)
-        logging.debug('Current sub: %s is_subscribed: %s', callbackurl, is_subscribed)
+        logging.debug('Current sub: %s is_subscribed: %s', callbackurl,
+                is_subscribed)
         
         # Existing subs.
         subscriptions = self.client.list_subscriptions()
@@ -88,7 +88,7 @@ class Worker(object):
                 # This sub is bikebuds, but we don't recognize it.
                 try:
                     self.client.unsubscribe(sub['callbackurl'])
-                    logging.info('Unsubscribed: %s', sub)
+                    logging.debug('Unsubscribed: %s', sub)
                 except Exception as e:
                     logging.exception('Unsubscribe failed: %s', sub)
                 sub_key = ds_util.client.key('WithingsSubscription',
@@ -98,13 +98,14 @@ class Worker(object):
         # After previous cleanup, see if we need to re-subscribed:
         is_subscribed = self.client.is_subscribed(callbackurl)
         if is_subscribed:
-            logging.info('Already have a sub, not re-registering.')
+            logging.debug('Already have a sub, not re-registering.')
         elif config.is_dev:
-            logging.info('Dev server. Not registering a subscription')
+            logging.debug('Dev server. Not registering a subscription')
         else:
             try:
                 self.client.subscribe(callbackurl, comment=comment)
-                logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
+                logging.debug('Subscribed: %s to %s', self.service.key,
+                        callbackurl)
                 sub_entity = Entity(ds_util.client.key('WithingsSubscription',
                     comment, parent=self.service.key))
                 sub_entity.update({'callbackurl': callbackurl, 'comment': comment})
@@ -120,7 +121,6 @@ class EventsWorker(object):
         self.client = create_client(service)
 
     def sync(self):
-        logging.debug('EventsWorker: sync: %s', self.service.key)
         measures = sorted(
                 self.client.get_measures(lastupdate=0, updatetime=0),
                 key=lambda x: x.date)
@@ -135,7 +135,9 @@ class EventsWorker(object):
 
         user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
-            logging.debug('EventsWorker: daily_weight_notif: queued: %s', user.key)
+            logging.debug('EventsWorker: daily_weight_notif: queued: %s',
+                    user.key)
             task_util.process_weight_trend(self.service)
         else:
-            logging.debug('EventsWorker: daily_weight_notif: not enabled: %s', user.key)
+            logging.debug('EventsWorker: daily_weight_notif: not enabled: %s',
+                    user.key)

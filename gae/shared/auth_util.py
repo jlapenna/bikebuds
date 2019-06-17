@@ -102,7 +102,6 @@ def verify_claims_from_cookie(request):
     # detect if the user's Firebase session was revoked, user deleted/disabled,
     # etc.
     try:
-        logging.info('verify_claims_from_cookie')
         return auth.verify_session_cookie(session_cookie, check_revoked=True)
     except ValueError as e:
         flask.abort(401, 'Unable to validate cookie')

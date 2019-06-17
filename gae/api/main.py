@@ -43,11 +43,13 @@ from shared.datastore.user import User
 from shared.datastore.service import Service
 from shared.datastore.series import Series
 
-logging_util.silence_logs()
 
 app = Flask(__name__)
-app.logger.setLevel(logging.DEBUG)
 CORS(app, origins=config.origins)
+
+app.logger.setLevel(logging.DEBUG)
+logging_util.debug_logging()
+logging_util.silence_logs()
 
 # https://flask-restplus.readthedocs.io/en/stable/swagger.html#documenting-authorizations
 # https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
@@ -364,14 +366,11 @@ class ClientResource(Resource):
     def post(self):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        logging.debug('update_client: api.payload: %s', api.payload)
         new_client = api.payload
         existing_client = ClientState.get(new_client['token'], parent=user.key)
         existing_client.update(new_client)
         existing_client['modified'] = datetime.datetime.now(
                 datetime.timezone.utc)
-        logging.debug('update_client: New: %s, Updated: %s', new_client,
-                existing_client)
         ds_util.client.put(existing_client)
         return WrapEntity(existing_client)
 
@@ -426,7 +425,6 @@ class ClubActivitiesResource(Resource):
         athletes_query.add_filter('clubs.id', '=', club_id)
         athletes_query.keys_only()
         athlete_keys = [a for a in athletes_query.fetch()]
-        logging.warn('Athletes found: %s', len(athlete_keys))
 
         # Find all their activities in the past two weeks.
         two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=14)
@@ -469,7 +467,6 @@ class ProfileResource(Resource):
     @api.doc('get_profile')
     @api.marshal_with(profile_model, skip_none=True)
     def get(self):
-        logging.warn('Before claims')
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
         strava = Service.get('strava', parent=user.key)
@@ -512,12 +509,9 @@ class ServiceResource(Resource):
     def post(self, name):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
-        logging.debug('update_service: api.payload: %s', api.payload)
         new_service = api.payload
         existing_service = Service.get(name, parent=user.key)
         existing_service.update(new_service)
-        logging.debug('update_service: New: %s, Updated: %s', new_service,
-                existing_service)
         ds_util.client.put(existing_service)
         return WrapEntity(existing_service)
 
@@ -545,10 +539,6 @@ def after(response):
     return logging_util.after(response)
 
 
-logging_util.debug_logging()
 if __name__ == '__main__':
     host, port = config.api_url[7:].split(':')
     app.run(host='localhost', port=port, debug=True)
-else:
-    # When run under dev_appserver it is not '__main__'.
-    pass

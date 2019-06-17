@@ -41,9 +41,11 @@ from services.strava import strava
 from services.withings.weight_trend_notif import WeightTrendWorker
 from services.withings import withings
 
-logging_util.silence_logs()
-
 app = flask.Flask(__name__)
+
+app.logger.setLevel(logging.DEBUG)
+logging_util.debug_logging()
+logging_util.silence_logs()
 
 
 @app.route('/weight_notify', methods=['POST'])
@@ -53,40 +55,7 @@ def weight_notify_trigger():
     service = Service.get('withings', parent=user.key)
 
     task_result = task_util.process_weight_trend(service)
-    logging.debug('Enqueued Task: %s', task_result)
     return 'OK', 200
-
-
-@app.route('/test', methods=['POST'])
-def test_trigger():
-    claims = auth_util.verify(flask.request)
-    user = User.get(claims)
-
-    e = Entity(ds_util.client.key('Task'))
-    e.update({'param1': 'value1'})
-    e['param2'] = 'value2'
-
-    task_result = task_util.test(e)
-    logging.debug('Enqueued Task: %s', task_result)
-    return 'OK', 200
-
-
-@app.route('/tasks/test', methods=['POST'])
-def test_task():
-    entity = task_util.get_payload(flask.request)
-    logging.info('/tasks/test: %s', entity)
-    return 'OK', 200
-
-
-def _do_cleanup(version, datastore_state, cleanup_fn):
-    if config.is_dev or (datastore_state.version < version):
-        logging.info(
-                'Running cleanup: %s -> %s', datastore_state.version, version)
-        cleanup_fn()
-        logging.info(
-                'Completed cleanup: %s -> %s', datastore_state.version, version)
-        datastore_state.version = version
-    datastore_state.put()
 
 
 @app.route('/tasks/cleanup', methods=['GET'])
@@ -127,20 +96,19 @@ def sync_task():
 
 @app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
 def service_sync_task(service_name):
-    logging.warn('Starting service_sync')
     params = task_util.get_payload(flask.request)
     state_key = params['state_key']
     service = ds_util.client.get(params['service_key'])
     user_key = service.key.parent
 
-    logging.warn('Validating state key')
+    logging.debug('Validating state key')
     if state_key is None:
-        logging.info('Invalid state_key. params: %s', params)
+        logging.warn('Invalid state_key. params: %s', params)
         return 'Invalid state_key', 503
 
-    logging.warn('Validating credentials')
+    logging.debug('Validating credentials')
     if service['credentials'] is None:
-        logging.info('No creds: %s', service.key)
+        logging.warn('No creds: %s', service.key)
         return 'OK', 250
 
     if service_name == 'withings':
@@ -150,9 +118,7 @@ def service_sync_task(service_name):
     elif service_name == 'strava':
         _do(strava.Worker(service), work_key=service.key)
 
-    logging.warn('Finishing work')
     task_util.maybe_finish_sync_services_and_queue_process(service, state_key)
-    logging.warn('Finished work')
     return 'OK', 200
 
 
@@ -168,7 +134,6 @@ def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']
     logging.info('Processing Event: Key: %s', event.key)
-    logging.debug('Processing Event: Entity: %s', event)
 
     service_key = event.key.parent
     user_key = service_key.parent
@@ -221,9 +186,8 @@ def process_weight_trend_task():
 def _do(worker, work_key=None, method='sync'):
     work_name = worker.__class__.__name__
     try:
-        logging.info('Worker starting: %s/%s', work_name, work_key)
+        logging.debug('Worker starting: %s/%s', work_name, work_key)
         getattr(worker, method)()  # Dynamically run the provided method.
-        sync_successful = True
         logging.info('Worker completed: %s/%s', work_name, work_key)
         return 'OK', 200
     except TimeoutError as e:
@@ -238,6 +202,17 @@ def _do(worker, work_key=None, method='sync'):
         raise e.with_traceback(sys.exc_info()[2])
 
 
+def _do_cleanup(version, datastore_state, cleanup_fn):
+    if config.is_dev or (datastore_state.version < version):
+        logging.debug(
+                'Running cleanup: %s -> %s', datastore_state.version, version)
+        cleanup_fn()
+        logging.info(
+                'Completed cleanup: %s -> %s', datastore_state.version, version)
+        datastore_state.version = version
+    datastore_state.put()
+
+
 @app.before_request
 def before():
     logging_util.before()
@@ -248,10 +223,6 @@ def after(response):
     return logging_util.after(response)
 
 
-logging_util.debug_logging()
 if __name__ == '__main__':
     host, port = config.backend_url[7:].split(':')
     app.run(host='localhost', port=port, debug=True)
-else:
-    # When run under dev_appserver it is not '__main__'.
-    pass

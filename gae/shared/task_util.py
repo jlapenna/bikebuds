@@ -75,9 +75,8 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
 
         # Add the payload to the request.
         task['app_engine_http_request']['body'] = converted_payload
-        logging.debug('Added payload to task: %s', task)
 
-    logging.info('Queueing task: %s',
+    logging.debug('Queueing task: %s',
             task['app_engine_http_request']['relative_uri'])
     if config.is_dev:
         # Override when running locally.
@@ -85,7 +84,8 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
             service == 'frontend'
         url = getattr(config, service + '_url') + relative_uri
         response = requests.post(url, data=converted_payload)
-        logging.info('Queued task: response: %s', response)
+        logging.info('Queued task: %s response: %s',
+                task['app_engine_http_request']['relative_uri'], response)
         return response
 
     return _client.create_task(_parent, task)
@@ -123,12 +123,11 @@ def sync_services(services):
                 'service': 'backend',
                 'entity': _params_entity(state_key=state.key, service_key=service.key)
                 })
-            logging.warn('Added: %s', tasks[-1])
+            logging.debug('Added: %s', tasks[-1])
 
         # Write the number of tasks we're about to queue.
         state['total_tasks'] = len(tasks)
         ds_util.client.put(state)
-        logging.warn('Put state: %s', state)
 
         # Queue all the tasks.
         for task in tasks:
@@ -150,9 +149,8 @@ def maybe_finish_sync_services_and_queue_process(service, state_key):
     # values yet, so the other server can't read them if they get processed
     # before the transaction completes.
     def do():
-        logging.warn('Incrementing completed tasks for %s', state_key)
+        logging.debug('Incrementing completed tasks for %s', state_key)
         state = ds_util.client.get(state_key)
-        logging.warn('Fetched %s and it is %s', state_key, state)
         state['completed_tasks'] += 1
         ds_util.client.put(state)
 
@@ -161,7 +159,7 @@ def maybe_finish_sync_services_and_queue_process(service, state_key):
         ds_util.client.put(service)
 
         if state['completed_tasks'] == state['total_tasks']:
-            logging.info('Completed all pending tasks for %s', state.key)
+            logging.debug('Completed all pending tasks for %s', state.key)
             _queue_task(**{
                 'relative_uri': '/tasks/process',
                 'service': 'backend',

@@ -35,13 +35,16 @@ from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
 
-logging_util.silence_logs()
 
 app = flask.Flask(__name__)
 app.register_blueprint(bbfitbit.module)
 app.register_blueprint(strava.module)
 app.register_blueprint(withings.module)
 CORS(app, origins=config.origins)
+
+app.logger.setLevel(logging.DEBUG)
+logging_util.debug_logging()
+logging_util.silence_logs()
 
 
 @app.route('/services/redirect', methods=['GET'])
@@ -64,7 +67,6 @@ def create_session(claims):
         response = flask.make_response(flask.jsonify({'status': 'success'}))
         expires = datetime.datetime.now(datetime.timezone.utc) + expires_in
         response.set_cookie('session', session_cookie, expires=expires, httponly=True)
-        logging.info(response)
         return response
     except auth.AuthError as e:
         flask.abort(401, 'Failed to create a session cookie')
@@ -80,10 +82,6 @@ def after(response):
     return logging_util.after(response)
 
 
-logging_util.debug_logging()
 if __name__ == '__main__':
     host, port = config.frontend_url[7:].split(':')
     app.run(host='localhost', port=port, debug=True)
-else:
-    # When run under dev_appserver it is not '__main__'.
-    pass
