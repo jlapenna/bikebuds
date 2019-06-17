@@ -78,11 +78,15 @@ flutter_result=$?;
 popd
 
 ########################################
-# TODO: Sanitize or fix python.
-# https://prettier.io/docs/en/precommit.html
+# Test python GAE backends
 py_result=0;
 
 py_files=$(git diff --cached --name-only --diff-filter=ACM "*.py" | sed 's| |\\ |g')
+if [[ -n "${py_files}" ]]; then 
+  ./tools/scripts/run_python_tests.sh
+  py_result=$?
+fi
+
 
 
 ########################################
