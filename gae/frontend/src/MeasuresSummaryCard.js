@@ -129,8 +129,14 @@ class MeasuresSummaryCard extends Component {
                 <TableCell>
                   {localMoment(moment(Number(measure.date))).fromNow()}
                 </TableCell>
-                <TableCell>{measure.weight}</TableCell>
-                <TableCell>{measure.fat_ratio}</TableCell>
+                <TableCell>
+                  {measure.weight &&
+                      Number.parseFloat(measure.weight).toFixed(2)}
+                </TableCell>
+                <TableCell>
+                  {measure.fat_ratio &&
+                   Number.parseFloat(measure.fat_ratio).toFixed(2)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
