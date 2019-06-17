@@ -20,7 +20,6 @@ from shared.datastore.service import Service
 
 
 def create_client(service):
-    logging.debug('withings.create_client: creds: %s', service['credentials'])
     creds = nokia.NokiaCredentials(
             access_token=service['credentials'].get('access_token'),
             token_expiry=service['credentials'].get('token_expiry'),
@@ -30,8 +29,6 @@ def create_client(service):
             client_id=service['credentials'].get('client_id'),
             consumer_secret=service['credentials'].get('consumer_secret')
             )
-    logging.debug('withings.create_client: nokia_creds: %s', creds)
-
     def refresh_callback(new_credentials):
         updated_credentials = Service.update_credentials(service, new_credentials)
     return nokia.NokiaApi(creds, refresh_cb=refresh_callback)
