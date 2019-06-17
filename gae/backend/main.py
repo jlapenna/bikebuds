@@ -213,6 +213,11 @@ def _do_cleanup(version, datastore_state, cleanup_fn):
     datastore_state.put()
 
 
+@app.route('/unittest', methods=['GET', 'POST'])
+def unittest():
+    return 'OK', 200
+
+
 @app.before_request
 def before():
     logging_util.before()

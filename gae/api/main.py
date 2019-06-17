@@ -529,6 +529,12 @@ class SyncResource(Resource):
         return WrapEntity(service)
 
 
+@api.route('/unittest')
+class UnittestResource(Resource):
+    def get(self):
+        return None
+
+
 @app.before_request
 def before():
     logging_util.before()

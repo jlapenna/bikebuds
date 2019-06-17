@@ -72,6 +72,11 @@ def create_session(claims):
         flask.abort(401, 'Failed to create a session cookie')
 
 
+@app.route('/unittest', methods=['GET', 'POST'])
+def unittest():
+    return 'OK', 200
+
+
 @app.before_request
 def before():
     logging_util.before()
