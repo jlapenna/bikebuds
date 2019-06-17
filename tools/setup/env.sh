@@ -30,7 +30,7 @@ function main() {
 
   echo ""
   echo "Installing libraries into 'gae' virtualenv."
-  activate_gae_virtualenv
+  activate_virtualenv gae python2
   pip2 install ipython inotify
   deactivate
 
@@ -52,31 +52,16 @@ function main() {
   popd
 
   echo ""
-  echo "Installing frontend dependencies."
+  echo "Setting up frontend."
   local frontend_path="${repo_path}/gae/frontend"
-  rm -rf "${frontend_path}/lib"
-  pip2 install -t "${frontend_path}/lib" -r "${frontend_path}/requirements.txt"
-  pushd "$frontend_path/lib"
-  ln -sf ../../../environments/env
-  popd
 
   echo ""
-  echo "Installing api dependencies."
+  echo "Setting up api."
   local api_path="${repo_path}/gae/api"
-  rm -rf "${api_path}/lib"
-  pip2 install -t "${api_path}/lib" -r "${api_path}/requirements.txt"
-  pushd "$api_path/lib"
-  ln -sf ../../../environments/env
-  popd
 
   echo ""
-  echo "Installing backend dependencies."
+  echo "Setting up backend."
   local backend_path="${repo_path}/gae/backend"
-  rm -rf "${backend_path}/lib"
-  pip2 install -t "${backend_path}/lib" -r "${backend_path}/requirements.txt"
-  pushd "$backend_path/lib"
-  ln -sf ../../../environments/env
-  popd
 
   echo ""
   echo "Initializing npm packages for frontend."
