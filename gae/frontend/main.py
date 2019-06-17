@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-try:
-  import googleclouddebugger
-  googleclouddebugger.enable()
-except ImportError:
-  pass
-
 import datetime
 import logging
 
@@ -29,6 +23,7 @@ from firebase_admin import auth
 
 from shared import auth_util
 from shared import logging_util
+from shared import stackdriver_util
 from shared.config import config
 
 from services.bbfitbit import bbfitbit
@@ -45,6 +40,8 @@ CORS(app, origins=config.origins)
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
 logging_util.silence_logs()
+
+stackdriver_util.start()
 
 
 @app.route('/services/redirect', methods=['GET'])

@@ -30,3 +30,7 @@ Babel
 
 # Utility
 sortedcontainers
+
+# Stackdriver
+google-cloud-profiler
+google-python-cloud-debugger

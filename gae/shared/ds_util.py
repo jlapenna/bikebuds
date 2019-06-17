@@ -12,25 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 from google.cloud.datastore import Client
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
-from google.oauth2.service_account import Credentials
 
 from shared.config import config
-
-
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    # Production
-    credentials = None
-else:
-    # Local
-    credentials = Credentials.from_service_account_file(
-            'env/service_keys/python-client-testing.json')
-    if getattr(config, 'datastore_emulator_host', None):
-        os.environ['DATASTORE_EMULATOR_HOST'] = config.datastore_emulator_host
+from shared.credentials import credentials
 
 
 # Datastore Client
