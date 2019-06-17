@@ -62,9 +62,15 @@ def before():
 
 # Useful debugging interceptor to log all endpoint responses
 def after(response):
+    if flask.request.path in [
+            '/swagger.json'
+            ]:
+        body = len(response.data.decode('utf-8'))
+    else:
+        body = response.data.decode('utf-8')
     try:
         bb_logger.debug('%s: response: %s, %s', flask.request.path,
-                response.status, response.data.decode('utf-8'))
+                response.status, body)
     except:
         bb_logger.debug('%s: response: could not parse', flask.request.path)
     return response
