@@ -364,13 +364,13 @@ class _PolylineMapConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
-    def to_entity(cls, polyline_map, parent=None):
+    def to_entity(cls, activity_map, parent=None):
         entity = Entity(
                 ds_util.client.key('PolylineMap', parent=parent),
                 exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES)
-        entity['id'] = polyline_map.id
-        entity['polyline'] = polyline_map.polyline
-        entity['summary_polyline'] = polyline_map.polyline
+        entity['id'] = activity_map.id
+        entity['polyline'] = activity_map.polyline
+        entity['summary_polyline'] = activity_map.summary_polyline
         return entity
 
 
