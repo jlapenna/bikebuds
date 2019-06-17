@@ -45,6 +45,10 @@ logging_util.silence_logs()
 stackdriver_util.start()
 
 
+class SyncException(Exception):
+    pass
+
+
 @app.route('/weight_notify', methods=['POST'])
 def weight_notify_trigger():
     claims = auth_util.verify(flask.request)
@@ -187,16 +191,10 @@ def _do(worker, work_key=None, method='sync'):
         getattr(worker, method)()  # Dynamically run the provided method.
         logging.info('Worker completed: %s/%s', work_name, work_key)
         return 'OK', 200
-    except TimeoutError as e:
-        logging.debug('%s for %s/%s, Originally: %s',
-                sys.exc_info()[0].__name__,
-                work_name,
-                work_key,
-                sys.exc_info()[1]
-                )
-        return 'Sync Failed', 503
     except Exception as e:
-        raise e.with_traceback(sys.exc_info()[2])
+        raise SyncException(
+                'Worker failed: %s/%s' % (work_name, work_key)) from e
+        return 'Sync Failed', 503
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):
