@@ -43,7 +43,7 @@ class Worker(object):
 
     def sync(self):
         try:
-            #self.sync_measures()
+            self.sync_measures()
             self.sync_subscription()
         except TokenExpiredError as e:
             logging.exception('Token Expired Error: service: %s, wiping creds',
