@@ -82,7 +82,7 @@ def events_post():
             logging.warn('Received event for %s but missing Athlete', owner_id)
             return 'OK', 200
 
-        event_entity = SubscriptionEvent.to_entity(event_data,
+        event_entity = SubscriptionEvent.to_entity(event_json,
                 parent=service_key)
         task_util.process_event(event_entity)
     except:
