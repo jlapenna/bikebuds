@@ -59,10 +59,7 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
             except Exception as e:
                 logging.exception('fcm_util.send: Failure: %s', user_key)
                 _add_delivery(fcm_message, client_state, message, e)
-        try:
-            ds_util.client.put(fcm_message)
-        except Exception as e:
-            logging.exception('Unable to put FCM message: %s', fcm_message)
+        ds_util.client.put(fcm_message)
 
 
 def _add_delivery(fcm_message, client_store, message, response):
