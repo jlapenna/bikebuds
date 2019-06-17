@@ -34,14 +34,15 @@ class Service(object):
 
     @classmethod
     def update_credentials(cls, service, new_credentials):
-        logging.debug('Updating credentials: %s', service.key)
         updated = False
         if new_credentials is None or not new_credentials:
+            logging.info('Clearing credentials: %s', service.key)
             if 'credentials' in service:
                 del(service['credentials'])
             ds_util.client.put(service)
             return None
 
+        logging.debug('Updating credentials: %s', service.key)
         if 'credentials' not in service or service['credentials'] is None:
             # If we don't have credentials in the service at all, add it,
             # the rest assume the key exists.

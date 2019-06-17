@@ -30,5 +30,6 @@ def create_client(service):
             consumer_secret=service['credentials'].get('consumer_secret')
             )
     def refresh_callback(new_credentials):
+        logging.debug('Withings creds refresh for: %s', service.key)
         updated_credentials = Service.update_credentials(service, new_credentials)
     return nokia.NokiaApi(creds, refresh_cb=refresh_callback)
