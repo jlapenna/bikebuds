@@ -108,7 +108,7 @@ def service_sync_task(service_name):
         return 'Invalid state_key', 503
 
     logging.debug('Validating credentials')
-    if service['credentials'] is None:
+    if 'credentials' not in service or not service['credentials']:
         logging.warn('No creds: %s', service.key)
         return 'OK', 250
 
@@ -154,7 +154,7 @@ def process_event_task():
         logging.warn('Cannot process event %s, no service', event.key)
         return 'OK', 200
     
-    if 'credentials' not in service:
+    if 'credentials' not in service or not service['credentials']:
         logging.warn('Cannot process event %s, no credentials', event.key)
         return 'OK', 200
 
