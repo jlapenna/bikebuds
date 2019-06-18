@@ -71,47 +71,54 @@ class Worker(object):
             config.frontend_url, query_string)
         comment = self.service.key.to_legacy_urlsafe().decode()
         is_subscribed = self.client.is_subscribed(callbackurl)
-        logging.debug('Current sub: %s is_subscribed: %s', callbackurl,
-                is_subscribed)
+        logging.debug('Currently subscribed %s: %s to %s',
+                is_subscribed, self.service.key, callbackurl)
         
         # Existing subs.
         subscriptions = self.client.list_subscriptions()
-        current_sub = None
         for sub in subscriptions:
-            logging.debug('Examining sub: %s', sub)
-            if config.frontend_url in sub['callbackurl']:
-                # This is a bikebuds subscription.
-                if sub['callbackurl'] == callbackurl:
-                    logging.debug('Found our sub: %s', sub)
-                    current_sub = sub
-                    continue
+            logging.debug('Examining sub: %s to %s', self.service.key, sub)
+            if (config.frontend_url in sub['callbackurl']
+                    and sub['callbackurl'] != callbackurl):
                 # This sub is bikebuds, but we don't recognize it.
                 try:
                     self.client.unsubscribe(sub['callbackurl'])
-                    logging.debug('Unsubscribed: %s', sub)
+                    logging.info('Unsubscribed: %s from %s',
+                            self.service.key, sub)
+                    ds_util.client.delete(
+                            ds_util.client.key('WithingsSubscription',
+                                sub['callbackurl'], parent=self.service.key))
                 except Exception as e:
-                    logging.exception('Unsubscribe failed: %s', sub)
-                sub_key = ds_util.client.key('WithingsSubscription',
-                        sub['callbackurl'], parent=self.service.key)
-                ds_util.client.delete(sub_key)
+                    logging.exception('Unsubscribe failed: %s from %s',
+                            self.service.key, sub)
 
         # After previous cleanup, see if we need to re-subscribed:
         is_subscribed = self.client.is_subscribed(callbackurl)
         if is_subscribed:
-            logging.debug('Already have a sub, not re-registering.')
+            logging.debug('Already have a sub, not re-registering for %s',
+                    self.service.key)
+            sub_entity = Entity(
+                    ds_util.client.key('WithingsSubscription',
+                        callbackurl, parent=self.service.key))
+            sub_entity.update({'callbackurl': callbackurl, 'comment': comment})
+            ds_util.client.put(sub_entity)
         elif config.is_dev:
-            logging.debug('Dev server. Not registering a subscription')
+            logging.debug('Dev server. Not registering %s to %s',
+                    self.service.key, callbackurl)
         else:
             try:
                 self.client.subscribe(callbackurl, comment=comment)
-                logging.debug('Subscribed: %s to %s', self.service.key,
+                logging.info('Subscribed: %s to %s', self.service.key,
                         callbackurl)
-                sub_entity = Entity(ds_util.client.key('WithingsSubscription',
-                    comment, parent=self.service.key))
-                sub_entity.update({'callbackurl': callbackurl, 'comment': comment})
-                ds_util.client.put(sub_entity)
+                entity = Entity(
+                        ds_util.client.key('WithingsSubscription',
+                            callbackurl, parent=self.service.key))
+                entity.update(
+                        {'callbackurl': callbackurl, 'comment': comment})
+                ds_util.client.put(entity)
             except Exception as e:
-                logging.exception('Subscribe failed: %s, %s', callbackurl, comment)
+                logging.exception('Subscribe failed: %s to %s',
+                        self.service.key, callbackurl)
 
 
 class EventsWorker(object):

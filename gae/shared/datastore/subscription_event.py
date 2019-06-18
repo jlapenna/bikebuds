@@ -21,8 +21,8 @@ from shared import ds_util
 class SubscriptionEvent(object):
     @classmethod
     def to_entity(cls, properties, parent=None):
-        event_entity = Entity(
+        entity = Entity(
                 ds_util.client.key('SubscriptionEvent', parent=parent))
-        event_entity.update(properties)
-        event_entity.exclude_from_indexes = event_entity.keys()
-        return event_entity
+        entity.update(properties)
+        entity.exclude_from_indexes = entity.keys()
+        return entity

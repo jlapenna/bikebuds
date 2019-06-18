@@ -74,18 +74,31 @@ def events_post():
 
     event_data = None
     try:
+        event_data = flask.request.form.to_dict()
+    except:
+        logging.exception('Failed processing Withings event_data: %s',
+                flask.request.form)
+
+    service_key = None
+    try:
         service_key = Key.from_legacy_urlsafe(
                 flask.request.args.get('service_key'))
-        logging.debug('Withings Event for: %s', service_key)
+    except:
+        logging.exception('Failed processing Withings service_key: %s',
+                flask.request.args.get('service_key'))
 
-        event_data = flask.request.form.to_dict()
-
+    if event_data is None or service_key is None:
+        logging.error('Unable to process Withings event: %s, %s, %s',
+                flask.request.url, event_data, service_key)
+        sub_event_failure = SubscriptionEvent.to_entity(
+                {'url': flask.request.url, 'event_data': event_data})
+        ds_util.client.put(sub_event_failure)
+    else:
         event_entity = SubscriptionEvent.to_entity(event_data,
                 parent=service_key)
         task_util.process_event(event_entity)
         logging.info('Queued Withings event for: %s', service_key)
-    except:
-        logging.exception('Failed while processing %s', event_data)
+
     return 'OK', 200
 
 
