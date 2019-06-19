@@ -69,8 +69,8 @@ class Worker(object):
             # First delete all the user's existing clubs.
             clubs_query = ds_util.client.query(kind='Club', ancestor=self.service.key)
             clubs_query.keys_only()
-            club_keys = [club.key for club in clubs_query.fetch()]
-            ds_util.client.delete_multi(club_keys)
+            ds_util.client.delete_multi(
+                    club.key for club in clubs_query.fetch())
 
             # Then add a club entity for each of the user's clubs.
             for club_in_athlete_entity in athlete_entity['clubs']:
