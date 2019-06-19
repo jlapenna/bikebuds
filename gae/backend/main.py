@@ -95,8 +95,8 @@ def sync_task():
     return 'OK', 200
 
 
-@app.route('/tasks/service_sync/<service_name>', methods=['GET', 'POST'])
-def service_sync_task(service_name):
+@app.route('/tasks/sync/service/<service_name>', methods=['GET', 'POST'])
+def sync_service_task(service_name):
     params = task_util.get_payload(flask.request)
     state_key = params['state_key']
     service = ds_util.client.get(params['service_key'])
@@ -123,10 +123,18 @@ def service_sync_task(service_name):
     return 'OK', 200
 
 
-@app.route('/tasks/process', methods=['GET', 'POST'])
-def process_task():
-    """Called after all services for all users have finished syncing."""
-    _do(strava.ClubMembershipsProcessor(), work_key='all', method='process')
+@app.route('/sync/club/<club_id>', methods=['POST'])
+def sync_club_trigger(club_id):
+    claims = auth_util.verify(flask.request)
+    user = User.get(claims)
+
+    task_result = task_util.sync_club(club_id)
+    return 'OK', 200
+
+
+@app.route('/tasks/sync/club/<club_id>', methods=['GET', 'POST'])
+def sync_club_task(club_id):
+    _do(strava.ClubWorker(club_id), work_key=club_id)
     return 'OK', 200
 
 

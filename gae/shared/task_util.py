@@ -97,6 +97,13 @@ def _params_entity(**kwargs):
     return params_entity
 
 
+def sync_club(club_id):
+    _queue_task(**{
+        'relative_uri': '/tasks/sync/club/%s' % club_id,
+        'service': 'backend',
+        })
+
+
 def sync_service(service):
     sync_services([service])
 
@@ -119,7 +126,7 @@ def sync_services(services):
             service['syncing'] = True
 
             tasks.append({
-                'relative_uri': '/tasks/service_sync/' + service.key.name,
+                'relative_uri': '/tasks/sync/service/' + service.key.name,
                 'service': 'backend',
                 'entity': _params_entity(state_key=state.key, service_key=service.key)
                 })

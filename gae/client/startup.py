@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import collections
+
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.cloud.datastore import Client
 from google.cloud.datastore.key import Key
@@ -15,6 +17,10 @@ from shared.config import config
 ds_credentials = Credentials.from_service_account_file(
         'lib/env/service_keys/python-client-testing.json')
 ds_client = Client(project=config.project_id, credentials=ds_credentials)
+
+# Common name for ds client in actual server. Convenience.
+DsUtil = collections.namedtuple('DsUtil', 'client')
+ds_util = DsUtil(client=ds_client)
 
 # OAuth to Google - Gets a google ID token, access token & refresh token.
 oauth_flow = InstalledAppFlow.from_client_secrets_file(

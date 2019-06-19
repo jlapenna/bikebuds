@@ -252,7 +252,7 @@ class _AthleteConverter(object):
     __INCLUDE_IN_INDEXES = SortedSet([
             # Fields that /are/ included in indexes.
             'id',
-            # 'clubs.id' ??
+            'clubs'
             ])
     __STORED_FIELDS = SortedSet([
             'city',
@@ -264,7 +264,7 @@ class _AthleteConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
-    def to_entity(cls, athlete, parent=None, sub_ref=False):
+    def to_entity(cls, athlete, parent=None):
         properties_dict = athlete.to_dict()
         properties_dict['id'] = athlete.id
 
@@ -327,6 +327,7 @@ class _ClubConverter(object):
     __INCLUDE_IN_INDEXES = SortedSet([
             # Fields that /are/ included in indexes.
             'id',
+            'admin'
             ])
     __STORED_FIELDS = SortedSet([
             ])
@@ -334,7 +335,7 @@ class _ClubConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
-    def to_entity(cls, club, parent=None, sub_ref=False):
+    def to_entity(cls, club, parent=None):
         properties_dict = club.to_dict()
         properties_dict['id'] = club.id
 

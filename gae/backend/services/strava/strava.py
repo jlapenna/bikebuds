@@ -39,62 +39,26 @@ class Worker(object):
     def sync(self):
         self.sync_athlete()
         self.sync_activities()
-        self.sync_clubs()
 
     def sync_athlete(self):
         self.client.ensure_access()
 
         athlete = self.client.get_athlete()
-        return ds_util.client.put(
-                Athlete.to_entity(athlete, parent=self.service.key))
+        ds_util.client.put(Athlete.to_entity(athlete, parent=self.service.key))
 
     def sync_activities(self):
         self.client.ensure_access()
 
         athlete = self.client.get_athlete()
+        athlete_clubs = [club.id for club in athlete.clubs]
 
+        # Track the clubs that these activities were a part of, by annotating
+        # them with the athlete's clubs.
         for activity in self.client.get_activities():
-            ds_util.client.put(
-                    Activity.to_entity(activity, parent=self.service.key))
-
-    def sync_clubs(self):
-        self.client.ensure_access()
-
-        athlete_entity = Athlete.get_private(self.service.key)
-        if athlete_entity is None:
-            raise Error('Unable to sync clubs, no athlete found for user: %s',
-                    self.service.key.parent)
-
-        with ds_util.client.transaction():
-            # First delete all the user's existing clubs.
-            clubs_query = ds_util.client.query(kind='Club', ancestor=self.service.key)
-            clubs_query.keys_only()
-            ds_util.client.delete_multi(
-                    club.key for club in clubs_query.fetch())
-
-            # Then add a club entity for each of the user's clubs.
-            for club_in_athlete_entity in athlete_entity['clubs']:
-                club_result = self.client.get_club(club_in_athlete_entity.key.id)
-                ds_util.client.put(Club.to_entity(club_result, self.service.key))
-                
-                # Go through each club the user has, and if they are an admin,
-                # fully resolve the club.
-                # The club we get back doenst have ids for members. making this less useful.
-                #if club_in_athlete_entity['admin']:
-                #    logging.warn('User is an admin, fetching members list')
-                #    members_result = [m for m in self.client.get_club_members(
-                #            club_in_athlete_entity.key.id)]
-                #    logging.warn('Fetching members list: %s', members_result)
-                #    logging.warn('Fetching club from strava: %s',
-                #            club_in_athlete_entity.key.id)
-                #    club_result = self.client.get_club(
-                #            club_in_athlete_entity.key.id)
-                #    logging.warn('Fetched club from strava: %s',
-                #            club_result.to_dict())
-                #    club_entity = Club.to_entity(club_result)
-                #    club_entity['members'] = [Athlete.to_entity(member)
-                #            for member in members_result]
-                #    ds_util.client.put(club_entity)
+            activity_entity = Activity.to_entity(
+                    activity, parent=self.service.key)
+            activity_entity['clubs'] = athlete_clubs
+            ds_util.client.put(activity_entity)
 
     def _sync_activity(self, activity_id):
         """Gets additional info: description, calories and embed_token."""
@@ -103,56 +67,63 @@ class Worker(object):
                 Activity.to_entity(activity, parent=self.service.key))
 
 
-class ClubMembershipsProcessor(object):
-    """Syncs every club's memberships."""
+class ClubWorker(object):
 
-    def process(self):
-        clubs_to_put = []
-        club_query = ds_util.client.query(kind='Club')
-        for club_entity in club_query.fetch():
-            logging.debug('Joining club: %s', club_entity.key.id)
-            athletes_query = ds_util.client.query(kind='Athlete')
-            athletes_query.add_filter('clubs.id', '=', club_entity.key.id)
-            club_entity.members = [athlete_entity for athlete_entity in
-                    athletes_query.fetch()]
-            clubs_to_put.append(club_entity)
-        ds_util.client.put_multi(clubs_to_put)
+    def __init__(self, club_id):
+        self.club_id = club_id
+        self.service = None
+        self.client = None
 
+    def _init_client(self):
+        query = ds_util.client.query(kind='Athlete')
+        query.add_filter('clubs.id', '=', int(self.club_id))
+        query.add_filter('clubs.admin', '=', True)
+        query.keys_only()
+        admin_service_keys = [athlete.key.parent for athlete in query.fetch()]
+        if len(admin_service_keys) == 0:
+            logging.warn(
+                    'ClubWorker: Cannot sync %s without an admin',
+                    self.club_id)
+            return False
 
-class ClubActivitiesProcessor(object):
-    """Syncs all club activities."""
+        # TODO: We might some day want to randomly select an admin by which to
+        # fetch club details, rather than the first.
+        self.service = ds_util.client.get(admin_service_keys[0])
+        if self.service is None:
+            logging.error(
+                    'ClubWorker: Cannot sync %s without a service',
+                    self.club_id)
+            return False
 
-    def process(self):
-        athlete_entities = ds_util.client.query(kind='Athlete').fetch()
-        club_to_users = collections.defaultdict(lambda: set())
-        for athlete_entity in athlete_entities:
-            for club in athlete_entity.clubs:
-                club_to_users[club.key.id].add(athlete_entity.key.id)
-        for club_id, members in club_to_users.items():
-            athletes_in_club_query = ds_util.client.query(
-                    kind='Athlete', order=['id'])
-            athletes_in_club_query.add_filter('id', '=', members);
-            athletes_in_club_query.keys_only()
-            athletes_in_club = [a for a in athletes_in_club_query.fetch()]
-            service_keys = [athlete_entity.key.parent
-                    for athlete_entity in athlete_entities]
-            services_query = ds_util.client.query(kind='Service')
-            servies_query.add_filter('__key__', '=', service_entity_keys)
-            services_query.add_filter('credentials', '!=', None)
-            if len(service_entities) == 0:
-                logging.warn('No creds to sync club %s. Unexpected.', club_id)
-            random.shuffle(service_entities)
+        logging.debug(
+                'ClubWorker: Using %s for %s', self.service.key, self.club_id)
+        self.client = ClientWrapper(self.service)
+        return True
 
-            # Just use the first creds for now.
-            service_entity = service_entities[0]
-            client = ClientWrapper(service_entity)
-            activities = client.get_club_activities(club_id)
+    def sync(self):
+        if not self._init_client():
+            logging.error(
+                    'ClubWorker: Cannot sync %s, no client.', self.club_id)
+            return
 
-            with ds_util.client.transaction:
-                ds_util.client.put_multi(
-                        Activity.to_entity(activity,
-                            parent=ds_util.client.key('Club', club_id))
-                        for activity in activities)
+        # Create a club id'ed by the club_id but without a parent.
+        # Note, per the docs, a parentless entity won't be returned by a query
+        # with ancestor=None
+        # TODO: We shouldn't put member-specific  fields in this entity.
+        club_result = self.client.get_club(self.club_id)
+        club_entity = ds_util.put(Club.to_entity(club_result))
+
+        # These athlete responses don't have ids, so we can't really use this
+        # result. [<Athlete id=None firstname='Matt' lastname='C.'>, ...]
+        #members_result = [m for m in self.client.get_club_members(self.club_id)]
+        #logging.debug(members_result)
+
+        # By way of fetching athletes, we've also found their memberships.
+        # Fetch those athletes.
+        query = ds_util.client.query(kind='Athlete')
+        query.add_filter('clubs.id', '=', int(self.club_id))
+        query.keys_only()
+        athlete_keys = [athlete.key for athlete in query.fetch()]
 
 
 class EventsWorker(object):
