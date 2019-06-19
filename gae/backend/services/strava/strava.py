@@ -55,8 +55,7 @@ class Worker(object):
 
         for activity in self.client.get_activities():
             ds_util.client.put(
-                    Activity.to_entity(activity, parent=self.service.key,
-                        detailed_athlete=athlete))
+                    Activity.to_entity(activity, parent=self.service.key))
 
     def sync_clubs(self):
         self.client.ensure_access()
