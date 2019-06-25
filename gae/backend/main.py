@@ -49,16 +49,6 @@ class SyncException(Exception):
     pass
 
 
-@app.route('/weight_notify', methods=['POST'])
-def weight_notify_trigger():
-    claims = auth_util.verify(flask.request)
-    user = User.get(claims)
-    service = Service.get('withings', parent=user.key)
-
-    task_result = task_util.process_weight_trend(service)
-    return 'OK', 200
-
-
 @app.route('/tasks/cleanup', methods=['GET'])
 def cleanup_task():
     result = [r for r in ds_util.client.query(kind='DatastoreState').fetch()]
