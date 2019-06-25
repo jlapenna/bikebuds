@@ -15,6 +15,7 @@
 """Helpers for the cloud tasks queue."""
 
 import datetime
+import hashlib
 import os
 import logging
 
@@ -25,6 +26,7 @@ from google.cloud.datastore import helpers
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore_v1.proto import entity_pb2
 from google.oauth2.service_account import Credentials
+from google.protobuf.timestamp_pb2 import Timestamp
 
 from shared import ds_util
 from shared.config import config
@@ -40,7 +42,13 @@ else:
 
 # Create a client.
 _client = tasks_v2.CloudTasksClient(credentials=credentials)
-_parent = _client.queue_path(config.project_id, config.tasks_location, 'default')
+
+_default_parent = _client.queue_path(config.project_id, config.tasks_location,
+        'default')
+_events_parent = _client.queue_path(config.project_id, config.tasks_location,
+        'events')
+_notifications_parent = _client.queue_path(config.project_id,
+        config.tasks_location, 'notifications')
 
 
 def _serialize_entity(entity):
@@ -59,7 +67,8 @@ def _deserialize_entity(pb_bytes):
     return helpers.entity_from_protobuf(entity)
 
 
-def _queue_task(entity=None, relative_uri=None, service='default'):
+def _queue_task(name=None, parent=None, entity=None, relative_uri=None,
+        service='default', delay_timedelta=None):
     task = {
         'app_engine_http_request': {
             'http_method': 'POST',
@@ -67,6 +76,19 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
             'app_engine_routing': {'service': service}
         }
     }
+
+    if name is not None:
+        hashed_name = hashlib.sha1(str(name))
+        task['name'] = hashed_name.hexdigest()
+
+    if parent is None:
+        parent = _default_parent
+
+    if delay_timedelta:
+        future_time = datetime.datetime.utcnow() + delay_timedelta
+        timestamp = Timestamp()
+        timestamp.FromDatetime(future_time)
+        task['schedule_time'] =  timestamp
 
     converted_payload = None
     if entity is not None:
@@ -88,7 +110,7 @@ def _queue_task(entity=None, relative_uri=None, service='default'):
                 task['app_engine_http_request']['relative_uri'], response)
         return response
 
-    return _client.create_task(_parent, task)
+    return _client.create_task(parent, task)
 
 
 def _params_entity(**kwargs):
@@ -126,9 +148,10 @@ def sync_services(services):
             service['syncing'] = True
 
             tasks.append({
+                'entity': _params_entity(state_key=state.key,
+                    service_key=service.key),
                 'relative_uri': '/tasks/sync/service/' + service.key.name,
                 'service': 'backend',
-                'entity': _params_entity(state_key=state.key, service_key=service.key)
                 })
             logging.debug('Added: %s', tasks[-1])
 
@@ -168,9 +191,9 @@ def maybe_finish_sync_services(service, state_key):
         if state['completed_tasks'] == state['total_tasks']:
             logging.debug('Completed all pending tasks for %s', state.key)
             #_queue_task(**{
+            #    'entity': _params_entity(state_key=state.key),
             #    'relative_uri': '/tasks/process',
             #    'service': 'backend',
-            #    'entity': _params_entity(state_key=state.key)
             #    })
     if not config.is_dev:
         with ds_util.client.transaction():
@@ -181,15 +204,18 @@ def maybe_finish_sync_services(service, state_key):
 
 def process_event(event):
     _queue_task(**{
+        'entity': _params_entity(event=event),
         'relative_uri': '/tasks/process_event',
         'service': 'backend',
-        'entity': _params_entity(event=event)
+        'parent': _events_parent,
+        'delay_timedelta': datetime.timedelta(seconds=5),
         })
 
 
 def process_weight_trend(service):
     _queue_task(**{
+        'entity': _params_entity(service_key=service.key),
         'relative_uri': '/tasks/process_weight_trend',
         'service': 'backend',
-        'entity': _params_entity(service_key=service.key)
+        'parent': _notifications_parent,
         })
