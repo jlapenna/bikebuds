@@ -40,7 +40,17 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
         static_folder='static')
 
 
-@module.route('/services/withings/events', methods=['GET', 'HEAD', 'POST'])
+@module.route('/services/withings/events', methods=['HEAD'])
+@cross_origin(origins=['https://www.withings.com'])
+def events_head():
+    sub_secret = flask.request.args.get('sub_secret', None)
+    if sub_secret != config.withings_creds['sub_secret']:
+        logging.warn('Invalid sub_secret: Provided %s, expected %s'
+                % (sub_secret, config.withings_creds['sub_secret']))
+    return 'OK', 200
+
+
+@module.route('/services/withings/events', methods=['POST'])
 @cross_origin(origins=['https://www.withings.com'])
 def events_post():
     sub_secret = flask.request.args.get('sub_secret', None)
