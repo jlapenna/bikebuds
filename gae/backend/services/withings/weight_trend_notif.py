@@ -62,14 +62,19 @@ class WeightTrendWorker(object):
                     'WeightTrendWorker: daily_weight_notif: no timeframe: %s', user.key)
             return
 
-        latest_weight = weight_trend['latest'][1]['weight']
+        if 'latest' not in weight_trend:
+            logging.debug(
+                    'WeightTrendWorker: daily_weight_notif: no latest: %s', user.key)
+            return
+
+        latest_weight = weight_trend['latest']['weight']
         if to_imperial:
             latest_weight = Weight(kg=latest_weight).lb
-        time_frame_weight = weight_trend[time_frame][1]['weight']
+        time_frame_weight = weight_trend[time_frame]['weight']
 
         if to_imperial:
             time_frame_weight = Weight(kg=time_frame_weight).lb
-        time_frame_date = weight_trend[time_frame][1]['date']
+        time_frame_date = weight_trend[time_frame]['date']
 
         delta = time_frame_weight - latest_weight
         unit = 'kg'
@@ -129,5 +134,5 @@ class WeightTrendWorker(object):
                 time_frame, tick = trend[trend_index]
             if measure['date'] <= tick:
                 if 'weight' in measure:
-                    trend_result[time_frame] = tick, measure
+                    trend_result[time_frame] = measure
         return trend_result
