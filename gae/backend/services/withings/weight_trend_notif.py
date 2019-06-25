@@ -76,16 +76,16 @@ class WeightTrendWorker(object):
             time_frame_weight = Weight(kg=time_frame_weight).lb
         time_frame_date = weight_trend[time_frame]['date']
 
-        delta = time_frame_weight - latest_weight
+        delta = round(latest_weight - time_frame_weight, 1)
         unit = 'kg'
         if to_imperial:
             unit = 'lbs'
         if delta > 0:
-            title = 'Down %.1f %s from %s' % (abs(delta), unit, time_frame)
+            title = 'Up %.1f %s from %s' % (abs(delta), unit, time_frame)
         elif delta == 0:
             title = 'Weight unchanged since %s' % (time_frame,)
         else:
-            title = 'Up %.1f %s from %s' % (abs(delta), unit, time_frame)
+            title = 'Down %.1f %s from %s' % (abs(delta), unit, time_frame)
         body = 'You were %.1f %s on %s' % (time_frame_weight, unit,
                 format_date(time_frame_date.date(), format='medium'))
 
