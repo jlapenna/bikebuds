@@ -36,6 +36,7 @@ function main() {
   pushd gae/${service}
   #FLASK_ENV=development gunicorn3 main:app
   while :; do
+    xtitle "service: $service"; \
     FLASK_ENV=development python main.py
     sleep 1;
   done;
