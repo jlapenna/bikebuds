@@ -150,7 +150,7 @@ def get_payload(request):
     return _deserialize_entity(request.get_data())
 
 
-def maybe_finish_sync_services_and_queue_process(service, state_key):
+def maybe_finish_sync_services(service, state_key):
     # We have to do this "do" nonsense, because when on dev we fake tasks by
     # just triggering them via http, and the transaction hasn't written the
     # values yet, so the other server can't read them if they get processed
@@ -167,11 +167,11 @@ def maybe_finish_sync_services_and_queue_process(service, state_key):
 
         if state['completed_tasks'] == state['total_tasks']:
             logging.debug('Completed all pending tasks for %s', state.key)
-            _queue_task(**{
-                'relative_uri': '/tasks/process',
-                'service': 'backend',
-                'entity': _params_entity(state_key=state.key)
-                })
+            #_queue_task(**{
+            #    'relative_uri': '/tasks/process',
+            #    'service': 'backend',
+            #    'entity': _params_entity(state_key=state.key)
+            #    })
     if not config.is_dev:
         with ds_util.client.transaction():
             do()

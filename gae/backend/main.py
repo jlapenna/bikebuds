@@ -119,7 +119,7 @@ def sync_service_task(service_name):
     elif service_name == 'strava':
         _do(strava.Worker(service), work_key=service.key)
 
-    task_util.maybe_finish_sync_services_and_queue_process(service, state_key)
+    task_util.maybe_finish_sync_services(service, state_key)
     return 'OK', 200
 
 
