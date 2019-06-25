@@ -7,18 +7,18 @@
 #   $ gcloud topic gcloudignore
 #
 .gcloudignore
-# If you would like to upload your .git directory, .gitignore file or files
-# from your .gitignore file, remove the corresponding line
-# below:
+
+# Git files
 .git
 .gitignore
 
-# Python pycache:
-__pycache__/
-*.pyc
+# Exclude files ignored by git.
+#!include:.gitignore
 
-node_modules
 package.json
 package-lock.json
 public
 src
+
+# Finally, forceably include the files we've built and need to deploy:
+!/build

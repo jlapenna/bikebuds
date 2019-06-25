@@ -1,21 +1,14 @@
-/lib
+# Python cache files:
+__pycache__/
+*.pyc
 
-# dependencies
+# NPM dependencies
 /node_modules
 
-# testing
-/coverage
-
-# production
+# NPM build artifacts
 /build
 
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# NPM log artifacts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
