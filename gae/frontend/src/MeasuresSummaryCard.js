@@ -68,6 +68,7 @@ class MeasuresSummaryCard extends Component {
   }
 
   handleMeasures = newMeasures => {
+    console.log('MeasuresSummaryCard: handleMeasures: ', newMeasures)
     if (newMeasures.length === 0) {
       this.setState({
         measures: []
@@ -88,7 +89,7 @@ class MeasuresSummaryCard extends Component {
       var measure = newMeasures[newMeasures.length - 1 - i];
       var measureDate = moment(Number(measure.date));
       if (measureDate <= ticks[ticksIndex]) {
-        measures.unshift(measure);
+        measures.push(measure);
         ticksIndex -= 1;
       }
       if (measureDate <= yearAgo) {
@@ -124,7 +125,7 @@ class MeasuresSummaryCard extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.state.measures.reverse().map((measure, index) => (
+            {this.state.measures.map((measure, index) => (
               <TableRow key={index} hover={true}>
                 <TableCell>
                   {localMoment(moment(Number(measure.date))).fromNow()}
