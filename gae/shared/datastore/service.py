@@ -56,3 +56,9 @@ class Service(object):
         else:
             logging.info('Unchanged service credentials: %s', service.key)
         return service['credentials']
+
+    @classmethod
+    def has_credentials(cls, service, required_key=None):
+        return (service is not None and service.get('credentials')
+                and (required_key is None
+                    or service['credentials'].get(required_key)))

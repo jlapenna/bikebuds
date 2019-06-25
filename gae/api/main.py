@@ -460,8 +460,7 @@ class ProfileResource(Resource):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
         strava = Service.get('strava', parent=user.key)
-        strava_connected = ('credentials' in strava
-                and strava['credentials'] is not None)
+        strava_connected = Service.has_credentials(strava)
         athlete = Athlete.get_private(strava.key)
 
         return dict(

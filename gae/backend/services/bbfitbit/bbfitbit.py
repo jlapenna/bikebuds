@@ -20,6 +20,7 @@ import fitbit
 from shared import ds_util
 from shared.config import config
 from shared.datastore.series import Series
+from shared.datastore.service import Service
 
 class Worker(object):
 
@@ -36,6 +37,9 @@ class Worker(object):
 
 
 def create_client(service):
+    if not Service.has_credentials(service, required_key='refresh_token'):
+        raise Exception(
+                'Cannot create Fitbit client without creds: %s', service)
     def refresh_callback(new_credentials):
         logging.debug('Fitbit creds refresh for: %s', service.key)
         Service.update_credentials(service, new_credentials)

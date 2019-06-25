@@ -60,7 +60,7 @@ class Worker(object):
                 key=lambda x: x.date)
         series = Series.to_entity(measures, self.service.key.name,
                 parent=self.service.key)
-        return ds_util.client.put(series)
+        ds_util.client.put(series)
 
     def sync_subscription(self):
         query_string = urlencode({
