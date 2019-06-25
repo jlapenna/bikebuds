@@ -134,7 +134,7 @@ class _ClubWidget extends Component {
         <Grid
           className={this.props.classes.contentGridElement}
           container
-          spacing={24}
+          spacing={3}
         >
           <Grid
             className={this.props.classes.contentGridElement}

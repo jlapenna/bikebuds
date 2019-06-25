@@ -33,7 +33,7 @@ class Settings extends Component {
   render() {
     return (
       <div>
-        <Grid container spacing={24} justify="space-evenly" alignItems="center">
+        <Grid container spacing={3} justify="space-evenly" alignItems="center">
           <Grid item xs={12} sm={12}>
             <ProfileCard
               firebaseUser={this.props.firebaseUser}

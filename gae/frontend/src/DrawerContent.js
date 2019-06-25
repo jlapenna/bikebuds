@@ -33,7 +33,10 @@ class DrawerContent extends React.Component {
     },
     footer: {
       bottom: 0
-    }
+    },
+    active: {
+      backgroundColor: theme.palette.action.selected
+    },
   });
 
   static propTypes = {
@@ -49,6 +52,11 @@ class DrawerContent extends React.Component {
       return null;
     }
 
+    const DrawerItemLink = React.forwardRef((props, ref) => <NavLink innerRef={ref} {...props}
+            exact
+            activeClassName={this.props.classes.active}
+      />);
+
     return (
       <React.Fragment>
         <List
@@ -58,30 +66,24 @@ class DrawerContent extends React.Component {
           <ListItem
             button
             key="Home"
-            component={NavLink}
+            component={DrawerItemLink}
             to={{ pathname: '/', search: window.location.search }}
-            exact
-            activeClassName={this.props.classes.active}
           >
             <ListItemText>Home</ListItemText>
           </ListItem>
           <ListItem
             button
             key="Events"
-            component={NavLink}
+            component={DrawerItemLink}
             to={{ pathname: '/events', search: window.location.search }}
-            exact
-            activeClassName={this.props.classes.active}
           >
             <ListItemText>Rides</ListItemText>
           </ListItem>
           <ListItem
             button
             key="Settings"
-            component={NavLink}
+            component={DrawerItemLink}
             to={{ pathname: '/settings', search: window.location.search }}
-            exact
-            activeClassName={this.props.classes.active}
           >
             <ListItemText>Settings</ListItemText>
           </ListItem>

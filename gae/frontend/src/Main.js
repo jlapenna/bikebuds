@@ -68,14 +68,11 @@ class Main extends Component {
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing.unit * 2
+      padding: theme.spacing(2)
     },
     mainContent: {
       height: '100%',
       width: '100%'
-    },
-    active: {
-      backgroundColor: theme.palette.action.selected
     }
   });
 

@@ -50,7 +50,7 @@ class Home extends Component {
           profile={this.props.profile}
           apiClient={this.props.apiClient}
           render={wrapperState => (
-            <Grid container spacing={24}>
+            <Grid container spacing={3}>
               <Grid item xs={12} lg={8}>
                 <ActivitiesWrapper
                   apiClient={this.props.apiClient}
