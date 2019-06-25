@@ -87,10 +87,10 @@ def sync_trigger(name):
 @app.route('/tasks/sync', methods=['GET'])
 def sync_task():
     services_query = ds_util.client.query(kind='Service')
-    services_query.add_filter('credentials', '!=', None)
-    services_query.add_filter('sync_enabled', '==', True)
-    services_query.add_filter('syncing', '==', False)
-    services = [service for service in services_query.fetch()]
+    services_query.add_filter('sync_enabled', '=', True)
+    services_query.add_filter('syncing', '=', False)
+    services = [service for service in services_query.fetch()
+            if Service.has_credentials(service)]
     task_util.sync_services(services)
     return 'OK', 200
 
