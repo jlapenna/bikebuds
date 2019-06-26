@@ -75,10 +75,11 @@ def after(response):
     else:
         body = response.data.decode('utf-8')
     try:
-        bb_logger.debug('%s: response: %s, %s', flask.request.path,
-                response.status, body)
+        bb_logger.debug('%s %s: response: %s, %s', flask.request.method,
+                        flask.request.path, response.status, body)
     except:
-        bb_logger.debug('%s: response: could not parse', flask.request.path)
+        bb_logger.debug('%s %s: response: could not parse',
+                        flask.request.method, flask.request.path)
     return response
 
 
