@@ -19,7 +19,7 @@ from google.oauth2.service_account import Credentials
 
 from shared.config import config
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+if os.getenv('GAE_ENV', '').startswith('standard'):
     # Production
     credentials = None
 else:

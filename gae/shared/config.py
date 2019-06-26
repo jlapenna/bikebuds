@@ -38,10 +38,10 @@ class _Config(object):
 
 
 def _devOrProd(dev, prod):
-    if not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-        return dev
-    else:
+    if os.getenv('GAE_ENV', '').startswith('standard'):
         return prod
+    else:
+        return dev
 
 
 config = _Config()

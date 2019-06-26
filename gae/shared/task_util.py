@@ -32,7 +32,7 @@ from shared import ds_util
 from shared.config import config
 from shared.datastore.service import Service
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+if os.getenv('GAE_ENV', '').startswith('standard'):
     # Production
     credentials = None
 else:
