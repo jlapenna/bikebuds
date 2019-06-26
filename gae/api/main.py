@@ -523,6 +523,11 @@ class UnittestResource(Resource):
         return None
 
 
+@app.route('/_ah/warmup')
+def warmup():
+    return '', 200, {}
+
+
 @app.before_request
 def before():
     logging_util.before()
