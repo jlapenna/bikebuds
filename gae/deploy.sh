@@ -28,7 +28,8 @@ function delete_old_versions() {
   local service=$1
   local max_versions=$2
 
-  local versions=$(gcloud --project=bikebuds-app app versions list --service ${service} --sort-by '~version' --filter="XXXversion.traffic_split<1.0" --format 'value(version.id)' | sort -r)
+  local versions=$(gcloud --project=bikebuds-app app versions list --service ${service} \
+      --sort-by '~version' --filter="traffic_split=0.0" --format 'value(id)' | sort -r)
   local count=0
   echo "Keeping the $max_versions latest versions of the $1 service"
   for version in $versions; do
@@ -87,14 +88,14 @@ function main() {
 
   # Deploy firebase
   ./firebase/deploy.sh
-  
+
   # Delete older versions.
   for service in ${services}; do
     if [[ "$service" == "frontend" ]]; then
       # For the sake of gae, our frontend is actually the default service.
       service="default";
     fi
-    #delete_old_versions $service 2;
+    delete_old_versions $service 2;
   done;
 
   # Remove the generated source contexts
