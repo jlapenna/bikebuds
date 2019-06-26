@@ -36,13 +36,13 @@ from services.strava import strava
 from services.withings.weight_trend_notif import WeightTrendWorker
 from services.withings import withings
 
+stackdriver_util.start()
+
 app = flask.Flask(__name__)
 
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
 logging_util.silence_logs()
-
-stackdriver_util.start()
 
 
 class SyncException(Exception):

@@ -30,6 +30,7 @@ from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
 
+stackdriver_util.start()
 
 app = flask.Flask(__name__)
 app.register_blueprint(bbfitbit.module)
@@ -40,8 +41,6 @@ CORS(app, origins=config.origins)
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
 logging_util.silence_logs()
-
-stackdriver_util.start()
 
 
 @app.route('/services/redirect', methods=['GET'])

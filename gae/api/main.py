@@ -39,6 +39,7 @@ from shared.datastore.user import User
 from shared.datastore.service import Service
 from shared.datastore.series import Series
 
+stackdriver_util.start()
 
 app = Flask(__name__)
 CORS(app, origins=config.origins)
@@ -46,8 +47,6 @@ CORS(app, origins=config.origins)
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
 logging_util.silence_logs()
-
-stackdriver_util.start()
 
 # https://flask-restplus.readthedocs.io/en/stable/swagger.html#documenting-authorizations
 # https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document
