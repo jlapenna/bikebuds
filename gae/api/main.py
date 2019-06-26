@@ -342,6 +342,9 @@ class ActivitiesResource(Resource):
         service = Service.get('strava', parent=user.key)
         activities_query = ds_util.client.query(
                 kind='Activity', ancestor=service.key, order=['-start_date'])
+        one_year_ago = (datetime.datetime.now(datetime.timezone.utc) -
+                datetime.timedelta(days=365))
+        activities_query.add_filter('start_date', '>', one_year_ago)
         activities = [WrapEntity(a) for a in activities_query.fetch()]
         return activities
 
