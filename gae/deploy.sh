@@ -58,7 +58,15 @@ function main() {
   # First, commit all the code outstanding into a temporary commit for
   # safe-keeping.
   git add .
-  git commit --allow-empty -a -m"Working Set: ${date}";
+  git commit -a -m"Working Set: ${date}";
+  local working_set_committed=$?
+
+  # Abort if our tests don't pass commit.
+  if [[ "$working_set_committed" == "10" ]]; then
+    echo "Git commit failed verification, abort!"
+    git reset .
+    exit 10
+  fi
 
   # Make sure we're not using cached pyc.
   find ./ -iname '*.py[co]' -delete
@@ -106,7 +114,9 @@ function main() {
 
   # Break apart the working set commit, back to where we started before
   # the deploy script.
-  git reset HEAD~
+  if [[ "$working_set_committed" == "0" ]]; then
+    git reset HEAD~
+  fi
 
   # And restore the dev environment config.
   set_dev_environment
