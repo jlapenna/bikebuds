@@ -49,3 +49,21 @@ function source_files() {
 function sgrep() {
   egrep "$@" $(source_files)
 }
+
+function watch_logs() {
+  local service=$1;
+  local version=$2;
+
+  local version_flag=""
+  if [[ "${version}" == "latest" ]]; then
+    local latest="$(gcloud --project=bikebuds-app app versions list \
+        --service ${service} --sort-by '~version' \
+        --filter="traffic_split=1.0" --format='value(id)')"
+    version_flag="-v ${latest}"
+  elif [[ "${version}" != "" ]]; then
+    version_flag="-v ${version}"
+  fi
+
+  xtitle logs: $service;
+  gcloud --project=bikebuds-app app logs tail -s "${service}" ${version_flag}
+}
