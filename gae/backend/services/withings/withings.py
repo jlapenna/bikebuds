@@ -95,8 +95,8 @@ class Worker(object):
         # After previous cleanup, see if we need to re-subscribed:
         is_subscribed = self.client.is_subscribed(callbackurl)
         if is_subscribed:
-            logging.debug('Already have a sub, not re-registering for %s',
-                    self.service.key)
+            logging.debug('Already have a sub, not re-registering for %s to %s',
+                    self.service.key, callbackurl)
             sub_entity = Entity(
                     ds_util.client.key('WithingsSubscription',
                         callbackurl, parent=self.service.key))
@@ -113,8 +113,11 @@ class Worker(object):
                 entity = Entity(
                         ds_util.client.key('WithingsSubscription',
                             callbackurl, parent=self.service.key))
-                entity.update(
-                        {'callbackurl': callbackurl, 'comment': comment})
+                entity.update({
+                    'callbackurl': callbackurl,
+                    'comment': comment,
+                    'date': datetime.datetime.now(datetime.timezone.utc)
+                    })
                 ds_util.client.put(entity)
             except Exception as e:
                 logging.exception('Subscribe failed: %s to %s',
