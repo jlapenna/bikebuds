@@ -46,8 +46,6 @@ function delete_old_versions() {
 function main() {
   local repo_path="$(get_repo_path)";
 
-  set_prod_environment
-
   if [[ -z "$@" ]]; then
     local services="frontend api backend";
   else
@@ -68,8 +66,7 @@ function main() {
     exit 10
   fi
 
-  # Make sure we're not using cached pyc.
-  find ./ -iname '*.py[co]' -delete
+  set_prod_environment
 
   if [[ "$services" == *"frontend"* ]]; then
     # Maybe build the react app.
@@ -97,6 +94,9 @@ function main() {
   # Deploy firebase
   ./firebase/deploy.sh
 
+  # And restore the dev environment config.
+  set_dev_environment
+
   # Delete older versions.
   for service in ${services}; do
     if [[ "$service" == "frontend" ]]; then
@@ -117,9 +117,6 @@ function main() {
   if [[ "$working_set_committed" == "0" ]]; then
     git reset HEAD~
   fi
-
-  # And restore the dev environment config.
-  set_dev_environment
 }
 
 main "$@"
