@@ -83,7 +83,7 @@ def events_post():
             return 'OK', 200
 
         event_entity = SubscriptionEvent.to_entity(event_json,
-                parent=service_key)
+                parent=athlete.key.parent)
         task_util.process_event(event_entity)
     except:
         logging.exception('Failed while processing %s', event_json)
