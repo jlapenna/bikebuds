@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import binascii
 import json
 import logging
 import os
@@ -93,6 +94,12 @@ def events_post():
     try:
         service_key = Key.from_legacy_urlsafe(
                 flask.request.args.get('service_key'))
+    except binascii.Error as e:
+        # In older code we accidentally registered with poorly constructed
+        # callbackurls, ingore these.
+        logging.debug('Received invalid event from bad callbackurl %s',
+                flask.request.url)
+        return 'OK', 200
     except:
         logging.exception('Failed processing Withings service_key: %s',
                 flask.request.args.get('service_key'))
@@ -101,7 +108,8 @@ def events_post():
         logging.error('Unable to process Withings event: %s, %s, %s',
                 flask.request.url, event_data, service_key)
         sub_event_failure = SubscriptionEvent.to_entity(
-                {'url': flask.request.url, 'event_data': event_data})
+                {'url': flask.request.url, 'event_data': event_data,
+                    'failure': True})
         ds_util.client.put(sub_event_failure)
     else:
         event_entity = SubscriptionEvent.to_entity(event_data,
