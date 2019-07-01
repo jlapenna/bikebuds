@@ -20,6 +20,7 @@ import os
 import flask
 from flask_cors import cross_origin
 
+from google.protobuf.message import DecodeError
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
 
@@ -92,20 +93,23 @@ def events_post():
 
     service_key = None
     try:
-        service_key = Key.from_legacy_urlsafe(
-                flask.request.args.get('service_key'))
+        if 'service_key' in flask.request.args:
+            service_key = Key.from_legacy_urlsafe(
+                    flask.request.args.get('service_key'))
+        else:
+            logging.warning('Key missing in callbackurl %s', flask.request.url)
     except binascii.Error as e:
         # In older code we accidentally registered with poorly constructed
         # callbackurls, ingore these.
         logging.debug('Received invalid event from bad callbackurl %s',
                 flask.request.url)
-        return 'OK', 200
     except:
         logging.exception('Failed processing Withings service_key: %s',
                 flask.request.args.get('service_key'))
 
     if event_data is None or service_key is None:
-        logging.error('Unable to process Withings event: %s, %s, %s',
+        logging.error('Unable to process Withings event: '
+                'url: %s, event_data: %s, service_key: %s',
                 flask.request.url, event_data, service_key)
         sub_event_failure = SubscriptionEvent.to_entity(
                 {'url': flask.request.url, 'event_data': event_data,
@@ -115,7 +119,7 @@ def events_post():
         event_entity = SubscriptionEvent.to_entity(event_data,
                 parent=service_key)
         task_util.process_event(event_entity)
-        logging.info('Queued Withings event for: %s', service_key)
+        logging.debug('Queued Withings event for: %s', service_key)
 
     return 'OK', 200
 

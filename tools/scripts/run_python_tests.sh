@@ -15,13 +15,16 @@
 # limitations under the License.
 
 source tools/scripts/base.sh
-
-export REPO_PATH="$(get_repo_path)";
+load_config;
 
 function main() {
-  local final_result=0;
+  if [[ -z "$@" ]]; then
+    local services="frontend api backend";
+  else
+    local services="$@";
+  fi
 
-  local services="frontend api backend";
+  local final_result=0;
   for service in ${services}; do
     local result=0;
 
@@ -34,6 +37,16 @@ function main() {
       echo "Unable to pip install. Aborting."
       exit 3;
     fi
+
+    if [ -e "test_requirements.txt" ]; then
+      pip install -r test_requirements.txt > /dev/null 2>&1
+      result=$?;
+      if [[ ${result} != 0 ]]; then
+        echo "Unable to pip install test_requirements.txt. Aborting."
+        exit 3;
+      fi
+    fi
+
     python -m unittest
     result=$?;
     popd
