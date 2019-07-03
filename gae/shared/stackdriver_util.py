@@ -30,7 +30,7 @@ def start():
             logging.exception('Unable to enable Cloud Debugger, no creds')
         try:
             import googlecloudprofiler
-            googlecloudprofiler.start(verbose=3)
+            googlecloudprofiler.start(verbose=0)
             logging.debug('Enabled Cloud Profiler')
         except ImportError:
             logging.exception('Unable to import Cloud Profiler')
