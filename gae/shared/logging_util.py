@@ -90,7 +90,9 @@ def silence_logs():
         'oauth2client.contrib.multistore_file',
         'stravalib.model.Activity',
         'stravalib.model.Athlete',
-        'stravalib.model.Club'
+        'stravalib.model.Club',
+        'google.auth.transport.requests',
+        'google_auth_httplib2',
     ]
     for log in logs_to_silence:
         logging.getLogger(log).setLevel(logging.ERROR)
