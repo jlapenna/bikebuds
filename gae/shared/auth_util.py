@@ -24,18 +24,16 @@ import google.auth.transport
 
 import firebase_admin
 from firebase_admin import auth
-from firebase_admin import credentials
-FIREBASE_ADMIN_CREDS = credentials.Certificate(
-        'env/service_keys/firebase-adminsdk.json')
-firebase_admin.initialize_app(FIREBASE_ADMIN_CREDS)
 
 from shared.config import config
+from shared.credentials import firebase_credentials
 
+firebase_admin.initialize_app(firebase_credentials)
 
 def fake_claims():
     if config.is_dev and config.fake_user:
         logging.warn('Using Fake User')
-        return {'sub': config.fake_user}
+        return {'sub': config.fake_user, 'admin': True}
     else:
         return None
 
@@ -106,3 +104,9 @@ def verify_claims_from_cookie(request):
     except ValueError as e:
         flask.abort(401, 'Unable to validate cookie')
 
+
+def verify_admin(request):
+    claims = verify_claims(flask.request)
+    if not claims.get('admin'):
+        flask.abort(403, 'User is not an admin')
+    return claims
