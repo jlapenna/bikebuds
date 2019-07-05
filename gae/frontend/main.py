@@ -23,14 +23,11 @@ from firebase_admin import auth
 
 from shared import auth_util
 from shared import logging_util
-from shared import stackdriver_util
 from shared.config import config
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings import withings
-
-stackdriver_util.start()
 
 app = flask.Flask(__name__)
 app.register_blueprint(bbfitbit.module)

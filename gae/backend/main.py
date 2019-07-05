@@ -26,7 +26,6 @@ from shared.config import config
 from shared import auth_util
 from shared import ds_util
 from shared import logging_util
-from shared import stackdriver_util
 from shared import task_util
 from shared.datastore.service import Service
 from shared.datastore.user import User
@@ -35,8 +34,6 @@ from services.bbfitbit import bbfitbit
 from services.strava import strava
 from services.withings.weight_trend_notif import WeightTrendWorker
 from services.withings import withings
-
-stackdriver_util.start()
 
 app = flask.Flask(__name__)
 

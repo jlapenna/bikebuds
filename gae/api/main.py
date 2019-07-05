@@ -27,7 +27,6 @@ from google.cloud.datastore import helpers
 from shared import auth_util
 from shared import ds_util
 from shared import logging_util
-from shared import stackdriver_util
 from shared import task_util
 from shared.config import config
 from flask_cors import cross_origin
@@ -38,8 +37,6 @@ from shared.datastore.club import Club
 from shared.datastore.user import User
 from shared.datastore.service import Service
 from shared.datastore.series import Series
-
-stackdriver_util.start()
 
 app = Flask(__name__)
 CORS(app, origins=config.origins)
