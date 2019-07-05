@@ -39,6 +39,8 @@ from shared.datastore.user import User
 from shared.datastore.service import Service
 from shared.datastore.series import Series
 
+from admin import api as admin_api
+
 app = Flask(__name__)
 CORS(app, origins=config.origins)
 
@@ -68,6 +70,8 @@ api = Api(app, version='1.0', title='Bikebuds API',
     authorizations=authorizations,
     default='bikebuds'
 )
+api.add_namespace(admin_api)
+
 app.config.SWAGGER_UI_DOC_EXPANSION = 'list'
 app.config.SWAGGER_UI_OPERATION_ID = True
 

@@ -23,10 +23,9 @@ function main() {
 
   echo ""
   echo "Setting up virtual environments."
-  mkdir environments >/dev/null 2>&1;
-  mkdir environments/virtual/client >/dev/null 2>&1;
-  mkdir environments/virtual/gae >/dev/null 2>&1;
-  mkdir environments/virtual/gae3 >/dev/null 2>&1;
+  mkdir virtualenv/client >/dev/null 2>&1;
+  mkdir virtualenv/gae >/dev/null 2>&1;
+  mkdir virtualenv/gae3 >/dev/null 2>&1;
 
   echo ""
   echo "Installing libraries into 'gae' virtualenv."

@@ -17,10 +17,8 @@ import os
 
 
 class _Config(object):
-    def __init__(self):
-        base_path = 'lib/env'
-        if not os.path.exists(base_path):
-            base_path = 'env/'
+    def __init__(self, base_path):
+        self.base_path = base_path
         base_config = json.load(open(os.path.join(base_path, 'config.json')))
         for key, value in base_config.items():
             setattr(self, key, value)
@@ -43,4 +41,4 @@ def _devOrProd(dev, prod):
         return dev
 
 
-config = _Config()
+config = _Config(os.environ.get('BIKEBUDS_ENV', 'environments/env'))

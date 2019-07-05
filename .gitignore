@@ -1,4 +1,3 @@
-environments
-appengine_env
-client_env
-generated
+/environments
+/virtualenv
+/generated

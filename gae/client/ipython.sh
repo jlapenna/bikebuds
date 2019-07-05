@@ -22,7 +22,7 @@ function main() {
   local repo_path="$(get_repo_path)"; 
   local client_path="${repo_path}/gae/client"
 
-  activate_client_virtualenv
+  activate_virtualenv client python3
   pip install -r ${client_path}/requirements.txt
 
   load_config

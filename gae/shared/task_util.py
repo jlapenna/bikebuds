@@ -30,15 +30,9 @@ from google.protobuf.timestamp_pb2 import Timestamp
 
 from shared import ds_util
 from shared.config import config
+from shared.credentials import credentials
 from shared.datastore.service import Service
 
-if os.getenv('GAE_ENV', '').startswith('standard'):
-    # Production
-    credentials = None
-else:
-    # Local
-    credentials = Credentials.from_service_account_file(
-            'env/service_keys/python-client-testing.json')
 
 # Create a client.
 _client = tasks_v2.CloudTasksClient(credentials=credentials)

@@ -23,7 +23,7 @@ export REPO_PATH="$(get_repo_path)";
 function source_files() {
   find . \
     \( \
-    -path "./$(realpath --relative-to=. $REPO_PATH/environments/virtual)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/virtualenv)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \

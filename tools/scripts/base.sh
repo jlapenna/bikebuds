@@ -18,7 +18,13 @@ PROD_API_HOSTNAME='api.bikebuds.cc'
 LOCAL_API_HOSTNAME='localhost:8082'
 
 function load_config() {
-  for kv in $(jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' environments/env/config.json); do
+  local env=${BIKEBUDS_ENV}
+  if [[ "${env}" == "" ]]; then
+    env="environments/env"
+  fi
+  config="${env}/config.json";
+
+  for kv in $(jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' ${config}); do
     export "CONFIG_${kv}";
   done;
 }
@@ -66,10 +72,10 @@ function set_prod_environment() {
 function activate_virtualenv() {
   local env_name="$1"
   local python="$2"
-  local env_path=$(readlink -f "$(get_repo_path)/environments/virtual/${env_name}")
+  local env_path=$(readlink -f "$(get_repo_path)/virtualenv/${env_name}")
 
-  #echo "Installing virtual environment at ${env_path}"
-  #virtualenv --python "${python}" "${env_path}"
+  echo "Installing virtual environment at ${env_path}"
+  virtualenv --python "${python}" "${env_path}"
   
   echo "Activating virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
@@ -77,16 +83,6 @@ function activate_virtualenv() {
     echo "Unable to setup virtual environment." >&2
     return 2;
   fi
-}
-
-function activate_client_virtualenv() {
-  activate_virtualenv client python3
-  return $?
-}
-
-function activate_gae_virtualenv() {
-  activate_virtualenv gae python2
-  return $?
 }
 
 function activate_gae3_virtualenv() {
