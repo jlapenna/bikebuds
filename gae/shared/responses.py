@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 
-from google.cloud.datastore.entity import Entity
+import collections
 
-from shared import ds_util
 
-class SubscriptionEvent(object):
-    @classmethod
-    def to_entity(cls, properties, parent):
-        entity = Entity(ds_util.client.key('SubscriptionEvent', parent=parent))
-        entity.update(properties)
-        entity.exclude_from_indexes = entity.keys()
-        return entity
+Response = collections.namedtuple('Response', ('message', 'code'))
+
+
+class Responses(object):
+    OK = Response('OK', 200)
+    OK_NO_SERVICE = Response('NO SERVICE', 210)
+    OK_NO_CREDENTIALS = Response('NO CREDENTIALS', 220)
+    OK_INVALID_STATE_KEY = Response('INVALID STATE_KEY', 230)
+    INVALID_TOKEN = Response('INVALID VERIFY_TOKEN', 401)

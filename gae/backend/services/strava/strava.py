@@ -137,8 +137,9 @@ class EventsWorker(object):
         self.client.ensure_access()
 
         query = ds_util.client.query(kind='SubscriptionEvent',
-                ancestor=self.service.key, order=['-event_time'])
+                ancestor=self.service.key)
         events = query.fetch()
+        events = sorted(events, key=lambda x: x['event_time'])
         batches = collections.defaultdict(list)
         for event in events:
             batches[(event['object_id'], event['object_type'])].append(event)
@@ -147,10 +148,14 @@ class EventsWorker(object):
                     self.client, self.service, object_id, object_type, batch)
 
 
-    def _process_event_batch(client, service, object_id, object_type, batch):
+    def _process_event_batch(self, client, service, object_id, object_type,
+            batch):
         with ds_util.client.transaction():
             logging.debug('process_event_batch:  %s, %s, %s',
                     service.key, object_id, len(batch))
+
+            # We're no longer going to need these.
+            ds_util.client.delete_multi((event.key for event in batch))
 
             if object_type != 'activity':
                 logging.warn('Update object_type not implemented: %s', object_type)
@@ -160,7 +165,7 @@ class EventsWorker(object):
 
             if 'delete' in operations:
                 activity_key = ds_util.client.key('Activity', object_id, parent=service.key)
-                result = activity_key.delete()
+                ds_util.client.delete(activity_key)
                 logging.info('Deleted: Entity: %s', activity_key)
             else:
                 activity = client.get_activity(object_id)
@@ -172,64 +177,3 @@ class EventsWorker(object):
                 ds_util.client.put(activity_entity)
                 activity_key = activity_entity.key
                 logging.info('Created: %s -> %s', activity.id, activity_key)
-
-            ds_util.client.delete_multi((event.key for event in batch))
-
-
-def _add_test_sub_events():
-    service_key = Athlete.get_by_id(35056021, keys_only=True).parent
-    e = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
-    e.update(
-            {'aspect_type': 'create',
-                'event_time': 1549151210,
-                'object_id': 2120517766,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                })
-    ds_util.client.put(e)
-    e = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
-    e.update(
-            {'aspect_type': 'update',
-                'event_time': 1549151212,
-                'object_id': 2120517766,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {'title': 'Updated Title'}
-                })
-    ds_util.client.put(e)
-    e = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
-    e.update(
-            {'aspect_type': 'create',
-                'event_time': 1549151211,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                })
-    ds_util.client.put(e)
-    e = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
-    e.update(
-            {'aspect_type': 'update',
-                'event_time': 1549151213,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {'title': 'Second Updated Title'}
-                })
-    ds_util.client.put(e)
-    e = Entity(ds_util.client.key('SubscriptionEvent', parent=service_key))
-    e.update(
-            {'aspect_type': 'delete',
-                'event_time': 1549151214,
-                'object_id': 2120517859,
-                'object_type': 'activity',
-                'owner_id': 35056021,
-                'subscription_id': 133263,
-                'updates': {}
-                })
-    ds_util.client.put(e)

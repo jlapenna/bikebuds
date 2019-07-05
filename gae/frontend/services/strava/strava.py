@@ -31,6 +31,7 @@ from shared.datastore.athlete import Athlete
 from shared.datastore.service import Service
 from shared.datastore.subscription_event import SubscriptionEvent
 from shared.datastore.user import User
+from shared.responses import Responses
 
 
 SERVICE_NAME = 'strava'
@@ -48,7 +49,7 @@ def events_get():
     verify_token = flask.request.args.get('hub.verify_token')
 
     if verify_token != config.strava_creds['verify_token']:
-        return 'Invalid verify_token', 401
+        return Responses.INVALID_TOKEN
 
     return flask.jsonify({'hub.challenge': challenge})
 
@@ -63,7 +64,7 @@ def events_post():
     #    raise auth.AuthError(401, 'Invalid verify_token')
 
     # Events come in the form:
-    #event_json = {'aspect_type': 'create',
+    #event_data = {'aspect_type': 'create',
     #        'event_time': 1549151210,
     #        'object_id': 2120237411,
     #        'object_type': 'activity',
@@ -72,22 +73,38 @@ def events_post():
     #        'updates': {}
     #        }
 
-    event_json = None
+    event_data = None
+    owner_id = None
     try:
-        event_json = flask.request.get_json()
-        owner_id = event_json['owner_id']
-
-        athlete = Athlete.get_by_id(owner_id)
-        if athlete is None:
-            logging.warn('Received event for %s but missing Athlete', owner_id)
-            return 'OK', 200
-
-        event_entity = SubscriptionEvent.to_entity(event_json,
-                parent=athlete.key.parent)
-        task_util.process_event(event_entity)
+        event_data = flask.request.get_json()
+        owner_id = event_data['owner_id']
     except:
-        logging.exception('Failed while processing %s', event_json)
-    return 'OK', 200
+        logging.exception('Failed while getting json.')
+
+    service_key = None
+    if owner_id is not None:
+        athlete = Athlete.get_by_id(owner_id)
+        if athlete is not None:
+            service_key = athlete.key.parent
+        else:
+            logging.warning('Received event for %s but missing Athlete',
+                    owner_id)
+
+    if event_data is None or service_key is None:
+        logging.error('Unable to process Strava event: '
+                'url: %s, event_data: %s, service_key: %s',
+                flask.request.url, event_data, service_key)
+        sub_event_failure = SubscriptionEvent.to_entity(
+                {'url': flask.request.url, 'event_data': event_data,
+                    'failure': True}, parent=None)
+        ds_util.client.put(sub_event_failure)
+    else:
+        event_entity = SubscriptionEvent.to_entity(event_data,
+                parent=service_key)
+        ds_util.client.put(event_entity)
+        task_util.process_event(event_entity.key)
+        logging.debug('Queued Strava event for: %s', service_key)
+    return Responses.OK
 
 
 @module.route('/services/strava/init', methods=['GET', 'POST'])

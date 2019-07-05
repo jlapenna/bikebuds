@@ -24,12 +24,13 @@ from flask_restplus import Api, Resource, fields
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore import helpers
 
+
 from shared import auth_util
 from shared import ds_util
 from shared import logging_util
 from shared import task_util
 from shared.config import config
-from flask_cors import cross_origin
+from shared.responses import Responses
 
 from shared.datastore.athlete import Athlete
 from shared.datastore.client_state import ClientState
@@ -525,7 +526,7 @@ class UnittestResource(Resource):
 
 @app.route('/_ah/warmup')
 def warmup():
-    return '', 200, {}
+    return Responses.OK
 
 
 @app.before_request

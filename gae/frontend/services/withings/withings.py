@@ -33,6 +33,7 @@ from shared.config import config
 from shared.datastore.service import Service
 from shared.datastore.subscription_event import SubscriptionEvent
 from shared.datastore.user import User
+from shared.responses import Responses
 
 
 SERVICE_NAME = 'withings'
@@ -49,7 +50,7 @@ def events_head():
     if sub_secret != config.withings_creds['sub_secret']:
         logging.warn('Invalid sub_secret: Provided %s, expected %s'
                 % (sub_secret, config.withings_creds['sub_secret']))
-    return 'OK', 200
+    return Responses.OK
 
 
 @module.route('/services/withings/events', methods=['POST'])
@@ -113,15 +114,15 @@ def events_post():
                 flask.request.url, event_data, service_key)
         sub_event_failure = SubscriptionEvent.to_entity(
                 {'url': flask.request.url, 'event_data': event_data,
-                    'failure': True})
+                    'failure': True}, parent=None)
         ds_util.client.put(sub_event_failure)
     else:
         event_entity = SubscriptionEvent.to_entity(event_data,
                 parent=service_key)
-        task_util.process_event(event_entity)
+        ds_util.client.put(event_entity)
+        task_util.process_event(event_entity.key)
         logging.debug('Queued Withings event for: %s', service_key)
-
-    return 'OK', 200
+    return Responses.OK
 
 
 @module.route('/services/withings/init', methods=['GET', 'POST'])

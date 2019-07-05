@@ -24,6 +24,7 @@ from firebase_admin import auth
 from shared import auth_util
 from shared import logging_util
 from shared.config import config
+from shared.responses import Responses
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
@@ -67,7 +68,7 @@ def create_session(claims):
 
 @app.route('/unittest', methods=['GET', 'POST'])
 def unittest():
-    return 'OK', 200
+    return Responses.OK
 
 
 @app.before_request

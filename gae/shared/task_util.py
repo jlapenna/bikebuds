@@ -201,10 +201,9 @@ def maybe_finish_sync_services(service, state_key):
     else:
         do()
 
-
-def process_event(event):
+def process_event(event_key):
     _queue_task(**{
-        'entity': _params_entity(event=event),
+        'entity': _params_entity(event_key=event_key),
         'relative_uri': '/tasks/process_event',
         'service': 'backend',
         'parent': _events_parent,
@@ -219,3 +218,7 @@ def process_weight_trend(service):
         'service': 'backend',
         'parent': _notifications_parent,
         })
+
+def task_body_for_test(**kwargs):
+    params_entity = _params_entity(**kwargs)
+    return _serialize_entity(params_entity)
