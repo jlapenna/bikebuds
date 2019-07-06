@@ -28,12 +28,6 @@ function main() {
   mkdir virtualenv/gae3 >/dev/null 2>&1;
 
   echo ""
-  echo "Installing libraries into 'gae' virtualenv."
-  activate_virtualenv gae python2
-  pip2 install ipython inotify
-  deactivate
-
-  echo ""
   echo "Setting up config environments."
   pushd environments;
   if [[ ! -d "dev" ]]; then
@@ -48,24 +42,6 @@ function main() {
     echo "gcloud --project=bikebuds-app source repos clone env prod"
     read
   fi
-  popd
-
-  echo ""
-  echo "Setting up frontend."
-  local frontend_path="${repo_path}/gae/frontend"
-
-  echo ""
-  echo "Setting up api."
-  local api_path="${repo_path}/gae/api"
-
-  echo ""
-  echo "Setting up backend."
-  local backend_path="${repo_path}/gae/backend"
-
-  echo ""
-  echo "Initializing npm packages for frontend."
-  pushd gae/frontend
-  HUSKY_SKIP_INSTALL=true npm install
   popd
 }
 

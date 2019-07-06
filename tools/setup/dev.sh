@@ -21,9 +21,6 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
-  echo "Setting up your git repository."
-  git config core.hooksPath tools/githooks
-
   echo "Installing the correct packages with apt"
   sudo apt install -y python python-dev python-pip
   sudo apt install -y python3 python3-dev python3-pip
@@ -34,6 +31,18 @@ function main() {
   sudo apt install -y jq
 
   echo "Apt installed a few libraries."
+  echo "Or it didn't, you might need to install them yourself. Press enter."
+  read
+
+  pip install grpcio
+
+  echo "Pip installed a few libraries."
+  echo "Or it didn't, you might need to install them yourself. Press enter."
+  read
+
+  pip3 install pre-commit
+
+  echo "Pip3 installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 
@@ -57,6 +66,13 @@ function main() {
   mvn clean package
   popd
 
+  echo "Initializing npm packages for frontend."
+  pushd gae/frontend
+  npm install
+  popd
+
+  echo "Initializing pre-commit."
+  pre-commit install
 }
 
 main "$@"

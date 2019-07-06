@@ -1,0 +1,54 @@
+repos:
+  - repo: local
+    hooks:
+      - id: python-test
+        name: 'python-test'
+        entry: tools/scripts/run_python_tests.sh
+        language: system
+        pass_filenames: false
+        files: \.(py)$
+      - id: flutter-test
+        name: 'flutter-test'
+        entry: tools/scripts/run_flutter_tests.sh
+        language: system
+        pass_filenames: false
+        files: \.(dart)$
+      - id: react-test
+        name: 'react-test'
+        entry: tools/scripts/run_react_tests.sh
+        language: system
+        pass_filenames: false
+        files: gae/frontend/src.*\.(js)$
+  - repo: https://github.com/Cretezy/flutter-format-pre-commit
+    rev: 4a1df675bb74dea371c17934933e257e46f8dd98
+    hooks:
+      - id: flutter-format
+  - repo: https://github.com/python/black
+    rev: 19.3b0
+    hooks:
+      - id: black
+        language_version: python3.6
+  - repo: https://github.com/prettier/prettier
+    rev: 1.18.2
+    hooks:
+      - id: prettier
+        exclude: \.(js|jsx|ts|tsx)$
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v6.0.1
+    hooks:
+      - id: eslint
+        entry: ./gae/frontend/node_modules/.bin/eslint --fix
+        files: \.(js|jsx|ts|tsx)$
+        additional_dependencies:
+          - babel-eslint
+          - eslint
+          - prettier
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.7.7
+    hooks:
+      - id: flake8
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.3
+    hooks:
+      - id: check-yaml
+      - id: detect-private-key

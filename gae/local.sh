@@ -25,12 +25,6 @@ function main() {
 
   load_config;
 
-  # dev_appserver runs in python2.
-  activate_virtualenv devappserver python2
-
-  # And needs grpcio explictly installed.
-  pip install grpcio
-
   # We want our dev, not prod environment (generally a no-op).
   set_dev_environment
 

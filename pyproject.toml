@@ -1,0 +1,15 @@
+[tool.black]
+skip-string-normalization = "true"
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.git
+    | \.tox
+    | \.venv
+    | environments
+    | generated
+    | virtualenv
+  )/
+)
+'''
