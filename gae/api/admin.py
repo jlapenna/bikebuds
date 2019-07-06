@@ -17,13 +17,17 @@ import flask
 from flask_restplus import Resource, Namespace
 
 from shared import auth_util
-from shared.datastore.user import User
+from shared import ds_util
+from shared import task_util
 
 api = Namespace('admin', 'Bikebuds Admin API')
 
 
-@api.route('/test')
-class TestResource(Resource):
+@api.route('/process_events')
+class ProcessEventsResource(Resource):
     def get(self):
-        claims = auth_util.verify_admin(flask.request)
-        return {}
+        auth_util.verify_admin(flask.request)
+
+        sub_events_query = ds_util.client.query(kind='SubscriptionEvent')
+        for sub_event in sub_events_query.fetch():
+            task_util.process_event(sub_event.key)
