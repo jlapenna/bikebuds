@@ -24,11 +24,10 @@ from shared.responses import Responses
 
 import main
 
-SERVICE_KEY = 'ahFkZXZ-YmlrZWJ1ZHMtdGVzdHIxCxIEVXNlciISamxhcGVubmFAZ21haWwuY29tDAsSB1NlcnZpY2UiCHdpdGhpbmdzDA'
+SERVICE_KEY = 'ahFkZXZ-YmlrZWJ1ZHMtdGVzdHIxCxIEVXNlciISamxhcGVubmFAZ21haWwuY29tDAsSB1NlcnZpY2UiCHdpdGhpbmdzDA'  # noqa: E501
 
 
 class MainTest(unittest.TestCase):
-
     def setUp(self):
         main.app.testing = True
         self.client = main.app.test_client()
@@ -40,34 +39,33 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
     def test_withings_event_valid(self, process_event_mock, ds_util_put_mock):
-        query_string = urlencode({
+        query_string = urlencode(
+            {
                 'sub_secret': config.withings_creds['sub_secret'],
                 'service_key': SERVICE_KEY,
-        })
+            }
+        )
         url = '/services/withings/events?%s' % (query_string,)
-        r = self.client.post(url, data={
-            'startdate': '1532017199',
-            'enddate': '1532017200',
-            'appli': '1'
-            })
+        r = self.client.post(
+            url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
+        )
         self.assertEqual(r.status_code, Responses.OK.code)
         self.assertTrue(ds_util_put_mock.called)
         self.assertTrue(process_event_mock.called)
 
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
-    def test_withings_event_bad_service_key(self, process_event_mock,
-            ds_util_put_mock):
-        query_string = urlencode({
+    def test_withings_event_bad_service_key(self, process_event_mock, ds_util_put_mock):
+        query_string = urlencode(
+            {
                 'sub_secret': config.withings_creds['sub_secret'],
                 'service_key': "b'12345'",
-        })
+            }
+        )
         url = '/services/withings/events?%s' % (query_string,)
-        r = self.client.post(url, data={
-            'startdate': '1532017199',
-            'enddate': '1532017200',
-            'appli': '1'
-            })
+        r = self.client.post(
+            url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
+        )
         self.assertEqual(r.status_code, Responses.OK.code)
         self.assertTrue(ds_util_put_mock.called)
         self.assertFalse(process_event_mock.called)
@@ -75,14 +73,13 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
-    def test_strava_event_valid(self, process_event_mock, ds_util_put_mock,
-            athlete_get_by_id_mock):
-        mock_athlete = Entity(
-                ds_util.client.key('Service', 'strava', 'Athlete'))
+    def test_strava_event_valid(
+        self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
+    ):
+        mock_athlete = Entity(ds_util.client.key('Service', 'strava', 'Athlete'))
         athlete_get_by_id_mock.return_value = mock_athlete
 
-        r = self.client.post('/services/strava/events',
-                json=_strava_create_event())
+        r = self.client.post('/services/strava/events', json=_strava_create_event())
         self.assertEqual(r.status_code, Responses.OK.code)
         self.assertTrue(ds_util_put_mock.called)
         self.assertTrue(process_event_mock.called)
@@ -90,16 +87,17 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id', return_value=None)
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
-    def test_strava_event_unknown_athlete(self, process_event_mock,
-            ds_util_put_mock, athlete_get_by_id_mock):
-        r = self.client.post('/services/strava/events',
-                json=_strava_create_event())
+    def test_strava_event_unknown_athlete(
+        self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
+    ):
+        r = self.client.post('/services/strava/events', json=_strava_create_event())
         self.assertEqual(r.status_code, Responses.OK.code)
 
         # We expect a failure entity to be written and process to not be
         # called.
         self.assertTrue(ds_util_put_mock.called)
         self.assertFalse(process_event_mock.called)
+
 
 def _strava_create_event():
     return {
@@ -109,5 +107,4 @@ def _strava_create_event():
         "object_type": "activity",
         "owner_id": 35056021,
         "subscription_id": 133263,
-        }
-
+    }

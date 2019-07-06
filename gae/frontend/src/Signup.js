@@ -57,11 +57,13 @@ class Signup extends React.Component {
       );
     }
 
-    return <SignupStepper
-      firebase={this.props.firebase}
-      firebaseUser={this.props.firebaseUser}
-      onFinished={this.handleStepperFinished}
-    />;
+    return (
+      <SignupStepper
+        firebase={this.props.firebase}
+        firebaseUser={this.props.firebaseUser}
+        onFinished={this.handleStepperFinished}
+      />
+    );
   }
 }
 export default withStyles(Signup.styles)(Signup);

@@ -23,12 +23,11 @@ React + Material-UI
 
 Based on the create-react-app npm app, extended with several other react libraries.
 
-   * https://github.com/facebook/create-react-app
-   * https://material-ui.com/
-   * https://github.com/firebase/firebaseui-web-react
-   * https://github.com/firebase/firebaseui-web/
-   * etc...
-
+- https://github.com/facebook/create-react-app
+- https://material-ui.com/
+- https://github.com/firebase/firebaseui-web-react
+- https://github.com/firebase/firebaseui-web/
+- etc...
 
 #### Backend
 
@@ -56,21 +55,20 @@ Most details below assume you're using a linux machine for development.
 
 bikebuds development requires:
 
-* Python 2.7
-  * https://www.python.org/downloads/ (See "Specific Releases").
-* PIP 2.x
-  * https://pypi.org/project/pip/
-* virtualenv
-  * https://virtualenv.pypa.io/en/latest/
-* gCloud CLI
-  * https://cloud.google.com/sdk/gcloud/
-* NPM
-  * https://www.npmjs.com/get-npm
-* Android Studio
-  * package:args/args.dart
-* Flutter SDK
-  * https://flutter.io/docs/get-started/install
-
+- Python 2.7
+  - https://www.python.org/downloads/ (See "Specific Releases").
+- PIP 2.x
+  - https://pypi.org/project/pip/
+- virtualenv
+  - https://virtualenv.pypa.io/en/latest/
+- gCloud CLI
+  - https://cloud.google.com/sdk/gcloud/
+- NPM
+  - https://www.npmjs.com/get-npm
+- Android Studio
+  - package:args/args.dart
+- Flutter SDK
+  - https://flutter.io/docs/get-started/install
 
 ### Setup
 
@@ -81,7 +79,7 @@ From the root directory:
 ./tools/setup/dev.sh  # Installs pre-reqs
 
 # Ensure the source tree links to the proper configs, so you can compile.
-./tools/setup/env.sh  # Sets up 
+./tools/setup/env.sh  # Sets up
 ```
 
 #### Git Hooks
@@ -90,7 +88,6 @@ From the root directory:
 
 1.  husky -- Run all affected tests in the frontend project.
 2.  flutter test -- Run all tests for the flutter app.
-
 
 ### Evironment Configs
 
@@ -121,6 +118,7 @@ dev
 ```
 
 #### dev/config.json
+
 ```
 {
   "project_id": "",
@@ -148,6 +146,7 @@ dev
 ```
 
 #### dev/service_keys/fitbit.json
+
 ```
 {
   "admin_account": "user@domain",
@@ -160,6 +159,7 @@ dev
 ```
 
 #### dev/service_keys/strava.json
+
 ```
 {
   "client_id": "XXX",
@@ -169,6 +169,7 @@ dev
 ```
 
 #### dev/service_keys/withings.json
+
 ```
 {
   "admin_account": "user@domain",
@@ -185,7 +186,7 @@ dev
 
 You should be able to visit localhost:8080 to see the frontend.
 
-Note: localhost:8081 also serves the frontend, but it will serve the latest 
+Note: localhost:8081 also serves the frontend, but it will serve the latest
 production npm build of the react app. You probably dont' want this.
 
 ### API Updates

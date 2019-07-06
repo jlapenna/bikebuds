@@ -16,10 +16,10 @@ runtime: python37
 service: api
 
 inbound_services:
-- warmup
+  - warmup
 
 handlers:
-- url: /.*
-  script: auto
-  secure: always
-  redirect_http_response_code: 301
+  - url: /.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301

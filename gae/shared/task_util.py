@@ -16,7 +16,6 @@
 
 import datetime
 import hashlib
-import os
 import logging
 
 import requests
@@ -25,24 +24,23 @@ from google.cloud import tasks_v2
 from google.cloud.datastore import helpers
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore_v1.proto import entity_pb2
-from google.oauth2.service_account import Credentials
 from google.protobuf.timestamp_pb2 import Timestamp
 
 from shared import ds_util
 from shared.config import config
 from shared.credentials import credentials
-from shared.datastore.service import Service
 
 
 # Create a client.
 _client = tasks_v2.CloudTasksClient(credentials=credentials)
 
-_default_parent = _client.queue_path(config.project_id, config.tasks_location,
-        'default')
-_events_parent = _client.queue_path(config.project_id, config.tasks_location,
-        'events')
-_notifications_parent = _client.queue_path(config.project_id,
-        config.tasks_location, 'notifications')
+_default_parent = _client.queue_path(
+    config.project_id, config.tasks_location, 'default'
+)
+_events_parent = _client.queue_path(config.project_id, config.tasks_location, 'events')
+_notifications_parent = _client.queue_path(
+    config.project_id, config.tasks_location, 'notifications'
+)
 
 
 def _serialize_entity(entity):
@@ -61,13 +59,19 @@ def _deserialize_entity(pb_bytes):
     return helpers.entity_from_protobuf(entity)
 
 
-def _queue_task(name=None, parent=None, entity=None, relative_uri=None,
-        service='default', delay_timedelta=None):
+def _queue_task(
+    name=None,
+    parent=None,
+    entity=None,
+    relative_uri=None,
+    service='default',
+    delay_timedelta=None,
+):
     task = {
         'app_engine_http_request': {
             'http_method': 'POST',
             'relative_uri': relative_uri,
-            'app_engine_routing': {'service': service}
+            'app_engine_routing': {'service': service},
         }
     }
 
@@ -82,7 +86,7 @@ def _queue_task(name=None, parent=None, entity=None, relative_uri=None,
         future_time = datetime.datetime.utcnow() + delay_timedelta
         timestamp = Timestamp()
         timestamp.FromDatetime(future_time)
-        task['schedule_time'] =  timestamp
+        task['schedule_time'] = timestamp
 
     converted_payload = None
     if entity is not None:
@@ -92,16 +96,18 @@ def _queue_task(name=None, parent=None, entity=None, relative_uri=None,
         # Add the payload to the request.
         task['app_engine_http_request']['body'] = converted_payload
 
-    logging.debug('Queueing task: %s',
-            task['app_engine_http_request']['relative_uri'])
+    logging.debug('Queueing task: %s', task['app_engine_http_request']['relative_uri'])
     if config.is_dev:
         # Override when running locally.
         if service == 'default':
             service == 'frontend'
         url = getattr(config, service + '_url') + relative_uri
         response = requests.post(url, data=converted_payload)
-        logging.info('Queued task: %s response: %s',
-                task['app_engine_http_request']['relative_uri'], response)
+        logging.info(
+            'Queued task: %s response: %s',
+            task['app_engine_http_request']['relative_uri'],
+            response,
+        )
         return response
 
     return _client.create_task(parent, task)
@@ -114,10 +120,9 @@ def _params_entity(**kwargs):
 
 
 def sync_club(club_id):
-    _queue_task(**{
-        'relative_uri': '/tasks/sync/club/%s' % club_id,
-        'service': 'backend',
-        })
+    _queue_task(
+        **{'relative_uri': '/tasks/sync/club/%s' % club_id, 'service': 'backend'}
+    )
 
 
 def sync_service(service):
@@ -130,23 +135,28 @@ def sync_services(services):
     # values yet, so the other server can't read them if they get processed
     # before the transaction completes.
     def do():
-        state = Entity(ds_util.client.key('SyncState',
-            datetime.datetime.now(datetime.timezone.utc).isoformat()))
+        state = Entity(
+            ds_util.client.key(
+                'SyncState', datetime.datetime.now(datetime.timezone.utc).isoformat()
+            )
+        )
         state['completed_tasks'] = 0
         ds_util.client.put(state)
 
         tasks = []
         for service in services:
-            user_key = service.key.parent
             service['sync_date'] = datetime.datetime.now(datetime.timezone.utc)
             service['syncing'] = True
 
-            tasks.append({
-                'entity': _params_entity(state_key=state.key,
-                    service_key=service.key),
-                'relative_uri': '/tasks/sync/service/' + service.key.name,
-                'service': 'backend',
-                })
+            tasks.append(
+                {
+                    'entity': _params_entity(
+                        state_key=state.key, service_key=service.key
+                    ),
+                    'relative_uri': '/tasks/sync/service/' + service.key.name,
+                    'service': 'backend',
+                }
+            )
             logging.debug('Added: %s', tasks[-1])
 
         # Write the number of tasks we're about to queue.
@@ -156,6 +166,7 @@ def sync_services(services):
         # Queue all the tasks.
         for task in tasks:
             _queue_task(**task)
+
     if not config.is_dev:
         with ds_util.client.transaction():
             do()
@@ -184,34 +195,41 @@ def maybe_finish_sync_services(service, state_key):
 
         if state['completed_tasks'] == state['total_tasks']:
             logging.debug('Completed all pending tasks for %s', state.key)
-            #_queue_task(**{
+            # _queue_task(**{
             #    'entity': _params_entity(state_key=state.key),
             #    'relative_uri': '/tasks/process',
             #    'service': 'backend',
             #    })
+
     if not config.is_dev:
         with ds_util.client.transaction():
             do()
     else:
         do()
 
+
 def process_event(event_key):
-    _queue_task(**{
-        'entity': _params_entity(event_key=event_key),
-        'relative_uri': '/tasks/process_event',
-        'service': 'backend',
-        'parent': _events_parent,
-        'delay_timedelta': datetime.timedelta(seconds=5),
-        })
+    _queue_task(
+        **{
+            'entity': _params_entity(event_key=event_key),
+            'relative_uri': '/tasks/process_event',
+            'service': 'backend',
+            'parent': _events_parent,
+            'delay_timedelta': datetime.timedelta(seconds=5),
+        }
+    )
 
 
 def process_weight_trend(service):
-    _queue_task(**{
-        'entity': _params_entity(service_key=service.key),
-        'relative_uri': '/tasks/process_weight_trend',
-        'service': 'backend',
-        'parent': _notifications_parent,
-        })
+    _queue_task(
+        **{
+            'entity': _params_entity(service_key=service.key),
+            'relative_uri': '/tasks/process_weight_trend',
+            'service': 'backend',
+            'parent': _notifications_parent,
+        }
+    )
+
 
 def task_body_for_test(**kwargs):
     params_entity = _params_entity(**kwargs)

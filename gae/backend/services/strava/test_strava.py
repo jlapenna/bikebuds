@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import mock
-import time 
 import unittest
 
 from google.cloud.datastore.entity import Entity
@@ -35,7 +34,6 @@ class MockQuery(object):
 
 
 class MainTest(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -45,8 +43,15 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.ds_util.client.delete_multi')
     @mock.patch('shared.ds_util.client.transaction')
     @mock.patch('shared.ds_util.client.query')
-    def test_events_worker(self, query_mock, transaction_mock,
-            delete_multi_mock, ClientWrapperMock, put_mock, delete_mock):
+    def test_events_worker(
+        self,
+        query_mock,
+        transaction_mock,
+        delete_multi_mock,
+        ClientWrapperMock,
+        put_mock,
+        delete_mock,
+    ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'XXX'}
 
@@ -64,8 +69,7 @@ class MainTest(unittest.TestCase):
 
         # Even though 2120517859 has multiple evens, one is a delete. So we
         # delete it and never fetch it.
-        activity_key = ds_util.client.key('Activity', 2120517859,
-                parent=service.key)
+        activity_key = ds_util.client.key('Activity', 2120517859, parent=service.key)
         delete_mock.assert_called_once_with(activity_key)
 
         # And even though 2120517766 has multiple events, we only fetch it
@@ -88,48 +92,63 @@ def _test_events():
     service_key = ds_util.client.key('Service', 'strava')
     return [
         SubscriptionEvent.to_entity(
-                {'aspect_type': 'create',
-                    'event_time': 1549151210,
-                    'object_id': 2120517766,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }, parent=service_key),
+            {
+                'aspect_type': 'create',
+                'event_time': 1549151210,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {},
+            },
+            parent=service_key,
+        ),
         SubscriptionEvent.to_entity(
-                {'aspect_type': 'update',
-                    'event_time': 1549151212,
-                    'object_id': 2120517766,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {'title': 'Updated Title'}
-                    }, parent=service_key),
+            {
+                'aspect_type': 'update',
+                'event_time': 1549151212,
+                'object_id': 2120517766,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Updated Title'},
+            },
+            parent=service_key,
+        ),
         SubscriptionEvent.to_entity(
-                {'aspect_type': 'create',
-                    'event_time': 1549151211,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }, parent=service_key),
+            {
+                'aspect_type': 'create',
+                'event_time': 1549151211,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {},
+            },
+            parent=service_key,
+        ),
         SubscriptionEvent.to_entity(
-                {'aspect_type': 'update',
-                    'event_time': 1549151213,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {'title': 'Second Updated Title'}
-                    }, parent=service_key),
+            {
+                'aspect_type': 'update',
+                'event_time': 1549151213,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {'title': 'Second Updated Title'},
+            },
+            parent=service_key,
+        ),
         SubscriptionEvent.to_entity(
-                {'aspect_type': 'delete',
-                    'event_time': 1549151214,
-                    'object_id': 2120517859,
-                    'object_type': 'activity',
-                    'owner_id': 35056021,
-                    'subscription_id': 133263,
-                    'updates': {}
-                    }, parent=service_key),
-        ]
+            {
+                'aspect_type': 'delete',
+                'event_time': 1549151214,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {},
+            },
+            parent=service_key,
+        ),
+    ]

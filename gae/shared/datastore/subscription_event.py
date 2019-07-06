@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
+
 
 class SubscriptionEvent(object):
     @classmethod

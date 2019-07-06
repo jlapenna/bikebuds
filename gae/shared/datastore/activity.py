@@ -12,15 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import hashlib
-import logging
-import pytz
-
-from google.cloud.datastore.entity import Entity
-from google.cloud.datastore.helpers import GeoPoint
-
-from shared import ds_util
 from shared.datastore.strava.converters import StravaConverters
+
 
 class Activity(object):
     """Its an activity!"""
@@ -28,4 +21,5 @@ class Activity(object):
     @classmethod
     def to_entity(cls, activity, parent=None, detailed_athlete=None):
         return StravaConverters.Activity.to_entity(
-                activity, parent=parent, detailed_athlete=detailed_athlete)
+            activity, parent=parent, detailed_athlete=detailed_athlete
+        )

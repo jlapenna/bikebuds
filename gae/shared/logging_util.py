@@ -29,7 +29,9 @@ LOG_RESPONSES = False
 def all_logging():
     # Standardize default logging.
     logging.basicConfig(
-            format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s] %(message)s')
+        format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s] %(message)s'  # noqa: E501
+    )
+
 
 def debug_logging():
     all_logging()
@@ -37,11 +39,12 @@ def debug_logging():
     # dev_appserver doesn't seem to properly set up logging.
     bb_logger.setLevel(logging.DEBUG)
 
-    # From: https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
-    #gunicorn_logger = logging.getLogger('gunicorn.error')
-    #gunicorn_logger.setLevel(logging.DEBUG)
-    #werkzeug_logger = logging.getLogger('werkzeug')
-    #werkzeug_logger.setLevel(logging.DEBUG)
+    # From:
+    #     https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
+    # gunicorn_logger = logging.getLogger('gunicorn.error')
+    # gunicorn_logger.setLevel(logging.DEBUG)
+    # werkzeug_logger = logging.getLogger('werkzeug')
+    # werkzeug_logger.setLevel(logging.DEBUG)
 
 
 # From: https://stackoverflow.com/a/39734260
@@ -54,32 +57,38 @@ def before():
     elif len(flask.request.values) == 0:
         query += '(None)'
     else:
-        query += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.values.items()])
+        query += ', '.join(['%s=%s' % (k, v) for k, v in flask.request.values.items()])
     if not LOG_HEADERS:
         headers += '(skipped)'
     else:
-        headers += ', '.join(['%s=%s' % (k, v) for k,v in flask.request.headers.items()])
-    bb_logger.debug('%s %s: %s; %s', flask.request.method, flask.request.path, query, headers)
+        headers += ', '.join(
+            ['%s=%s' % (k, v) for k, v in flask.request.headers.items()]
+        )
+    bb_logger.debug(
+        '%s %s: %s; %s', flask.request.method, flask.request.path, query, headers
+    )
 
 
 # Useful debugging interceptor to log all endpoint responses
 def after(response):
     if not LOG_RESPONSES:
         body = ''
-    elif flask.request.path in [
-            '/activities',
-            '/swagger.json',
-            '/series'
-            ]:
+    elif flask.request.path in ['/activities', '/swagger.json', '/series']:
         body = len(response.data.decode('utf-8'))
     else:
         body = response.data.decode('utf-8')
     try:
-        bb_logger.debug('%s %s: response: %s, %s', flask.request.method,
-                        flask.request.path, response.status, body)
-    except:
-        bb_logger.debug('%s %s: response: could not parse',
-                        flask.request.method, flask.request.path)
+        bb_logger.debug(
+            '%s %s: response: %s, %s',
+            flask.request.method,
+            flask.request.path,
+            response.status,
+            body,
+        )
+    except Exception:
+        bb_logger.debug(
+            '%s %s: response: could not parse', flask.request.method, flask.request.path
+        )
     return response
 
 

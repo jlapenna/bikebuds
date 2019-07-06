@@ -200,7 +200,9 @@ class ActivityDetail extends Component {
       this.props.activity.properties.distance,
       this.props.profile
     );
-    const duration = readableDuration(this.props.activity.properties.moving_time);
+    const duration = readableDuration(
+      this.props.activity.properties.moving_time
+    );
     const average_speed = readableSpeed(
       this.props.activity.properties.average_speed,
       this.props.profile

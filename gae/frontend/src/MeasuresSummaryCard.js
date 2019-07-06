@@ -68,7 +68,7 @@ class MeasuresSummaryCard extends Component {
   }
 
   handleMeasures = newMeasures => {
-    console.log('MeasuresSummaryCard: handleMeasures: ', newMeasures)
+    console.log('MeasuresSummaryCard: handleMeasures: ', newMeasures);
     if (newMeasures.length === 0) {
       this.setState({
         measures: []
@@ -132,11 +132,11 @@ class MeasuresSummaryCard extends Component {
                 </TableCell>
                 <TableCell>
                   {measure.weight &&
-                      Number.parseFloat(measure.weight).toFixed(2)}
+                    Number.parseFloat(measure.weight).toFixed(2)}
                 </TableCell>
                 <TableCell>
                   {measure.fat_ratio &&
-                   Number.parseFloat(measure.fat_ratio).toFixed(2)}
+                    Number.parseFloat(measure.fat_ratio).toFixed(2)}
                 </TableCell>
               </TableRow>
             ))}

@@ -20,7 +20,6 @@ import main
 
 
 class MainTest(unittest.TestCase):
-
     def setUp(self):
         main.app.testing = True
         self.client = main.app.test_client()

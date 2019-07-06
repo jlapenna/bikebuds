@@ -12,18 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
-import datetime
 import functools
 import logging
-import random
 import time
 
-from shared import ds_util
 from shared.config import config
-from shared.datastore.activity import Activity
-from shared.datastore.athlete import Athlete
-from shared.datastore.club import Club
 from shared.datastore.service import Service
 
 import stravalib
@@ -32,11 +25,13 @@ from stravalib import exc
 
 class ClientWrapper(object):
     """Auto-refresh (once) access tokens on any request."""
+
     def __init__(self, service):
         self._service = service
         self._client = stravalib.client.Client(
-                access_token=service['credentials']['access_token'],
-                rate_limiter=(lambda x=None: None))
+            access_token=service['credentials']['access_token'],
+            rate_limiter=(lambda x=None: None),
+        )
 
     def ensure_access(self):
         """Ensure that an access token is good for at least 60 more seconds."""
@@ -49,21 +44,24 @@ class ClientWrapper(object):
 
     def __getattr__(self, attr):
         func = getattr(self._client, attr)
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except exc.AccessUnauthorized as e: 
+            except exc.AccessUnauthorized as e:
                 logging.info("Token expired, refreshing.", e)
                 self._refresh_credentials()
                 return func(*args, **kwargs)
             return func(*args, **kwargs)
+
         return wrapper
 
     def _refresh_credentials(self):
         new_credentials = self._client.refresh_access_token(
             client_id=config.strava_creds['client_id'],
             client_secret=config.strava_creds['client_secret'],
-            refresh_token=self._service['credentials']['refresh_token'])
+            refresh_token=self._service['credentials']['refresh_token'],
+        )
         Service.update_credentials(self._service, dict(new_credentials))
         self._client.access_token = self._service['credentials']['access_token']

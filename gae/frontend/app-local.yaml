@@ -17,10 +17,10 @@ runtime: python37
 # When running in local mode, we defer to the npm runner to serve the frontend
 # UI. Only serve frontend endpoints, here.
 handlers:
-- url: /services/.*
-  script: auto
-  secure: always
-  redirect_http_response_code: 301
+  - url: /services/.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301
 
 env_variables:
   # Firebase

@@ -30,6 +30,7 @@ from shared.credentials import firebase_credentials
 
 firebase_admin.initialize_app(firebase_credentials)
 
+
 def fake_claims():
     if config.is_dev and config.fake_user:
         logging.warn('Using Fake User')
@@ -46,6 +47,7 @@ def claims_required(func):
         except auth.AuthError as e:
             return e.message, e.code
         return func(claims)
+
     return wrapper
 
 
@@ -68,8 +70,9 @@ def verify_claims(request, impersonate=None):
     claims = None
     if 'UseAltAuth' in request.headers:
         # This is a standard oauth token from my python client.
-        claims = google.oauth2.id_token.verify_oauth2_token(id_token,
-                google.auth.transport.requests.Request())
+        claims = google.oauth2.id_token.verify_oauth2_token(
+            id_token, google.auth.transport.requests.Request()
+        )
         # The claims have an email address that we have verified. Use that to
         # find the firebase user.
         if claims['iss'] == 'https://accounts.google.com':
@@ -78,10 +81,11 @@ def verify_claims(request, impersonate=None):
     else:
         # This is a firebase token.
         try:
-            claims = google.oauth2.id_token.verify_firebase_token(id_token,
-                    google.auth.transport.requests.Request())
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, google.auth.transport.requests.Request()
+            )
             firebase_user = auth.get_user(claims['sub'])
-        except ValueError as e:
+        except ValueError:
             flask.abort(403, 'id_token already expired.')
 
     if not claims:
@@ -101,7 +105,7 @@ def verify_claims_from_cookie(request):
     # etc.
     try:
         return auth.verify_session_cookie(session_cookie, check_revoked=True)
-    except ValueError as e:
+    except ValueError:
         flask.abort(401, 'Unable to validate cookie')
 
 

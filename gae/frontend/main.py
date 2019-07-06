@@ -62,7 +62,7 @@ def create_session(claims):
         expires = datetime.datetime.now(datetime.timezone.utc) + expires_in
         response.set_cookie('session', session_cookie, expires=expires, httponly=True)
         return response
-    except auth.AuthError as e:
+    except auth.AuthError:
         flask.abort(401, 'Failed to create a session cookie')
 
 

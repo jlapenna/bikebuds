@@ -12,14 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import logging
-import os
 
 import flask
-from flask_cors import cross_origin
 
-from google.cloud.datastore.entity import Entity
 
 import fitbit
 
@@ -32,23 +27,24 @@ from shared.datastore.user import User
 
 SERVICE_NAME = 'fitbit'
 
-module = flask.Blueprint(SERVICE_NAME, __name__,
-        template_folder='templates',
-        static_folder='static')
+module = flask.Blueprint(
+    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
+)
 
 
 @module.route('/services/fitbit/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
+    # Creates the service if it doesn't exist.
     user = User.get(claims)
-    service = Service.get(SERVICE_NAME, parent=user.key)
+    Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
 
 
 @module.route('/services/fitbit/redirect', methods=['GET'])
-#@cross_origin(origins=['https://www.fitbit.com'])
+# @cross_origin(origins=['https://www.fitbit.com'])
 @auth_util.claims_required
 def redirect(claims):
     user = User.get(claims)
@@ -58,12 +54,13 @@ def redirect(claims):
     dest = flask.request.args.get('dest', '')
 
     auth_client = fitbit.FitbitOauth2Client(
-            client_id=config.fitbit_creds['client_id'],
-            client_secret=config.fitbit_creds['client_secret'],
-            redirect_uri=get_redirect_uri(dest))
+        client_id=config.fitbit_creds['client_id'],
+        client_secret=config.fitbit_creds['client_secret'],
+        redirect_uri=get_redirect_uri(dest),
+    )
     creds = auth_client.fetch_access_token(code)
 
-    service_creds = Service.update_credentials(service, creds)
+    Service.update_credentials(service, creds)
 
     task_util.sync_service(service)
 
@@ -76,9 +73,10 @@ def get_redirect_uri(dest):
 
 def get_auth_url_response(dest):
     auth_client = fitbit.FitbitOauth2Client(
-            config.fitbit_creds['client_id'],
-            config.fitbit_creds['client_secret'],
-            redirect_uri=get_redirect_uri(dest))
+        config.fitbit_creds['client_id'],
+        config.fitbit_creds['client_secret'],
+        redirect_uri=get_redirect_uri(dest),
+    )
     url, state = auth_client.authorize_token_url()
     if flask.request.method == 'POST':
         return flask.jsonify({'authorize_url': url})

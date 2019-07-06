@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
-
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
@@ -33,10 +31,10 @@ class Preferences(object):
     @classmethod
     def default(cls):
         return {
-                'units': Preferences.Units.IMPERIAL,
-                'weight_service': Preferences.WeightService.WITHINGS,
-                'daily_weight_notif': False,
-                }
+            'units': Preferences.Units.IMPERIAL,
+            'weight_service': Preferences.WeightService.WITHINGS,
+            'daily_weight_notif': False,
+        }
 
 
 class User(object):

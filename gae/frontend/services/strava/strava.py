@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
-import os
 
 import flask
 from flask_cors import cross_origin
-
-from google.cloud.datastore.entity import Entity
 
 import stravalib
 
@@ -36,15 +32,14 @@ from shared.responses import Responses
 
 SERVICE_NAME = 'strava'
 
-module = flask.Blueprint(SERVICE_NAME, __name__,
-        template_folder='templates',
-        static_folder='static')
+module = flask.Blueprint(
+    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
+)
 
 
 @module.route('/services/strava/events', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
 def events_get():
-    mode = flask.request.args.get('hub.mode')
     challenge = flask.request.args.get('hub.challenge')
     verify_token = flask.request.args.get('hub.verify_token')
 
@@ -59,12 +54,12 @@ def events_get():
 def events_post():
     # I guess someone could DOS us with events, I guess they're not
     # authenticated... These are not supplied in sub events.
-    #verify_token = flask.request.args.get('hub.verify_token', None)
-    #if verify_token != config.strava_creds['verify_token']:
+    # verify_token = flask.request.args.get('hub.verify_token', None)
+    # if verify_token != config.strava_creds['verify_token']:
     #    raise auth.AuthError(401, 'Invalid verify_token')
 
     # Events come in the form:
-    #event_data = {'aspect_type': 'create',
+    # event_data = {'aspect_type': 'create',
     #        'event_time': 1549151210,
     #        'object_id': 2120237411,
     #        'object_type': 'activity',
@@ -78,7 +73,7 @@ def events_post():
     try:
         event_data = flask.request.get_json()
         owner_id = event_data['owner_id']
-    except:
+    except Exception:
         logging.exception('Failed while getting json.')
 
     service_key = None
@@ -87,20 +82,23 @@ def events_post():
         if athlete is not None:
             service_key = athlete.key.parent
         else:
-            logging.warning('Received event for %s but missing Athlete',
-                    owner_id)
+            logging.warning('Received event for %s but missing Athlete', owner_id)
 
     if event_data is None or service_key is None:
-        logging.error('Unable to process Strava event: '
-                'url: %s, event_data: %s, service_key: %s',
-                flask.request.url, event_data, service_key)
+        logging.error(
+            'Unable to process Strava event: '
+            'url: %s, event_data: %s, service_key: %s',
+            flask.request.url,
+            event_data,
+            service_key,
+        )
         sub_event_failure = SubscriptionEvent.to_entity(
-                {'url': flask.request.url, 'event_data': event_data,
-                    'failure': True}, parent=None)
+            {'url': flask.request.url, 'event_data': event_data, 'failure': True},
+            parent=None,
+        )
         ds_util.client.put(sub_event_failure)
     else:
-        event_entity = SubscriptionEvent.to_entity(event_data,
-                parent=service_key)
+        event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
         ds_util.client.put(event_entity)
         task_util.process_event(event_entity.key)
         logging.debug('Queued Strava event for: %s', service_key)
@@ -108,11 +106,12 @@ def events_post():
 
 
 @module.route('/services/strava/init', methods=['GET', 'POST'])
-#@cross_origin(origins=['https://www.strava.com'])
+# @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def init(claims):
+    # Creates the service if it doesn't exist.
     user = User.get(claims)
-    service = Service.get(SERVICE_NAME, parent=user.key)
+    Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
@@ -130,12 +129,13 @@ def redirect(claims):
 
     client = stravalib.client.Client()
     creds = client.exchange_code_for_token(
-            client_id=config.strava_creds['client_id'],
-            client_secret=config.strava_creds['client_secret'],
-            code=code)
+        client_id=config.strava_creds['client_id'],
+        client_secret=config.strava_creds['client_secret'],
+        code=code,
+    )
     creds_dict = dict(creds)
 
-    service_creds = Service.update_credentials(service, creds_dict)
+    Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
 
@@ -149,10 +149,11 @@ def get_redirect_uri(dest):
 def get_auth_url_response(dest):
     client = stravalib.client.Client()
     url = client.authorization_url(
-            client_id=config.strava_creds['client_id'],
-            redirect_uri=get_redirect_uri(dest),
-            approval_prompt='force',
-            scope=['activity:read_all', 'profile:read_all'])
+        client_id=config.strava_creds['client_id'],
+        redirect_uri=get_redirect_uri(dest),
+        approval_prompt='force',
+        scope=['activity:read_all', 'profile:read_all'],
+    )
 
     if flask.request.method == 'POST':
         return flask.jsonify({'redirect_url': url})

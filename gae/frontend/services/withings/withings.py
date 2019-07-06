@@ -13,18 +13,14 @@
 # limitations under the License.
 
 import binascii
-import json
 import logging
-import os
 
 import flask
 from flask_cors import cross_origin
 
-from google.protobuf.message import DecodeError
-from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
 
-import nokia 
+import nokia
 
 from shared import auth_util
 from shared import ds_util
@@ -38,9 +34,9 @@ from shared.responses import Responses
 
 SERVICE_NAME = 'withings'
 
-module = flask.Blueprint(SERVICE_NAME, __name__,
-        template_folder='templates',
-        static_folder='static')
+module = flask.Blueprint(
+    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
+)
 
 
 @module.route('/services/withings/events', methods=['HEAD'])
@@ -48,8 +44,10 @@ module = flask.Blueprint(SERVICE_NAME, __name__,
 def events_head():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
-        logging.warn('Invalid sub_secret: Provided %s, expected %s'
-                % (sub_secret, config.withings_creds['sub_secret']))
+        logging.warn(
+            'Invalid sub_secret: Provided %s, expected %s'
+            % (sub_secret, config.withings_creds['sub_secret'])
+        )
     return Responses.OK
 
 
@@ -58,16 +56,19 @@ def events_head():
 def events_post():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
-        logging.warn('Invalid sub_secret: Provided %s, expected %s'
-                % (sub_secret, config.withings_creds['sub_secret']))
+        logging.warn(
+            'Invalid sub_secret: Provided %s, expected %s'
+            % (sub_secret, config.withings_creds['sub_secret'])
+        )
 
     # Events come POSTED in the form:
-    #logging.info('Received Event: Headers:\n%s\nBody:\n%s',
+    # logging.info('Received Event: Headers:\n%s\nBody:\n%s',
     #        flask.request.headers, flask.request.get_data())
     # Headers:
     #   X-Google-Apps-Metadata: domain=gmail.com,host=*.bikebuds.cc
     #   X-Appengine-Citylatlong: 0.000000,0.000000
-    #   X-Cloud-Trace-Context: 501952e8e74efe98b012acc24be99669/717376932886432083;o=1
+    #   X-Cloud-Trace-Context: \
+    #       501952e8e74efe98b012acc24be99669/717376932886432083;o=1
     #   X-Appengine-Default-Namespace: gmail.com
     #   Content-Length: 63
     #   X-Appengine-Region: ?
@@ -78,7 +79,7 @@ def events_post():
     #   Content-Type: application/x-www-form-urlencoded
     # Body:
     #   userid=17012450&startdate=1532017199&enddate=1532017200&appli=1
-    #event_data = {
+    # event_data = {
     #        'userid': 17012450,
     #        'startdate': 1532017199,
     #        'enddate': 1532017200,
@@ -88,37 +89,44 @@ def events_post():
     event_data = None
     try:
         event_data = flask.request.form.to_dict()
-    except:
-        logging.exception('Failed processing Withings event_data: %s',
-                flask.request.form)
+    except Exception:
+        logging.exception(
+            'Failed processing Withings event_data: %s', flask.request.form
+        )
 
     service_key = None
     try:
         if 'service_key' in flask.request.args:
-            service_key = Key.from_legacy_urlsafe(
-                    flask.request.args.get('service_key'))
+            service_key = Key.from_legacy_urlsafe(flask.request.args.get('service_key'))
         else:
             logging.warning('Key missing in callbackurl %s', flask.request.url)
-    except binascii.Error as e:
+    except binascii.Error:
         # In older code we accidentally registered with poorly constructed
         # callbackurls, ingore these.
-        logging.debug('Received invalid event from bad callbackurl %s',
-                flask.request.url)
-    except:
-        logging.exception('Failed processing Withings service_key: %s',
-                flask.request.args.get('service_key'))
+        logging.debug(
+            'Received invalid event from bad callbackurl %s', flask.request.url
+        )
+    except Exception:
+        logging.exception(
+            'Failed processing Withings service_key: %s',
+            flask.request.args.get('service_key'),
+        )
 
     if event_data is None or service_key is None:
-        logging.error('Unable to process Withings event: '
-                'url: %s, event_data: %s, service_key: %s',
-                flask.request.url, event_data, service_key)
+        logging.error(
+            'Unable to process Withings event: '
+            'url: %s, event_data: %s, service_key: %s',
+            flask.request.url,
+            event_data,
+            service_key,
+        )
         sub_event_failure = SubscriptionEvent.to_entity(
-                {'url': flask.request.url, 'event_data': event_data,
-                    'failure': True}, parent=None)
+            {'url': flask.request.url, 'event_data': event_data, 'failure': True},
+            parent=None,
+        )
         ds_util.client.put(sub_event_failure)
     else:
-        event_entity = SubscriptionEvent.to_entity(event_data,
-                parent=service_key)
+        event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
         ds_util.client.put(event_entity)
         task_util.process_event(event_entity.key)
         logging.debug('Queued Withings event for: %s', service_key)
@@ -128,8 +136,9 @@ def events_post():
 @module.route('/services/withings/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
+    # Creates the service if it doesn't exist.
     user = User.get(claims)
-    service = Service.get(SERVICE_NAME, parent=user.key)
+    Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
     return get_auth_url_response(dest)
@@ -145,20 +154,23 @@ def redirect(claims):
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
 
-    auth = nokia.NokiaAuth(config.withings_creds['client_id'],
-            config.withings_creds['client_secret'],
-            callback_uri=get_callback_uri(dest))
+    auth = nokia.NokiaAuth(
+        config.withings_creds['client_id'],
+        config.withings_creds['client_secret'],
+        callback_uri=get_callback_uri(dest),
+    )
     creds = auth.get_credentials(code)
     creds_dict = dict(
-            access_token=creds.access_token,
-            token_expiry=creds.token_expiry,
-            token_type=creds.token_type,
-            refresh_token=creds.refresh_token,
-            user_id=creds.user_id,
-            client_id=creds.client_id,
-            consumer_secret=creds.consumer_secret)
+        access_token=creds.access_token,
+        token_expiry=creds.token_expiry,
+        token_type=creds.token_type,
+        refresh_token=creds.refresh_token,
+        user_id=creds.user_id,
+        client_id=creds.client_id,
+        consumer_secret=creds.consumer_secret,
+    )
 
-    service_creds = Service.update_credentials(service, creds_dict)
+    Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
 
@@ -170,9 +182,11 @@ def get_callback_uri(dest):
 
 
 def get_auth_url_response(dest):
-    auth = nokia.NokiaAuth(config.withings_creds['client_id'],
-            config.withings_creds['client_secret'],
-            callback_uri=get_callback_uri(dest))
+    auth = nokia.NokiaAuth(
+        config.withings_creds['client_id'],
+        config.withings_creds['client_secret'],
+        callback_uri=get_callback_uri(dest),
+    )
     if flask.request.method == 'POST':
         return flask.jsonify({'authorize_url': auth.get_authorize_url()})
     else:

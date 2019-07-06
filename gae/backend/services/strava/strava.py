@@ -13,27 +13,16 @@
 # limitations under the License.
 
 import collections
-import datetime
-import functools
 import logging
-import random
-import time
-
-import stravalib
-from stravalib import exc
 
 from shared import ds_util
-from shared.config import config
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
-from shared.datastore.club import Club
-from shared.datastore.service import Service
 
 from services.strava.client import ClientWrapper
 
 
 class Worker(object):
-
     def __init__(self, service):
         self.service = service
         self.client = ClientWrapper(service)
@@ -57,75 +46,14 @@ class Worker(object):
         # Track the clubs that these activities were a part of, by annotating
         # them with the athlete's clubs.
         for activity in self.client.get_activities():
-            activity_entity = Activity.to_entity(
-                    activity, parent=self.service.key)
+            activity_entity = Activity.to_entity(activity, parent=self.service.key)
             activity_entity['clubs'] = athlete_clubs
             ds_util.client.put(activity_entity)
 
     def _sync_activity(self, activity_id):
         """Gets additional info: description, calories and embed_token."""
         activity = self.client.get_activity(activity_id)
-        return ds_util.client.put(
-                Activity.to_entity(activity, parent=self.service.key))
-
-
-class ClubWorker(object):
-
-    def __init__(self, club_id):
-        self.club_id = club_id
-        self.service = None
-        self.client = None
-
-    def _init_client(self):
-        query = ds_util.client.query(kind='Athlete')
-        query.add_filter('clubs.id', '=', int(self.club_id))
-        query.add_filter('clubs.admin', '=', True)
-        query.keys_only()
-        admin_service_keys = [athlete.key.parent for athlete in query.fetch()]
-        if len(admin_service_keys) == 0:
-            logging.warn(
-                    'ClubWorker: Cannot sync %s without an admin',
-                    self.club_id)
-            return False
-
-        # TODO: We might some day want to randomly select an admin by which to
-        # fetch club details, rather than the first.
-        self.service = ds_util.client.get(admin_service_keys[0])
-        if self.service is None:
-            logging.error(
-                    'ClubWorker: Cannot sync %s without a service',
-                    self.club_id)
-            return False
-
-        logging.debug(
-                'ClubWorker: Using %s for %s', self.service.key, self.club_id)
-        self.client = ClientWrapper(self.service)
-        return True
-
-    def sync(self):
-        if not self._init_client():
-            logging.error(
-                    'ClubWorker: Cannot sync %s, no client.', self.club_id)
-            return
-
-        # Create a club id'ed by the club_id but without a parent.
-        # Note, per the docs, a parentless entity won't be returned by a query
-        # with ancestor=None
-        # TODO: We shouldn't put member-specific  fields in this entity.
-        club_result = self.client.get_club(self.club_id)
-        club_entity = ds_util.put(Club.to_entity(club_result))
-
-        # These athlete responses don't have ids, so we can't really use this
-        # result. [<Athlete id=None firstname='Matt' lastname='C.'>, ...]
-        #members_result = [m for m in self.client.get_club_members(self.club_id)]
-        #logging.debug(members_result)
-
-        # By way of fetching athletes, we've also found their memberships.
-        # Fetch those athletes.
-        query = ds_util.client.query(kind='Athlete')
-        query.add_filter('clubs.id', '=', int(self.club_id))
-        query.keys_only()
-        athlete_keys = [athlete.key for athlete in query.fetch()]
+        return ds_util.client.put(Activity.to_entity(activity, parent=self.service.key))
 
 
 class EventsWorker(object):
@@ -136,8 +64,9 @@ class EventsWorker(object):
     def sync(self):
         self.client.ensure_access()
 
-        query = ds_util.client.query(kind='SubscriptionEvent',
-                ancestor=self.service.key)
+        query = ds_util.client.query(
+            kind='SubscriptionEvent', ancestor=self.service.key
+        )
         events = query.fetch()
         events = sorted(events, key=lambda x: x['event_time'])
         batches = collections.defaultdict(list)
@@ -145,14 +74,14 @@ class EventsWorker(object):
             batches[(event['object_id'], event['object_type'])].append(event)
         for (object_id, object_type), batch in batches.items():
             self._process_event_batch(
-                    self.client, self.service, object_id, object_type, batch)
+                self.client, self.service, object_id, object_type, batch
+            )
 
-
-    def _process_event_batch(self, client, service, object_id, object_type,
-            batch):
+    def _process_event_batch(self, client, service, object_id, object_type, batch):
         with ds_util.client.transaction():
-            logging.debug('process_event_batch:  %s, %s, %s',
-                    service.key, object_id, len(batch))
+            logging.debug(
+                'process_event_batch:  %s, %s, %s', service.key, object_id, len(batch)
+            )
 
             # We're no longer going to need these.
             ds_util.client.delete_multi((event.key for event in batch))
@@ -164,14 +93,16 @@ class EventsWorker(object):
             operations = [event['aspect_type'] for event in batch]
 
             if 'delete' in operations:
-                activity_key = ds_util.client.key('Activity', object_id, parent=service.key)
+                activity_key = ds_util.client.key(
+                    'Activity', object_id, parent=service.key
+                )
                 ds_util.client.delete(activity_key)
                 logging.info('Deleted: Entity: %s', activity_key)
             else:
                 activity = client.get_activity(object_id)
                 activity_entity = Activity.to_entity(activity, parent=service.key)
-                # get_activity returns a MetaAthelte, which only has an athlete id,
-                # replace from the stored athlete entity.
+                # get_activity returns a MetaAthelte, which only has an
+                # athlete_id, replace from the stored athlete entity.
                 athlete_entity = Athlete.get_private(service.key)
                 activity_entity['athlete'] = athlete_entity
                 ds_util.client.put(activity_entity)

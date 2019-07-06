@@ -1,8 +1,5 @@
 {
-  "extends": [
-    "react-app",
-    "plugin:prettier/recommended"
-  ],
+  "extends": ["react-app", "plugin:prettier/recommended"],
   "settings": {
     "react": {
       "version": "16.8.6"

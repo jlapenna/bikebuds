@@ -19,24 +19,24 @@ runtime: python37
 # it.
 #
 handlers:
-- url: /services/.*
-  script: auto
-  secure: always
-  redirect_http_response_code: 301
-- url: /(.*\.(json|js|ico))$
-  static_files: build/\1
-  upload: build/.*\.(json|js|ico)$
-  secure: always
-  redirect_http_response_code: 301
-- url: /static
-  static_dir: build/static/
-  secure: always
-  redirect_http_response_code: 301
-- url: /.*
-  static_files: build/index.html
-  upload: build/index.html
-  secure: always
-  redirect_http_response_code: 301
+  - url: /services/.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301
+  - url: /(.*\.(json|js|ico))$
+    static_files: build/\1
+    upload: build/.*\.(json|js|ico)$
+    secure: always
+    redirect_http_response_code: 301
+  - url: /static
+    static_dir: build/static/
+    secure: always
+    redirect_http_response_code: 301
+  - url: /.*
+    static_files: build/index.html
+    upload: build/index.html
+    secure: always
+    redirect_http_response_code: 301
 
 env_variables:
   # Firebase

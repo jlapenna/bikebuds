@@ -1,4 +1,3 @@
-
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
@@ -26,11 +25,11 @@ if os.getenv('GAE_ENV', '').startswith('standard'):
 else:
     # Local
     credentials = Credentials.from_service_account_file(
-            os.path.join(config.base_path,
-                'service_keys/python-client-testing.json'))
+        os.path.join(config.base_path, 'service_keys/python-client-testing.json')
+    )
     if getattr(config, 'datastore_emulator_host', None):
         os.environ['DATASTORE_EMULATOR_HOST'] = config.datastore_emulator_host
 
 firebase_credentials = Certificate(
-            os.path.join(config.base_path,
-                'service_keys/firebase-adminsdk.json'))
+    os.path.join(config.base_path, 'service_keys/firebase-adminsdk.json')
+)

@@ -165,7 +165,9 @@ class _ClubWidget extends Component {
                   alignItems="center"
                 >
                   <Grid item>
-                    <Typography variant="h5">{this.props.club.properties.name}</Typography>
+                    <Typography variant="h5">
+                      {this.props.club.properties.name}
+                    </Typography>
                   </Grid>
                   <Grid item>
                     <Grid
@@ -175,22 +177,24 @@ class _ClubWidget extends Component {
                       justify="space-evenly"
                       alignItems="center"
                     >
-                      {this.props.club.properties.members.map((member, index) => {
-                        var url = '';
-                        return (
-                          <Grid item key={index}>
-                            <Button alt={member.firstname} href={url}>
-                              <Avatar
-                                alt={member.firstname}
-                                src={member.profile_medium}
-                              />
-                              <Typography>
-                                {member.firstname} {member.lastname}
-                              </Typography>
-                            </Button>
-                          </Grid>
-                        );
-                      })}
+                      {this.props.club.properties.members.map(
+                        (member, index) => {
+                          var url = '';
+                          return (
+                            <Grid item key={index}>
+                              <Button alt={member.firstname} href={url}>
+                                <Avatar
+                                  alt={member.firstname}
+                                  src={member.profile_medium}
+                                />
+                                <Typography>
+                                  {member.firstname} {member.lastname}
+                                </Typography>
+                              </Button>
+                            </Grid>
+                          );
+                        }
+                      )}
                     </Grid>
                   </Grid>
                 </Grid>

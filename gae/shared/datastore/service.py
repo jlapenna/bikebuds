@@ -18,6 +18,7 @@ from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 
+
 class Service(object):
     """Its a service!"""
 
@@ -38,7 +39,7 @@ class Service(object):
         if new_credentials is None or not new_credentials:
             logging.info('Clearing credentials: %s', service.key)
             if 'credentials' in service:
-                del(service['credentials'])
+                del service['credentials']
             ds_util.client.put(service)
             return None
 
@@ -59,6 +60,8 @@ class Service(object):
 
     @classmethod
     def has_credentials(cls, service, required_key=None):
-        return (service is not None and service.get('credentials')
-                and (required_key is None
-                    or service['credentials'].get(required_key)))
+        return (
+            service is not None
+            and service.get('credentials')
+            and (required_key is None or service['credentials'].get(required_key))
+        )

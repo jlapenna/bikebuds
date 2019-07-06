@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 from shared.datastore.strava.converters import StravaConverters
+
 
 class Club(object):
     """Its a club!"""
@@ -26,5 +26,4 @@ class Club(object):
 
     @classmethod
     def get(cls, club_id, parent=None):
-        return ds_util.client.get(
-                ds_util.client.key('Club', club_id, parent=parent))
+        return ds_util.client.get(ds_util.client.key('Club', club_id, parent=parent))

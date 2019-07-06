@@ -67,8 +67,8 @@ class StandaloneSignup extends Component {
           <main className={this.props.classes.main}>
             <div className={this.props.classes.toolbar} />
             <Signup
-                firebase={this.props.firebase}
-                firebaseUser={this.props.firebaseUser}
+              firebase={this.props.firebase}
+              firebaseUser={this.props.firebaseUser}
             />
           </main>
         </div>

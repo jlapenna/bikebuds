@@ -36,7 +36,7 @@ class DrawerContent extends React.Component {
     },
     active: {
       backgroundColor: theme.palette.action.selected
-    },
+    }
   });
 
   static propTypes = {
@@ -52,10 +52,14 @@ class DrawerContent extends React.Component {
       return null;
     }
 
-    const DrawerItemLink = React.forwardRef((props, ref) => <NavLink innerRef={ref} {...props}
-            exact
-            activeClassName={this.props.classes.active}
-      />);
+    const DrawerItemLink = React.forwardRef((props, ref) => (
+      <NavLink
+        innerRef={ref}
+        {...props}
+        exact
+        activeClassName={this.props.classes.active}
+      />
+    ));
 
     return (
       <React.Fragment>

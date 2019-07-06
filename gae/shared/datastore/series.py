@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import datetime
-import logging
 
 from google.cloud.datastore.entity import Entity
 
@@ -29,8 +28,7 @@ class Series(object):
 
     @classmethod
     def get(cls, name, parent=None):
-        return ds_util.client.get(
-                ds_util.client.key('Series', name, parent=parent))
+        return ds_util.client.get(ds_util.client.key('Series', name, parent=parent))
 
     @classmethod
     def to_entity(cls, measures, name, parent=None):
@@ -63,21 +61,21 @@ class Series(object):
     def _measure_from_fitbit_time_series(cls, measure):
         date = datetime.datetime.strptime(measure['dateTime'], '%Y-%m-%d')
         entity = Entity(ds_util.client.key('Measure', date.strftime('%s')))
-        entity.update(dict(
-                date=date,
-                weight=float(measure['value']),
-                ))
+        entity.update(dict(date=date, weight=float(measure['value'])))
         return entity
 
     @classmethod
     def _measure_from_fitbit_log(cls, measure):
         date = datetime.datetime.strptime(
-                measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S')
+            measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S'
+        )
         entity = Entity(ds_util.client.key('Measure', date.strftime('%s')))
-        entity.update(dict(
+        entity.update(
+            dict(
                 id=measure['logId'],
                 date=date,
                 weight=measure['weight'],
                 fat_ratio=measure['fat'],
-                ))
+            )
+        )
         return entity

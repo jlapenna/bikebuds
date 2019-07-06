@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
-from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 from shared.datastore.strava.converters import StravaConverters
@@ -36,8 +33,10 @@ class Athlete(object):
 
     @classmethod
     def get_private(cls, service_key):
-        result = [r for r in
-                ds_util.client.query(kind='Athlete', ancestor=service_key).fetch()]
+        result = [
+            r
+            for r in ds_util.client.query(kind='Athlete', ancestor=service_key).fetch()
+        ]
         if len(result) == 0:
             return None
         elif len(result) > 1:

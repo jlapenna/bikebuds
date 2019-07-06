@@ -37,8 +37,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     creds_path = os.path.join(
-            os.environ.get('BIKEBUDS_ENV', 'environments/env'),
-            'service_keys/firebase-adminsdk.json')
+        os.environ.get('BIKEBUDS_ENV', 'environments/env'),
+        'service_keys/firebase-adminsdk.json',
+    )
     creds = Certificate(creds_path)
     firebase_admin.initialize_app(creds)
 

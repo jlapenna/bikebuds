@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-
 from google.cloud.datastore.entity import Entity
 
 import nokia
@@ -29,11 +27,13 @@ class _MeasureConverter(object):
             value = measure.get_measure(type_int)
             if value is not None:
                 attributes[key] = value
-        entity = Entity(ds_util.client.key(
-            'Measure', measure.date.timestamp, parent=parent))
+        entity = Entity(
+            ds_util.client.key('Measure', measure.date.timestamp, parent=parent)
+        )
         entity.update(attributes)
         entity['date'] = measure.date.datetime.replace(tzinfo=None)
         return entity
+
 
 class WithingsConverters(object):
     Measure = _MeasureConverter

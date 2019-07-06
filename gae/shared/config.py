@@ -24,14 +24,18 @@ class _Config(object):
             setattr(self, key, value)
 
         self.origins = _devOrProd(
-                '*', [self.frontend_url, self.api_url, self.backend_url])
+            '*', [self.frontend_url, self.api_url, self.backend_url]
+        )
 
-        self.fitbit_creds = json.load(open(os.path.join(base_path,
-            'service_keys/fitbit.json')))
-        self.strava_creds = json.load(open(os.path.join(base_path,
-            'service_keys/strava.json')))
-        self.withings_creds = json.load(open(os.path.join(base_path,
-            'service_keys/withings.json')))
+        self.fitbit_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/fitbit.json'))
+        )
+        self.strava_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/strava.json'))
+        )
+        self.withings_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/withings.json'))
+        )
 
 
 def _devOrProd(dev, prod):

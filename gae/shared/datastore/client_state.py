@@ -14,8 +14,6 @@
 
 from google.cloud.datastore.entity import Entity
 
-import nokia
-
 from shared import ds_util
 
 

@@ -19,7 +19,6 @@ from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 from shared import task_util
-from shared.datastore.subscription_event import SubscriptionEvent
 from shared.responses import Responses
 
 import main
@@ -31,7 +30,6 @@ class MockWorker(object):
 
 
 class MainTest(unittest.TestCase):
-
     def setUp(self):
         main.app.testing = True
         self.client = main.app.test_client()
@@ -40,51 +38,57 @@ class MainTest(unittest.TestCase):
         r = self.client.post('/unittest')
         self.assertEqual(r.status_code, Responses.OK.code)
 
-    @mock.patch('main.strava.EventsWorker',
-            return_value=MockWorker())
+    @mock.patch('main.strava.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
-    def test_process_event_task_valid_strava(self, ds_util_client_get_mock,
-            strava_worker_mock):
+    def test_process_event_task_valid_strava(
+        self, ds_util_client_get_mock, strava_worker_mock
+    ):
 
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'fake': 'XXX'}
 
-        event_entity = Entity(ds_util.client.key('SubscriptionEvent',
-            parent=service.key))
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', parent=service.key)
+        )
 
         # We pretend a service exists in the event we create.
         ds_util_client_get_mock.return_value = service
 
-        r = self.client.post('/tasks/process_event',
-                data=task_util.task_body_for_test(event_key=event_entity.key))
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event_key=event_entity.key),
+        )
         self.assertEqual(r.status_code, Responses.OK.code)
         self.assertTrue(strava_worker_mock.called)
 
-    @mock.patch('main.withings.EventsWorker',
-            return_value=MockWorker())
+    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
-    def test_process_event_task_valid_withings(self, ds_util_client_get_mock,
-            withings_worker_mock):
+    def test_process_event_task_valid_withings(
+        self, ds_util_client_get_mock, withings_worker_mock
+    ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
         service['credentials'] = {'fake': 'XXX'}
 
-        event_entity = Entity(ds_util.client.key('SubscriptionEvent',
-            parent=service.key))
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', parent=service.key)
+        )
 
         # We pretend a service exists in the event we create.
         ds_util_client_get_mock.return_value = service
 
-        r = self.client.post('/tasks/process_event',
-                data=task_util.task_body_for_test(event_key=event_entity.key))
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event_key=event_entity.key),
+        )
         self.assertEqual(r.status_code, Responses.OK.code)
         self.assertTrue(withings_worker_mock.called)
 
-    @mock.patch('main.withings.EventsWorker',
-            return_value=MockWorker())
+    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
-    def test_process_event_task_no_service(self, ds_util_client_get_mock,
-            withings_worker_mock):
+    def test_process_event_task_no_service(
+        self, ds_util_client_get_mock, withings_worker_mock
+    ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
         service['credentials'] = {'fake': 'XXX'}
@@ -94,26 +98,31 @@ class MainTest(unittest.TestCase):
         # No service!
         ds_util_client_get_mock.return_value = None
 
-        r = self.client.post('/tasks/process_event',
-                data=task_util.task_body_for_test(event_key=event_entity.key))
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event_key=event_entity.key),
+        )
         self.assertEqual(r.status_code, Responses.OK_NO_SERVICE.code)
         self.assertFalse(withings_worker_mock.called)
 
-    @mock.patch('main.withings.EventsWorker',
-            return_value=MockWorker())
+    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
-    def test_process_event_task_no_credentials(self, ds_util_client_get_mock,
-            withings_worker_mock):
+    def test_process_event_task_no_credentials(
+        self, ds_util_client_get_mock, withings_worker_mock
+    ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
 
-        event_entity = Entity(ds_util.client.key('SubscriptionEvent',
-            parent=service.key))
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', parent=service.key)
+        )
 
         # We pretend a service exists in the event we create.
         ds_util_client_get_mock.return_value = service
 
-        r = self.client.post('/tasks/process_event',
-                data=task_util.task_body_for_test(event_key=event_entity.key))
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event_key=event_entity.key),
+        )
         self.assertEqual(r.status_code, Responses.OK_NO_CREDENTIALS.code)
         self.assertFalse(withings_worker_mock.called)

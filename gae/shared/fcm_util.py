@@ -15,8 +15,6 @@
 import datetime
 import logging
 
-from google.cloud.datastore.entity import Entity
-
 from firebase_admin import messaging
 
 from shared import ds_util
@@ -30,8 +28,9 @@ def active_clients(user_key):
 
 
 def best_clients(user_key):
-    query = ds_util.client.query(kind='ClientState', ancestor=user_key,
-            order=['-modified'])
+    query = ds_util.client.query(
+        kind='ClientState', ancestor=user_key, order=['-modified']
+    )
     query.add_filter('active', '=', True)
     return [c for c in query.fetch(1)]
 
@@ -46,17 +45,17 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
             a ClientMessage will be passed as a 'client' kwarg.
     """
     with ds_util.client.transaction():
-        fcm_send_event = FcmSendEvent.to_entity({
-            'date': datetime.datetime.utcnow(),
-            'messages': [],
-            }, parent=user_key)
+        fcm_send_event = FcmSendEvent.to_entity(
+            {'date': datetime.datetime.utcnow(), 'messages': []}, parent=user_key
+        )
         logging.debug('Sending notification to %s clients', len(clients))
         for client_state in clients:
             message = notif_fn(*args, client=client_state, **kwargs)
             try:
                 response = messaging.send(message)
-                logging.debug('fcm_util.send: Success: %s, %s, %s', user_key, message,
-                        response)
+                logging.debug(
+                    'fcm_util.send: Success: %s, %s, %s', user_key, message, response
+                )
                 _add_delivery(fcm_send_event, client_state, message, response)
             except Exception as e:
                 logging.exception('fcm_util.send: Failure: %s', user_key)
@@ -67,18 +66,24 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
 def _add_delivery(fcm_send_event, client_store, message, response):
     success = not isinstance(response, Exception)
     if message.data is not None:
-        e = FcmMessage.to_entity({
-            'response': str(response),
-            'client_store': client_store.key,
-            'success': success})
+        e = FcmMessage.to_entity(
+            {
+                'response': str(response),
+                'client_store': client_store.key,
+                'success': success,
+            }
+        )
         fcm_send_event['messages'].append(e)
     elif message.notification is not None:
-        e = FcmMessage.to_entity({
-            'response': str(response),
-            'client_store': client_store.key,
-            'success': success,
-            'title': message.notification.title,
-            'body': message.notification.body})
+        e = FcmMessage.to_entity(
+            {
+                'response': str(response),
+                'client_store': client_store.key,
+                'success': success,
+                'title': message.notification.title,
+                'body': message.notification.body,
+            }
+        )
         fcm_send_event['messages'].append(e)
     else:
         logging.error('Cannot add delivery of unknown message type')

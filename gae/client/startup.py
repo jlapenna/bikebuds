@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 
-import collections
+import logging  # noqa: F401
+import os
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.cloud.datastore import Client
-from google.cloud.datastore.key import Key
-from google.oauth2.service_account import Credentials
+from google_auth_oauthlib import flow
+from google.cloud.datastore import Client  # noqa: F401
+from google.cloud.datastore.key import Key  # noqa: F401
 
-from pyswagger import App, Security
-from pyswagger.contrib.client.requests import Client as SwagClient
-from pyswagger.utils import jp_compose
-
-from shared.config import config
-from shared import ds_util
+from shared.config import config  # noqa: F401
+from shared import ds_util  # noqa: F401
+from shared import task_util  # noqa: F401
 
 # OAuth to Google - Gets a google ID token, access token & refresh token.
-oauth_flow = InstalledAppFlow.from_client_secrets_file(
-        os.path.join(config.base_path, 
-        'service_keys/python-client-testing-oauth.json',
-        scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/userinfo.profile']))
+oauth_flow = flow.InstalledAppFlow.from_client_secrets_file(
+    os.path.join(config.base_path, 'service_keys/python-client-testing-oauth.json'),
+    scopes=[
+        'openid',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+    ],
+)
+
 
 def run_flow():
-    return flow.run_local_server(host='localhost', port=8095,
-            open_browser=True)
+    return flow.run_local_server(host='localhost', port=8095, open_browser=True)

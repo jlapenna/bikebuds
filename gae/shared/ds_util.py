@@ -13,8 +13,6 @@
 # limitations under the License.
 
 from google.cloud.datastore import Client
-from google.cloud.datastore.entity import Entity
-from google.cloud.datastore.key import Key
 
 from shared.config import config
 from shared.credentials import credentials

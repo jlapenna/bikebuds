@@ -16,10 +16,10 @@ runtime: python37
 service: backend
 
 handlers:
-- url: /.*
-  script: auto
-  secure: always
-  redirect_http_response_code: 301
+  - url: /.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301
 
 env_variables:
   # Firebase

@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-import enum
 import logging
-import sys
 
-from urllib3.exceptions import TimeoutError
 
 import flask
 
@@ -57,10 +53,10 @@ def cleanup_task():
     else:
         datastore_state = result[0]
 
-    # Eg.,
-    #def cleanup():
-    #    ndb.delete_multi(Activity.query().fetch(keys_only=True))
-    #_do_cleanup(7, datastore_state, cleanup)
+    def cleanup():
+        logging.info('No-op cleanup')
+
+    _do_cleanup(0, datastore_state, cleanup)
 
     return Responses.OK
 
@@ -70,7 +66,7 @@ def sync_trigger(name):
     claims = auth_util.verify(flask.request)
     user = User.get(claims)
 
-    task_result = task_util.sync_service(Service.get(name, parent=user.key))
+    task_util.sync_service(Service.get(name, parent=user.key))
     return Responses.OK
 
 
@@ -79,8 +75,11 @@ def sync_task():
     services_query = ds_util.client.query(kind='Service')
     services_query.add_filter('sync_enabled', '=', True)
     services_query.add_filter('syncing', '=', False)
-    services = [service for service in services_query.fetch()
-            if Service.has_credentials(service)]
+    services = [
+        service
+        for service in services_query.fetch()
+        if Service.has_credentials(service)
+    ]
     task_util.sync_services(services)
     return Responses.OK
 
@@ -90,7 +89,6 @@ def sync_service_task(service_name):
     params = task_util.get_payload(flask.request)
     state_key = params['state_key']
     service = ds_util.client.get(params['service_key'])
-    user_key = service.key.parent
 
     logging.debug('Validating state key')
     if state_key is None:
@@ -100,7 +98,7 @@ def sync_service_task(service_name):
     logging.debug('Validating credentials')
     if not Service.has_credentials(service):
         logging.warn('No creds: %s', service.key)
-        return Response.OK_NO_CREDENTIALS
+        return Responses.OK_NO_CREDENTIALS
 
     if service_name == 'withings':
         _do(withings.Worker(service), work_key=service.key)
@@ -110,21 +108,6 @@ def sync_service_task(service_name):
         _do(strava.Worker(service), work_key=service.key)
 
     task_util.maybe_finish_sync_services(service, state_key)
-    return Responses.OK
-
-
-@app.route('/sync/club/<club_id>', methods=['POST'])
-def sync_club_trigger(club_id):
-    claims = auth_util.verify(flask.request)
-    user = User.get(claims)
-
-    task_result = task_util.sync_club(club_id)
-    return Responses.OK
-
-
-@app.route('/tasks/sync/club/<club_id>', methods=['POST'])
-def sync_club_task(club_id):
-    _do(strava.ClubWorker(club_id), work_key=club_id)
     return Responses.OK
 
 
@@ -140,11 +123,11 @@ def process_event_task():
     # embeds a service_key in it, then we might get these.
     service_key = event_key.parent
     service = ds_util.client.get(service_key)
-    
+
     if service is None:
         logging.warning('Cannot process event %s, no service', event_key)
         return Responses.OK_NO_SERVICE
-    
+
     if not Service.has_credentials(service):
         logging.warning('Cannot process event %s, no credentials', event_key)
         return Responses.OK_NO_CREDENTIALS
@@ -180,17 +163,14 @@ def _do(worker, work_key=None, method='sync'):
         getattr(worker, method)()  # Dynamically run the provided method.
         logging.info('Worker completed: %s/%s', work_name, work_key)
     except Exception as e:
-        raise SyncException(
-                'Worker failed: %s/%s' % (work_name, work_key)) from e
+        raise SyncException('Worker failed: %s/%s' % (work_name, work_key)) from e
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):
     if config.is_dev or (datastore_state.version < version):
-        logging.debug(
-                'Running cleanup: %s -> %s', datastore_state.version, version)
+        logging.debug('Running cleanup: %s -> %s', datastore_state.version, version)
         cleanup_fn()
-        logging.info(
-                'Completed cleanup: %s -> %s', datastore_state.version, version)
+        logging.info('Completed cleanup: %s -> %s', datastore_state.version, version)
         datastore_state.version = version
     datastore_state.put()
 

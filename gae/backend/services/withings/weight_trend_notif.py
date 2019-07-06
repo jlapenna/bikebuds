@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import datetime
 import logging
 
 from firebase_admin import messaging
 
-from babel.dates import format_datetime, format_date
+from babel.dates import format_date
 from measurement.measures import Weight
-import nokia
 
 from shared import ds_util
 from shared import fcm_util
@@ -31,7 +29,6 @@ from services.withings.client import create_client
 
 
 class WeightTrendWorker(object):
-
     def __init__(self, service):
         self.service = service
         self.client = create_client(service)
@@ -39,7 +36,9 @@ class WeightTrendWorker(object):
     def sync(self):
         user = ds_util.client.get(self.service.key.parent)
         if not user['preferences']['daily_weight_notif']:
-            logging.debug('WeightTrendWorker: daily_weight_notif: not enabled: %s', user.key)
+            logging.debug(
+                'WeightTrendWorker: daily_weight_notif: not enabled: %s', user.key
+            )
             return
         to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
 
@@ -47,24 +46,17 @@ class WeightTrendWorker(object):
         series_entity = Series.get('withings', self.service.key)
         weight_trend = self._weight_trend(series_entity)
 
-        time_frame = None
-        if 'a week ago' in weight_trend:
-            time_frame = 'a week ago'
-        elif 'a month ago' in weight_trend:
-            time_frame = 'a month ago'
-        elif 'six months ago' in weight_trend:
-            time_frame = 'six months ago'
-        elif 'a year ago' in weight_trend:
-            time_frame = 'a year ago'
-
+        time_frame = self._get_best_time_frame(weight_trend)
         if time_frame is None:
             logging.debug(
-                    'WeightTrendWorker: daily_weight_notif: no timeframe: %s', user.key)
+                'WeightTrendWorker: daily_weight_notif: no timeframe: %s', user.key
+            )
             return
 
         if 'latest' not in weight_trend:
             logging.debug(
-                    'WeightTrendWorker: daily_weight_notif: no latest: %s', user.key)
+                'WeightTrendWorker: daily_weight_notif: no latest: %s', user.key
+            )
             return
 
         latest_weight = weight_trend['latest']['weight']
@@ -86,25 +78,25 @@ class WeightTrendWorker(object):
             title = 'Weight unchanged since %s' % (time_frame,)
         else:
             title = 'Down %.1f %s from %s' % (abs(delta), unit, time_frame)
-        body = 'You were %.1f %s on %s' % (time_frame_weight, unit,
-                format_date(time_frame_date.date(), format='medium'))
+        body = 'You were %.1f %s on %s' % (
+            time_frame_weight,
+            unit,
+            format_date(time_frame_date.date(), format='medium'),
+        )
 
         # Send notifications
         clients = fcm_util.best_clients(user.key)
+
         def notif_fn(client=None):
             return messaging.Message(
-                    notification=messaging.Notification(
-                        title=title,
-                        body=body,
-                        ),
-                    android=messaging.AndroidConfig(
-                        priority='normal',
-                        notification=messaging.AndroidNotification(
-                            color='#f45342'
-                            ),
-                        ),
-                    token=client['token'],
-                    )
+                notification=messaging.Notification(title=title, body=body),
+                android=messaging.AndroidConfig(
+                    priority='normal',
+                    notification=messaging.AndroidNotification(color='#f45342'),
+                ),
+                token=client['token'],
+            )
+
         fcm_util.send(user.key, clients, notif_fn)
 
     def _weight_trend(self, series):
@@ -116,12 +108,12 @@ class WeightTrendWorker(object):
         today = datetime.datetime.now(datetime.timezone.utc)
 
         trend = [
-                ('a year_ago', today - datetime.timedelta(days=365)),
-                ('six months ago', today - datetime.timedelta(days=183)),
-                ('a month ago', today - datetime.timedelta(days=30)),
-                ('a week ago', today - datetime.timedelta(days=7)),
-                ('latest', datetime.datetime.now(datetime.timezone.utc)),
-                ]
+            ('a year_ago', today - datetime.timedelta(days=365)),
+            ('six months ago', today - datetime.timedelta(days=183)),
+            ('a month ago', today - datetime.timedelta(days=30)),
+            ('a week ago', today - datetime.timedelta(days=7)),
+            ('latest', datetime.datetime.now(datetime.timezone.utc)),
+        ]
 
         trend_result = {}
 
@@ -136,3 +128,14 @@ class WeightTrendWorker(object):
                 if 'weight' in measure:
                     trend_result[time_frame] = measure
         return trend_result
+
+    def _get_best_time_frame(self, weight_trend):
+        if 'a week ago' in weight_trend:
+            return 'a week ago'
+        elif 'a month ago' in weight_trend:
+            return 'a month ago'
+        elif 'six months ago' in weight_trend:
+            return 'six months ago'
+        elif 'a year ago' in weight_trend:
+            return 'a year ago'
+        return None
