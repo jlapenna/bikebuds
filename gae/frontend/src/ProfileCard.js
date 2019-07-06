@@ -114,14 +114,17 @@ class ProfileCard extends Component {
             </Grid>
             <Grid item>
               <Typography variant="h5">
-                {this.props.firebaseUser.displayName}
+                {this.props.firebaseUser.displayName}{' '}
+                {this.props.firebaseUser.admin && <span>(Admin)</span>}
               </Typography>
             </Grid>
             <Grid item>
               <Typography variant="h6">
-                {!!this.props.profile.athlete.properties.city
-                    ? (<span>{this.props.profile.athlete.properties.city}</span>)
-                    : (<span>&#8203;</span>)}
+                {!!this.props.profile.athlete.properties.city ? (
+                  <span>{this.props.profile.athlete.properties.city}</span>
+                ) : (
+                  <span>&#8203;</span>
+                )}
               </Typography>
             </Grid>
             <Grid item>

@@ -95,6 +95,12 @@ class App extends Component {
           isSignedIn: !!firebaseUser,
           firebaseUser: firebaseUser
         });
+        firebaseUser.getIdTokenResult().then(idTokenResult => {
+          firebaseUser.admin = !!idTokenResult.claims['admin'];
+          this.setState({
+            firebaseUser: firebaseUser
+          });
+        });
       },
       firebaseUser => {
         console.log('App.onAuthStateChanged: Next', firebaseUser);
@@ -106,6 +112,12 @@ class App extends Component {
         this.setState({
           isSignedInNext: !!firebaseUser,
           firebaseUserNext: firebaseUser
+        });
+        firebaseUser.getIdTokenResult().then(idTokenResult => {
+          firebaseUser.admin = !!idTokenResult.claims['admin'];
+          this.setState({
+            firebaseUser: firebaseUser
+          });
         });
       }
     );
