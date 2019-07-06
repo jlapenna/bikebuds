@@ -43,7 +43,7 @@ def upload(package, service, apk, track):
         packageName=package,
         media_body=apk).execute()
 
-    print 'Version code %d has been uploaded' % apk_response['versionCode']
+    print('Version code %d has been uploaded' % apk_response['versionCode'])
 
     track_response = service.edits().tracks().update(
         editId=edit_id,
@@ -51,18 +51,19 @@ def upload(package, service, apk, track):
         packageName=package,
         body={u'versionCodes': [apk_response['versionCode']]}).execute()
 
-    print 'Track %s is set for version code(s) %s' % (
-        track_response['track'], str(track_response['versionCodes']))
+    print('Track %s is set for version code(s) %s' % (
+        track_response['track'], str(track_response['versionCodes'])))
 
     commit_request = service.edits().commit(
         editId=edit_id, packageName=package).execute()
 
-    print 'Edit "%s" has been committed' % (commit_request['id'])
+    print('Edit "%s" has been committed' % (commit_request['id']))
 
-  except AccessTokenRefreshError, e:
-    print ('The credentials have been revoked or expired, please re-run the '
+  except AccessTokenRefreshError as e:
+    print('The credentials have been revoked or expired, please re-run the '
            'application to re-authorize')
     raise e
+
 
 def main():
   parser = argparse.ArgumentParser()
