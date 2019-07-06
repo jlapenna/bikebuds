@@ -97,15 +97,6 @@ function main() {
   # And restore the dev environment config.
   set_dev_environment
 
-  # Delete older versions.
-  for service in ${services}; do
-    if [[ "$service" == "frontend" ]]; then
-      # For the sake of gae, our frontend is actually the default service.
-      service="default";
-    fi
-    delete_old_versions $service 2;
-  done;
-
   # Remove the generated source contexts
   rm gae/*/source-context.json >/dev/null 2>&1
 
@@ -117,6 +108,15 @@ function main() {
   if [[ "$working_set_committed" == "0" ]]; then
     git reset HEAD~
   fi
+
+  # Finally, delete older versions.
+  for service in ${services}; do
+    if [[ "$service" == "frontend" ]]; then
+      # For the sake of gae, our frontend is actually the default service.
+      service="default";
+    fi
+    delete_old_versions $service 0;
+  done;
 }
 
 main "$@"
