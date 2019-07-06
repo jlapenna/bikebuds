@@ -56,7 +56,7 @@ function main() {
   # First, commit all the code outstanding into a temporary commit for
   # safe-keeping.
   git add .
-  git commit -a -m"Working Set: ${date}";
+  git commit --no-verify -a -m"Working Set: ${date}";
   local working_set_committed=$?
 
   # Abort if our tests don't pass commit.
