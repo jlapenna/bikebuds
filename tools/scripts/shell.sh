@@ -65,5 +65,9 @@ function watch_logs() {
   fi
 
   xtitle logs: $service;
+
+  if [[ "${service}" == "frontend" ]]; then
+    service="default";
+  fi
   gcloud --project=bikebuds-app app logs tail -s "${service}" ${version_flag}
 }
