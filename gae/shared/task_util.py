@@ -15,7 +15,6 @@
 """Helpers for the cloud tasks queue."""
 
 import datetime
-import hashlib
 import logging
 
 import requests
@@ -75,12 +74,11 @@ def _queue_task(
         }
     }
 
-    if name is not None:
-        hashed_name = hashlib.sha1(str(name))
-        task['name'] = hashed_name.hexdigest()
-
     if parent is None:
         parent = _default_parent
+
+    if name is not None:
+        task['name'] = '%s/tasks/%s' % (parent, name)
 
     if delay_timedelta:
         future_time = datetime.datetime.utcnow() + delay_timedelta
@@ -120,7 +118,7 @@ def _params_entity(**kwargs):
 
 
 def sync_club(club_id):
-    _queue_task(
+    return _queue_task(
         **{'relative_uri': '/tasks/sync/club/%s' % club_id, 'service': 'backend'}
     )
 
@@ -209,25 +207,22 @@ def maybe_finish_sync_services(service, state_key):
 
 
 def process_event(event_key):
-    _queue_task(
-        **{
-            'entity': _params_entity(event_key=event_key),
-            'relative_uri': '/tasks/process_event',
-            'service': 'backend',
-            'parent': _events_parent,
-            'delay_timedelta': datetime.timedelta(seconds=5),
-        }
+    return _queue_task(
+        name=event_key.name,
+        entity=_params_entity(event_key=event_key),
+        relative_uri='/tasks/process_event',
+        service='backend',
+        parent=_events_parent,
+        delay_timedelta=datetime.timedelta(seconds=5),
     )
 
 
 def process_weight_trend(service):
-    _queue_task(
-        **{
-            'entity': _params_entity(service_key=service.key),
-            'relative_uri': '/tasks/process_weight_trend',
-            'service': 'backend',
-            'parent': _notifications_parent,
-        }
+    return _queue_task(
+        entity=_params_entity(service_key=service.key),
+        relative_uri='/tasks/process_weight_trend',
+        service='backend',
+        parent=_notifications_parent,
     )
 
 

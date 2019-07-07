@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import logging
 
 import flask
 from flask_cors import cross_origin
+
+from google.api_core.exceptions import AlreadyExists
 
 import stravalib
 
@@ -93,15 +96,22 @@ def events_post():
             service_key,
         )
         sub_event_failure = SubscriptionEvent.to_entity(
-            {'url': flask.request.url, 'event_data': event_data, 'failure': True},
-            parent=None,
+            {
+                'url': flask.request.url,
+                'event_data': event_data,
+                'failure': True,
+                'date': datetime.datetime.utcnow(),
+            }
         )
         ds_util.client.put(sub_event_failure)
     else:
         event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
         ds_util.client.put(event_entity)
-        task_util.process_event(event_entity.key)
-        logging.debug('Queued Strava event for: %s', service_key)
+        try:
+            task_util.process_event(event_entity.key)
+            logging.debug('Queued Strava event: %s', event_entity.key)
+        except AlreadyExists:
+            logging.debug('Duplicate Strava event: %s', event_entity.key)
     return Responses.OK
 
 

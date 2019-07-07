@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import binascii
+import datetime
 import logging
 
 import flask
 from flask_cors import cross_origin
 
+from google.api_core.exceptions import AlreadyExists
 from google.cloud.datastore.key import Key
 
 import nokia
@@ -121,15 +123,26 @@ def events_post():
             service_key,
         )
         sub_event_failure = SubscriptionEvent.to_entity(
-            {'url': flask.request.url, 'event_data': event_data, 'failure': True},
-            parent=None,
+            {
+                'url': flask.request.url,
+                'event_data': event_data,
+                'failure': True,
+                'date': datetime.datetime.utcnow(),
+            }
         )
         ds_util.client.put(sub_event_failure)
     else:
-        event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
+        event_entity = SubscriptionEvent.to_entity(
+            event_data,
+            name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
+            parent=service_key,
+        )
         ds_util.client.put(event_entity)
-        task_util.process_event(event_entity.key)
-        logging.debug('Queued Withings event for: %s', service_key)
+        try:
+            task_util.process_event(event_entity.key)
+            logging.debug('Queued Withings event: %s', event_entity.key)
+        except AlreadyExists:
+            logging.debug('Duplicate Withings event: %s', event_entity.key)
     return Responses.OK
 
 

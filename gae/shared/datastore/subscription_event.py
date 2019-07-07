@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
+
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
@@ -19,8 +21,17 @@ from shared import ds_util
 
 class SubscriptionEvent(object):
     @classmethod
-    def to_entity(cls, properties, parent):
-        entity = Entity(ds_util.client.key('SubscriptionEvent', parent=parent))
+    def to_entity(cls, properties, name=None, parent=None):
+        if name:
+            key = ds_util.client.key('SubscriptionEvent', name, parent=parent)
+        else:
+            key = ds_util.client.key('SubscriptionEvent', parent=parent)
+        entity = Entity(key)
         entity.update(properties)
         entity.exclude_from_indexes = entity.keys()
         return entity
+
+    @classmethod
+    def hash_name(cls, *args):
+        hash_string = '-'.join([str(arg) for arg in args])
+        return hashlib.sha1(hash_string.encode()).hexdigest()
