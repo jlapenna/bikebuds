@@ -59,7 +59,7 @@ class MainTest(unittest.TestCase):
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
         self.assertEqual(r.status_code, Responses.OK.code)
-        self.assertTrue(strava_worker_mock.called)
+        strava_worker_mock.assert_called_once()
 
     @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
@@ -82,7 +82,7 @@ class MainTest(unittest.TestCase):
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
         self.assertEqual(r.status_code, Responses.OK.code)
-        self.assertTrue(withings_worker_mock.called)
+        withings_worker_mock.assert_called_once()
 
     @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
@@ -103,7 +103,7 @@ class MainTest(unittest.TestCase):
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
         self.assertEqual(r.status_code, Responses.OK_NO_SERVICE.code)
-        self.assertFalse(withings_worker_mock.called)
+        withings_worker_mock.assert_not_called()
 
     @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
@@ -125,4 +125,4 @@ class MainTest(unittest.TestCase):
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
         self.assertEqual(r.status_code, Responses.OK_NO_CREDENTIALS.code)
-        self.assertFalse(withings_worker_mock.called)
+        withings_worker_mock.assert_not_called()

@@ -50,8 +50,8 @@ class MainTest(unittest.TestCase):
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
         self.assertEqual(r.status_code, Responses.OK.code)
-        self.assertTrue(ds_util_put_mock.called)
-        self.assertTrue(process_event_mock.called)
+        ds_util_put_mock.assert_called_once()
+        process_event_mock.assert_called_once()
 
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
@@ -67,8 +67,8 @@ class MainTest(unittest.TestCase):
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
         self.assertEqual(r.status_code, Responses.OK.code)
-        self.assertTrue(ds_util_put_mock.called)
-        self.assertFalse(process_event_mock.called)
+        ds_util_put_mock.assert_called_once()
+        process_event_mock.assert_not_called()
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id')
     @mock.patch('shared.ds_util.client.put')
@@ -81,8 +81,8 @@ class MainTest(unittest.TestCase):
 
         r = self.client.post('/services/strava/events', json=_strava_create_event())
         self.assertEqual(r.status_code, Responses.OK.code)
-        self.assertTrue(ds_util_put_mock.called)
-        self.assertTrue(process_event_mock.called)
+        ds_util_put_mock.assert_called_once()
+        process_event_mock.assert_called_once()
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id', return_value=None)
     @mock.patch('shared.ds_util.client.put')
@@ -95,8 +95,8 @@ class MainTest(unittest.TestCase):
 
         # We expect a failure entity to be written and process to not be
         # called.
-        self.assertTrue(ds_util_put_mock.called)
-        self.assertFalse(process_event_mock.called)
+        ds_util_put_mock.assert_called_once()
+        process_event_mock.assert_not_called()
 
 
 def _strava_create_event():
