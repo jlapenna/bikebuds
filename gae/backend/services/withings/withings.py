@@ -16,8 +16,6 @@ import datetime
 import logging
 from urllib.parse import urlencode
 
-from google.cloud.datastore.entity import Entity
-
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, MissingTokenError
 
 from shared import ds_util
@@ -25,6 +23,7 @@ from shared import task_util
 from shared.config import config
 from shared.datastore.series import Series
 from shared.datastore.service import Service
+from shared.datastore.subscription import Subscription
 
 from services.withings.client import create_client
 
@@ -94,9 +93,7 @@ class Worker(object):
                     logging.info('Unsubscribed: %s from %s', self.service.key, sub)
                     ds_util.client.delete(
                         ds_util.client.key(
-                            'WithingsSubscription',
-                            sub['callbackurl'],
-                            parent=self.service.key,
+                            'Subscription', sub['callbackurl'], parent=self.service.key
                         )
                     )
                 except Exception:
@@ -112,12 +109,16 @@ class Worker(object):
                 self.service.key,
                 callbackurl,
             )
-            sub_entity = Entity(
-                ds_util.client.key(
-                    'WithingsSubscription', callbackurl, parent=self.service.key
-                )
+            sub_entity = Subscription.to_entity(
+                {
+                    'callbackurl': callbackurl,
+                    'comment': comment,
+                    'date': datetime.datetime.now(datetime.timezone.utc),
+                },
+                callbackurl,
+                parent=self.service.key,
             )
-            sub_entity.update({'callbackurl': callbackurl, 'comment': comment})
+            sub_entity.update()
             ds_util.client.put(sub_entity)
         elif config.is_dev:
             logging.debug(
@@ -127,17 +128,14 @@ class Worker(object):
             try:
                 self.client.subscribe(callbackurl, comment=comment)
                 logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
-                entity = Entity(
-                    ds_util.client.key(
-                        'WithingsSubscription', callbackurl, parent=self.service.key
-                    )
-                )
-                entity.update(
+                entity = Subscription.to_entity(
                     {
                         'callbackurl': callbackurl,
                         'comment': comment,
                         'date': datetime.datetime.now(datetime.timezone.utc),
-                    }
+                    },
+                    callbackurl,
+                    parent=self.service.key,
                 )
                 ds_util.client.put(entity)
             except Exception:
