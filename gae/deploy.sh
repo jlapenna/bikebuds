@@ -78,6 +78,7 @@ function main() {
   git push --force production master
 
   # Generate source contexts for debugging.
+  echo "\nGenerating source contexts."
   for service in $services; do
     gcloud --project=bikebuds-app debug source gen-repo-info-file \
         --output-directory=gae/$service \
@@ -86,12 +87,14 @@ function main() {
   done;
 
   # Deploy apps
+  echo "\nDeploying apps."
   yes|gcloud --project=bikebuds-app app deploy \
     gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
   # Deploy firebase
+  echo "\nUpdating firebase."
   ./firebase/deploy.sh
 
   # And restore the dev environment config.
