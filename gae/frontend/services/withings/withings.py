@@ -137,12 +137,17 @@ def events_post():
             name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
             parent=service_key,
         )
+        logging.debug(
+            'Processing Withings event: %s from url: %s',
+            event_entity.key,
+            flask.request.url,
+        )
         ds_util.client.put(event_entity)
         try:
             task_util.process_event(event_entity.key)
-            logging.debug('Queued Withings event: %s', event_entity.key)
+            logging.info('Queued Withings event: %s', event_entity.key)
         except AlreadyExists:
-            logging.debug('Duplicate Withings event: %s', event_entity.key)
+            logging.info('Duplicate Withings event: %s', event_entity.key)
     return Responses.OK
 
 
