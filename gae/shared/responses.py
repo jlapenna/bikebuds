@@ -25,3 +25,4 @@ class Responses(object):
     OK_NO_CREDENTIALS = Response('NO CREDENTIALS', 220)
     OK_INVALID_STATE_KEY = Response('INVALID STATE_KEY', 230)
     INVALID_TOKEN = Response('INVALID VERIFY_TOKEN', 401)
+    BAD_REQUEST = Response('BAD REQUEST', 400)

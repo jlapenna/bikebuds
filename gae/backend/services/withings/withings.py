@@ -24,8 +24,7 @@ from shared.config import config
 from shared.datastore.series import Series
 from shared.datastore.service import Service
 from shared.datastore.subscription import Subscription
-
-from services.withings.client import create_client
+from shared.services.withings.client import create_client
 
 
 class Worker(object):

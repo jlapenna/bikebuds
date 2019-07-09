@@ -24,8 +24,7 @@ from shared import ds_util
 from shared import fcm_util
 from shared.datastore.series import Series
 from shared.datastore.user import Preferences
-
-from services.withings.client import create_client
+from shared.services.withings.client import create_client
 
 
 class WeightTrendWorker(object):
