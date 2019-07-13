@@ -19,7 +19,7 @@ import logging
 import flask
 from flask import Flask
 from flask_cors import CORS
-from flask_restplus import Api, Resource, fields
+from flask_restplus import Api, Resource, fields, reqparse
 
 
 from shared import auth_util
@@ -512,7 +512,14 @@ class ProfileResource(Resource):
         )
 
 
+filter_parser = reqparse.RequestParser()
+filter_parser.add_argument(
+    'filter', type=str, help='A filter for measures in a series.'
+)
+
+
 @api.route('/series')
+@api.expect(filter_parser)
 class SeriesResource(Resource):
     @api.doc('get_series')
     @api.marshal_with(series_entity_model, skip_none=True)
@@ -523,6 +530,9 @@ class SeriesResource(Resource):
         series = Series.get(
             service_name, ds_util.client.key('Service', service_name, parent=user.key)
         )
+        args = filter_parser.parse_args()
+        if args['filter']:
+            series['measures'] = [m for m in series['measures'] if args['filter'] in m]
         return WrapEntity(series)
 
 

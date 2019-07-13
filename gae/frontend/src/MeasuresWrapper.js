@@ -63,7 +63,9 @@ class MeasuresWrapper extends Component {
       this.state.measures === undefined
     ) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds.get_series({}).then(this.handleSeries);
+      this.props.apiClient.bikebuds
+        .get_series({ filter: 'weight' })
+        .then(this.handleSeries);
     }
   }
 
