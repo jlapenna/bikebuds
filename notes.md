@@ -358,3 +358,15 @@ Not supported locally.
 ```
 gcloud --project=bikebuds-app tasks queues create default
 ```
+
+# Withings
+
+Token expiry as passed in via creds to NokiaApi:
+Its used to get the seconds until which the token expires.
+
+'expires_in': str(int(credentials.token_expiry) - ts()),
+
+token_expiry == time at which the token expires.
+expires_in == delta until expiration.
+
+My API stores expires_in.

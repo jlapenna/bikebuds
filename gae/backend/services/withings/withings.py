@@ -16,13 +16,10 @@ import datetime
 import logging
 from urllib.parse import urlencode
 
-from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, MissingTokenError
-
 from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.series import Series
-from shared.datastore.service import Service
 from shared.datastore.subscription import Subscription
 from shared.services.withings.client import create_client
 
@@ -33,21 +30,8 @@ class Worker(object):
         self.client = create_client(service)
 
     def sync(self):
-        try:
-            self.sync_measures()
-            self.sync_subscription()
-        except TokenExpiredError:
-            logging.exception(
-                'Token Expired Error: service: %s, wiping creds',
-                self.service['credentials'],
-            )
-            Service.update_credentials(self.service, None)
-        except MissingTokenError:
-            logging.exception(
-                'Missing Token Error: service: %s, wiping creds',
-                self.service['credentials'],
-            )
-            Service.update_credentials(self.service, None)
+        self.sync_measures()
+        self.sync_subscription()
 
     def sync_measures(self):
         measures = sorted(
