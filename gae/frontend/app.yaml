@@ -23,9 +23,9 @@ handlers:
     script: auto
     secure: always
     redirect_http_response_code: 301
-  - url: /(.*\.(json|js|ico))$
+  - url: /(.*\.(json|js|ico|png|html))$
     static_files: build/\1
-    upload: build/.*\.(json|js|ico)$
+    upload: build/.*\.(json|js|ico|png|html)$
     secure: always
     redirect_http_response_code: 301
   - url: /static
