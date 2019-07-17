@@ -20,7 +20,7 @@ from google.cloud.datastore.entity import Entity
 from stravalib.model import Activity
 
 from services.strava.strava import EventsWorker
-from shared.datastore.subscription_event import SubscriptionEvent
+from shared.datastore.subscription import SubscriptionEvent
 
 from shared import ds_util
 

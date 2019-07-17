@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.cloud.datastore.entity import Entity
+
 from shared import ds_util
 
 
-class FcmMessage(object):
-    """Its a series!"""
-
-    @classmethod
-    def get(cls, name, parent=None):
-        return ds_util.client.get(ds_util.client.key('FcmMessage', name, parent=parent))
+def to_entity(kind, properties, name=None, parent=None, include_in_indexes=tuple()):
+    if name:
+        key = ds_util.client.key(kind, name, parent=parent)
+    else:
+        key = ds_util.client.key(kind, parent=parent)
+    entity = Entity(key)
+    entity.update(properties)
+    entity.exclude_from_indexes = entity.keys() - include_in_indexes
+    return entity

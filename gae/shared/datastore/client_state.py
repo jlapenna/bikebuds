@@ -18,8 +18,6 @@ from shared import ds_util
 
 
 class ClientState(object):
-    """Its a series!"""
-
     @classmethod
     def get(cls, name, parent=None):
         key = ds_util.client.key('ClientState', name, parent=parent)

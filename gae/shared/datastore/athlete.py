@@ -18,8 +18,6 @@ from shared.datastore.strava.converters import StravaConverters
 
 
 class Athlete(object):
-    """Its a athlete!"""
-
     @classmethod
     def get_by_id(cls, strava_id):
         athlete_query = ds_util.client.query(kind='Athlete')

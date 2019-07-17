@@ -28,7 +28,7 @@ from shared import task_util
 from shared.config import config
 from shared.datastore.athlete import Athlete
 from shared.datastore.service import Service
-from shared.datastore.subscription_event import SubscriptionEvent
+from shared.datastore.subscription import SubscriptionEvent
 from shared.datastore.user import User
 from shared.responses import Responses
 

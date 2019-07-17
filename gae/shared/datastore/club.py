@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from shared import ds_util
 from shared.datastore.strava.converters import StravaConverters
 
 
 class Club(object):
-    """Its a club!"""
+    @classmethod
+    def get(cls, club_id, parent=None):
+        return ds_util.client.get(ds_util.client.key('Club', club_id, parent=parent))
 
     @classmethod
     def to_entity(cls, club, parent=None):
         return StravaConverters.Club.to_entity(club, parent=parent)
-
-    @classmethod
-    def get(cls, club_id, parent=None):
-        return ds_util.client.get(ds_util.client.key('Club', club_id, parent=parent))

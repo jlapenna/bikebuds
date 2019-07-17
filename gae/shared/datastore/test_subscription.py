@@ -14,7 +14,7 @@
 
 import unittest
 
-from shared.datastore.subscription_event import SubscriptionEvent
+from shared.datastore.subscription import SubscriptionEvent
 
 
 class SubscriptionEventTest(unittest.TestCase):

@@ -12,24 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.cloud.datastore.entity import Entity
-
 from shared import ds_util
+from shared.datastore.entity_util import to_entity
 
 
 class FcmSendEvent(object):
     @classmethod
     def to_entity(cls, properties, parent=None):
-        entity = Entity(ds_util.client.key('FcmSendEvent', parent=parent))
-        entity.update(properties)
-        entity.exclude_from_indexes = entity.keys()
-        return entity
+        return to_entity(
+            'FcmSendEvent', properties, parent=parent, include_in_indexes=('date',)
+        )
 
 
 class FcmMessage(object):
     @classmethod
+    def get(cls, name, parent=None):
+        return ds_util.client.get(ds_util.client.key('FcmMessage', name, parent=parent))
+
+    @classmethod
     def to_entity(cls, properties, parent=None):
-        entity = Entity(ds_util.client.key('FcmMessage', parent=parent))
-        entity.update(properties)
-        entity.exclude_from_indexes = entity.keys()
-        return entity
+        return to_entity(
+            'FcmMessage', properties, parent=parent, include_in_indexes=('date',)
+        )

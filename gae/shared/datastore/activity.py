@@ -16,8 +16,6 @@ from shared.datastore.strava.converters import StravaConverters
 
 
 class Activity(object):
-    """Its an activity!"""
-
     @classmethod
     def to_entity(cls, activity, parent=None, detailed_athlete=None):
         return StravaConverters.Activity.to_entity(
