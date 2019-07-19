@@ -123,8 +123,10 @@ class _EventScreenState extends State<EventScreen> {
     firebase.firestore.runTransaction((Transaction tx) async {
       print(
           'EventScreen.handleStartDateChanged: running transaction "$newStartDate"');
+      var startDate =
+          newStartDate != null ? Timestamp.fromDate(newStartDate) : null;
       await tx.update(widget.event.reference, <String, dynamic>{
-        'start_date': Timestamp.fromDate(newStartDate),
+        'start_date': startDate,
       });
       print('EventScreen.handleStartDateChanged: completed transaction.');
     });
@@ -172,6 +174,7 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   Widget buildEvent(AsyncSnapshot<DocumentSnapshot> snapshot) {
+    DateTime startDate = widget.event['start_date']?.toDate();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -189,17 +192,28 @@ class _EventScreenState extends State<EventScreen> {
               decoration: InputDecoration(
                   labelText: 'Title', hasFloatingPlaceholder: false),
             ),
-            DateTimePickerFormField(
-              format: dateTimeFormat,
-              onChanged: handleStartDateChanged,
-              editable: false,
-              initialDate: widget.event['start_date'].toDate(),
-              initialValue: widget.event['start_date'].toDate(),
-              inputType: InputType.both,
-              style: Theme.of(context).textTheme.body1,
-              decoration: InputDecoration(
-                  labelText: 'Start Date', hasFloatingPlaceholder: false),
-            ),
+            DateTimeField(
+                format: dateTimeFormat,
+                initialValue: startDate,
+                onChanged: handleStartDateChanged,
+                decoration: InputDecoration(labelText: 'Start Date'),
+                onShowPicker: (context, currentValue) async {
+                  final date = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime(2018),
+                    initialDate: startDate ?? DateTime.now(),
+                    lastDate: DateTime(2025),
+                  );
+                  if (date != null) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime:
+                          TimeOfDay.fromDateTime(startDate ?? DateTime.now()),
+                    );
+                    return DateTimeField.combine(date, time);
+                  }
+                  return currentValue;
+                }),
             TextField(
               controller: descriptionController,
               focusNode: descriptionFocusNode,
