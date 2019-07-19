@@ -72,16 +72,9 @@ class _SignedInAppState extends State<SignedInApp> {
         });
         firebase.messaging.requestNotificationPermissions();
         firebase.messaging.configure(
-          onMessage: (Map<String, dynamic> message) async {
-            print('Messaging.onMessage: $message');
-          },
-          onResume: (Map<String, dynamic> message) async {
-            print('Messaging.onResume: $message');
-          },
-          onLaunch: (Map<String, dynamic> message) async {
-            print('Messaging.onLaunch: $message');
-          },
-        );
+            onMessage: this.onMessage,
+            onResume: this.onResume,
+            onLaunch: this.onLaunch);
       }
     }
     super.didChangeDependencies();
@@ -93,6 +86,18 @@ class _SignedInAppState extends State<SignedInApp> {
       _messagingListener.cancel();
     }
     super.dispose();
+  }
+
+  Future<dynamic> onMessage(Map<String, dynamic> message) async {
+    print('Messaging.onMessage: $message');
+  }
+
+  Future<dynamic> onResume(Map<String, dynamic> message) async {
+    print('Messaging.onResume: $message');
+  }
+
+  Future<dynamic> onLaunch(Map<String, dynamic> message) async {
+    print('Messaging.onLaunch: $message');
   }
 
   @override
