@@ -36,11 +36,11 @@ class ClientWrapper(object):
     def ensure_access(self):
         """Ensure that an access token is good for at least 60 more seconds."""
         now = time.time()
-        expires_around = self._service['credentials']['expires_at'] - 60
+        expires_around = self._service.get('credentials', {}).get('expires_at', 0) - 60
         if time.time() > expires_around:
             seconds_ago = now - expires_around
             logging.info('Access expired %s ago; fetching new', seconds_ago)
-            self._refresh_credentials()
+            self._refresh_access_token()
 
     def __getattr__(self, attr):
         func = getattr(self._client, attr)
@@ -51,13 +51,18 @@ class ClientWrapper(object):
                 return func(*args, **kwargs)
             except exc.AccessUnauthorized as e:
                 logging.info("Token expired, refreshing.", e)
-                self._refresh_credentials()
-                return func(*args, **kwargs)
-            return func(*args, **kwargs)
+                if self._refresh_access_token():
+                    return func(*args, **kwargs)
 
         return wrapper
 
-    def _refresh_credentials(self):
+    def _refresh_access_token(self):
+        if self._service['credentials'].get('refresh_token') is None:
+            logging.warn(
+                'Cannot refresh_access_token for %s, no refresh_token',
+                self._service.key,
+            )
+            return False
         new_credentials = self._client.refresh_access_token(
             client_id=config.strava_creds['client_id'],
             client_secret=config.strava_creds['client_secret'],
@@ -65,3 +70,4 @@ class ClientWrapper(object):
         )
         Service.update_credentials(self._service, dict(new_credentials))
         self._client.access_token = self._service['credentials']['access_token']
+        return True
