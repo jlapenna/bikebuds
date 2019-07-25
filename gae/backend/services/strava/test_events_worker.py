@@ -19,7 +19,7 @@ from google.cloud.datastore.entity import Entity
 
 from stravalib.model import Activity
 
-from services.strava.strava import EventsWorker
+from services.strava.events_worker import EventsWorker
 from shared.datastore.subscription import SubscriptionEvent
 
 from shared import ds_util
@@ -37,20 +37,20 @@ class MainTest(unittest.TestCase):
     def setUp(self):
         pass
 
+    @mock.patch('services.strava.events_worker.ClientWrapper')
     @mock.patch('shared.ds_util.client.delete')
-    @mock.patch('shared.ds_util.client.put')
-    @mock.patch('services.strava.strava.ClientWrapper')
     @mock.patch('shared.ds_util.client.delete_multi')
-    @mock.patch('shared.ds_util.client.transaction')
+    @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.query')
+    @mock.patch('shared.ds_util.client.transaction')
     def test_events_worker(
         self,
-        query_mock,
         transaction_mock,
-        delete_multi_mock,
-        ClientWrapperMock,
+        query_mock,
         put_mock,
+        delete_multi_mock,
         delete_mock,
+        ClientWrapperMock,
     ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'XXX'}

@@ -31,8 +31,10 @@ from shared.responses import Responses
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
-from services.withings.weight_trend_notif import WeightTrendWorker
+from services.strava.events_worker import EventsWorker as StravaEventsWorker
 from services.withings import withings
+from services.withings.withings import EventsWorker as WithingsEventsWorker
+from services.withings.weight_trend_notif import WeightTrendWorker
 
 app = flask.Flask(__name__)
 
@@ -133,11 +135,11 @@ def process_event_task():
         return Responses.OK_NO_CREDENTIALS
 
     if service_key.name == 'withings':
-        _do(withings.EventsWorker(service), work_key=service.key)
+        _do(WithingsEventsWorker(service), work_key=service.key)
     elif service_key.name == 'fitbit':
         pass
     elif service_key.name == 'strava':
-        _do(strava.EventsWorker(service), work_key=service.key)
+        _do(StravaEventsWorker(service), work_key=service.key)
     return Responses.OK
 
 

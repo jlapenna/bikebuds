@@ -38,7 +38,7 @@ class MainTest(unittest.TestCase):
         r = self.client.post('/unittest')
         self.assertEqual(r.status_code, Responses.OK.code)
 
-    @mock.patch('main.strava.EventsWorker', return_value=MockWorker())
+    @mock.patch('main.StravaEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_valid_strava(
         self, ds_util_client_get_mock, strava_worker_mock
@@ -61,7 +61,7 @@ class MainTest(unittest.TestCase):
         self.assertEqual(r.status_code, Responses.OK.code)
         strava_worker_mock.assert_called_once()
 
-    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_valid_withings(
         self, ds_util_client_get_mock, withings_worker_mock
@@ -84,7 +84,7 @@ class MainTest(unittest.TestCase):
         self.assertEqual(r.status_code, Responses.OK.code)
         withings_worker_mock.assert_called_once()
 
-    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_no_service(
         self, ds_util_client_get_mock, withings_worker_mock
@@ -105,7 +105,7 @@ class MainTest(unittest.TestCase):
         self.assertEqual(r.status_code, Responses.OK_NO_SERVICE.code)
         withings_worker_mock.assert_not_called()
 
-    @mock.patch('main.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_no_credentials(
         self, ds_util_client_get_mock, withings_worker_mock

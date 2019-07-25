@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
-import logging
-
 from shared import ds_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
@@ -54,57 +51,3 @@ class Worker(object):
         """Gets additional info: description, calories and embed_token."""
         activity = self.client.get_activity(activity_id)
         return ds_util.client.put(Activity.to_entity(activity, parent=self.service.key))
-
-
-class EventsWorker(object):
-    def __init__(self, service):
-        self.service = service
-        self.client = ClientWrapper(service)
-
-    def sync(self):
-        self.client.ensure_access()
-
-        query = ds_util.client.query(
-            kind='SubscriptionEvent', ancestor=self.service.key
-        )
-        events = query.fetch()
-        events = sorted(events, key=lambda x: x['event_time'])
-        batches = collections.defaultdict(list)
-        for event in events:
-            batches[(event['object_id'], event['object_type'])].append(event)
-        for (object_id, object_type), batch in batches.items():
-            self._process_event_batch(
-                self.client, self.service, object_id, object_type, batch
-            )
-
-    def _process_event_batch(self, client, service, object_id, object_type, batch):
-        with ds_util.client.transaction():
-            logging.debug(
-                'process_event_batch:  %s, %s, %s', service.key, object_id, len(batch)
-            )
-
-            # We're no longer going to need these.
-            ds_util.client.delete_multi((event.key for event in batch))
-
-            if object_type != 'activity':
-                logging.warn('Update object_type not implemented: %s', object_type)
-                return
-
-            operations = [event['aspect_type'] for event in batch]
-
-            if 'delete' in operations:
-                activity_key = ds_util.client.key(
-                    'Activity', object_id, parent=service.key
-                )
-                ds_util.client.delete(activity_key)
-                logging.info('Deleted: Entity: %s', activity_key)
-            else:
-                activity = client.get_activity(object_id)
-                activity_entity = Activity.to_entity(activity, parent=service.key)
-                # get_activity returns a MetaAthelte, which only has an
-                # athlete_id, replace from the stored athlete entity.
-                athlete_entity = Athlete.get_private(service.key)
-                activity_entity['athlete'] = athlete_entity
-                ds_util.client.put(activity_entity)
-                activity_key = activity_entity.key
-                logging.info('Created: %s -> %s', activity.id, activity_key)
