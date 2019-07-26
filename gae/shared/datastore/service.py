@@ -59,8 +59,8 @@ class Service(object):
         return service['credentials']
 
     @classmethod
-    def has_credentials(cls, service, required_key=None):
-        return (
+    def has_credentials(cls, service, required_key='refresh_token'):
+        return bool(
             service is not None
             and service.get('credentials')
             and (required_key is None or service['credentials'].get(required_key))

@@ -21,8 +21,11 @@ Response = collections.namedtuple('Response', ('message', 'code'))
 
 class Responses(object):
     OK = Response('OK', 200)
+    OK_SYNC_EXCEPTION = Response('UNKNOWN EXCEPTION', 201)
     OK_NO_SERVICE = Response('NO SERVICE', 210)
     OK_NO_CREDENTIALS = Response('NO CREDENTIALS', 220)
     OK_INVALID_STATE_KEY = Response('INVALID STATE_KEY', 230)
-    INVALID_TOKEN = Response('INVALID VERIFY_TOKEN', 401)
+
+    OK_UNKNOWN_EXCEPTION = Response('UNKNOWN EXCEPTION', 299)
     BAD_REQUEST = Response('BAD REQUEST', 400)
+    INVALID_TOKEN = Response('INVALID VERIFY_TOKEN', 401)

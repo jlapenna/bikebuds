@@ -37,7 +37,7 @@ class Worker(object):
 
 
 def create_client(service):
-    if not Service.has_credentials(service, required_key='refresh_token'):
+    if not Service.has_credentials(service):
         raise Exception('Cannot create Fitbit client without creds: %s', service)
 
     def refresh_callback(new_credentials):

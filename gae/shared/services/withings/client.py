@@ -20,7 +20,7 @@ from shared.datastore.service import Service
 
 
 def create_client(service):
-    if not Service.has_credentials(service, required_key='refresh_token'):
+    if not Service.has_credentials(service):
         raise Exception('Cannot create Withings client without creds: %s', service)
     # Note: token_expiry is equivelent to expires_at, provided by the API.
     creds = nokia.NokiaCredentials(

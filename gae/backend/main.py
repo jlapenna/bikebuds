@@ -102,12 +102,15 @@ def sync_service_task(service_name):
         logging.warn('No creds: %s', service.key)
         return Responses.OK_NO_CREDENTIALS
 
-    if service_name == 'withings':
-        _do(withings.Worker(service), work_key=service.key)
-    elif service_name == 'fitbit':
-        _do(bbfitbit.Worker(service), work_key=service.key)
-    elif service_name == 'strava':
-        _do(strava.Worker(service), work_key=service.key)
+    try:
+        if service_name == 'withings':
+            _do(withings.Worker(service), work_key=service.key)
+        elif service_name == 'fitbit':
+            _do(bbfitbit.Worker(service), work_key=service.key)
+        elif service_name == 'strava':
+            _do(strava.Worker(service), work_key=service.key)
+    except SyncException:
+        return Responses.OK_SYNC_EXCEPTION
 
     task_util.maybe_finish_sync_services(service, state_key)
     return Responses.OK
@@ -134,12 +137,15 @@ def process_event_task():
         logging.warning('Cannot process event %s, no credentials', event_key)
         return Responses.OK_NO_CREDENTIALS
 
-    if service_key.name == 'withings':
-        _do(WithingsEventsWorker(service), work_key=service.key)
-    elif service_key.name == 'fitbit':
-        pass
-    elif service_key.name == 'strava':
-        _do(StravaEventsWorker(service), work_key=service.key)
+    try:
+        if service_key.name == 'withings':
+            _do(WithingsEventsWorker(service), work_key=service.key)
+        elif service_key.name == 'fitbit':
+            pass
+        elif service_key.name == 'strava':
+            _do(StravaEventsWorker(service), work_key=service.key)
+    except SyncException:
+        return Responses.OK_SYNC_EXCEPTION
     return Responses.OK
 
 
@@ -149,12 +155,15 @@ def process_weight_trend_task():
     service_key = params['service_key']
     service = ds_util.client.get(service_key)
     service_name = service.key.name
-    if service_name == 'withings':
-        _do(WeightTrendWorker(service), work_key=service_key)
-    elif service_name == 'fitbit':
-        pass
-    elif service_name == 'strava':
-        pass
+    try:
+        if service_name == 'withings':
+            _do(WeightTrendWorker(service), work_key=service_key)
+        elif service_name == 'fitbit':
+            pass
+        elif service_name == 'strava':
+            pass
+    except SyncException:
+        return Responses.OK_SYNC_EXCEPTION
     return Responses.OK
 
 
@@ -164,8 +173,8 @@ def _do(worker, work_key=None, method='sync'):
         logging.debug('Worker starting: %s/%s', work_name, work_key)
         getattr(worker, method)()  # Dynamically run the provided method.
         logging.info('Worker completed: %s/%s', work_name, work_key)
-    except Exception as e:
-        raise SyncException('Worker failed: %s/%s' % (work_name, work_key)) from e
+    except Exception:
+        raise SyncException('Worker failed: %s/%s', work_name, work_key)
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):

@@ -45,7 +45,7 @@ class MainTest(unittest.TestCase):
     ):
 
         service = Entity(ds_util.client.key('Service', 'strava'))
-        service['credentials'] = {'fake': 'XXX'}
+        service['credentials'] = {'refresh_token': 'validrefreshtoken'}
 
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', parent=service.key)
@@ -68,7 +68,7 @@ class MainTest(unittest.TestCase):
     ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
-        service['credentials'] = {'fake': 'XXX'}
+        service['credentials'] = {'refresh_token': 'validrefreshtoken'}
 
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', parent=service.key)
@@ -91,7 +91,7 @@ class MainTest(unittest.TestCase):
     ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
-        service['credentials'] = {'fake': 'XXX'}
+        service['credentials'] = {'refresh_token': 'validrefreshtoken'}
 
         event_entity = Entity(ds_util.client.key('SubscriptionEvent'))
 
