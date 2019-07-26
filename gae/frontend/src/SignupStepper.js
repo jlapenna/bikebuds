@@ -40,20 +40,20 @@ class SignupStepper extends React.Component {
       height: '100%'
     },
     stepBody: {
-      marginTop: theme.spacing.unit,
-      marginBottom: theme.spacing.unit
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1)
     },
     stepContent: {
-      marginTop: theme.spacing.unit,
-      marginBottom: theme.spacing.unit
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1)
     },
     stepper: {},
     mobileButton: {
-      marginRight: theme.spacing.unit,
-      marginLeft: theme.spacing.unit
+      marginRight: theme.spacing(1),
+      marginLeft: theme.spacing(1)
     },
     desktopButton: {
-      marginRight: theme.spacing.unit
+      marginRight: theme.spacing(1)
     }
   });
 

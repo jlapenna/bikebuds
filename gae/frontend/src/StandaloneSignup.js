@@ -40,7 +40,7 @@ class StandaloneSignup extends Component {
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing.unit * 2
+      padding: theme.spacing(2)
     }
   });
 
