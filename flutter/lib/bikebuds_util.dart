@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import "dart:async";
+import 'dart:io';
 
 import "package:bikebuds/config.dart";
 import "package:bikebuds/firebase_util.dart";
@@ -102,7 +103,9 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
 
   Future<ClientStateEntity> registerClient(
       FutureOr<String> firebaseToken) async {
-    var client = ClientState()..token = await firebaseToken;
+    var client = ClientState()
+      ..token = await firebaseToken
+      ..type = Platform.operatingSystem.toUpperCase();
     return api.updateClient(client, xFields: "*").then((response) {
       print('bikebuds_util: registerClient: response: $response');
       setState(() {

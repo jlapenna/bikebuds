@@ -18,6 +18,12 @@ from shared import ds_util
 
 
 class ClientState(object):
+    class Types(object):
+        UNKNOWN = 'UNKNOWN'
+        ANDROID = 'ANDROID'
+        IOS = 'IOS'
+        WEB = 'WEB'
+
     @classmethod
     def get(cls, name, parent=None):
         key = ds_util.client.key('ClientState', name, parent=parent)
@@ -26,5 +32,6 @@ class ClientState(object):
             return client_state
         client_state = Entity(key)
         client_state['active'] = True
+        client_state['type'] = 'UNKNOWN'
         ds_util.client.put(client_state)
         return client_state

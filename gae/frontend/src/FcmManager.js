@@ -138,7 +138,11 @@ class FcmManager extends Component {
     ) {
       this.props.apiClient.bikebuds
         .update_client({
-          payload: { token: this.state.fcmToken }
+          payload: {
+            active: true,
+            token: this.state.fcmToken,
+            type: 'WEB'
+          }
         })
         .then(this.handleUpdateClient);
     }
