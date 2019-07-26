@@ -91,7 +91,7 @@ class WeightTrendWorker(object):
                 notification=messaging.Notification(title=title, body=body),
                 android=messaging.AndroidConfig(
                     priority='high',  # Wake up the device to notify.
-                    ttl='82800s',  # 23 hours
+                    ttl=82800,  # 23 hours
                     # notification=messaging.AndroidNotification(),
                 ),
                 token=client['token'],
