@@ -530,6 +530,8 @@ class SeriesResource(Resource):
         series = Series.get(
             service_name, ds_util.client.key('Service', service_name, parent=user.key)
         )
+        if series is None:
+            return WrapEntity(None)
         args = filter_parser.parse_args()
         if args['filter']:
             series['measures'] = [m for m in series['measures'] if args['filter'] in m]
