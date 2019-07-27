@@ -19,7 +19,6 @@ import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
-import ClientsCard from './ClientsCard';
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
@@ -53,15 +52,12 @@ class Settings extends Component {
             apiClient={this.props.apiClient}
           />
         </Grid>
-        <Grid item xs={12} sm={12} md={4}>
+        <Grid item xs={12}>
           <PreferencesCard
             firebaseUser={this.props.firebaseUser}
             apiClient={this.props.apiClient}
             profile={this.props.profile}
           />
-        </Grid>
-        <Grid item xs={12} sm={12} md={8}>
-          <ClientsCard apiClient={this.props.apiClient} />
         </Grid>
       </Grid>
     );

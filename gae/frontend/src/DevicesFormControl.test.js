@@ -17,10 +17,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import ClientsCard from './ClientsCard';
+import DevicesFormControl from './DevicesFormControl';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<ClientsCard />, div);
+  ReactDOM.render(<DevicesFormControl />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

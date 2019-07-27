@@ -32,6 +32,8 @@ import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
 
+import DevicesFormControl from './DevicesFormControl';
+
 class PreferencesCard extends Component {
   static styles = theme => ({
     root: {
@@ -182,6 +184,9 @@ class PreferencesCard extends Component {
                   />
                 </FormGroup>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <DevicesFormControl apiClient={this.props.apiClient} />
             </Grid>
           </Grid>
         </CardContent>
