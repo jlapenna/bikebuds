@@ -32,7 +32,9 @@ import moment from 'moment';
 class ClientsCard extends Component {
   static styles = {
     root: {
-      'min-height': '200px'
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     },
     cardContentItem: {
       width: '100%'

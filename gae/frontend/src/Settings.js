@@ -33,45 +33,37 @@ class Settings extends Component {
 
   render() {
     return (
-      <div>
-        <Grid container spacing={3} justify="space-evenly" alignItems="center">
-          <Grid item xs={12} sm={12}>
-            <ProfileCard
-              firebaseUser={this.props.firebaseUser}
-              apiClient={this.props.apiClient}
-              profile={this.props.profile}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <ServiceCard
-              serviceName="fitbit"
-              apiClient={this.props.apiClient}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <ServiceCard
-              serviceName="strava"
-              apiClient={this.props.apiClient}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <ServiceCard
-              serviceName="withings"
-              apiClient={this.props.apiClient}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <PreferencesCard
-              firebaseUser={this.props.firebaseUser}
-              apiClient={this.props.apiClient}
-              profile={this.props.profile}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <ClientsCard apiClient={this.props.apiClient} />
-          </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={12}>
+          <ProfileCard
+            firebaseUser={this.props.firebaseUser}
+            apiClient={this.props.apiClient}
+            profile={this.props.profile}
+          />
         </Grid>
-      </div>
+        <Grid item xs={12} sm={6} md={4}>
+          <ServiceCard serviceName="fitbit" apiClient={this.props.apiClient} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <ServiceCard serviceName="strava" apiClient={this.props.apiClient} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <ServiceCard
+            serviceName="withings"
+            apiClient={this.props.apiClient}
+          />
+        </Grid>
+        <Grid item xs={12} sm={12} md={4}>
+          <PreferencesCard
+            firebaseUser={this.props.firebaseUser}
+            apiClient={this.props.apiClient}
+            profile={this.props.profile}
+          />
+        </Grid>
+        <Grid item xs={12} sm={12} md={8}>
+          <ClientsCard apiClient={this.props.apiClient} />
+        </Grid>
+      </Grid>
     );
   }
 }

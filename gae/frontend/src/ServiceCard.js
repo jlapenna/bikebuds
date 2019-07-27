@@ -38,14 +38,12 @@ import { createSession } from './session_util';
 class ServiceCard extends Component {
   static styles = {
     root: {
-      'min-height': '200px'
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     },
     cardContentItem: {
       width: '100%'
-    },
-    avatar: {
-      width: 60,
-      height: 60
     }
   };
 
@@ -150,7 +148,7 @@ class ServiceCard extends Component {
     return (
       <CardContent className={this.props.classes.content}>
         <Grid container direction="column" justify="center" alignItems="center">
-          <Grid className={this.props.classes.cardContentItem} item>
+          <Grid item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
             {this.state.service === undefined && <LinearProgress />}
             {this.state.service &&

@@ -42,7 +42,9 @@ class ProfileCard extends Component {
 
   static styles = {
     root: {
-      'min-height': 356
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     },
     avatar: {
       width: 128,

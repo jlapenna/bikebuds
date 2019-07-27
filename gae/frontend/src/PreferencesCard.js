@@ -22,11 +22,12 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
@@ -34,11 +35,14 @@ import cloneDeepWith from 'lodash/cloneDeepWith';
 class PreferencesCard extends Component {
   static styles = theme => ({
     root: {
-      'min-height': '200px'
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     },
     container: {
       display: 'flex',
-      flexWrap: 'wrap'
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     }
   });
 
@@ -54,7 +58,6 @@ class PreferencesCard extends Component {
   }
 
   handlePreferences = response => {
-    console.log('PreferencesCard.updatePreferenceState', response);
     this.props.profile.updatePreferences(response.body);
     this.setState({ updatingRemote: false });
   };
@@ -98,85 +101,89 @@ class PreferencesCard extends Component {
   };
 
   render() {
-    console.log('PreferencesCard.render: ', this.state, this.props);
     return (
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
-          <div className={this.props.classes.container}>
-            <FormControl
-              component="fieldset"
-              className={this.props.classes.formControl}
-              disabled={this.state.updatingRemote}
-            >
-              <Typography variant="h5">Unit</Typography>
-              <RadioGroup
-                aria-label="Measurement Units"
-                name="units"
-                className={this.props.classes.group}
-                value={this.props.profile.user.properties.preferences.units}
-                onChange={this.handleRadioGroupChange}
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={12}>
+              <FormControl
+                component="fieldset"
+                className={this.props.classes.formControl}
+                disabled={this.state.updatingRemote}
               >
-                <FormControlLabel
-                  value="METRIC"
-                  control={<Radio />}
-                  label="Metric"
-                />
-                <FormControlLabel
-                  value="IMPERIAL"
-                  control={<Radio />}
-                  label="Imperial"
-                />
-              </RadioGroup>
-            </FormControl>
-            <FormControl
-              component="fieldset"
-              className={this.props.classes.formControl}
-              disabled={this.state.updatingRemote}
-            >
-              <Typography variant="h5">Weight Service</Typography>
-              <RadioGroup
-                aria-label="Weight Service"
-                name="weight_service"
-                className={this.props.classes.group}
-                value={
-                  this.props.profile.user.properties.preferences.weight_service
-                }
-                onChange={this.handleRadioGroupChange}
+                <Typography variant="h5">Unit</Typography>
+                <RadioGroup
+                  aria-label="Measurement Units"
+                  name="units"
+                  className={this.props.classes.group}
+                  value={this.props.profile.user.properties.preferences.units}
+                  onChange={this.handleRadioGroupChange}
+                >
+                  <FormControlLabel
+                    value="METRIC"
+                    control={<Radio />}
+                    label="Metric"
+                  />
+                  <FormControlLabel
+                    value="IMPERIAL"
+                    control={<Radio />}
+                    label="Imperial"
+                  />
+                </RadioGroup>
+              </FormControl>
+              <FormControl
+                component="fieldset"
+                className={this.props.classes.formControl}
+                disabled={this.state.updatingRemote}
               >
-                <FormControlLabel
-                  value="FITBIT"
-                  control={<Radio />}
-                  label="Fitbit"
-                />
-                <FormControlLabel
-                  value="WITHINGS"
-                  control={<Radio />}
-                  label="Withings"
-                />
-              </RadioGroup>
-            </FormControl>
-            <FormControl
-              component="fieldset"
-              className={this.props.classes.formControl}
-              disabled={this.state.updatingRemote}
-            >
-              <Typography variant="h5">Notifications</Typography>
-              <FormGroup disabled={this.state.updatingRemote}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={
-                        this.props.profile.user.properties.preferences
-                          .daily_weight_notif
-                      }
-                      onChange={this.handleNotifChange}
-                    />
+                <Typography variant="h5">Weight Service</Typography>
+                <RadioGroup
+                  aria-label="Weight Service"
+                  name="weight_service"
+                  className={this.props.classes.group}
+                  value={
+                    this.props.profile.user.properties.preferences
+                      .weight_service
                   }
-                  label="Daily Weight Notification"
-                />
-              </FormGroup>
-            </FormControl>
-          </div>
+                  onChange={this.handleRadioGroupChange}
+                >
+                  <FormControlLabel
+                    value="FITBIT"
+                    control={<Radio />}
+                    label="Fitbit"
+                  />
+                  <FormControlLabel
+                    value="WITHINGS"
+                    control={<Radio />}
+                    label="Withings"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <FormControl
+                component="fieldset"
+                className={this.props.classes.formControl}
+                disabled={this.state.updatingRemote}
+              >
+                <Typography variant="h5">Notifications</Typography>
+                <FormGroup disabled={this.state.updatingRemote}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          this.props.profile.user.properties.preferences
+                            .daily_weight_notif
+                        }
+                        onChange={this.handleNotifChange}
+                      />
+                    }
+                    label="Daily Weight Notification"
+                  />
+                </FormGroup>
+              </FormControl>
+            </Grid>
+          </Grid>
         </CardContent>
         <CardActions />
       </Card>
