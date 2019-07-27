@@ -384,6 +384,19 @@ class ActivitiesResource(Resource):
         return activities
 
 
+@api.route('/clients')
+class ClientsResource(Resource):
+    @api.doc('get_clients')
+    @api.marshal_with(client_state_entity_model, skip_none=True, as_list=True)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
+        user = User.get(claims)
+        clients_query = ds_util.client.query(
+            kind='ClientState', ancestor=user.key, order=['-modified']
+        )
+        return [WrapEntity(c) for c in clients_query.fetch()]
+
+
 @api.route('/client/<client_id>')
 class ClientResource(Resource):
     @api.doc('get_client')

@@ -19,6 +19,7 @@ import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
+import ClientsCard from './ClientsCard';
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
@@ -41,30 +42,33 @@ class Settings extends Component {
               profile={this.props.profile}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
+            <ServiceCard
+              serviceName="fitbit"
+              apiClient={this.props.apiClient}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <ServiceCard
+              serviceName="strava"
+              apiClient={this.props.apiClient}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <ServiceCard
+              serviceName="withings"
+              apiClient={this.props.apiClient}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <PreferencesCard
               firebaseUser={this.props.firebaseUser}
               apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard
-              serviceName="fitbit"
-              apiClient={this.props.apiClient}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard
-              serviceName="strava"
-              apiClient={this.props.apiClient}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ServiceCard
-              serviceName="withings"
-              apiClient={this.props.apiClient}
-            />
+          <Grid item xs={12} sm={6}>
+            <ClientsCard apiClient={this.props.apiClient} />
           </Grid>
         </Grid>
       </div>
