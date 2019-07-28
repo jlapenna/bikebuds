@@ -25,7 +25,7 @@ def create_client(service):
     # Note: token_expiry is equivelent to expires_at, provided by the API.
     creds = nokia.NokiaCredentials(
         access_token=service['credentials'].get('access_token'),
-        token_expiry=service['credentials'].get('expires_at'),
+        token_expiry=service['credentials'].get('expires_at', 0),
         token_type=service['credentials'].get('token_type'),
         refresh_token=service['credentials'].get('refresh_token'),
         user_id=service['credentials'].get('user_id'),
