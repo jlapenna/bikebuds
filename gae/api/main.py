@@ -360,7 +360,12 @@ profile_model = api.model(
 
 client_state_model = api.model(
     'ClientState',
-    {'active': fields.Boolean, 'token': fields.String, 'type': fields.String},
+    {
+        'active': fields.Boolean,
+        'token': fields.String,
+        'type': fields.String,
+        'modified': fields.DateTime,
+    },
 )
 client_state_entity_model = EntityModel(client_state_model)
 

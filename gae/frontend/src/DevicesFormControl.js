@@ -48,7 +48,6 @@ class DevicesFormControl extends Component {
     this.setState({
       clients: response.body
     });
-    console.log('DevicesFormControl.handleClients', response.body);
   };
 
   handleSwitchChange = client => event => {
@@ -65,11 +64,7 @@ class DevicesFormControl extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('DevicesFormControl.componentDidUpdate', prevProps);
     if (this.props.apiClient && this.state.clients === undefined) {
-      console.log(
-        'DevicesFormControl.componentDidUpdate: apiClient and no state'
-      );
       this.props.apiClient.bikebuds.get_clients().then(this.handleClients);
     }
   }
