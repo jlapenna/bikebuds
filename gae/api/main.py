@@ -362,9 +362,10 @@ client_state_model = api.model(
     'ClientState',
     {
         'active': fields.Boolean,
+        'created': fields.DateTime,
+        'modified': fields.DateTime,
         'token': fields.String,
         'type': fields.String,
-        'modified': fields.DateTime,
     },
 )
 client_state_entity_model = EntityModel(client_state_model)

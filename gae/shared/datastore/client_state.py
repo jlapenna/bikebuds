@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
@@ -32,6 +34,9 @@ class ClientState(object):
             return client_state
         client_state = Entity(key)
         client_state['active'] = True
+        client_state['created'] = datetime.datetime.now(datetime.timezone.utc)
+        client_state['modified'] = datetime.datetime.now(datetime.timezone.utc)
+        client_state['token'] = name
         client_state['type'] = 'UNKNOWN'
         ds_util.client.put(client_state)
         return client_state
