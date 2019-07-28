@@ -35,7 +35,9 @@ import ActivityDetail from './ActivityDetail';
 class ActivitiesListCard extends Component {
   static styles = {
     root: {
-      height: '400px'
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
     },
     content: {
       height: '400px'

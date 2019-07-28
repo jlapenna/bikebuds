@@ -40,11 +40,6 @@ class PreferencesCard extends Component {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between'
-    },
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between'
     }
   });
 
