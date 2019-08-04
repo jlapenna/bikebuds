@@ -43,7 +43,7 @@ class DevicesFormControl extends Component {
 
   handleClients = response => {
     response.body.forEach(function(client) {
-      client.properties.modified = moment.utc(client.properties.modified);
+      client.properties.created = moment.utc(client.properties.created);
     });
     this.setState({
       clients: response.body
@@ -89,9 +89,9 @@ class DevicesFormControl extends Component {
                   value={client.properties.token}
                   control={<Switch />}
                   label={
+                    client.properties.created.format('LLL') +
+                    ' ' +
                     client.properties.type
-                      ? client.properties.type
-                      : client.properties.modified.format('LLL')
                   }
                   labelPlacement="end"
                 />
