@@ -24,7 +24,7 @@ load_config;
 function main() {
   local repo_path="$(get_repo_path)"; 
 
-  activate_gae3_virtualenv
+  activate_virtualenv gae3 python3
 
   pushd gae/frontend
   PORT=8080 BROWSER=none npm start

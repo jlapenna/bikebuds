@@ -85,11 +85,6 @@ function activate_virtualenv() {
   fi
 }
 
-function activate_gae3_virtualenv() {
-  activate_virtualenv gae3 python3
-  return $?
-}
-
 function setup_datastore_emulator() {
   load_config
   echo "Running against the local datastore.";
