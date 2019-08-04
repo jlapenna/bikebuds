@@ -2,6 +2,7 @@
 Flask==1.0.3
 Flask-Cors==3.0.7
 flask-restplus==0.12.1
+flask-talisman==0.7.0
 
 requests==2.22.0
 requests-toolbelt==0.9.1

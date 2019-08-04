@@ -29,6 +29,7 @@ SERVICE_KEY = 'ahFkZXZ-YmlrZWJ1ZHMtdGVzdHIxCxIEVXNlciISamxhcGVubmFAZ21haWwuY29tD
 
 class MainTest(unittest.TestCase):
     def setUp(self):
+        main.app.debug = True
         main.app.testing = True
         self.client = main.app.test_client()
 

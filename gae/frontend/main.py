@@ -18,6 +18,7 @@ import logging
 import flask
 from flask_cors import CORS
 from flask_cors import cross_origin
+from flask_talisman import Talisman
 
 from firebase_admin import auth
 
@@ -35,6 +36,7 @@ app.register_blueprint(bbfitbit.module)
 app.register_blueprint(strava.module)
 app.register_blueprint(withings.module)
 CORS(app, origins=config.origins)
+Talisman(app, force_https_permanent=True)
 
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
