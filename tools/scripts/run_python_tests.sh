@@ -31,7 +31,7 @@ function main() {
     activate_virtualenv ${service} python3
 
     pushd gae/${service}
-    pip install -r requirements.txt > /dev/null 2>&1
+    pip -q install -r requirements.txt
     result=$?;
     if [[ ${result} != 0 ]]; then
       echo "Unable to pip install. Aborting."
@@ -39,7 +39,7 @@ function main() {
     fi
 
     if [ -e "test_requirements.txt" ]; then
-      pip install -r test_requirements.txt > /dev/null 2>&1
+      pip -q install -r test_requirements.txt
       result=$?;
       if [[ ${result} != 0 ]]; then
         echo "Unable to pip install test_requirements.txt. Aborting."

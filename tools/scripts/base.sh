@@ -39,12 +39,21 @@ function verify_deps() {
 }
 
 function get_repo_path() {
-  local repo_path=$(readlink -e "$PWD")
+  local repo_path=$(readlink -m "$PWD")
+  echo "${repo_path}";
   if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo." >&2
+    echo "Must be in the bikebuds code repo!" >&2
     return 1;
   fi
-  echo "${repo_path}";
+}
+
+function get_virtualenv_path() {
+  local env_name="$1"
+  local env_path=$(readlink -m "$(get_repo_path)/virtualenv/${env_name}")
+  echo "${env_path}";
+  if [ ! -d "${env_path}" ]; then
+    return 1;
+  fi
 }
 
 function set_dev_environment() {
@@ -72,15 +81,21 @@ function set_prod_environment() {
 function activate_virtualenv() {
   local env_name="$1"
   local python="$2"
-  local env_path=$(readlink -f "$(get_repo_path)/virtualenv/${env_name}")
+  local env_path="$(get_virtualenv_path "${env_name}")"
 
-  echo "Installing virtual environment at ${env_path}"
-  virtualenv --python "${python}" "${env_path}"
+  if [ ! -d "${env_path}" ]; then
+    echo "Unable to find virtual environment, creating it at ${env_path}." >&2
+    virtualenv --python "${python}" "${env_path}";
+    if [ "$?" -ne 0 ]; then
+      echo "Unable to create virtual environment." >&2
+      return 2;
+    fi
+  fi
   
   echo "Activating virtual environment at ${env_path}"
   source "${env_path}/bin/activate"
   if [ "$?" -ne 0 ]; then
-    echo "Unable to setup virtual environment." >&2
+    echo "Unable to activate virtual environment." >&2
     return 2;
   fi
 }
