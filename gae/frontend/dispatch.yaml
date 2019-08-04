@@ -1,0 +1,5 @@
+dispatch:
+  - url: 'api.bikebuds.cc/*'
+    service: api
+  - url: 'backend.bikebuds.cc/*'
+    service: backend
