@@ -22,8 +22,6 @@ import "package:bikebuds_api/api.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/widgets.dart";
 
-var f = defaultApiClient;
-
 class BikebudsApiContainer extends StatefulWidget {
   final Widget child;
 
