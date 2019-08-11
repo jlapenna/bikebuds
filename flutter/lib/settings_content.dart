@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class SettingsContent extends StatelessWidget {
+  SettingsContent();
+
   @override
   Widget build(BuildContext context) {
     var bikebuds = BikebudsApiContainer.of(context);

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/events_content.dart';
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/main_content.dart';
+import 'package:bikebuds/page.dart';
 import 'package:bikebuds/privacy_util.dart';
-import 'package:bikebuds/settings_content.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -34,11 +34,24 @@ class _MainScreenState extends State<MainScreen> {
         title: Text("Bikebuds"),
       ),
       drawer: buildDrawer(firebase),
-      body: buildBody(firebase),
+      body: MainContent(_selectedDrawerItem),
     );
   }
 
   Drawer buildDrawer(FirebaseContainerState firebase) {
+    List<Widget> children = [];
+    children.add(DrawerHeader(child: Container()));
+    for (int i = 0; i < pages.length; i++) {
+      children.add(ListTile(
+        title: Text(pages[i].title),
+        onTap: () {
+          setState(() {
+            _selectedDrawerItem = i;
+            Navigator.pop(context);
+          });
+        },
+      ));
+    }
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -46,36 +59,7 @@ class _MainScreenState extends State<MainScreen> {
             child: ListView(
               // Important: Remove any padding from the ListView.
               padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(child: Container()),
-                ListTile(
-                  title: Text('Rides'),
-                  onTap: () {
-                    setState(() {
-                      _selectedDrawerItem = 0;
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-                ListTile(
-                  title: Text('Settings'),
-                  onTap: () {
-                    setState(() {
-                      _selectedDrawerItem = 1;
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-                ListTile(
-                  title: Text('Signup'),
-                  onTap: () {
-                    setState(() {
-                      _selectedDrawerItem = 2;
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-              ],
+              children: children,
             ),
           ),
           Container(
@@ -102,16 +86,5 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
-  }
-
-  Widget buildBody(FirebaseContainerState firebase) {
-    switch (_selectedDrawerItem) {
-      case 0:
-        return EventsContent();
-      case 1:
-        return SettingsContent();
-      default:
-        return Container();
-    }
   }
 }
