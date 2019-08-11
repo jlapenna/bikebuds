@@ -25,7 +25,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedDrawerItem = 1;
+  int _selectedDrawerItem = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +40,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Drawer buildDrawer(FirebaseContainerState firebase) {
-    List<Widget> children = [];
-    children.add(DrawerHeader(child: Container()));
+    final List<Widget> children = [DrawerHeader(child: Container())];
     for (int i = 0; i < pages.length; i++) {
       children.add(ListTile(
         title: Text(pages[i].title),

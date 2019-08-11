@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/pages/pages.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-class MainContent extends StatelessWidget {
-  final int selectedDrawerItem;
+import '../../user_model.dart';
+import 'web.dart';
 
-  const MainContent(this.selectedDrawerItem);
+class HomePage extends StatelessWidget {
+  const HomePage();
 
   @override
   Widget build(BuildContext context) {
-    print('MainContent: building.');
-    return pages[selectedDrawerItem].widgetBuilder();
+    return ScopedModelDescendant<UserModel>(builder: (context, child, model) {
+      return Web();
+    });
   }
 }

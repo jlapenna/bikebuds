@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import 'events/events_page.dart';
+import 'home/home_page.dart';
 import 'settings/settings_page.dart';
 
-final List<Page> pages = [
+final List<Page> pages = List.unmodifiable([
+  Page('Home', () => HomePage()),
   Page('Rides', () => EventsPage()),
   Page('Settings', () => SettingsPage()),
-];
+]);
 
 class Page {
   final String title;
