@@ -12,18 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'events_content.dart';
-import 'home_content.dart';
-import 'settings_content.dart';
+import 'package:flutter/material.dart';
 
-final List<Page> pages = [
-  Page('Rides', () => EventsPage()),
-  Page('Settings', () => SettingsPage()),
-];
+import 'events_list.dart';
 
-class Page {
-  final String title;
-  final dynamic widgetBuilder;
+class EventsPage extends StatefulWidget {
+  EventsPage();
 
-  const Page(this.title, this.widgetBuilder);
+  @override
+  _EventsPageState createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: EventsList(),
+    );
+  }
 }

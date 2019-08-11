@@ -21,16 +21,16 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class EventScreen extends StatefulWidget {
+class EventPage extends StatefulWidget {
   final DocumentSnapshot event;
 
-  EventScreen({this.event});
+  EventPage({this.event});
 
   @override
-  _EventScreenState createState() => _EventScreenState();
+  _EventPageState createState() => _EventPageState();
 }
 
-class _EventScreenState extends State<EventScreen> {
+class _EventPageState extends State<EventPage> {
   FirebaseContainerState firebase;
 
   DocumentSnapshot event;

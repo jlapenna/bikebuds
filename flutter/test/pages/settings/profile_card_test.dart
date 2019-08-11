@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/profile_card.dart';
+import 'package:bikebuds/pages/settings/profile_card.dart';
 import 'package:bikebuds_api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'bikebuds_api_testutil.dart';
-import 'firebase_testutil.dart';
+import '../../bikebuds_api_testutil.dart';
+import '../../firebase_testutil.dart';
 
 void main() {
   testWidgets('profile card smoke test', (WidgetTester tester) async {

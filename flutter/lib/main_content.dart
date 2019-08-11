@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/page.dart';
+import 'package:bikebuds/pages/pages.dart';
 import 'package:flutter/material.dart';
 
 class MainContent extends StatelessWidget {
   final int selectedDrawerItem;
 
-  MainContent(this.selectedDrawerItem);
+  const MainContent(this.selectedDrawerItem);
+
   @override
   Widget build(BuildContext context) {
     return pages[selectedDrawerItem].widgetBuilder();

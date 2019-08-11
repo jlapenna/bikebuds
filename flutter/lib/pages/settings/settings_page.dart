@@ -13,13 +13,14 @@
 // limitations under the License.
 
 import 'package:bikebuds/bikebuds_util.dart';
-import 'package:bikebuds/profile_card.dart';
 import 'package:bikebuds/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-class SettingsContent extends StatelessWidget {
-  SettingsContent();
+import 'profile_card.dart';
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage();
 
   @override
   Widget build(BuildContext context) {

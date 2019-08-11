@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/events_list.dart';
-import 'package:flutter/material.dart';
+import 'events/events_page.dart';
+import 'settings/settings_page.dart';
 
-class EventsContent extends StatefulWidget {
-  EventsContent();
+final List<Page> pages = [
+  Page('Rides', () => EventsPage()),
+  Page('Settings', () => SettingsPage()),
+];
 
-  @override
-  _EventsContentState createState() => _EventsContentState();
-}
+class Page {
+  final String title;
+  final dynamic widgetBuilder;
 
-class _EventsContentState extends State<EventsContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: EventsList(),
-    );
-  }
+  const Page(this.title, this.widgetBuilder);
 }

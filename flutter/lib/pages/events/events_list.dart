@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/event_screen.dart';
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/pages/events/event_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'date_util.dart';
+import '../../date_util.dart';
 
 class EventsList extends StatefulWidget {
   EventsList();
@@ -64,7 +64,7 @@ class _EventsListState extends State<EventsList> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventScreen(event: event),
+            builder: (context) => EventPage(event: event),
           ),
         );
       },

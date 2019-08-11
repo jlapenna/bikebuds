@@ -14,9 +14,10 @@
 
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_content.dart';
-import 'package:bikebuds/page.dart';
 import 'package:bikebuds/privacy_util.dart';
 import 'package:flutter/material.dart';
+
+import 'pages/pages.dart';
 
 class MainScreen extends StatefulWidget {
   @override
