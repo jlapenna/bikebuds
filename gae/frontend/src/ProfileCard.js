@@ -89,7 +89,7 @@ class ProfileCard extends Component {
           this.props.profile.athlete.properties.clubs.map((club, index) => {
             return (
               <Grid item key={index}>
-                <ClubAvatar club={club} />
+                <ClubAvatar club={club} match={this.props.match} />
               </Grid>
             );
           })}
@@ -147,7 +147,10 @@ class ProfileCard extends Component {
             color="primary"
             variant="contained"
             component={Link}
-            to={{ pathname: '/signup', search: window.location.search }}
+            to={{
+              pathname: `${this.props.match.url}/signup`,
+              search: window.location.search
+            }}
             disabled={this.state.connectActionPending}
           >
             Connect Services

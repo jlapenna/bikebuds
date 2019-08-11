@@ -37,6 +37,7 @@ class Settings extends Component {
           <ProfileCard
             firebaseUser={this.props.firebaseUser}
             apiClient={this.props.apiClient}
+            match={this.props.match}
             profile={this.props.profile}
           />
         </Grid>

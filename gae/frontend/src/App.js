@@ -35,6 +35,7 @@ import { config } from './config';
 
 import { FirebaseState } from './firebase_util';
 
+import Embed from './Embed';
 import Main from './Main';
 import Privacy from './Privacy';
 import SignInScreen from './SignInScreen';
@@ -134,6 +135,9 @@ class App extends Component {
     return (
       <Router>
         <Switch>
+          <Route path="/services">
+            <div>Misconfigured.</div>
+          </Route>
           <Route path="/privacy">
             <Privacy />
           </Route>
@@ -143,27 +147,44 @@ class App extends Component {
           <Route path="/app">
             <Redirect to="/" />
           </Route>
-          <Route path="/signin">
+          <Route
+            path="/signup"
+            render={props => (
+              <StandaloneSignup
+                firebase={this.state.firebase}
+                firebaseUser={
+                  this._isSignedIn() ? this.state.firebaseUser : undefined
+                }
+                match={props.match}
+              />
+            )}
+          />
+          <Route
+            path="/embed/"
+            render={props => (
+              <Embed
+                firebase={this.state.firebase}
+                firebaseUser={
+                  this._isSignedIn() ? this.state.firebaseUser : undefined
+                }
+                match={props.match}
+              />
+            )}
+          />
+          <Route
+            path="/"
+            render={props => (
+              <Main
+                firebase={this.state.firebase}
+                firebaseUser={
+                  this._isSignedIn() ? this.state.firebaseUser : undefined
+                }
+                match={props.match}
+              />
+            )}
+          />
+          <Route path="">
             <Redirect to="/" />
-          </Route>
-          <Route path="/services">
-            <div>Misconfigured.</div>
-          </Route>
-          <Route path="/signup">
-            <StandaloneSignup
-              firebase={this.state.firebase}
-              firebaseUser={
-                this._isSignedIn() ? this.state.firebaseUser : undefined
-              }
-            />
-          </Route>
-          <Route>
-            <Main
-              firebase={this.state.firebase}
-              firebaseUser={
-                this._isSignedIn() ? this.state.firebaseUser : undefined
-              }
-            />
           </Route>
         </Switch>
       </Router>
@@ -174,6 +195,9 @@ class App extends Component {
     return (
       <Router>
         <Switch>
+          <Route path="/services">
+            <div>Misconfigured.</div>
+          </Route>
           <Route path="/privacy">
             <Privacy />
           </Route>
@@ -183,10 +207,7 @@ class App extends Component {
           <Route path="/signin">
             <SignInScreen firebase={this.state.firebase} />
           </Route>
-          <Route path="/services">
-            <div>Misconfigured.</div>
-          </Route>
-          <Route path="/">
+          <Route path="">
             <Redirect to="/signin" />
           </Route>
         </Switch>
@@ -201,6 +222,9 @@ class App extends Component {
       // We haven't initialized state, so we don't know what to render.
       return null;
     }
+    // I can't make this router nicer, as putting routes inside a fragment
+    // as the fragments then contain the routes, which the switch doesn't know
+    // how to properly switch with.
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />

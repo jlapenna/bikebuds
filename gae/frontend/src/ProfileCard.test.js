@@ -30,9 +30,14 @@ it('renders without crashing', () => {
   const profile = {
     athlete: { properties: { city: 'San Francisco' } }
   };
+  const match = {};
   ReactDOM.render(
     <Router>
-      <ProfileCard firebaseUser={firebaseUser} profile={profile} />
+      <ProfileCard
+        firebaseUser={firebaseUser}
+        profile={profile}
+        match={match}
+      />
     </Router>,
     div
   );

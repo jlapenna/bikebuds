@@ -23,9 +23,10 @@ import ClubAvatar from './ClubAvatar';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
+  const match = {};
   ReactDOM.render(
     <Router>
-      <ClubAvatar club={{ id: 1, name: 'ClubName' }} />
+      <ClubAvatar club={{ id: 1, name: 'ClubName' }} match={match} />
     </Router>,
     div
   );

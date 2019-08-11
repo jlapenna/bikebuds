@@ -27,6 +27,7 @@ import Signup from './Signup';
 
 export default class MainContent extends React.Component {
   static propTypes = {
+    match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     apiClient: PropTypes.object.isRequired,
@@ -34,7 +35,11 @@ export default class MainContent extends React.Component {
   };
 
   render() {
-    console.log('MainContent.render: ', this.props.profile);
+    console.log(
+      'MainContent.render: ',
+      this.props.match.path,
+      this.props.profile
+    );
     if (!this.props.profile.fetched) {
       console.log('MainContent.render: no profile');
       return null;
@@ -42,7 +47,7 @@ export default class MainContent extends React.Component {
     if (!this.props.profile.signup_complete) {
       return (
         <Route>
-          <Redirect to="/signup" />
+          <Redirect to="signup" />
         </Route>
       );
     }
@@ -50,29 +55,19 @@ export default class MainContent extends React.Component {
     return (
       <Switch>
         <Route
-          path="/club/:club_id"
-          render={thinger => (
+          path={`${this.props.match.path}club/:club_id`}
+          render={props => (
             <Club
-              clubId={Number(thinger.match.params.club_id)}
+              clubId={Number(props.match.params.club_id)}
               apiClient={this.props.apiClient}
               profile={this.props.profile}
             />
           )}
         />
         <Route
-          path="/"
+          path={`${this.props.match.path}events`}
           exact
-          render={() => (
-            <Home
-              apiClient={this.props.apiClient}
-              profile={this.props.profile}
-            />
-          )}
-        />
-        <Route
-          path="/events"
-          exact
-          render={() => (
+          render={props => (
             <Events
               firebase={this.props.firebase}
               apiClient={this.props.apiClient}
@@ -80,20 +75,31 @@ export default class MainContent extends React.Component {
           )}
         />
         <Route
-          path="/settings"
-          exact
-          render={() => (
+          path={`${this.props.match.path}settings`}
+          render={props => (
             <Settings
               apiClient={this.props.apiClient}
               firebaseUser={this.props.firebaseUser}
+              match={this.props.match}
               profile={this.props.profile}
             />
           )}
         />
-        <Route path="/signup" exact render={() => <Signup />} />
-        <Route>
-          <Redirect to="/" />
-        </Route>
+        <Route
+          path={`${this.props.match.path}/signup`}
+          exact
+          render={props => <Signup />}
+        />
+        <Route
+          path={`${this.props.match.path}`}
+          exact
+          render={props => (
+            <Home
+              apiClient={this.props.apiClient}
+              profile={this.props.profile}
+            />
+          )}
+        />
       </Switch>
     );
   }

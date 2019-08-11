@@ -77,6 +77,7 @@ class Main extends Component {
   });
 
   static propTypes = {
+    match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired
   };
@@ -122,97 +123,96 @@ class Main extends Component {
 
   render() {
     return (
-      <React.Fragment>
-        <div className={this.props.classes.root}>
-          <SwagWrapper
-            onReady={this.handleSwagReady}
-            onFailed={this.handleSwagFailed}
+      <div className={this.props.classes.root}>
+        <SwagWrapper
+          onReady={this.handleSwagReady}
+          onFailed={this.handleSwagFailed}
+        />
+        {this.state.apiClient && (
+          <ProfileWrapper
+            apiClient={this.state.apiClient}
+            profile={this.state.profile}
           />
+        )}
+        {this.state.apiClient && this.props.firebase !== undefined && (
+          <FcmManager
+            firebase={this.props.firebase}
+            apiClient={this.state.apiClient}
+            onMessage={this.handleFcmMessage}
+          />
+        )}
+        <AppBar className={this.props.classes.appBar} position="fixed">
+          <Toolbar>
+            <IconButton
+              className={this.props.classes.menuButton}
+              onClick={this.handleDrawerToggle}
+              color="inherit"
+              aria-label="Menu"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              className={this.props.classes.grow}
+              variant="h6"
+              color="inherit"
+            >
+              Bikebuds
+            </Typography>
+          </Toolbar>
+          {this.state.profile === undefined && <LinearProgress />}
+        </AppBar>
+        <nav className={this.props.classes.drawer}>
+          <Hidden mdUp>
+            <Drawer
+              container={this.props.container}
+              variant="temporary"
+              anchor={this.props.theme.direction === 'rtl' ? 'right' : 'left'}
+              open={this.state.mobileOpen}
+              onClose={this.handleDrawerToggle}
+              classes={{
+                paper: this.props.classes.drawerPaper
+              }}
+              ModalProps={{
+                keepMounted: true // Better open performance on mobile.
+              }}
+            >
+              <div className={this.props.classes.toolbar} />
+              <DrawerContent
+                profile={this.state.profile}
+                onClick={() => this.setState({ mobileOpen: false })}
+              />
+            </Drawer>
+          </Hidden>
+          <Hidden smDown>
+            <Drawer
+              classes={{
+                paper: this.props.classes.drawerPaper
+              }}
+              variant="permanent"
+              open
+            >
+              <div className={this.props.classes.toolbar} />
+              <DrawerContent
+                profile={this.state.profile}
+                onClick={() => this.setState({ mobileOpen: false })}
+              />
+            </Drawer>
+          </Hidden>
+        </nav>
+        <main className={this.props.classes.main}>
+          <div className={this.props.classes.toolbar} />
           {this.state.apiClient && (
-            <ProfileWrapper
+            <MainContent
+              className={this.props.classes.mainContent}
+              match={this.props.match}
+              firebase={this.props.firebase}
+              firebaseUser={this.props.firebaseUser}
               apiClient={this.state.apiClient}
               profile={this.state.profile}
             />
           )}
-          {this.state.apiClient && this.props.firebase !== undefined && (
-            <FcmManager
-              firebase={this.props.firebase}
-              apiClient={this.state.apiClient}
-              onMessage={this.handleFcmMessage}
-            />
-          )}
-          <AppBar className={this.props.classes.appBar} position="fixed">
-            <Toolbar>
-              <IconButton
-                className={this.props.classes.menuButton}
-                onClick={this.handleDrawerToggle}
-                color="inherit"
-                aria-label="Menu"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography
-                className={this.props.classes.grow}
-                variant="h6"
-                color="inherit"
-              >
-                Bikebuds
-              </Typography>
-            </Toolbar>
-            {this.state.profile === undefined && <LinearProgress />}
-          </AppBar>
-          <nav className={this.props.classes.drawer}>
-            <Hidden mdUp>
-              <Drawer
-                container={this.props.container}
-                variant="temporary"
-                anchor={this.props.theme.direction === 'rtl' ? 'right' : 'left'}
-                open={this.state.mobileOpen}
-                onClose={this.handleDrawerToggle}
-                classes={{
-                  paper: this.props.classes.drawerPaper
-                }}
-                ModalProps={{
-                  keepMounted: true // Better open performance on mobile.
-                }}
-              >
-                <div className={this.props.classes.toolbar} />
-                <DrawerContent
-                  profile={this.state.profile}
-                  onClick={() => this.setState({ mobileOpen: false })}
-                />
-              </Drawer>
-            </Hidden>
-            <Hidden smDown>
-              <Drawer
-                classes={{
-                  paper: this.props.classes.drawerPaper
-                }}
-                variant="permanent"
-                open
-              >
-                <div className={this.props.classes.toolbar} />
-                <DrawerContent
-                  profile={this.state.profile}
-                  onClick={() => this.setState({ mobileOpen: false })}
-                />
-              </Drawer>
-            </Hidden>
-          </nav>
-          <main className={this.props.classes.main}>
-            <div className={this.props.classes.toolbar} />
-            {this.state.apiClient && (
-              <MainContent
-                className={this.props.classes.mainContent}
-                firebase={this.props.firebase}
-                firebaseUser={this.props.firebaseUser}
-                apiClient={this.state.apiClient}
-                profile={this.state.profile}
-              />
-            )}
-          </main>
-        </div>
-      </React.Fragment>
+        </main>
+      </div>
     );
   }
 }
