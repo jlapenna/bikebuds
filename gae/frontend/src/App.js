@@ -42,7 +42,7 @@ import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
-class App extends Component {
+class MainApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -69,7 +69,7 @@ class App extends Component {
 
   componentDidMount() {
     if (config.isDev && config.fakeUser) {
-      console.log('App: Warning: Using Fake User.');
+      console.log('MainApp: Warning: Using Fake User.');
       const firebaseUser = {
         displayName: 'Fake User',
         photoUrl: '/logo-round.svg'
@@ -83,10 +83,10 @@ class App extends Component {
       return;
     }
 
-    console.log('App: Using Real Auth');
+    console.log('MainApp: Using Real Auth');
     this.unregisterAuthObserver = this.state.firebase.onAuthStateChanged(
       firebaseUser => {
-        console.log('App.onAuthStateChanged: ', firebaseUser);
+        console.log('MainApp.onAuthStateChanged: ', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
         // update state.
         if (this.unregisterAuthObserver === null) {
@@ -104,7 +104,7 @@ class App extends Component {
         });
       },
       firebaseUser => {
-        console.log('App.onAuthStateChanged: Next', firebaseUser);
+        console.log('MainApp.onAuthStateChanged: Next', firebaseUser);
         // If we've unmounted before this callback executes, we don't want to
         // update state.
         if (this.unregisterAuthObserver === null) {
@@ -135,18 +135,6 @@ class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route path="/services">
-            <div>Misconfigured.</div>
-          </Route>
-          <Route path="/privacy">
-            <Privacy />
-          </Route>
-          <Route path="/tos">
-            <ToS />
-          </Route>
-          <Route path="/app">
-            <Redirect to="/" />
-          </Route>
           <Route
             path="/signup"
             render={props => (
@@ -195,19 +183,19 @@ class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route path="/services">
-            <div>Misconfigured.</div>
-          </Route>
-          <Route path="/privacy">
-            <Privacy />
-          </Route>
-          <Route path="/tos">
-            <ToS />
-          </Route>
-          <Route path="/signin">
-            <SignInScreen firebase={this.state.firebase} />
-          </Route>
-          <Route path="">
+          <Route
+            path="/signin"
+            render={props => (
+              <SignInScreen
+                firebase={this.state.firebase}
+                firebaseUser={
+                  this._isSignedIn() ? this.state.firebaseUser : undefined
+                }
+                match={props.match}
+              />
+            )}
+          />
+          <Route>
             <Redirect to="/signin" />
           </Route>
         </Switch>
@@ -216,9 +204,9 @@ class App extends Component {
   }
 
   render() {
-    console.log('App.render: ', this.state);
+    console.log('MainApp.render: ', this.state);
     if (this._isSignedIn() === undefined) {
-      console.log('App.render: Still uninitialized');
+      console.log('MainApp.render: Still uninitialized');
       // We haven't initialized state, so we don't know what to render.
       return null;
     }
@@ -231,6 +219,34 @@ class App extends Component {
         {this._isSignedIn()
           ? this.renderSignedInRouter()
           : this.renderSignedOutRouter()}
+      </MuiThemeProvider>
+    );
+  }
+}
+
+/** Directs most routes to our main app, but some auth-less routes to shims. */
+class App extends Component {
+  render() {
+    console.log('App.render: ', this.state);
+    return (
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Switch>
+            <Route path="/services">
+              <div>Misconfigured.</div>
+            </Route>
+            <Route path="/privacy">
+              <Privacy />
+            </Route>
+            <Route path="/tos">
+              <ToS />
+            </Route>
+            <Route>
+              <MainApp />
+            </Route>
+          </Switch>
+        </Router>
       </MuiThemeProvider>
     );
   }
