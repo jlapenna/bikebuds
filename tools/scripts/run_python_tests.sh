@@ -49,6 +49,7 @@ function main() {
 
     python -m unittest
     result=$?;
+    echo '================================================================================'
     popd
 
     deactivate
