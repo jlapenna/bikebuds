@@ -14,6 +14,7 @@
 
 import unittest
 
+from shared import ds_util
 from shared.datastore.subscription import SubscriptionEvent
 
 
@@ -31,3 +32,15 @@ class SubscriptionEventTest(unittest.TestCase):
     def test_hash_name_empty_args(self):
         args = []
         self.assertRaises(Exception, SubscriptionEvent.hash_name, *args)
+
+    def test_uses_name(self):
+        service_key = ds_util.client.key('Service', 'withings')
+        event_data = {'key1': 'AAA', 'key2': 'BBB', 'key3': 'CCC'}
+        event_entity = SubscriptionEvent.to_entity(
+            event_data,
+            name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
+            parent=service_key,
+        )
+        self.assertEqual(
+            '2236edf1239b64ae48b309fb0bf15cdf6ddbf921', event_entity.key.name
+        )
