@@ -42,5 +42,7 @@ class SubscriptionEvent(object):
 
     @classmethod
     def hash_name(cls, *args):
+        if len(args) == 0:
+            raise TypeError("Expected non-zero-length hash_name args")
         hash_string = '-'.join([str(arg) for arg in args])
         return hashlib.sha1(hash_string.encode()).hexdigest()
