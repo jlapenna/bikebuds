@@ -67,7 +67,7 @@ class MainTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, Responses.OK_SUB_EVENT_FAILED.code)
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_not_called()
 

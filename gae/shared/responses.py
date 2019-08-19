@@ -21,6 +21,9 @@ Response = collections.namedtuple('Response', ('message', 'code'))
 
 class Responses(object):
     OK = Response('OK', 200)
+    # 200, because this is what withings requires as a response.
+    OK_SUB_EVENT_FAILED = Response('SUB_EVENT_FAILED', 200)
+
     OK_SYNC_EXCEPTION = Response('UNKNOWN EXCEPTION', 201)
     OK_NO_SERVICE = Response('NO SERVICE', 210)
     OK_NO_CREDENTIALS = Response('NO CREDENTIALS', 220)

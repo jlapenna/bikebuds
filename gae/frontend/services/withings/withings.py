@@ -131,23 +131,25 @@ def events_post():
             }
         )
         ds_util.client.put(sub_event_failure)
-    else:
-        event_entity = SubscriptionEvent.to_entity(
-            event_data,
-            name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
-            parent=service_key,
-        )
-        logging.debug(
-            'Processing Withings event: %s from url: %s',
-            event_entity.key,
-            flask.request.url,
-        )
-        ds_util.client.put(event_entity)
-        try:
-            task_util.process_event(event_entity.key)
-            logging.info('Queued Withings event: %s', event_entity.key)
-        except AlreadyExists:
-            logging.info('Duplicate Withings event: %s', event_entity.key)
+        return Responses.OK_SUB_EVENT_FAILED
+
+    # We can proess this entity.
+    event_entity = SubscriptionEvent.to_entity(
+        event_data,
+        name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
+        parent=service_key,
+    )
+    logging.debug(
+        'Processing Withings event: %s from url: %s',
+        event_entity.key,
+        flask.request.url,
+    )
+    ds_util.client.put(event_entity)
+    try:
+        task_util.process_event(event_entity.key)
+        logging.info('Queued Withings event: %s', event_entity.key)
+    except AlreadyExists:
+        logging.info('Duplicate Withings event: %s', event_entity.key)
     return Responses.OK
 
 
