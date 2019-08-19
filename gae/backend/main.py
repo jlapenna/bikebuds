@@ -174,6 +174,7 @@ def _do(worker, work_key=None, method='sync'):
         getattr(worker, method)()  # Dynamically run the provided method.
         logging.info('Worker completed: %s/%s', work_name, work_key)
     except Exception:
+        logging.exception('Worker failed: %s/%s', work_name, work_key)
         raise SyncException('Worker failed: %s/%s', work_name, work_key)
 
 
