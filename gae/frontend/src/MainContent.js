@@ -47,7 +47,7 @@ export default class MainContent extends React.Component {
     if (!this.props.profile.signup_complete) {
       return (
         <Route>
-          <Redirect to="signup" />
+          <Redirect to={`${this.props.match.url}signup`} />
         </Route>
       );
     }
@@ -86,7 +86,7 @@ export default class MainContent extends React.Component {
           )}
         />
         <Route
-          path={`${this.props.match.path}/signup`}
+          path={`${this.props.match.path}signup`}
           exact
           render={props => <Signup />}
         />

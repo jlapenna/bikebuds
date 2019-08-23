@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
@@ -31,10 +32,9 @@ import 'typeface-roboto';
 
 import theme from './theme';
 
-import { config } from './config';
-
 import { FirebaseState } from './firebase_util';
 
+import AuthWrapper from './AuthWrapper';
 import Embed from './Embed';
 import Main from './Main';
 import Privacy from './Privacy';
@@ -42,144 +42,63 @@ import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
-class MainApp extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      firebase:
-        props.firebase !== undefined
-          ? props.firebase
-          : new FirebaseState(true /* enableMessaging */),
-      isSignedIn: undefined,
-      firebaseUser: undefined,
-      isSignedInNext: undefined,
-      firebaseUserNext: undefined
-    };
-  }
+class SignedInApp extends Component {
+  static propTypes = {
+    firebase: PropTypes.object.isRequired,
+    firebaseUser: PropTypes.object.isRequired
+  };
 
-  _isSignedIn() {
-    if (
-      this.state.isSignedIn === undefined ||
-      this.state.isSignedInNext === undefined
-    ) {
-      return undefined;
-    }
-    return this.state.isSignedIn && this.state.isSignedInNext;
-  }
-
-  componentDidMount() {
-    if (config.isDev && config.fakeUser) {
-      console.log('MainApp: Warning: Using Fake User.');
-      const firebaseUser = {
-        displayName: 'Fake User',
-        photoUrl: '/logo-round.svg'
-      };
-      this.setState({
-        isSignedIn: true,
-        firebaseUser: firebaseUser,
-        isSignedInNext: true,
-        firebaseUserNext: firebaseUser
-      });
-      return;
-    }
-
-    console.log('MainApp: Using Real Auth');
-    this.unregisterAuthObserver = this.state.firebase.onAuthStateChanged(
-      firebaseUser => {
-        console.log('MainApp.onAuthStateChanged: ', firebaseUser);
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserver === null) {
-          return;
-        }
-        this.setState({
-          isSignedIn: !!firebaseUser,
-          firebaseUser: firebaseUser
-        });
-        firebaseUser.getIdTokenResult().then(idTokenResult => {
-          firebaseUser.admin = !!idTokenResult.claims['admin'];
-          this.setState({
-            firebaseUser: firebaseUser
-          });
-        });
-      },
-      firebaseUser => {
-        console.log('MainApp.onAuthStateChanged: Next', firebaseUser);
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserver === null) {
-          return;
-        }
-        this.setState({
-          isSignedInNext: !!firebaseUser,
-          firebaseUserNext: firebaseUser
-        });
-        firebaseUser.getIdTokenResult().then(idTokenResult => {
-          firebaseUser.admin = !!idTokenResult.claims['admin'];
-          this.setState({
-            firebaseUser: firebaseUser
-          });
-        });
-      }
-    );
-  }
-
-  componentWillUnmount() {
-    if (!!this.unregisterAuthObserver) {
-      this.unregisterAuthObserver();
-      this.unregisterAuthObserver = null;
-    }
-  }
-
-  renderSignedInRouter() {
+  render() {
+    console.log('App.SignedInApp.render');
     return (
       <Router>
         <Switch>
           <Route
             path="/signup"
-            render={props => (
+            render={routeProps => (
               <StandaloneSignup
-                firebase={this.state.firebase}
-                firebaseUser={
-                  this._isSignedIn() ? this.state.firebaseUser : undefined
-                }
-                match={props.match}
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+                match={routeProps.match}
               />
             )}
           />
           <Route
             path="/embed/"
-            render={props => (
+            render={routeProps => (
               <Embed
-                firebase={this.state.firebase}
-                firebaseUser={
-                  this._isSignedIn() ? this.state.firebaseUser : undefined
-                }
-                match={props.match}
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+                match={routeProps.match}
               />
             )}
           />
           <Route
             path="/"
-            render={props => (
+            render={routeProps => (
               <Main
-                firebase={this.state.firebase}
-                firebaseUser={
-                  this._isSignedIn() ? this.state.firebaseUser : undefined
-                }
-                match={props.match}
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+                match={routeProps.match}
               />
             )}
           />
-          <Route path="">
+          <Route>
             <Redirect to="/" />
           </Route>
         </Switch>
       </Router>
     );
   }
+}
 
-  renderSignedOutRouter() {
+class SignedOutApp extends Component {
+  static propTypes = {
+    firebase: PropTypes.object.isRequired
+  };
+
+  render() {
+    console.log('App.SignedOutApp.render');
     return (
       <Router>
         <Switch>
@@ -187,10 +106,7 @@ class MainApp extends Component {
             path="/signin"
             render={props => (
               <SignInScreen
-                firebase={this.state.firebase}
-                firebaseUser={
-                  this._isSignedIn() ? this.state.firebaseUser : undefined
-                }
+                firebase={this.props.firebase}
                 match={props.match}
               />
             )}
@@ -202,30 +118,60 @@ class MainApp extends Component {
       </Router>
     );
   }
+}
+
+class MainApp extends Component {
+  static propTypes = {
+    firebase: PropTypes.object.isRequired
+  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      isSignedIn: undefined
+    };
+  }
+
+  handleSignedIn = isSignedIn => {
+    console.log('App.MainApp.handleSignedIn:', isSignedIn);
+    this.setState({ isSignedIn: isSignedIn });
+  };
 
   render() {
-    console.log('MainApp.render: ', this.state);
-    if (this._isSignedIn() === undefined) {
-      console.log('MainApp.render: Still uninitialized');
-      // We haven't initialized state, so we don't know what to render.
-      return null;
-    }
-    // I can't make this router nicer, as putting routes inside a fragment
-    // as the fragments then contain the routes, which the switch doesn't know
-    // how to properly switch with.
+    console.log('App.MainApp.render');
     return (
-      <MuiThemeProvider theme={theme}>
-        <CssBaseline />
-        {this._isSignedIn()
-          ? this.renderSignedInRouter()
-          : this.renderSignedOutRouter()}
-      </MuiThemeProvider>
+      <AuthWrapper
+        firebase={this.props.firebase}
+        signedInHandler={this.handleSignedIn}
+        render={(authWrapperState) => {
+          switch (this.state.isSignedIn) {
+            case true:
+              return <SignedInApp {...authWrapperState} />
+            case false:
+              return <SignedOutApp firebase={this.props.firebase} />
+            default:
+              console.log('App.MainApp.render: unknown sign-in state.');
+              // We haven't figured out if we're signed in or not yet. Don't
+              // display anything.
+              return null;
+          }
+        }}
+      />
     );
   }
 }
 
 /** Directs most routes to our main app, but some auth-less routes to shims. */
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      firebase:
+        props.firebase !== undefined
+          ? props.firebase
+          : new FirebaseState(true /* enableMessaging */)
+    };
+  }
+
   render() {
     console.log('App.render: ', this.state);
     return (
@@ -243,7 +189,7 @@ class App extends Component {
               <ToS />
             </Route>
             <Route>
-              <MainApp />
+              <MainApp firebase={this.state.firebase} />
             </Route>
           </Switch>
         </Router>

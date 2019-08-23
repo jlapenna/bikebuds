@@ -41,24 +41,6 @@ class SignInScreen extends Component {
     firebase: PropTypes.object.isRequired
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isSignedIn: undefined,
-      isSignedInNext: undefined
-    };
-  }
-
-  _isSignedIn() {
-    if (
-      this.state.isSignedIn === undefined ||
-      this.state.isSignedInNext === undefined
-    ) {
-      return undefined;
-    }
-    return this.state.isSignedIn && this.state.isSignedInNext;
-  }
-
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
     console.log('SignInScreen.signInSuccessWithAuthResult', authResult);
     this.props.firebase.authNext
@@ -102,54 +84,8 @@ class SignInScreen extends Component {
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
   };
 
-  componentDidMount() {
-    this.unregisterAuthObserver = this.props.firebase.auth.onAuthStateChanged(
-      firebaseUser => {
-        console.log('SignInScreen.onAuthStateChanged: ', firebaseUser);
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserver === null) {
-          return;
-        }
-        this.setState({
-          isSignedIn: !!firebaseUser,
-          firebaseUser: firebaseUser
-        });
-      }
-    );
-    this.unregisterAuthObserverNext = this.props.firebase.authNext.onAuthStateChanged(
-      firebaseUser => {
-        console.log('SignInScreen.onAuthStateChanged: Next', firebaseUser);
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserverNext === null) {
-          return;
-        }
-        this.setState({
-          isSignedInNext: !!firebaseUser,
-          firebaseUserNext: firebaseUser
-        });
-      }
-    );
-  }
-
-  componentWillUnmount() {
-    console.log('SignInScreen: componentWillUnmount');
-    this.unregisterAuthObserverNext();
-    this.unregisterAuthObserverNext = null;
-    this.unregisterAuthObserver();
-    this.unregisterAuthObserver = null;
-  }
-
   render() {
     const { classes } = this.props;
-    if (this._isSignedIn() === undefined) {
-      // We haven't initialized state, so we don't know what to render.
-      return null;
-    }
-    if (this._isSignedIn()) {
-      return null;
-    }
     return (
       <div>
         <img className={classes.logo} alt="Bikebuds Logo" src={logoRound} />
