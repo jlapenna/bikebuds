@@ -371,6 +371,10 @@ client_state_model = api.model(
 client_state_entity_model = EntityModel(client_state_model)
 
 
+auth_model = api.model('Auth', {'token': fields.String})
+auth_entity_model = EntityModel(auth_model)
+
+
 @api.route('/activities')
 class ActivitiesResource(Resource):
     @api.doc('get_activities')
@@ -596,6 +600,16 @@ class SyncResource(Resource):
 class UnittestResource(Resource):
     def get(self):
         return None
+
+
+@api.route('/auth')
+class AuthResource(Resource):
+    @api.doc('auth')
+    @api.marshal_with(auth_model, skip_none=True)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
+        custom_token = auth_util.create_custom_token(claims)
+        return {'token': custom_token.decode('utf-8')}
 
 
 @app.route('/_ah/warmup')

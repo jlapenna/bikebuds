@@ -31,6 +31,13 @@ from shared.credentials import firebase_credentials
 firebase_admin.initialize_app(firebase_credentials)
 
 
+def create_custom_token(claims):
+    if config.is_dev and config.fake_user:
+        logging.warn('Create Custom Token: Using Fake User')
+        return b'FAKE TOKEN'
+    return auth.create_custom_token(claims['sub'])
+
+
 def fake_claims():
     if config.is_dev and config.fake_user:
         logging.warn('Using Fake User')
