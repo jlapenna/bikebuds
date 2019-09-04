@@ -24,13 +24,13 @@ export function createSession(responseCallback) {
   }
   firebase
     .auth()
-    .currentUser.getIdToken()
-    .then(idToken => {
+    .currentUser.getIdTokenResult()
+    .then(idTokenResult => {
       fetch(config.frontendUrl + '/services/session', {
         /* Set header for the XMLHttpRequest to get data from the web server
          * associated with userIdToken */
         headers: {
-          Authorization: 'Bearer ' + idToken
+          Authorization: 'Bearer ' + idTokenResult.token
         },
         method: 'POST',
         credentials: 'include'

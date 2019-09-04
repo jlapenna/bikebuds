@@ -28,75 +28,81 @@ class AuthWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isSignedIn: undefined,
       firebaseUser: undefined,
-      isSignedInNext: undefined,
-      firebaseUserNext: undefined
+      firebaseToken: undefined,
+      firebaseUserNext: undefined,
+      firebaseTokenNext: undefined
     };
   }
 
   _isSignedIn = () => {
-    if (this.state.isSignedIn === undefined) {
+    if (
+      this.state.firebaseUser === undefined ||
+      this.state.firebaseUserNext === undefined
+    ) {
       return undefined;
     }
-    return this.state.isSignedIn;
-    //return this.state.isSignedIn && this.state.isSignedInNext;
+    return !!this.state.firebaseUser && !!this.state.firebaseUserNext;
   };
 
   componentDidMount() {
     if (config.isDev && config.fakeUser) {
-      console.log('AuthWrapper: Warning: Using Fake User.');
+      console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
         displayName: 'Fake User',
         photoUrl: '/logo-round.svg'
       };
       this.setState({
-        isSignedIn: true,
         firebaseUser: firebaseUser,
-        isSignedInNext: true,
-        firebaseUserNext: firebaseUser
+        firebaseToken: 'XXXXXXXXXXXXXX',
+        firebaseUserNext: firebaseUser,
+        firebaseTokenNext: 'XXXXXXXXXXXXXX'
       });
       return;
     }
 
     console.log('AuthWrapper: Using Real Auth');
     this.unregisterAuthObserver = this.props.firebase.onAuthStateChanged(
-      firebaseUser => {
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserver === null) {
-          return;
-        }
-        if (!!firebaseUser) {
-          firebaseUser.getIdTokenResult().then(idTokenResult => {
-            console.log('AuthWrapper.getIdTokenResult:', idTokenResult);
-            firebaseUser.admin = !!idTokenResult.claims['admin'];
-            this.setState({
-              isSignedIn: !!firebaseUser,
-              firebaseUser: firebaseUser
-            });
-          });
-        }
-      },
-      firebaseUser => {
-        // If we've unmounted before this callback executes, we don't want to
-        // update state.
-        if (this.unregisterAuthObserver === null) {
-          return;
-        }
-        if (!!firebaseUser) {
-          firebaseUser.getIdTokenResult().then(idTokenResult => {
-            console.log('AuthWrapper.getIdTokenResultNext:', idTokenResult);
-            firebaseUser.admin = !!idTokenResult.claims['admin'];
-            this.setState({
-              isSignedInNext: !!firebaseUser,
-              firebaseUserNext: firebaseUser
-            });
-          });
-        }
-      }
+      this._onAuthStateChangedFn('firebaseUser', 'firebaseToken'),
+      this._onAuthStateChangedFn('firebaseUserNext', 'firebaseTokenNext')
     );
   }
+
+  _onAuthStateChangedFn = (firebaseUserKey, firebaseTokenKey) => {
+    return firebaseUser => {
+      // If we've unmounted before this callback executes, we don't want to
+      // update state.
+      if (this.unregisterAuthObserver === null) {
+        return;
+      }
+      console.log(
+        'AuthWrapper.onAuthStateChanged:',
+        firebaseUserKey,
+        firebaseUser
+      );
+      if (!!firebaseUser) {
+        firebaseUser.getIdTokenResult().then(idTokenResult => {
+          console.log(
+            'AuthWrapper.onAuthStateChanged:',
+            firebaseUserKey,
+            'idTokenResult:',
+            idTokenResult
+          );
+          firebaseUser.admin = !!idTokenResult.claims['admin'];
+
+          var stateUpdate = {};
+          stateUpdate[firebaseUserKey] = firebaseUser;
+          stateUpdate[firebaseTokenKey] = idTokenResult.token;
+          this.setState(stateUpdate);
+        });
+      } else {
+        var stateUpdate = {};
+        stateUpdate[firebaseUserKey] = null;
+        stateUpdate[firebaseTokenKey] = null;
+        this.setState(stateUpdate);
+      }
+    };
+  };
 
   componentWillUnmount() {
     if (!!this.unregisterAuthObserver) {
@@ -107,8 +113,8 @@ class AuthWrapper extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (
-      prevState.isSignedIn !== this.state.isSignedIn ||
-      prevState.isSignedInNext !== this.state.isSignedInNext
+      prevState.firebaseUser !== this.state.firebaseUser ||
+      prevState.firebaseUserNext !== this.state.firebaseUserNext
     ) {
       this.props.signedInHandler(this._isSignedIn());
     }
@@ -118,7 +124,9 @@ class AuthWrapper extends Component {
     return this.props.render({
       firebase: this.props.firebase,
       firebaseUser: this.state.firebaseUser,
-      firebaseUserNext: this.state.firebaseUserNext
+      firebaseToken: this.state.firebaseToken,
+      firebaseUserNext: this.state.firebaseUserNext,
+      firebaseTokenNext: this.state.firebaseTokenNext
     });
   }
 }

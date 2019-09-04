@@ -79,7 +79,8 @@ class Main extends Component {
   static propTypes = {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
-    firebaseUser: PropTypes.object.isRequired
+    firebaseUser: PropTypes.object.isRequired,
+    firebaseToken: PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -103,13 +104,6 @@ class Main extends Component {
     });
   };
 
-  handleSwagFailed = () => {
-    console.log('Main.handleSwagFailed');
-    this.setState({
-      apiClient: undefined
-    });
-  };
-
   handleProfileUpdated = profile => {
     console.log('Main.handleProfileUpdated', profile);
     this.setState({
@@ -125,8 +119,9 @@ class Main extends Component {
     return (
       <div className={this.props.classes.root}>
         <SwagWrapper
+          firebaseUser={this.props.firebaseUser}
+          firebaseToken={this.props.firebaseToken}
           onReady={this.handleSwagReady}
-          onFailed={this.handleSwagFailed}
         />
         {this.state.apiClient && (
           <ProfileWrapper
