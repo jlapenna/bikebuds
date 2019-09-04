@@ -24,9 +24,8 @@ import 'firebase/messaging';
 import { config, nextConfig } from './config';
 
 export class FirebaseState {
-  constructor(enableMessaging) {
-    /*
-    if (config.isDev && config.fakeUser) {
+  constructor(forTest) {
+    if (forTest) {
       // No push messages when running with fake users.
       this.app = null;
       this.auth = null;
@@ -36,7 +35,6 @@ export class FirebaseState {
       this.firestore = null;
       return;
     }
-    */
     try {
       this.app = firebase.initializeApp(config);
     } catch (err) {
@@ -45,12 +43,10 @@ export class FirebaseState {
     }
     this.auth = firebase.auth();
 
-    if (enableMessaging) {
-      try {
-        this.messaging = firebase.messaging();
-      } catch (err) {
-        console.warn('FirebaseState: Failed to set up messaging.');
-      }
+    try {
+      this.messaging = firebase.messaging();
+    } catch (err) {
+      console.warn('FirebaseState: Failed to set up messaging.');
     }
 
     try {
@@ -64,12 +60,13 @@ export class FirebaseState {
   }
 
   onAuthStateChanged = (appObserver, appNextObserver) => {
-    console.log('FirebaseState.onAuthStatechanged');
+    console.log('FirebaseState.onAuthStateChanged: Registering');
     var unregisterAppObserver = this.auth.onAuthStateChanged(appObserver);
     var unregisterAppNextObserver = this.authNext.onAuthStateChanged(
       appNextObserver
     );
     return function() {
+      console.log('FirebaseState.onAuthStateChanged: Unregistering');
       unregisterAppObserver();
       unregisterAppNextObserver();
     };

@@ -158,9 +158,7 @@ class App extends Component {
     super(props);
     this.state = {
       firebase:
-        props.firebase !== undefined
-          ? props.firebase
-          : new FirebaseState(true /* enableMessaging */),
+        props.firebase !== undefined ? props.firebase : new FirebaseState(),
     };
   }
 

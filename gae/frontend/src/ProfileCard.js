@@ -67,12 +67,9 @@ class ProfileCard extends Component {
   };
 
   handleSignOut = () => {
-    firebase
-      .auth()
-      .signOut()
-      .then(() => {
-        window.location.reload();
-      });
+    firebase.auth.signOut().then(() => {
+      window.location.reload();
+    });
   };
 
   componentDidMount() {

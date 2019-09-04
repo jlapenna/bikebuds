@@ -23,7 +23,7 @@ import { FirebaseState } from './firebase_util';
 import Events from './Events';
 
 it('renders without crashing', () => {
-  var firebase = new FirebaseState(false /* enableMessaging */);
+  var firebase = new FirebaseState(true /* forTest */);
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>

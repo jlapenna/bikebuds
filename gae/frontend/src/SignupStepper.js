@@ -151,7 +151,7 @@ class SignupStepper extends React.Component {
     if (activeStep.serviceName !== undefined) {
       this.setState({ connectPending: true });
 
-      createSession(response => {
+      createSession(this.props.firebase, response => {
         if (response.status === 200) {
           window.location.replace(
             config.frontendUrl +

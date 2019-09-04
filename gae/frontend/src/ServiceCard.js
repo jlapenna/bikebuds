@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -47,6 +48,10 @@ class ServiceCard extends Component {
     },
   };
 
+  static propTypes = {
+    firebase: PropTypes.object.isRequired,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -68,7 +73,7 @@ class ServiceCard extends Component {
           this.setState({ actionPending: false });
         });
     } else {
-      createSession(response => {
+      createSession(this.props.firebase, response => {
         if (response.status === 200) {
           window.location.replace(
             config.frontendUrl +

@@ -41,12 +41,17 @@ class Events extends Component {
 
   constructor(props) {
     super(props);
-    this.query = props.firebase.firestore.collection('events');
+    if (props.firebase.firestore !== null) {
+      this.query = props.firebase.firestore.collection('events');
+    } else {
+      console.log('Events: firestore not supported:', props.firebase);
+      this.query = null;
+    }
     this.state = {};
   }
 
   render() {
-    return (
+    return this.query !== null ? (
       <div className={this.props.classes.root}>
         <EventsListCard apiClient={this.props.apiClient} query={this.query} />
         <Fab
@@ -57,7 +62,7 @@ class Events extends Component {
           <AddIcon />
         </Fab>
       </div>
-    );
+    ) : null;
   }
 }
 export default withStyles(Events.styles)(Events);

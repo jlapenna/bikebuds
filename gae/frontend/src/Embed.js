@@ -80,6 +80,7 @@ class Embed extends Component {
     return (
       <div className={this.props.classes.root}>
         <SwagWrapper
+          firebase={this.props.firebase}
           onReady={this.handleSwagReady}
           onFailed={this.handleSwagFailed}
         />
