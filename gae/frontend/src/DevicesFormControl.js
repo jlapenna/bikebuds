@@ -30,14 +30,14 @@ class DevicesFormControl extends Component {
   static styles = {};
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired
+    apiClient: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       service: undefined,
-      actionPending: false
+      actionPending: false,
     };
   }
 
@@ -46,7 +46,7 @@ class DevicesFormControl extends Component {
       client.properties.created = moment.utc(client.properties.created);
     });
     this.setState({
-      clients: response.body
+      clients: response.body,
     });
   };
 
@@ -55,7 +55,7 @@ class DevicesFormControl extends Component {
     this.setState({ clients: this.state.clients });
 
     this.props.apiClient.bikebuds.update_client({
-      payload: client.properties
+      payload: client.properties,
     });
   };
 

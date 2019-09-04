@@ -37,25 +37,25 @@ import { localMoment } from './convert';
 class MeasuresSummaryCard extends Component {
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    measures: PropTypes.array
+    measures: PropTypes.array,
   };
 
   static styles = {
     root: {
       height: '400px',
-      position: 'relative'
+      position: 'relative',
     },
     summaryTable: {
       position: 'absolute',
       top: '0px',
-      'z-index': 2
+      'z-index': 2,
     },
     summaryChart: {
       position: 'absolute',
       top: '0px',
       'z-index': 1,
-      opacity: 0.5
-    }
+      opacity: 0.5,
+    },
   };
 
   constructor(props) {
@@ -63,7 +63,7 @@ class MeasuresSummaryCard extends Component {
     this.state = {
       measures: undefined,
       weightDomain: ['dataMin - 1', 'dataMax + 1'],
-      fatDomain: ['dataMin - 1', 'dataMax + 1']
+      fatDomain: ['dataMin - 1', 'dataMax + 1'],
     };
   }
 
@@ -71,7 +71,7 @@ class MeasuresSummaryCard extends Component {
     console.log('MeasuresSummaryCard: handleMeasures: ', newMeasures);
     if (newMeasures.length === 0) {
       this.setState({
-        measures: []
+        measures: [],
       });
       return;
     }
@@ -98,7 +98,7 @@ class MeasuresSummaryCard extends Component {
     }
 
     this.setState({
-      measures: measures
+      measures: measures,
     });
   };
 

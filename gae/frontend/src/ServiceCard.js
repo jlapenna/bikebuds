@@ -40,18 +40,18 @@ class ServiceCard extends Component {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     cardContentItem: {
-      width: '100%'
-    }
+      width: '100%',
+    },
   };
 
   constructor(props) {
     super(props);
     this.state = {
       service: undefined,
-      actionPending: false
+      actionPending: false,
     };
   }
 
@@ -97,7 +97,7 @@ class ServiceCard extends Component {
       response.body.properties.modified
     );
     this.setState({
-      service: response.body
+      service: response.body,
     });
     console.log('ServiceCard.handleService', response.body);
   };
@@ -125,7 +125,7 @@ class ServiceCard extends Component {
     this.props.apiClient.bikebuds
       .update_service({
         name: this.props.serviceName,
-        payload: { sync_enabled: event.target.checked }
+        payload: { sync_enabled: event.target.checked },
       })
       .then(this.handleService);
   };

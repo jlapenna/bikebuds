@@ -24,7 +24,7 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   const firebaseUser = {
     displayName: 'Display Name',
-    photoUrl: '/logo-round.svg'
+    photoUrl: '/logo-round.svg',
   };
   // this.props.profile.user.properties.preferences.units
   const profile = new ProfileState();

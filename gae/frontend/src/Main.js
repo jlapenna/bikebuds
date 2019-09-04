@@ -39,48 +39,48 @@ const drawerWidth = 240;
 class Main extends Component {
   static styles = theme => ({
     root: {
-      display: 'flex'
+      display: 'flex',
     },
     drawerPaper: {
-      width: drawerWidth
+      width: drawerWidth,
     },
     drawer: {
       [theme.breakpoints.up('md')]: {
         width: drawerWidth,
-        flexShrink: 0
+        flexShrink: 0,
       },
       height: '100%',
-      'text-align': 'center'
+      'text-align': 'center',
     },
     toolbar: theme.mixins.toolbar,
     appBar: {
       [theme.breakpoints.up('md')]: {
         width: '100%',
-        zIndex: theme.zIndex.drawer + 1
-      }
+        zIndex: theme.zIndex.drawer + 1,
+      },
     },
     menuButton: {
       marginRight: 20,
       [theme.breakpoints.up('md')]: {
-        display: 'none'
-      }
+        display: 'none',
+      },
     },
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing(2)
+      padding: theme.spacing(2),
     },
     mainContent: {
       height: '100%',
-      width: '100%'
-    }
+      width: '100%',
+    },
   });
 
   static propTypes = {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    firebaseToken: PropTypes.string.isRequired
+    firebaseToken: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -89,7 +89,7 @@ class Main extends Component {
       mobileOpen: false,
       apiClient: null,
       profile: new ProfileState(this.handleProfileUpdated),
-      swagClient: null
+      swagClient: null,
     };
   }
 
@@ -100,14 +100,14 @@ class Main extends Component {
   handleSwagReady = client => {
     console.log('Main.handleSwagReady: ', client);
     this.setState({
-      apiClient: client.apis
+      apiClient: client.apis,
     });
   };
 
   handleProfileUpdated = profile => {
     console.log('Main.handleProfileUpdated', profile);
     this.setState({
-      profile: profile
+      profile: profile,
     });
   };
 
@@ -165,10 +165,10 @@ class Main extends Component {
               open={this.state.mobileOpen}
               onClose={this.handleDrawerToggle}
               classes={{
-                paper: this.props.classes.drawerPaper
+                paper: this.props.classes.drawerPaper,
               }}
               ModalProps={{
-                keepMounted: true // Better open performance on mobile.
+                keepMounted: true, // Better open performance on mobile.
               }}
             >
               <div className={this.props.classes.toolbar} />
@@ -181,7 +181,7 @@ class Main extends Component {
           <Hidden smDown>
             <Drawer
               classes={{
-                paper: this.props.classes.drawerPaper
+                paper: this.props.classes.drawerPaper,
               }}
               variant="permanent"
               open

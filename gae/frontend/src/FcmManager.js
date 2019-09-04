@@ -24,7 +24,7 @@ class FcmManager extends Component {
     firebase: PropTypes.object.isRequired,
     apiClient: PropTypes.object.isRequired,
     onMessage: PropTypes.func,
-    onReady: PropTypes.func
+    onReady: PropTypes.func,
   };
 
   constructor(props) {
@@ -33,7 +33,7 @@ class FcmManager extends Component {
       registered: undefined,
       updated: undefined,
       fcmToken: localStorage.getItem('fcmToken'),
-      client: undefined
+      client: undefined,
     };
     console.log('FcmManager.constructor: ', this.state.fcmToken);
 
@@ -57,14 +57,14 @@ class FcmManager extends Component {
         localStorage.setItem('fcmToken', token);
         this.setState({
           fcmToken: token,
-          registered: true
+          registered: true,
         });
       })
       .catch(error => {
         console.log('FcmManager: Error: ', error);
         localStorage.setItem('fcmToken', null);
         this.setState({
-          fcmToken: null
+          fcmToken: null,
         });
       });
   };
@@ -76,7 +76,7 @@ class FcmManager extends Component {
     }
     this.setState({
       client: response.body.client,
-      updated: true
+      updated: true,
     });
     if (this.props.onReady !== undefined) {
       this.props.onReady(response.body.client);
@@ -95,7 +95,7 @@ class FcmManager extends Component {
       console.log('FcmManager.onTokenRefresh:', token);
       localStorage.setItem('fcmToken', token);
       this.setState({
-        fcmToken: token
+        fcmToken: token,
       });
     });
     this.messageListener = this.props.firebase.messaging.onMessage(payload => {
@@ -127,7 +127,7 @@ class FcmManager extends Component {
     if (this.state.registered === undefined) {
       console.log('FcmManager.componentDidUpdate: Registering');
       this.setState({
-        registered: false
+        registered: false,
       });
       this.registerFcm();
     }
@@ -141,8 +141,8 @@ class FcmManager extends Component {
           payload: {
             active: true,
             token: this.state.fcmToken,
-            type: 'WEB'
-          }
+            type: 'WEB',
+          },
         })
         .then(this.handleUpdateClient);
     }

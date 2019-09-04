@@ -30,10 +30,10 @@ export function createSession(responseCallback) {
         /* Set header for the XMLHttpRequest to get data from the web server
          * associated with userIdToken */
         headers: {
-          Authorization: 'Bearer ' + idTokenResult.token
+          Authorization: 'Bearer ' + idTokenResult.token,
         },
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       }).then(responseCallback);
     });
 }

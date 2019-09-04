@@ -37,21 +37,21 @@ class ActivitiesListCard extends Component {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     content: {
-      height: '400px'
+      height: '400px',
     },
     contentGridElement: {
       height: '100%',
-      overflow: 'auto'
-    }
+      overflow: 'auto',
+    },
   };
 
   static propTypes = {
     profile: PropTypes.object,
     showAthlete: PropTypes.bool,
-    showDate: PropTypes.bool
+    showDate: PropTypes.bool,
   };
 
   constructor(props) {
@@ -63,7 +63,7 @@ class ActivitiesListCard extends Component {
     ) {
       this.state = {
         selectedActivity: this.props.activities[0],
-        selectedIndex: 0
+        selectedIndex: 0,
       };
     } else {
       this.state = {};
@@ -74,7 +74,7 @@ class ActivitiesListCard extends Component {
     console.log('ActivitiesListCard.handleListItemClick: ', index, activity);
     this.setState({
       selectedActivity: activity,
-      selectedIndex: index
+      selectedIndex: index,
     });
   };
 
@@ -89,7 +89,7 @@ class ActivitiesListCard extends Component {
 
     this.setState({
       selectedActivity: selectedActivity,
-      selectedIndex: selectedIndex
+      selectedIndex: selectedIndex,
     });
   };
 
@@ -108,7 +108,7 @@ class ActivitiesListCard extends Component {
     ) {
       this.setState({
         selectedActivity: this.props.activities[0],
-        selectedIndex: 0
+        selectedIndex: 0,
       });
     }
   }

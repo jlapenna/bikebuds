@@ -32,7 +32,7 @@ import ActivitiesListCard from './ActivitiesListCard';
 class ClubFetcher extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    apiClient: PropTypes.object.isRequired
+    apiClient: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -41,7 +41,7 @@ class ClubFetcher extends Component {
       fetched: false,
       club: undefined,
       activities: undefined,
-      error: undefined
+      error: undefined,
     };
   }
 
@@ -49,12 +49,12 @@ class ClubFetcher extends Component {
     console.log('Club.handleActivities:', response);
     if (response.status !== 200) {
       this.setState({
-        activities: null
+        activities: null,
       });
       return;
     }
     this.setState({
-      activities: response.body
+      activities: response.body,
     });
   };
 
@@ -63,12 +63,12 @@ class ClubFetcher extends Component {
     if (response.status !== 200) {
       this.setState({
         club: null,
-        error: response.message
+        error: response.message,
       });
       return;
     }
     this.setState({
-      club: response.body
+      club: response.body,
     });
   };
 
@@ -102,22 +102,22 @@ class ClubFetcher extends Component {
 class _ClubWidget extends Component {
   static styles = {
     root: {
-      width: '100%'
+      width: '100%',
     },
     card: {
-      height: '400px'
+      height: '400px',
     },
     media: {
       height: '176px',
-      width: '360px'
-    }
+      width: '360px',
+    },
   };
 
   static propTypes = {
     profile: PropTypes.object.isRequired,
     activities: PropTypes.array,
     club: PropTypes.object,
-    error: PropTypes.string
+    error: PropTypes.string,
   };
 
   render() {
@@ -227,7 +227,7 @@ export default class Club extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
     apiClient: PropTypes.object.isRequired,
-    profile: PropTypes.object.isRequired
+    profile: PropTypes.object.isRequired,
   };
 
   render() {

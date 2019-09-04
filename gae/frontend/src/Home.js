@@ -28,7 +28,7 @@ import MeasuresWrapper from './MeasuresWrapper';
 class Home extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    profile: PropTypes.object
+    profile: PropTypes.object,
   };
 
   constructor(props) {
@@ -39,7 +39,7 @@ class Home extends Component {
   handleActivitiesResponse = response => {
     console.log('Home.onActivitiesReady', response);
     this.setState({
-      activities: response.body
+      activities: response.body,
     });
   };
 

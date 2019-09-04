@@ -26,7 +26,7 @@ import {
   withGoogleMap,
   BicyclingLayer,
   GoogleMap,
-  Polyline
+  Polyline,
 } from 'react-google-maps';
 
 import { config } from './config';
@@ -68,26 +68,26 @@ class _ActivityMap extends Component {
       overflow: 'visible',
       display: 'flex',
       'flex-direction': 'column',
-      'align-items': 'center'
+      'align-items': 'center',
     },
     containerElement: {
       'min-height': '200px',
       height: '100%',
       width: '100%',
-      flex: '1'
+      flex: '1',
     },
     mapElement: {
       height: '100%',
-      width: '100%'
+      width: '100%',
     },
     loadingElement: {
       height: '100%',
-      width: '100%'
-    }
+      width: '100%',
+    },
   };
 
   state = {
-    mapMounted: false
+    mapMounted: false,
   };
 
   _mapRef = null;
@@ -97,7 +97,7 @@ class _ActivityMap extends Component {
     this._mapRef = c;
 
     this.setState({
-      mapMounted: true
+      mapMounted: true,
     });
   };
 
@@ -124,7 +124,7 @@ class _ActivityMap extends Component {
 
       this.setState({
         decodedPolyline: decodedPolyline,
-        bounds: bounds
+        bounds: bounds,
       });
     }
   }
@@ -148,7 +148,7 @@ class _ActivityMap extends Component {
           options={{
             strokeColor: '#ff4081',
             strokeOpacity: 1,
-            strokeWeight: 3
+            strokeWeight: 3,
           }}
         />
         <BicyclingLayer autoUpdate />
@@ -166,24 +166,24 @@ class ActivityDetail extends Component {
       overflow: 'visible',
       display: 'flex',
       'flex-direction': 'column',
-      'align-items': 'center'
+      'align-items': 'center',
     },
     activityRow: {
-      width: '100%'
+      width: '100%',
     },
     activitySummary: {
       width: '100%',
       display: 'flex',
-      'align-items': 'stretch'
+      'align-items': 'stretch',
     },
     activitySummaryItem: {
-      width: '100%'
-    }
+      width: '100%',
+    },
   };
 
   static propTypes = {
     profile: PropTypes.object,
-    activity: PropTypes.object
+    activity: PropTypes.object,
   };
 
   render() {

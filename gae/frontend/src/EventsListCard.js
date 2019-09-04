@@ -32,20 +32,20 @@ import EventDetail from './EventDetail';
 class EventsListCard extends Component {
   static styles = {
     root: {
-      height: '400px'
+      height: '400px',
     },
     content: {
-      height: '400px'
+      height: '400px',
     },
     contentGridElement: {
       height: '100%',
-      overflow: 'auto'
-    }
+      overflow: 'auto',
+    },
   };
 
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    query: PropTypes.object.isRequired
+    query: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -53,14 +53,14 @@ class EventsListCard extends Component {
     this.state = {
       events: [],
       selectedEvent: undefined,
-      selectedIndex: undefined
+      selectedIndex: undefined,
     };
   }
 
   handleListItemClick = (index, event) => {
     this.setState({
       selectedEvent: event,
-      selectedIndex: index
+      selectedIndex: index,
     });
   };
 
@@ -85,7 +85,7 @@ class EventsListCard extends Component {
     this.setState({
       events: events,
       selectedEvent: selectedEvent,
-      selectedIndex: selectedindex
+      selectedIndex: selectedindex,
     });
   };
 

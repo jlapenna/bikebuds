@@ -26,23 +26,23 @@ import SwagWrapper from './SwagWrapper';
 class Embed extends Component {
   static styles = theme => ({
     root: {
-      display: 'flex'
+      display: 'flex',
     },
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing(2)
+      padding: theme.spacing(2),
     },
     mainContent: {
       height: '100%',
-      width: '100%'
-    }
+      width: '100%',
+    },
   });
 
   static propTypes = {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
-    firebaseUser: PropTypes.object.isRequired
+    firebaseUser: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -51,28 +51,28 @@ class Embed extends Component {
       mobileOpen: false,
       apiClient: null,
       profile: new ProfileState(this.handleProfileUpdated),
-      swagClient: null
+      swagClient: null,
     };
   }
 
   handleSwagReady = client => {
     console.log('Embed.handleSwagReady: ', client);
     this.setState({
-      apiClient: client.apis
+      apiClient: client.apis,
     });
   };
 
   handleSwagFailed = () => {
     console.log('Embed.handleSwagFailed');
     this.setState({
-      apiClient: undefined
+      apiClient: undefined,
     });
   };
 
   handleProfileUpdated = profile => {
     console.log('Embed.handleProfileUpdated', profile);
     this.setState({
-      profile: profile
+      profile: profile,
     });
   };
 

@@ -39,18 +39,18 @@ class PreferencesCard extends Component {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
-    }
+      justifyContent: 'space-between',
+    },
   });
 
   static propTypes = {
-    profile: PropTypes.object.isRequired
+    profile: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      updatingRemote: false
+      updatingRemote: false,
     };
   }
 

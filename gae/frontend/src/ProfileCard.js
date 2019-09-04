@@ -37,28 +37,28 @@ import ClubAvatar from './ClubAvatar';
 class ProfileCard extends Component {
   static propTypes = {
     firebaseUser: PropTypes.object.isRequired,
-    profile: PropTypes.object
+    profile: PropTypes.object,
   };
 
   static styles = {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     avatar: {
       width: 128,
-      height: 128
+      height: 128,
     },
     clubContainer: {
-      'min-height': 56
-    }
+      'min-height': 56,
+    },
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      connectActionPending: false
+      connectActionPending: false,
     };
   }
 
@@ -149,7 +149,7 @@ class ProfileCard extends Component {
             component={Link}
             to={{
               pathname: `${this.props.match.url}/signup`,
-              search: window.location.search
+              search: window.location.search,
             }}
             disabled={this.state.connectActionPending}
           >

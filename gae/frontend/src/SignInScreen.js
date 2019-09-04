@@ -30,15 +30,15 @@ class SignInScreen extends Component {
   static styles = {
     logo: {
       display: 'block',
-      margin: '20px auto 10px'
+      margin: '20px auto 10px',
     },
     privacyFooter: {
-      'text-align': 'center'
-    }
+      'text-align': 'center',
+    },
   };
 
   static propTypes = {
-    firebase: PropTypes.object.isRequired
+    firebase: PropTypes.object.isRequired,
   };
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
@@ -70,16 +70,16 @@ class SignInScreen extends Component {
   uiConfig = {
     // Popup signin flow rather than redirect flow.
     callbacks: {
-      signInSuccessWithAuthResult: this.handleSignInSuccessWithAuthResult
+      signInSuccessWithAuthResult: this.handleSignInSuccessWithAuthResult,
     },
     signInFlow: 'popup',
     signInOptions: [
       {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         // Required to enable one-tap sign-up for YOLO
         //authMethod: 'https://accounts.google.com',
-      }
-    ]
+      },
+    ],
     // Required to enable one-tap sign-up for YOLO
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
   };

@@ -25,10 +25,10 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   const firebaseUser = {
     displayName: 'Display Name',
-    photoUrl: '/logo-round.svg'
+    photoUrl: '/logo-round.svg',
   };
   const profile = {
-    athlete: { properties: { city: 'San Francisco' } }
+    athlete: { properties: { city: 'San Francisco' } },
   };
   const match = {};
   ReactDOM.render(

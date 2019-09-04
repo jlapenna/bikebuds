@@ -29,18 +29,18 @@ import Typography from '@material-ui/core/Typography';
 class DrawerContent extends React.Component {
   static styles = theme => ({
     list: {
-      height: '100%'
+      height: '100%',
     },
     footer: {
-      bottom: 0
+      bottom: 0,
     },
     active: {
-      backgroundColor: theme.palette.action.selected
-    }
+      backgroundColor: theme.palette.action.selected,
+    },
   });
 
   static propTypes = {
-    profile: PropTypes.object
+    profile: PropTypes.object,
   };
 
   render() {

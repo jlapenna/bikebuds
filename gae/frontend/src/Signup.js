@@ -28,25 +28,25 @@ class Signup extends React.Component {
     root: {
       'background-color': 'red',
       display: 'flex',
-      height: '100%'
-    }
+      height: '100%',
+    },
   });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    firebaseUser: PropTypes.object.isRequired
+    firebaseUser: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      stepperFinished: false
+      stepperFinished: false,
     };
   }
 
   handleStepperFinished = () => {
     this.setState({
-      stepperFinished: true
+      stepperFinished: true,
     });
   };
 

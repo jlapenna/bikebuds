@@ -20,21 +20,21 @@ import React, { Component } from 'react';
 class ActivitiesWrapper extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    onResponse: PropTypes.func.isRequired
+    onResponse: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       fetched: false,
-      response: undefined
+      response: undefined,
     };
   }
 
   handleUpdateRequestState = response => {
     console.log('ActivitiesWrapper.handleUpdateRequestState:', response.body);
     this.setState({
-      response: response
+      response: response,
     });
     this.props.onResponse(response);
   };

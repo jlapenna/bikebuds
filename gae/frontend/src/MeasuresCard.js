@@ -34,7 +34,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Label
+  Label,
 } from 'recharts';
 
 import { localMoment } from './convert';
@@ -44,18 +44,18 @@ class MeasuresCard extends Component {
     intervalUnit: 'M',
     intervalCount: 12,
     intervalFormat: "MMM 'YY",
-    tooltipFormat: 'LLL'
+    tooltipFormat: 'LLL',
   };
 
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    measures: PropTypes.array
+    measures: PropTypes.array,
   };
 
   static styles = {
     root: {
-      height: '400px'
-    }
+      height: '400px',
+    },
   };
 
   constructor(props) {
@@ -64,7 +64,7 @@ class MeasuresCard extends Component {
       measures: undefined,
       ticks: [],
       weightDomain: ['dataMin - 1', 'dataMax + 1'],
-      fatDomain: ['dataMin - 1', 'dataMax + 1']
+      fatDomain: ['dataMin - 1', 'dataMax + 1'],
     };
   }
 
@@ -107,7 +107,7 @@ class MeasuresCard extends Component {
           var newMeasure = {
             date: preferredNextDate.clone().format('x'),
             weightAvg: weightAvg,
-            weightError: [weightAvg - weightMin, weightMax - weightAvg]
+            weightError: [weightAvg - weightMin, weightMax - weightAvg],
           };
           if (fatCount > 0) {
             newMeasure['fat_ratio'] = fatSum / fatCount;
@@ -128,7 +128,7 @@ class MeasuresCard extends Component {
 
     this.setState({
       measures: measures,
-      ticks: ticks
+      ticks: ticks,
     });
   };
 

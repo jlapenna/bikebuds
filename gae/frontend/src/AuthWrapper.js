@@ -22,7 +22,7 @@ import { config } from './config';
 class AuthWrapper extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    signedInHandler: PropTypes.func.isRequired
+    signedInHandler: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -31,7 +31,7 @@ class AuthWrapper extends Component {
       firebaseUser: undefined,
       firebaseToken: undefined,
       firebaseUserNext: undefined,
-      firebaseTokenNext: undefined
+      firebaseTokenNext: undefined,
     };
   }
 
@@ -50,13 +50,13 @@ class AuthWrapper extends Component {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
         displayName: 'Fake User',
-        photoUrl: '/logo-round.svg'
+        photoUrl: '/logo-round.svg',
       };
       this.setState({
         firebaseUser: firebaseUser,
         firebaseToken: 'XXXXXXXXXXXXXX',
         firebaseUserNext: firebaseUser,
-        firebaseTokenNext: 'XXXXXXXXXXXXXX'
+        firebaseTokenNext: 'XXXXXXXXXXXXXX',
       });
       return;
     }
@@ -126,7 +126,7 @@ class AuthWrapper extends Component {
       firebaseUser: this.state.firebaseUser,
       firebaseToken: this.state.firebaseToken,
       firebaseUserNext: this.state.firebaseUserNext,
-      firebaseTokenNext: this.state.firebaseTokenNext
+      firebaseTokenNext: this.state.firebaseTokenNext,
     });
   }
 }

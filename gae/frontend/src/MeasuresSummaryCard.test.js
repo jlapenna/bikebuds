@@ -35,8 +35,8 @@ it('renders measures without crashing', () => {
       fat_mass_weight: 39.218,
       fat_ratio: 38.889,
       id: '1396366608',
-      weight: 222.3
-    }
+      weight: 222.3,
+    },
   ];
   ReactDOM.render(
     <MeasuresSummaryCard profile={{}} measures={measures} />,

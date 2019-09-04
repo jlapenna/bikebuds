@@ -27,12 +27,12 @@ class EventDetail extends Component {
       overflow: 'visible',
       display: 'flex',
       'flex-direction': 'column',
-      'align-items': 'center'
-    }
+      'align-items': 'center',
+    },
   };
 
   static propTypes = {
-    event: PropTypes.object
+    event: PropTypes.object,
   };
 
   render() {

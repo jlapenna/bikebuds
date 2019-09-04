@@ -31,7 +31,7 @@ export default class MainContent extends React.Component {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     apiClient: PropTypes.object.isRequired,
-    profile: PropTypes.object
+    profile: PropTypes.object,
   };
 
   render() {

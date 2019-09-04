@@ -37,30 +37,30 @@ import ToS from './ToS';
 class SignupStepper extends React.Component {
   static styles = theme => ({
     root: {
-      height: '100%'
+      height: '100%',
     },
     stepBody: {
       marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
     },
     stepContent: {
       marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
     },
     stepper: {},
     mobileButton: {
       marginRight: theme.spacing(1),
-      marginLeft: theme.spacing(1)
+      marginLeft: theme.spacing(1),
     },
     desktopButton: {
-      marginRight: theme.spacing(1)
-    }
+      marginRight: theme.spacing(1),
+    },
   });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    onFinished: PropTypes.func.isRequired
+    onFinished: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -68,7 +68,7 @@ class SignupStepper extends React.Component {
     this.state = {
       steps: this.createSteps(),
       activeStepIndex: 0,
-      connectTransition: false
+      connectTransition: false,
     };
   }
 
@@ -78,7 +78,7 @@ class SignupStepper extends React.Component {
         label: 'Welcome, ' + this.props.firebaseUser.displayName,
         content: () => <Consent />,
         isOptional: false,
-        buttonLabel: 'I\u00A0Agree'
+        buttonLabel: 'I\u00A0Agree',
       },
       {
         label: 'Terms of Service',
@@ -86,7 +86,7 @@ class SignupStepper extends React.Component {
           return <ToS />;
         },
         isOptional: false,
-        buttonLabel: 'Next'
+        buttonLabel: 'Next',
       },
       {
         label: 'Privacy',
@@ -94,7 +94,7 @@ class SignupStepper extends React.Component {
           return <Privacy />;
         },
         isOptional: false,
-        buttonLabel: 'Next'
+        buttonLabel: 'Next',
       },
       {
         label: 'Connect Strava',
@@ -107,7 +107,7 @@ class SignupStepper extends React.Component {
         },
         isOptional: false,
         serviceName: 'strava',
-        buttonLabel: 'Connect'
+        buttonLabel: 'Connect',
       },
       {
         label: 'Connect Withings',
@@ -116,7 +116,7 @@ class SignupStepper extends React.Component {
         },
         isOptional: true,
         serviceName: 'withings',
-        buttonLabel: 'Connect'
+        buttonLabel: 'Connect',
       },
       {
         label: 'Connect Fitbit',
@@ -125,7 +125,7 @@ class SignupStepper extends React.Component {
         },
         isOptional: true,
         serviceName: 'fitbit',
-        buttonLabel: 'Connect'
+        buttonLabel: 'Connect',
       },
       {
         label: 'Wrap up',
@@ -133,14 +133,14 @@ class SignupStepper extends React.Component {
           return <div>You&apos;re all set!</div>;
         },
         isOptional: false,
-        buttonLabel: 'Finish'
-      }
+        buttonLabel: 'Finish',
+      },
     ];
   };
 
   handleBack = () => {
     this.setState(state => ({
-      activeStepIndex: state.activeStepIndex - 1
+      activeStepIndex: state.activeStepIndex - 1,
     }));
   };
 
@@ -173,7 +173,7 @@ class SignupStepper extends React.Component {
     }
 
     this.setState({
-      activeStepIndex: activeStepIndex + 1
+      activeStepIndex: activeStepIndex + 1,
     });
   };
 
@@ -188,7 +188,7 @@ class SignupStepper extends React.Component {
 
     this.setState(state => {
       return {
-        activeStepIndex: state.activeStepIndex + 1
+        activeStepIndex: state.activeStepIndex + 1,
       };
     });
   };
@@ -197,14 +197,14 @@ class SignupStepper extends React.Component {
     let params = new URLSearchParams(window.location.search);
     if (!!params.get('skipTos')) {
       this.setState({
-        activeStepIndex: 3
+        activeStepIndex: 3,
       });
     } else {
       let startingService = params.get('service');
       for (var i = 0; i < this.state.steps.length; i++) {
         if (this.state.steps[i].serviceName === startingService) {
           this.setState({
-            activeStepIndex: i + 1
+            activeStepIndex: i + 1,
           });
           break;
         }

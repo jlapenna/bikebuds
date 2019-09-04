@@ -27,7 +27,7 @@ class Settings extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object,
-    profile: PropTypes.object
+    profile: PropTypes.object,
   };
 
   render() {

@@ -33,7 +33,7 @@ export const config = {
   devserver3Url: config_json['devserver_url'],
   api3Url: config_json['api_url'],
   backend3Url: config_json['backend_url'],
-  fakeUser: config_json['fake_user']
+  fakeUser: config_json['fake_user'],
 };
 
 export const nextConfig = {
@@ -42,5 +42,5 @@ export const nextConfig = {
   authDomain: config_json['next_auth_domain'],
   databaseURL: config_json['next_database_url'],
   storageBucket: config_json['next_storage_bucket'],
-  messagingSenderId: config_json['next_message_sender_id']
+  messagingSenderId: config_json['next_message_sender_id'],
 };

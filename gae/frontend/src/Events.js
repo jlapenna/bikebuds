@@ -30,13 +30,13 @@ class Events extends Component {
     fab: {
       position: 'absolute',
       bottom: theme.spacing(2),
-      right: theme.spacing(2)
-    }
+      right: theme.spacing(2),
+    },
   });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    apiClient: PropTypes.object.isRequired
+    apiClient: PropTypes.object.isRequired,
   };
 
   constructor(props) {

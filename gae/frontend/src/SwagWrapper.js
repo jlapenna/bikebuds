@@ -25,14 +25,14 @@ const bikebudsDiscoveryUrl = config.api3Url + '/swagger.json';
 
 class SwagWrapper extends Component {
   static propTypes = {
-    firebaseToken: PropTypes.string.isRequired
+    firebaseToken: PropTypes.string.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       clientLoaded: undefined,
-      client: undefined
+      client: undefined,
     };
   }
 
@@ -42,8 +42,8 @@ class SwagWrapper extends Component {
       url: bikebudsDiscoveryUrl,
       authorizations: {
         api_key: config.apiKey,
-        firebase: { token: authDict }
-      }
+        firebase: { token: authDict },
+      },
     }).then(client => {
       console.log('SwagWrapper: Loaded client: ', client);
       this.setState({ clientLoaded: true, client: client });

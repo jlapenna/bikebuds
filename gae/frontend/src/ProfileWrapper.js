@@ -41,13 +41,13 @@ export class ProfileState {
 export default class ProfileWrapper extends React.Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    profile: PropTypes.object.isRequired
+    profile: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      fetched: false
+      fetched: false,
     };
   }
 

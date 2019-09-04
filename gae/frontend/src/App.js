@@ -21,7 +21,7 @@ import {
   Redirect,
   BrowserRouter as Router,
   Route,
-  Switch
+  Switch,
 } from 'react-router-dom';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -46,7 +46,7 @@ class SignedInApp extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    firebaseToken: PropTypes.string.isRequired
+    firebaseToken: PropTypes.string.isRequired,
   };
 
   render() {
@@ -86,7 +86,7 @@ class SignedInApp extends Component {
 
 class SignedOutApp extends Component {
   static propTypes = {
-    firebase: PropTypes.object.isRequired
+    firebase: PropTypes.object.isRequired,
   };
 
   render() {
@@ -114,12 +114,12 @@ class SignedOutApp extends Component {
 
 class MainApp extends Component {
   static propTypes = {
-    firebase: PropTypes.object.isRequired
+    firebase: PropTypes.object.isRequired,
   };
   constructor(props) {
     super(props);
     this.state = {
-      isSignedIn: undefined
+      isSignedIn: undefined,
     };
   }
 
@@ -160,7 +160,7 @@ class App extends Component {
       firebase:
         props.firebase !== undefined
           ? props.firebase
-          : new FirebaseState(true /* enableMessaging */)
+          : new FirebaseState(true /* enableMessaging */),
     };
   }
 

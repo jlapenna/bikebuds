@@ -24,14 +24,14 @@ import { readableWeight } from './convert';
 class MeasuresWrapper extends Component {
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    render: PropTypes.func.isRequired
+    render: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       fetched: false,
-      measures: undefined
+      measures: undefined,
     };
   }
 
@@ -51,7 +51,7 @@ class MeasuresWrapper extends Component {
       }
     }
     this.setState({
-      measures: measures
+      measures: measures,
     });
   };
 

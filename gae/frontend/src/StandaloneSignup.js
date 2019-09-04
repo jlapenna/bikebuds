@@ -28,25 +28,25 @@ import Signup from './Signup';
 class StandaloneSignup extends Component {
   static styles = theme => ({
     root: {
-      display: 'flex'
+      display: 'flex',
     },
     toolbar: theme.mixins.toolbar,
     appBar: {
       [theme.breakpoints.up('md')]: {
         width: '100%',
-        zIndex: theme.zIndex.drawer + 1
-      }
+        zIndex: theme.zIndex.drawer + 1,
+      },
     },
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing(2)
-    }
+      padding: theme.spacing(2),
+    },
   });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    firebaseUser: PropTypes.object.isRequired
+    firebaseUser: PropTypes.object.isRequired,
   };
 
   render() {

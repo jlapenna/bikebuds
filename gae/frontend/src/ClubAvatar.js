@@ -25,7 +25,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 class ClubAvatar extends Component {
   static propTypes = {
-    club: PropTypes.object.isRequired
+    club: PropTypes.object.isRequired,
   };
 
   static styles = {
@@ -33,8 +33,8 @@ class ClubAvatar extends Component {
       'max-height': 32,
       'max-width': 32,
       width: 'auto',
-      height: 'auto'
-    }
+      height: 'auto',
+    },
   };
 
   render() {
@@ -44,7 +44,7 @@ class ClubAvatar extends Component {
         component={Link}
         to={{
           pathname: `${this.props.match.url}/${pathname}`,
-          search: window.location.search
+          search: window.location.search,
         }}
         alt={this.props.club.name}
       >
