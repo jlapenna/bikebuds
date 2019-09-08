@@ -37,18 +37,25 @@ class SwagWrapper extends Component {
   }
 
   componentDidMount() {
+    this._mounted = true;
     const authDict = { access_token: this.props.firebaseToken };
-    Swagger({
+    this._swaggerLoader = Swagger({
       url: bikebudsDiscoveryUrl,
       authorizations: {
         api_key: config.apiKey,
         firebase: { token: authDict },
       },
     }).then(client => {
-      console.log('SwagWrapper: Loaded client: ', client);
-      this.setState({ clientLoaded: true, client: client });
-      this.props.onReady(client);
+      if (this._mounted) {
+        console.log('SwagWrapper: Loaded client: ', client);
+        this.setState({ clientLoaded: true, client: client });
+        this.props.onReady(client);
+      }
     });
+  }
+
+  componentWillUnmount() {
+    this._mounted = false;
   }
 
   render() {
