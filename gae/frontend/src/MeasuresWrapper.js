@@ -36,7 +36,6 @@ class MeasuresWrapper extends Component {
   }
 
   handleSeries = response => {
-    console.log('MeasuresWrapper.handleSeries:', response);
     var measures = [];
     if (!!response.body && response.body.properties.measures !== undefined) {
       measures = response.body.properties.measures;
@@ -56,7 +55,6 @@ class MeasuresWrapper extends Component {
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('MeasuresWrapper.componentDidUpdate', prevProps);
     if (
       this.props.apiClient &&
       !this.state.fetched &&

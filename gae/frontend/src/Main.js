@@ -98,14 +98,12 @@ class Main extends Component {
   };
 
   handleSwagReady = client => {
-    console.log('Main.handleSwagReady: ', client);
     this.setState({
       apiClient: client.apis,
     });
   };
 
   handleProfileUpdated = profile => {
-    console.log('Main.handleProfileUpdated', profile);
     this.setState({
       profile: profile,
     });

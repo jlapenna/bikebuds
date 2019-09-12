@@ -56,21 +56,18 @@ class Embed extends Component {
   }
 
   handleSwagReady = client => {
-    console.log('Embed.handleSwagReady: ', client);
     this.setState({
       apiClient: client.apis,
     });
   };
 
   handleSwagFailed = () => {
-    console.log('Embed.handleSwagFailed');
     this.setState({
       apiClient: undefined,
     });
   };
 
   handleProfileUpdated = profile => {
-    console.log('Embed.handleProfileUpdated', profile);
     this.setState({
       profile: profile,
     });

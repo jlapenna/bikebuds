@@ -35,13 +35,7 @@ export default class MainContent extends React.Component {
   };
 
   render() {
-    console.log(
-      'MainContent.render: ',
-      this.props.match.path,
-      this.props.profile
-    );
     if (!this.props.profile.fetched) {
-      console.log('MainContent.render: no profile');
       return null;
     }
     if (!this.props.profile.signup_complete) {

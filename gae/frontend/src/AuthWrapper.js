@@ -19,6 +19,8 @@ import { Component } from 'react';
 
 import { config } from './config';
 
+const LOG = false;
+
 class AuthWrapper extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
@@ -61,7 +63,7 @@ class AuthWrapper extends Component {
       return;
     }
 
-    console.log('AuthWrapper: Using Real Auth');
+    LOG && console.log('AuthWrapper: Using Real Auth');
     this.unregisterAuthObserver = this.props.firebase.onAuthStateChanged(
       this._onAuthStateChangedFn('firebaseUser', 'firebaseToken'),
       this._onAuthStateChangedFn('firebaseUserNext', 'firebaseTokenNext')
@@ -75,19 +77,21 @@ class AuthWrapper extends Component {
       if (this.unregisterAuthObserver === null) {
         return;
       }
-      console.log(
-        'AuthWrapper.onAuthStateChanged:',
-        firebaseUserKey,
-        firebaseUser
-      );
+      LOG &&
+        console.log(
+          'AuthWrapper.onAuthStateChanged:',
+          firebaseUserKey,
+          firebaseUser
+        );
       if (!!firebaseUser) {
         firebaseUser.getIdTokenResult().then(idTokenResult => {
-          console.log(
-            'AuthWrapper.onAuthStateChanged:',
-            firebaseUserKey,
-            'idTokenResult:',
-            idTokenResult
-          );
+          LOG &&
+            console.log(
+              'AuthWrapper.onAuthStateChanged:',
+              firebaseUserKey,
+              'idTokenResult:',
+              idTokenResult
+            );
           firebaseUser.admin = !!idTokenResult.claims['admin'];
 
           var stateUpdate = {};

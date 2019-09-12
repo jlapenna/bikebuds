@@ -161,7 +161,7 @@ class SignupStepper extends React.Component {
               activeStep.serviceName
           );
         } else {
-          console.log('Unable to create a session.', response);
+          console.warn('Unable to create a session.', response);
           this.setState({ connectPending: false });
         }
       });
@@ -213,7 +213,6 @@ class SignupStepper extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('SignupStepper.componentDidUpdate', prevProps);
     if (this.state.activeStepIndex !== prevState.activeStepIndex) {
       window.scrollTo(0, 0);
     }

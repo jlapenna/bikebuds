@@ -32,7 +32,6 @@ class ActivitiesWrapper extends Component {
   }
 
   handleUpdateRequestState = response => {
-    console.log('ActivitiesWrapper.handleUpdateRequestState:', response.body);
     this.setState({
       response: response,
     });
@@ -45,7 +44,6 @@ class ActivitiesWrapper extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ActivitiesWrapper.componentDidUpdate', prevProps);
     if (
       this.props.apiClient &&
       !this.state.fetched &&
@@ -59,7 +57,6 @@ class ActivitiesWrapper extends Component {
   }
 
   render() {
-    console.log('ActivitiesWrapper.render', this.state.response);
     return <div className="ActivitiesWrapper" />;
   }
 }

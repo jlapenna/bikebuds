@@ -130,7 +130,6 @@ class _ActivityMap extends Component {
   }
 
   render() {
-    console.log('ActivityMap.render', this.props);
     return (
       <GoogleMapsWrapper
         googleMapURL={googleMapURL}

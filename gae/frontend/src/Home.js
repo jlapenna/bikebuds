@@ -37,7 +37,6 @@ class Home extends Component {
   }
 
   handleActivitiesResponse = response => {
-    console.log('Home.onActivitiesReady', response);
     this.setState({
       activities: response.body,
     });
