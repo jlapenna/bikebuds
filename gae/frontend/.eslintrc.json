@@ -4,5 +4,9 @@
     "react": {
       "version": "16.9.0"
     }
+  },
+  "globals": {
+    "createFirebaseState": true,
+    "createSignedInState": true
   }
 }

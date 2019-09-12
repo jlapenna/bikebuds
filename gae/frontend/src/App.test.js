@@ -15,14 +15,80 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render, waitForElement } from '@testing-library/react';
 
+import { config } from './config';
 import { FirebaseState } from './firebase_util';
 import App from './App';
 
-it('renders without crashing', () => {
-  var firebase = new FirebaseState(true /* forTest */);
-  const div = document.createElement('div');
-  ReactDOM.render(<App firebase={firebase} />, div);
-  ReactDOM.unmountComponentAtNode(div);
+// For mocking the swagger client.
+import {
+  __setMockClient as __setMockClientForSwagWrapper,
+  __reset as __resetSwagWrapper,
+} from './SwagWrapper';
+
+jest.mock('./SignInScreen');
+jest.mock('./SwagWrapper');
+
+beforeEach(() => {
+  __setMockClientForSwagWrapper({
+    apis: { bikebuds: { get_profile: () => Promise.resolve({ body: {} }) } },
+  });
 });
+
+afterEach(() => {
+  __resetSwagWrapper();
+});
+
+test('Renders unknown without crashing', async () => {
+  const firebase = createFirebaseState();
+  const { getByTestId } = render(<App firebase={firebase} />);
+  expect(getByTestId('unknown-app')).toBeInTheDocument();
+});
+
+test('Renders signed-in without crashing', async () => {
+  const firebase = createFirebaseState();
+  const { container, getByTestId } = render(<App firebase={firebase} />);
+
+  firebase.auth.changeAuthState(createSignedInState());
+  firebase.authNext.changeAuthState(createSignedInState());
+  firebase.auth.flush();
+  firebase.authNext.flush();
+
+  await waitForElement(() => getByTestId('signed-in-app'));
+  expect(container.textContent).toContain('Welcome to bikebuds');
+});
+
+test('Renders signed-out without crashing', async () => {
+  const firebase = createFirebaseState();
+  const { getByTestId } = render(<App firebase={firebase} />);
+
+  firebase.auth.changeAuthState(undefined);
+  firebase.authNext.changeAuthState(undefined);
+  firebase.auth.signOut();
+  firebase.authNext.signOut();
+
+  firebase.auth.flush();
+  firebase.authNext.flush();
+
+  await waitForElement(() => getByTestId('signed-out-app'));
+});
+
+describe('Signed-in via dev/fakeuser config', () => {
+  beforeEach(() => {
+    config.isDev = true;
+    config.fakeUser = 'jlapenna@gmail.com';
+  });
+
+  test('Renders signed-in without crashing', async () => {
+    const firebase = new FirebaseState(true /* forTest */);
+    const { queryByTestId } = render(<App firebase={firebase} />);
+    expect(queryByTestId('signed-in-app')).toBeInTheDocument();
+  });
+});
+
+//test('Snapshot test', async () => {
+//  const firebase = new FirebaseState(true /* forTest */);
+//  const { container, queryByTestId } = render(<App firebase={firebase} />);
+//  expect(container).toMatchSnapshot();
+//});
