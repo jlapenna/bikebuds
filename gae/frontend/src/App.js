@@ -42,7 +42,7 @@ import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
-class SignedInApp extends Component {
+export class SignedInApp extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
@@ -52,39 +52,41 @@ class SignedInApp extends Component {
   render() {
     console.log('App.SignedInApp.render');
     return (
-      <Router>
-        <Switch>
-          <Route
-            path="/signup"
-            render={routeProps => (
-              <StandaloneSignup {...this.props} match={routeProps.match} />
-            )}
-          />
-          <Route
-            path="/embed/"
-            render={routeProps => (
-              <Embed {...this.props} match={routeProps.match} />
-            )}
-          />
-          <Route path="/signin">
-            <Redirect to="/" />
-          </Route>
-          <Route
-            path="/"
-            render={routeProps => (
-              <Main {...this.props} match={routeProps.match} />
-            )}
-          />
-          <Route>
-            <Redirect to="/" />
-          </Route>
-        </Switch>
-      </Router>
+      <div data-testid="signed-in-app">
+        <Router>
+          <Switch>
+            <Route
+              path="/signup"
+              render={routeProps => (
+                <StandaloneSignup {...this.props} match={routeProps.match} />
+              )}
+            />
+            <Route
+              path="/embed/"
+              render={routeProps => (
+                <Embed {...this.props} match={routeProps.match} />
+              )}
+            />
+            <Route path="/signin">
+              <Redirect to="/" />
+            </Route>
+            <Route
+              path="/"
+              render={routeProps => (
+                <Main {...this.props} match={routeProps.match} />
+              )}
+            />
+            <Route>
+              <Redirect to="/" />
+            </Route>
+          </Switch>
+        </Router>
+      </div>
     );
   }
 }
 
-class SignedOutApp extends Component {
+export class SignedOutApp extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
   };
@@ -92,27 +94,29 @@ class SignedOutApp extends Component {
   render() {
     console.log('App.SignedOutApp.render');
     return (
-      <Router>
-        <Switch>
-          <Route
-            path="/signin"
-            render={props => (
-              <SignInScreen
-                firebase={this.props.firebase}
-                match={props.match}
-              />
-            )}
-          />
-          <Route>
-            <Redirect to="/signin" />
-          </Route>
-        </Switch>
-      </Router>
+      <div data-testid="signed-out-app">
+        <Router>
+          <Switch>
+            <Route
+              path="/signin"
+              render={props => (
+                <SignInScreen
+                  firebase={this.props.firebase}
+                  match={props.match}
+                />
+              )}
+            />
+            <Route>
+              <Redirect to="/signin" />
+            </Route>
+          </Switch>
+        </Router>
+      </div>
     );
   }
 }
 
-class MainApp extends Component {
+export class MainApp extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
   };
@@ -131,23 +135,27 @@ class MainApp extends Component {
   render() {
     console.log('App.MainApp.render');
     return (
-      <AuthWrapper
-        firebase={this.props.firebase}
-        signedInHandler={this.handleSignedIn}
-        render={authWrapperState => {
-          switch (this.state.isSignedIn) {
-            case true:
-              return <SignedInApp {...authWrapperState} />;
-            case false:
-              return <SignedOutApp firebase={this.props.firebase} />;
-            default:
-              console.log('App.MainApp.render: unknown sign-in state.');
-              // We haven't figured out if we're signed in or not yet. Don't
-              // display anything.
-              return null;
-          }
-        }}
-      />
+      <div data-testid="main-app">
+        <AuthWrapper
+          firebase={this.props.firebase}
+          signedInHandler={this.handleSignedIn}
+          render={authWrapperState => {
+            switch (this.state.isSignedIn) {
+              case true:
+                console.log('App.MainApp.render: signed-in state.');
+                return <SignedInApp {...authWrapperState} />;
+              case false:
+                console.log('App.MainApp.render: signed-out state.');
+                return <SignedOutApp firebase={this.props.firebase} />;
+              default:
+                console.log('App.MainApp.render: unknown sign-in state.');
+                // We haven't figured out if we're signed in or not yet. Don't
+                // display anything.
+                return <div data-testid="unknown-app" />;
+            }
+          }}
+        />
+      </div>
     );
   }
 }
@@ -163,7 +171,6 @@ class App extends Component {
   }
 
   render() {
-    console.log('App.render: ', this.state);
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
