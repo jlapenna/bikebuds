@@ -46,7 +46,6 @@ class ClubFetcher extends Component {
   }
 
   handleActivities = response => {
-    console.log('Club.handleActivities:', response);
     if (response.status !== 200) {
       this.setState({
         activities: null,
@@ -59,7 +58,6 @@ class ClubFetcher extends Component {
   };
 
   handleClub = response => {
-    console.log('Club.handleClub:', response);
     if (response.status !== 200) {
       this.setState({
         club: null,
@@ -78,7 +76,6 @@ class ClubFetcher extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('Club.componentDidUpdate', prevProps);
     if (
       this.props.apiClient &&
       !this.state.fetched &&
@@ -121,7 +118,6 @@ class _ClubWidget extends Component {
   };
 
   render() {
-    console.log('ClubWidget.render', this.props);
     if (this.props.club === undefined) {
       return null;
     }

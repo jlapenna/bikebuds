@@ -42,26 +42,15 @@ class SignInScreen extends Component {
   };
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
-    console.log('SignInScreen.signInSuccessWithAuthResult', authResult);
     this.props.firebase.authNext
       .signInAndRetrieveDataWithCredential(authResult.credential)
-      .then(signInResult => {
-        console.log(
-          'SignInScreen.signInWithCredential: result:',
-          authResult,
-          signInResult
-        );
-      })
       .catch(error => {
-        console.log(
-          'SignInScreen.signInWithCredential: catch:',
+        console.warn(
+          'SignInScreen.signInWithCredential: authNext: ',
           authResult,
           error
         );
       });
-    console.log(
-      'SignInScreen.signInSuccessWithAuthResult: Started NEXT sign in'
-    );
 
     // Return false to not redirect
     return false;

@@ -138,7 +138,6 @@ class MeasuresCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('MeasuresCard.componentDidUpdate', prevProps);
     if (this.state.measures === undefined && this.props.measures) {
       this.handleMeasures(this.props.measures);
     }

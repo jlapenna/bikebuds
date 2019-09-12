@@ -60,9 +60,8 @@ export class FirebaseState {
   }
 
   onAuthStateChanged = (appObserver, appNextObserver) => {
-    console.log('FirebaseState.onAuthStateChanged: Registering');
     if (this.auth === null) {
-      console.log('FirebaseState: Not setting up auth listeners, under test.');
+      console.warn('FirebaseState: Not setting up auth listeners, under test.');
       return;
     }
     var unregisterAppObserver = this.auth.onAuthStateChanged(appObserver);
@@ -70,7 +69,6 @@ export class FirebaseState {
       appNextObserver
     );
     return function() {
-      console.log('FirebaseState.onAuthStateChanged: Unregistering');
       unregisterAppObserver();
       unregisterAppNextObserver();
     };

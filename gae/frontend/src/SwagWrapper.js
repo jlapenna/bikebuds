@@ -47,7 +47,6 @@ class SwagWrapper extends Component {
       },
     }).then(client => {
       if (this._mounted) {
-        console.log('SwagWrapper: Loaded client: ', client);
         this.setState({ clientLoaded: true, client: client });
         this.props.onReady(client);
       }

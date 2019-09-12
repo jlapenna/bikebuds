@@ -50,7 +50,6 @@ export class SignedInApp extends Component {
   };
 
   render() {
-    console.log('App.SignedInApp.render');
     return (
       <div data-testid="signed-in-app">
         <Router>
@@ -92,7 +91,6 @@ export class SignedOutApp extends Component {
   };
 
   render() {
-    console.log('App.SignedOutApp.render');
     return (
       <div data-testid="signed-out-app">
         <Router>
@@ -128,12 +126,10 @@ export class MainApp extends Component {
   }
 
   handleSignedIn = isSignedIn => {
-    console.log('App.MainApp.handleSignedIn:', isSignedIn);
     this.setState({ isSignedIn: isSignedIn });
   };
 
   render() {
-    console.log('App.MainApp.render');
     return (
       <div data-testid="main-app">
         <AuthWrapper
@@ -142,13 +138,10 @@ export class MainApp extends Component {
           render={authWrapperState => {
             switch (this.state.isSignedIn) {
               case true:
-                console.log('App.MainApp.render: signed-in state.');
                 return <SignedInApp {...authWrapperState} />;
               case false:
-                console.log('App.MainApp.render: signed-out state.');
                 return <SignedOutApp firebase={this.props.firebase} />;
               default:
-                console.log('App.MainApp.render: unknown sign-in state.');
                 // We haven't figured out if we're signed in or not yet. Don't
                 // display anything.
                 return <div data-testid="unknown-app" />;

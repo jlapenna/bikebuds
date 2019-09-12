@@ -65,10 +65,8 @@ class EventsListCard extends Component {
   };
 
   handleUpdateEvents = snapshot => {
-    console.log('EventsListCard.handleUpdateEvents:', snapshot);
     var events = [];
     snapshot.forEach(doc => {
-      console.log('Adding event: ', doc);
       events.push(doc.data());
     });
 
@@ -76,11 +74,6 @@ class EventsListCard extends Component {
       var selectedEvent = events[0];
       var selectedindex = 0;
     }
-    console.log(
-      'EventsListCard.handleUpdateEvents: selectedEvent: ',
-      selectedEvent
-    );
-    console.log('EventsListCard.handleUpdateEvents: events: ', events);
 
     this.setState({
       events: events,
@@ -94,12 +87,7 @@ class EventsListCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('EventsListCard.componentDidUpdate', prevProps);
     if (this.props.apiClient && this.unsubscribe === undefined) {
-      console.log(
-        'EventsListCard.componentDidUpdate: subscribing to: ',
-        this.props.query
-      );
       this.unsubscribe = this.props.query.onSnapshot(this.handleUpdateEvents);
     }
   }
@@ -127,7 +115,6 @@ class EventsListCard extends Component {
         >
           <List>
             {this.state.events.map((event, index) => {
-              console.log('EventsListCard.renderCardContent: ', event);
               return (
                 <ListItem
                   key={index}

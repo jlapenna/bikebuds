@@ -24,7 +24,6 @@ export class ProfileState {
   }
 
   update(result) {
-    console.log('ProfileState.update: ', result);
     this.fetched = true;
     this.signup_complete = result.signup_complete;
     this.user = result.user;
@@ -57,23 +56,15 @@ export default class ProfileWrapper extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log(
-      'ProfileWrapper.componentDidUpdate: props',
-      this.props,
-      'state',
-      this.state
-    );
     if (this.props.apiClient && !this.state.fetched) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds.get_profile({}).then(response => {
-        console.log('ProfileWrapper: response: ', response);
         this.props.profile.update(response.body);
       });
     }
   }
 
   render() {
-    console.log('ProfileWrapper.render', this.props.profile);
     return null;
   }
 }

@@ -56,7 +56,6 @@ class ActivitiesListCard extends Component {
 
   constructor(props) {
     super(props);
-    console.log('ActivitiesListCard: ', props);
     if (
       this.props.activities !== undefined &&
       this.props.activities.length > 0
@@ -71,7 +70,6 @@ class ActivitiesListCard extends Component {
   }
 
   handleListItemClick = (index, activity) => {
-    console.log('ActivitiesListCard.handleListItemClick: ', index, activity);
     this.setState({
       selectedActivity: activity,
       selectedIndex: index,
@@ -79,7 +77,6 @@ class ActivitiesListCard extends Component {
   };
 
   handleUpdateActivities = activities => {
-    console.log('ActivitiesListCard.handleUpdateActivities: ');
     activities = activities || [];
 
     if (activities.length > 0) {
@@ -94,13 +91,6 @@ class ActivitiesListCard extends Component {
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ActivitiesListCard.componentDidUpdate', prevProps, this.props);
-    if (prevProps.activities !== this.props.activities) {
-      console.log(
-        'ActivitiesListCard.componentDidUpdate: new activities props',
-        this.props.activities
-      );
-    }
     if (
       this.props.activities !== prevProps.activities &&
       this.props.activities !== undefined &&

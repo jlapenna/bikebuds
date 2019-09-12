@@ -35,25 +35,21 @@ class FcmManager extends Component {
       fcmToken: localStorage.getItem('fcmToken'),
       client: undefined,
     };
-    console.log('FcmManager.constructor: ', this.state.fcmToken);
 
     this.tokenListener = null;
     this.messageListener = null;
   }
 
   registerFcm = () => {
-    console.log('FcmManager.registerFcm');
     if (config.vapidKey !== undefined) {
       this.props.firebase.messaging.usePublicVapidKey(config.vapidKey);
     }
     this.props.firebase.messaging
       .requestPermission()
       .then(() => {
-        console.log('FcmManager.registerFcm: granted permission');
         return this.props.firebase.messaging.getToken();
       })
       .then(token => {
-        console.log('FcmManager.registerFcm: got token');
         localStorage.setItem('fcmToken', token);
         this.setState({
           fcmToken: token,
@@ -61,7 +57,7 @@ class FcmManager extends Component {
         });
       })
       .catch(error => {
-        console.log('FcmManager: Error: ', error);
+        console.warn('FcmManager: Error: ', error);
         localStorage.setItem('fcmToken', null);
         this.setState({
           fcmToken: null,
@@ -70,7 +66,6 @@ class FcmManager extends Component {
   };
 
   handleUpdateClient = response => {
-    console.log('FcmManager.handleUpdateClient:', response.body);
     if (response.body === undefined) {
       return;
     }
@@ -84,7 +79,6 @@ class FcmManager extends Component {
   };
 
   componentDidMount() {
-    console.log('FcmManager.componentDidMount');
     if (config.isDev && config.fakeUser) {
       // No push messages when running with fake users.
       return;
@@ -119,13 +113,11 @@ class FcmManager extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('FcmManager.componentDidUpdate');
     if (config.isDev && config.fakeUser) {
       // No push messages when running with fake users.
       return;
     }
     if (this.state.registered === undefined) {
-      console.log('FcmManager.componentDidUpdate: Registering');
       this.setState({
         registered: false,
       });

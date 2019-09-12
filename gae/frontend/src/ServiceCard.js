@@ -82,7 +82,7 @@ class ServiceCard extends Component {
               '/init?dest=/settings'
           );
         } else {
-          console.log('Unable to create a session.', response);
+          console.warn('Unable to create a session.', response);
           this.setState({ actionPending: false });
         }
       });
@@ -104,7 +104,6 @@ class ServiceCard extends Component {
     this.setState({
       service: response.body,
     });
-    console.log('ServiceCard.handleService', response.body);
   };
 
   handleSync = () => {

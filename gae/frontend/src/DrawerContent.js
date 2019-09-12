@@ -44,7 +44,6 @@ class DrawerContent extends React.Component {
   };
 
   render() {
-    console.log('DrawerContent.render: ', this.props.profile);
     if (!this.props.profile) {
       return null;
     }

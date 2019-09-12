@@ -68,7 +68,6 @@ class MeasuresSummaryCard extends Component {
   }
 
   handleMeasures = newMeasures => {
-    console.log('MeasuresSummaryCard: handleMeasures: ', newMeasures);
     if (newMeasures.length === 0) {
       this.setState({
         measures: [],
