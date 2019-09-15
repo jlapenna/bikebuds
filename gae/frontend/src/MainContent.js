@@ -73,6 +73,7 @@ export default class MainContent extends React.Component {
           render={props => (
             <Settings
               apiClient={this.props.apiClient}
+              firebase={this.props.firebase}
               firebaseUser={this.props.firebaseUser}
               match={this.props.match}
               profile={this.props.profile}

@@ -26,6 +26,7 @@ import ServiceCard from './ServiceCard';
 class Settings extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
+    firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object,
     profile: PropTypes.object,
   };
@@ -42,13 +43,22 @@ class Settings extends Component {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <ServiceCard serviceName="fitbit" apiClient={this.props.apiClient} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <ServiceCard serviceName="strava" apiClient={this.props.apiClient} />
+          <ServiceCard
+            firebase={this.props.firebase}
+            serviceName="fitbit"
+            apiClient={this.props.apiClient}
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
+            firebase={this.props.firebase}
+            serviceName="strava"
+            apiClient={this.props.apiClient}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <ServiceCard
+            firebase={this.props.firebase}
             serviceName="withings"
             apiClient={this.props.apiClient}
           />
