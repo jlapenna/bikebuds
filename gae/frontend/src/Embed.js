@@ -62,13 +62,6 @@ class Embed extends Component {
     });
   };
 
-  handleSwagFailed = () => {
-    console.log('Embed.handleSwagFailed');
-    this.setState({
-      apiClient: undefined,
-    });
-  };
-
   handleProfileUpdated = profile => {
     console.log('Embed.handleProfileUpdated', profile);
     this.setState({
@@ -80,9 +73,9 @@ class Embed extends Component {
     return (
       <div className={this.props.classes.root}>
         <SwagWrapper
-          firebase={this.props.firebase}
+          firebaseUser={this.props.firebaseUser}
+          firebaseToken={this.props.firebaseToken}
           onReady={this.handleSwagReady}
-          onFailed={this.handleSwagFailed}
         />
         {this.state.apiClient && (
           <ProfileWrapper
