@@ -34,7 +34,7 @@ repos:
       - id: prettier
         exclude: index\.yaml|\.(js|jsx|ts|tsx)$
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v6.0.1
+    rev: v6.4.0
     hooks:
       - id: eslint
         entry: ./gae/frontend/node_modules/.bin/eslint --fix
@@ -42,13 +42,21 @@ repos:
         additional_dependencies:
           - babel-eslint
           - eslint
+          - eslint-config-prettier
+          - eslint-plugin-flowtype
+          - eslint-plugin-react
+          - eslint-plugin-import
+          - eslint-plugin-flowtype
+          - eslint-plugin-prettier
+          - eslint-plugin-react-hooks
+          - eslint-plugin-jsx-a11y
           - prettier
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.8
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+    rev: v2.3.0
     hooks:
       - id: check-yaml
       - id: detect-private-key
