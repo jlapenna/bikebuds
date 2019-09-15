@@ -20,45 +20,17 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
-
 import {
-  withScriptjs,
-  withGoogleMap,
   BicyclingLayer,
   GoogleMap,
+  LoadScript,
   Polyline,
-} from 'react-google-maps';
+} from '@react-google-maps/api';
 
 import { config } from './config';
 import { readableDistance, readableDuration, readableSpeed } from './convert';
 
-/*
-  path={[
-    { lat: props.activity.properties.start_latlng.latitude, lng: props.activity.properties.start_latlng.longitude },
-    { lat: props.activity.properties.end_latlng.latitude, lng: props.activity.properties.end_latlng.longitude }
-  ]}
-*/
-
-const googleMapURL =
-  'https://maps.googleapis.com/maps/api/js?key=' +
-  config.mapsApiKey +
-  '&v=3.exp&libraries=geometry,drawing,places';
-
-const GoogleMapsWrapper = withScriptjs(
-  withGoogleMap(props => {
-    const { onMapMounted, ...otherProps } = props;
-    return (
-      <GoogleMap
-        {...otherProps}
-        ref={c => {
-          onMapMounted && onMapMounted(c);
-        }}
-      >
-        {props.children}
-      </GoogleMap>
-    );
-  })
-);
+const MAP_LIBRARIES = ['geometry'];
 
 class _ActivityMap extends Component {
   static styles = {
@@ -92,9 +64,11 @@ class _ActivityMap extends Component {
 
   _mapRef = null;
 
-  _handleMapMounted = c => {
-    if (!c || this._mapRef) return;
-    this._mapRef = c;
+  _handleOnLoad = map => {
+    if (!map || this._mapRef) {
+      return;
+    }
+    this._mapRef = map;
 
     this.setState({
       mapMounted: true,
@@ -131,27 +105,29 @@ class _ActivityMap extends Component {
 
   render() {
     return (
-      <GoogleMapsWrapper
-        googleMapURL={googleMapURL}
+      <LoadScript
+        id="script-loader"
+        googleMapsApiKey={config.mapsApiKey}
+        libraries={MAP_LIBRARIES}
         loadingElement={<div className={this.props.classes.loadingElement} />}
-        containerElement={
-          <div className={this.props.classes.containerElement} />
-        }
-        mapElement={<div className={this.props.classes.mapElement} />}
-        defaultZoom={10}
-        onMapMounted={this._handleMapMounted}
       >
-        <Polyline
-          path={this.state.decodedPolyline}
-          visible
-          options={{
-            strokeColor: '#ff4081',
-            strokeOpacity: 1,
-            strokeWeight: 3,
-          }}
-        />
-        <BicyclingLayer autoUpdate />
-      </GoogleMapsWrapper>
+        <GoogleMap
+          mapContainerClassName={this.props.classes.containerElement}
+          onLoad={this._handleOnLoad}
+          zoom={10}
+        >
+          <Polyline
+            path={this.state.decodedPolyline}
+            visible
+            options={{
+              strokeColor: '#ff4081',
+              strokeOpacity: 1,
+              strokeWeight: 3,
+            }}
+          />
+          <BicyclingLayer autoUpdate />
+        </GoogleMap>
+      </LoadScript>
     );
   }
 }
