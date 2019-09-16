@@ -18,3 +18,6 @@
 
 # Removed 1 warning...
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+# https://github.com/flutter/flutter/issues/39650#issuecomment-527767673
+-dontwarn android.**
