@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 import Chrome from './Chrome';
 import FcmManager from './FcmManager';
@@ -100,7 +101,8 @@ class Main extends Component {
         {!this.props.embed && <Chrome profile={this.state.profile} />}
         <main className={this.props.classes.main}>
           {/* Ensure when chrome is enabled, we don't hide content under it. */}
-          <div className={this.props.classes.toolbar} />
+          {!this.props.embed && <div className={this.props.classes.toolbar} />}
+          {this.props.profile === undefined && <LinearProgress />}
           {this.state.apiClient && (
             <MainContent
               className={this.props.classes.mainContent}
