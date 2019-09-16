@@ -17,54 +17,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import AppBar from '@material-ui/core/AppBar';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-
 import { withStyles } from '@material-ui/core/styles';
 
-import DrawerContent from './DrawerContent';
+import Chrome from './Chrome';
 import FcmManager from './FcmManager';
 import MainContent from './MainContent';
 import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 import SwagWrapper from './SwagWrapper';
-
-const drawerWidth = 240;
 
 class Main extends Component {
   static styles = theme => ({
     root: {
       display: 'flex',
     },
-    drawerPaper: {
-      width: drawerWidth,
-    },
-    drawer: {
-      [theme.breakpoints.up('md')]: {
-        width: drawerWidth,
-        flexShrink: 0,
-      },
-      height: '100%',
-      'text-align': 'center',
-    },
     toolbar: theme.mixins.toolbar,
-    appBar: {
-      [theme.breakpoints.up('md')]: {
-        width: '100%',
-        zIndex: theme.zIndex.drawer + 1,
-      },
-    },
-    menuButton: {
-      marginRight: 20,
-      [theme.breakpoints.up('md')]: {
-        display: 'none',
-      },
-    },
     main: {
       height: '100%',
       width: '100%',
@@ -77,6 +43,7 @@ class Main extends Component {
   });
 
   static propTypes = {
+    embed: PropTypes.bool.isRequired,
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
@@ -86,16 +53,10 @@ class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mobileOpen: false,
       apiClient: null,
       profile: new ProfileState(this.handleProfileUpdated),
-      swagClient: null,
     };
   }
-
-  handleDrawerToggle = () => {
-    this.setState(state => ({ mobileOpen: !state.mobileOpen }));
-  };
 
   handleSwagReady = client => {
     this.setState({
@@ -127,72 +88,18 @@ class Main extends Component {
             profile={this.state.profile}
           />
         )}
-        {this.state.apiClient && this.props.firebase !== undefined && (
-          <FcmManager
-            firebase={this.props.firebase}
-            apiClient={this.state.apiClient}
-            onMessage={this.handleFcmMessage}
-          />
-        )}
-        <AppBar className={this.props.classes.appBar} position="fixed">
-          <Toolbar>
-            <IconButton
-              className={this.props.classes.menuButton}
-              onClick={this.handleDrawerToggle}
-              color="inherit"
-              aria-label="Menu"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              className={this.props.classes.grow}
-              variant="h6"
-              color="inherit"
-            >
-              Bikebuds
-            </Typography>
-          </Toolbar>
-          {this.state.profile === undefined && <LinearProgress />}
-        </AppBar>
-        <nav className={this.props.classes.drawer}>
-          <Hidden mdUp>
-            <Drawer
-              container={this.props.container}
-              variant="temporary"
-              anchor={this.props.theme.direction === 'rtl' ? 'right' : 'left'}
-              open={this.state.mobileOpen}
-              onClose={this.handleDrawerToggle}
-              classes={{
-                paper: this.props.classes.drawerPaper,
-              }}
-              ModalProps={{
-                keepMounted: true, // Better open performance on mobile.
-              }}
-            >
-              <div className={this.props.classes.toolbar} />
-              <DrawerContent
-                profile={this.state.profile}
-                onClick={() => this.setState({ mobileOpen: false })}
-              />
-            </Drawer>
-          </Hidden>
-          <Hidden smDown>
-            <Drawer
-              classes={{
-                paper: this.props.classes.drawerPaper,
-              }}
-              variant="permanent"
-              open
-            >
-              <div className={this.props.classes.toolbar} />
-              <DrawerContent
-                profile={this.state.profile}
-                onClick={() => this.setState({ mobileOpen: false })}
-              />
-            </Drawer>
-          </Hidden>
-        </nav>
+        {!this.props.embed &&
+          this.state.apiClient &&
+          this.props.firebase !== undefined && (
+            <FcmManager
+              firebase={this.props.firebase}
+              apiClient={this.state.apiClient}
+              onMessage={this.handleFcmMessage}
+            />
+          )}
+        {!this.props.embed && <Chrome profile={this.state.profile} />}
         <main className={this.props.classes.main}>
+          {/* Ensure when chrome is enabled, we don't hide content under it. */}
           <div className={this.props.classes.toolbar} />
           {this.state.apiClient && (
             <MainContent

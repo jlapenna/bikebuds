@@ -27,6 +27,7 @@ import {
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import 'typeface-roboto';
 
@@ -35,7 +36,6 @@ import theme from './theme';
 import { FirebaseState } from './firebase_util';
 
 import AuthWrapper from './AuthWrapper';
-import Embed from './Embed';
 import Main from './Main';
 import Privacy from './Privacy';
 import SignInScreen from './SignInScreen';
@@ -63,16 +63,19 @@ export class SignedInApp extends Component {
             <Route
               path="/embed/"
               render={routeProps => (
-                <Embed {...this.props} match={routeProps.match} />
+                <Main embed {...this.props} match={routeProps.match} />
               )}
             />
+            <Route path="/auth">
+              <Redirect to="/embed/" />
+            </Route>
             <Route path="/signin">
               <Redirect to="/" />
             </Route>
             <Route
               path="/"
               render={routeProps => (
-                <Main {...this.props} match={routeProps.match} />
+                <Main embed={false} {...this.props} match={routeProps.match} />
               )}
             />
             <Route>
@@ -104,6 +107,7 @@ export class SignedOutApp extends Component {
                 />
               )}
             />
+            <Route path="/auth" render={props => <CircularProgress />} />
             <Route>
               <Redirect to="/signin" />
             </Route>
