@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/loading.dart';
 import 'package:bikebuds/privacy_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -134,33 +135,13 @@ class SignInContainerState extends State<SignInContainer> {
       // We might be in the process of signing in, though...
       return MaterialApp(
         home: Scaffold(
-          body:
-              signingIn ? _buildSigningIn(context) : _buildStartSignIn(context),
+          body: signingIn ? loadingWidget(context) : _buildStartSignIn(context),
         ),
       );
     }
     return new _InheritedSignIn(
       data: this,
       child: widget.child,
-    );
-  }
-
-  Widget _buildSigningIn(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(width: 20.0),
-              ],
-            ),
-          ],
-        ),
-      ],
     );
   }
 

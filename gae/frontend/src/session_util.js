@@ -20,18 +20,15 @@ export function createSession(firebase, responseCallback) {
   if (config.is_dev && config.fake_user) {
     responseCallback({ status: 200 });
   }
-  firebase
-    .auth()
-    .currentUser.getIdTokenResult()
-    .then(idTokenResult => {
-      fetch(config.frontendUrl + '/services/session', {
-        /* Set header for the XMLHttpRequest to get data from the web server
-         * associated with userIdToken */
-        headers: {
-          Authorization: 'Bearer ' + idTokenResult.token,
-        },
-        method: 'POST',
-        credentials: 'include',
-      }).then(responseCallback);
-    });
+  firebase.auth.currentUser.getIdTokenResult().then(idTokenResult => {
+    fetch(config.frontendUrl + '/services/session', {
+      /* Set header for the XMLHttpRequest to get data from the web server
+       * associated with userIdToken */
+      headers: {
+        Authorization: 'Bearer ' + idTokenResult.token,
+      },
+      method: 'POST',
+      credentials: 'include',
+    }).then(responseCallback);
+  });
 }

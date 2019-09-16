@@ -23,6 +23,7 @@ const LOG = true;
 
 class AuthWrapper extends Component {
   static propTypes = {
+    embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
     signedInHandler: PropTypes.func.isRequired,
   };
@@ -30,7 +31,6 @@ class AuthWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      queryToken: new URLSearchParams(window.location.search).get('token'),
       firebaseUser: undefined,
       firebaseToken: undefined,
       firebaseUserNext: undefined,
@@ -39,19 +39,20 @@ class AuthWrapper extends Component {
   }
 
   _isSignedIn = () => {
-    if (this.state.firebaseUser === undefined) {
-      return undefined;
+    if (this.props.embed) {
+      if (this.state.firebaseUser === undefined) {
+        return undefined;
+      }
+      return !!this.state.firebaseUser;
+    } else {
+      if (
+        this.state.firebaseUser === undefined ||
+        this.state.firebaseUserNext === undefined
+      ) {
+        return undefined;
+      }
+      return !!this.state.firebaseUser && !!this.state.firebaseUserNext;
     }
-    return !!this.state.firebaseUser;
-    /*
-    if (
-      this.state.firebaseUser === undefined ||
-      this.state.firebaseUserNext === undefined
-    ) {
-      return undefined;
-    }
-    return !!this.state.firebaseUser && !!this.state.firebaseUserNext;
-    */
   };
 
   componentDidMount() {
@@ -76,7 +77,9 @@ class AuthWrapper extends Component {
       this._onAuthStateChangedFn('firebaseUserNext', 'firebaseTokenNext')
     );
 
-    if (this.state.queryToken != null) {
+    if (this.props.customToken != null) {
+      LOG &&
+        console.log('AuthWrapper.componentDidMount: handleCustomTokenLogin');
       this.handleCustomTokenLogin();
     }
   }
@@ -120,6 +123,7 @@ class AuthWrapper extends Component {
   };
 
   componentWillUnmount() {
+    LOG && console.log('AuthWrapper.componentWillUnmount');
     if (!!this.unregisterAuthObserver) {
       this.unregisterAuthObserver();
       this.unregisterAuthObserver = null;
@@ -133,23 +137,22 @@ class AuthWrapper extends Component {
     ) {
       this.props.signedInHandler(this._isSignedIn());
     }
-    if (prevState.queryToken !== this.state.queryToken) {
-      this.handleCustomTokenLogin();
-    }
   }
 
   handleCustomTokenLogin = () => {
-    LOG && console.log('AuthWrapper.handleCustomTokenLogin');
+    LOG &&
+      console.log(
+        'AuthWrapper.handleCustomTokenLogin:',
+        !!this.props.customToken
+      );
     this.props.firebase.auth
-      .signInWithCustomToken(this.state.queryToken)
+      .signInWithCustomToken(this.props.customToken)
       .then(result => {
         LOG &&
           console.log('AuthWrapper.handleCustomTokenLogin: result:', result);
-        //this.authStateChangedFn(result.user);
       })
       .catch(error => {
-        console.log('XXX: catch', error);
-        // Handle Errors here.
+        console.warn('AuthWrapper.handleCustomTokenLogin: error:', error);
       });
   };
 

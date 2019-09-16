@@ -40,11 +40,12 @@ class BikebudsApiContainer extends StatefulWidget {
 class BikebudsApiContainerState extends State<BikebudsApiContainer> {
   bool _loading = false;
 
-  BikebudsApi api;
-  ClientStateEntity _client = null;
+  BikebudsApi _api;
+  ClientStateEntity _client;
 
   @override
   void didChangeDependencies() {
+    print('BikebudsApiContainerState.didChangeDependencies');
     var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
     var signedIn = SignInContainer.of(context).signInState.signedIn;
@@ -59,8 +60,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     _loading = true;
     var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
-    //var api = BikebudsApi(await loadFromState(firebase),
-    //    rootUrl: (config)["api_url"] + "/_ah/api/");
     var apiClient = ApiClient(basePath: (config)["api_url"]);
 
     // Set an API Key.
@@ -72,9 +71,10 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     OAuth oAuth = apiClient.getAuthentication("firebase");
     oAuth.accessToken = await firebaseUser.getIdToken(refresh: true);
 
-    var api = BikebudsApi(apiClient);
+    final api = BikebudsApi(apiClient);
+    print("BikebudsApiContainerState._loadFirebase: $api");
     setState(() {
-      this.api = api;
+      this._api = api;
     });
   }
 
@@ -86,13 +86,21 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     );
   }
 
+  bool isReady() {
+    return _api != null;
+  }
+
   Future<FirebaseUser> get user async {
     var firebase = FirebaseContainer.of(context);
     return firebase.auth.currentUser();
   }
 
   Future<Profile> get profile async {
-    return api.getProfile(xFields: "*");
+    return _api.getProfile(xFields: "*");
+  }
+
+  Future<Auth> get auth async {
+    return _api.auth(xFields: "*");
   }
 
   ClientStateEntity get clientState {
@@ -104,7 +112,7 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     var client = ClientState()
       ..token = await firebaseToken
       ..type = Platform.operatingSystem.toUpperCase();
-    return api.updateClient(client, xFields: "*").then((response) {
+    return _api.updateClient(client, xFields: "*").then((response) {
       print('bikebuds_util: registerClient: response: $response');
       setState(() {
         _client = response;

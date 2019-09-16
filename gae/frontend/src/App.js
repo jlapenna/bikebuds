@@ -54,24 +54,21 @@ export class SignedInApp extends Component {
       <div data-testid="signed-in-app">
         <Router>
           <Switch>
-            <Route
-              path="/signup"
-              render={routeProps => (
-                <StandaloneSignup {...this.props} match={routeProps.match} />
-              )}
-            />
+            <Route path="/embed/auth">
+              <Redirect to="/embed/" />
+            </Route>
             <Route
               path="/embed/"
               render={routeProps => (
                 <Main embed {...this.props} match={routeProps.match} />
               )}
             />
-            <Route path="/auth">
-              <Redirect to="/embed/" />
-            </Route>
-            <Route path="/signin">
-              <Redirect to="/" />
-            </Route>
+            <Route
+              path="/signup"
+              render={routeProps => (
+                <StandaloneSignup {...this.props} match={routeProps.match} />
+              )}
+            />
             <Route
               path="/"
               render={routeProps => (
@@ -98,6 +95,7 @@ export class SignedOutApp extends Component {
       <div data-testid="signed-out-app">
         <Router>
           <Switch>
+            <Route path="/embed/auth" render={props => <CircularProgress />} />
             <Route
               path="/signin"
               render={props => (
@@ -107,12 +105,54 @@ export class SignedOutApp extends Component {
                 />
               )}
             />
-            <Route path="/auth" render={props => <CircularProgress />} />
             <Route>
               <Redirect to="/signin" />
             </Route>
           </Switch>
         </Router>
+      </div>
+    );
+  }
+}
+
+export class EmbedApp extends Component {
+  static propTypes = {
+    firebase: PropTypes.object.isRequired,
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      isSignedIn: undefined,
+    };
+    this.customToken = new URLSearchParams(window.location.search).get('token');
+  }
+
+  handleSignedIn = isSignedIn => {
+    this.setState({ isSignedIn: isSignedIn });
+  };
+
+  render() {
+    return (
+      <div data-testid="main-app">
+        <AuthWrapper
+          customToken={this.customToken}
+          embed={true}
+          firebase={this.props.firebase}
+          signedInHandler={this.handleSignedIn}
+          render={authWrapperState => {
+            switch (this.state.isSignedIn) {
+              case true:
+                return <SignedInApp {...authWrapperState} />;
+              case false:
+                return <SignedOutApp firebase={this.props.firebase} />;
+              default:
+                // We haven't figured out if we're signed in or not yet. Don't
+                // display anything.
+                return <div data-testid="unknown-app" />;
+            }
+          }}
+        />
       </div>
     );
   }
@@ -127,6 +167,7 @@ export class MainApp extends Component {
     this.state = {
       isSignedIn: undefined,
     };
+    this.customToken = new URLSearchParams(window.location.search).get('token');
   }
 
   handleSignedIn = isSignedIn => {
@@ -134,9 +175,12 @@ export class MainApp extends Component {
   };
 
   render() {
+    const customToken = this.customToken;
     return (
       <div data-testid="main-app">
         <AuthWrapper
+          customToken={customToken}
+          embed={false}
           firebase={this.props.firebase}
           signedInHandler={this.handleSignedIn}
           render={authWrapperState => {
@@ -181,6 +225,9 @@ class App extends Component {
             </Route>
             <Route path="/tos">
               <ToS />
+            </Route>
+            <Route path="/embed">
+              <EmbedApp firebase={this.state.firebase} />
             </Route>
             <Route>
               <MainApp firebase={this.state.firebase} />

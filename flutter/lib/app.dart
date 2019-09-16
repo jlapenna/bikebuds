@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:bikebuds/bikebuds_util.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
+import 'package:bikebuds/loading.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_model.dart';
@@ -55,9 +56,10 @@ class _SignedInAppState extends State<SignedInApp> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     var bikebuds = BikebudsApiContainer.of(context);
     var firebase = FirebaseContainer.of(context);
-    if (bikebuds.api != null) {
+    if (!bikebuds.isReady()) {
       print('SignedInApp.didDependenciesChange: $bikebuds, $firebase');
       user.updateProfile(bikebuds.profile);
       user.updateUser(bikebuds.user);
@@ -77,7 +79,6 @@ class _SignedInAppState extends State<SignedInApp> {
             onLaunch: this.onLaunch);
       }
     }
-    super.didChangeDependencies();
   }
 
   @override
@@ -115,6 +116,10 @@ class _SignedInAppState extends State<SignedInApp> {
     // full-app rendering if we aren't signed up.
     //User user = UserModel.of(context)?.bikebudsUser;
 
+    var bikebuds = BikebudsApiContainer.of(context);
+    if (!bikebuds.isReady()) {
+      return loadingWidget(context);
+    }
     return MaterialApp(
       title: 'Bikebuds',
       theme: ThemeData(

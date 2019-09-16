@@ -13,18 +13,23 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../user_model.dart';
-import 'mobile_embed.dart';
-
-class HomePage extends StatelessWidget {
-  const HomePage();
-
-  @override
-  Widget build(BuildContext context) {
-    return ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-      return MobileEmbed();
-    });
-  }
+Widget loadingWidget(BuildContext context) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CircularProgressIndicator(),
+              SizedBox(width: 20.0),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }
