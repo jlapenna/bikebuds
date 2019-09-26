@@ -20,7 +20,6 @@ import React, { Component } from 'react';
 class ActivitiesWrapper extends Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    onResponse: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -34,8 +33,8 @@ class ActivitiesWrapper extends Component {
   handleUpdateRequestState = response => {
     this.setState({
       response: response,
+      activities: response.body,
     });
-    this.props.onResponse(response);
   };
 
   componentDidMount() {
@@ -57,7 +56,9 @@ class ActivitiesWrapper extends Component {
   }
 
   render() {
-    return <div className="ActivitiesWrapper" />;
+    return (
+      <div className="ActivitiesWrapper">{this.props.render(this.state)}</div>
+    );
   }
 }
 export default ActivitiesWrapper;

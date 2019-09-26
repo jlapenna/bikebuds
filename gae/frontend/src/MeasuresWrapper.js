@@ -54,12 +54,8 @@ class MeasuresWrapper extends Component {
     });
   };
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      this.props.apiClient &&
-      !this.state.fetched &&
-      this.state.measures === undefined
-    ) {
+  componentDidMount() {
+    if (!this.state.fetched) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds
         .get_series({ filter: 'weight' })

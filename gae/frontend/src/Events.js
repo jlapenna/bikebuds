@@ -17,21 +17,17 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import Fab from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
+import Grid from '@material-ui/core/Grid';
 
 import { withStyles } from '@material-ui/core/styles';
 
+import ActivitiesListCard from './ActivitiesListCard';
+import ActivitiesWrapper from './ActivitiesWrapper';
 import EventsListCard from './EventsListCard';
 
 class Events extends Component {
   static styles = theme => ({
     root: {},
-    fab: {
-      position: 'absolute',
-      bottom: theme.spacing(2),
-      right: theme.spacing(2),
-    },
   });
 
   static propTypes = {
@@ -53,14 +49,28 @@ class Events extends Component {
   render() {
     return this.query !== null ? (
       <div className={this.props.classes.root}>
-        <EventsListCard apiClient={this.props.apiClient} query={this.query} />
-        <Fab
-          color="primary"
-          aria-label="Add"
-          className={this.props.classes.fab}
-        >
-          <AddIcon />
-        </Fab>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <EventsListCard
+              apiClient={this.props.apiClient}
+              query={this.query}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ActivitiesWrapper
+              apiClient={this.props.apiClient}
+              onResponse={this.handleActivitiesResponse}
+              render={wrapperState => (
+                <ActivitiesListCard
+                  apiClient={this.props.apiClient}
+                  profile={this.props.profile}
+                  activities={wrapperState.activities}
+                  showDate={true}
+                />
+              )}
+            />
+          </Grid>
+        </Grid>
       </div>
     ) : null;
   }

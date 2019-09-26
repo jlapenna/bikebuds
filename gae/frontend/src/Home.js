@@ -19,8 +19,6 @@ import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
-import ActivitiesListCard from './ActivitiesListCard';
-import ActivitiesWrapper from './ActivitiesWrapper';
 import MeasuresCard from './MeasuresCard';
 import MeasuresSummaryCard from './MeasuresSummaryCard';
 import MeasuresWrapper from './MeasuresWrapper';
@@ -31,17 +29,6 @@ class Home extends Component {
     profile: PropTypes.object,
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  handleActivitiesResponse = response => {
-    this.setState({
-      activities: response.body,
-    });
-  };
-
   render() {
     return (
       <div>
@@ -50,22 +37,10 @@ class Home extends Component {
           apiClient={this.props.apiClient}
           render={wrapperState => (
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={4}>
+              <Grid item xs={12}>
                 <MeasuresSummaryCard
                   profile={this.props.profile}
                   measures={wrapperState.measures}
-                />
-              </Grid>
-              <Grid item xs={12} lg={8}>
-                <ActivitiesWrapper
-                  apiClient={this.props.apiClient}
-                  onResponse={this.handleActivitiesResponse}
-                />
-                <ActivitiesListCard
-                  apiClient={this.props.apiClient}
-                  profile={this.props.profile}
-                  activities={this.state.activities}
-                  showDate={true}
                 />
               </Grid>
               <Grid item xs={12}>
