@@ -18,7 +18,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
-import LinearProgress from '@material-ui/core/LinearProgress';
+import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Chrome from './Chrome';
 import FcmManager from './FcmManager';
@@ -31,7 +32,6 @@ class Main extends Component {
     root: {
       display: 'flex',
     },
-    toolbar: theme.mixins.toolbar,
     main: {
       height: '100%',
       width: '100%',
@@ -40,6 +40,9 @@ class Main extends Component {
     mainContent: {
       height: '100%',
       width: '100%',
+    },
+    spinnerContainer: {
+      minHeight: '100vh',
     },
   });
 
@@ -75,6 +78,41 @@ class Main extends Component {
     console.log('Main.handleFcmMessage', payload);
   };
 
+  renderMainContent() {
+    var mainContent = (
+      <MainContent
+        className={this.props.classes.mainContent}
+        match={this.props.match}
+        firebase={this.props.firebase}
+        firebaseUser={this.props.firebaseUser}
+        apiClient={this.state.apiClient}
+        profile={this.state.profile}
+      />
+    );
+    if (this.props.embed) {
+      return <div className={this.props.classes.main}>{mainContent}</div>;
+    } else {
+      return <Chrome profile={this.state.profile} children={mainContent} />;
+    }
+  }
+
+  renderSpinner() {
+    return (
+      <Grid
+        className={this.props.classes.spinnerContainer}
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justify="center"
+      >
+        <Grid item>
+          <CircularProgress />
+        </Grid>
+      </Grid>
+    );
+  }
+
   render() {
     return (
       <div className={this.props.classes.root}>
@@ -89,31 +127,16 @@ class Main extends Component {
             profile={this.state.profile}
           />
         )}
-        {!this.props.embed &&
-          this.state.apiClient &&
-          this.props.firebase !== undefined && (
-            <FcmManager
-              firebase={this.props.firebase}
-              apiClient={this.state.apiClient}
-              onMessage={this.handleFcmMessage}
-            />
-          )}
-        {!this.props.embed && <Chrome profile={this.state.profile} />}
-        <main className={this.props.classes.main}>
-          {/* Ensure when chrome is enabled, we don't hide content under it. */}
-          {!this.props.embed && <div className={this.props.classes.toolbar} />}
-          {this.props.profile === undefined && <LinearProgress />}
-          {this.state.apiClient && (
-            <MainContent
-              className={this.props.classes.mainContent}
-              match={this.props.match}
-              firebase={this.props.firebase}
-              firebaseUser={this.props.firebaseUser}
-              apiClient={this.state.apiClient}
-              profile={this.state.profile}
-            />
-          )}
-        </main>
+        {!this.props.embed && this.state.apiClient && (
+          <FcmManager
+            firebase={this.props.firebase}
+            apiClient={this.state.apiClient}
+            onMessage={this.handleFcmMessage}
+          />
+        )}
+        {this.state.profile.fetched
+          ? this.renderMainContent()
+          : this.renderSpinner()}
       </div>
     );
   }

@@ -44,6 +44,11 @@ class Chrome extends Component {
       height: '100%',
       'text-align': 'center',
     },
+    main: {
+      height: '100%',
+      width: '100%',
+      padding: theme.spacing(2),
+    },
     toolbar: theme.mixins.toolbar,
     appBar: {
       [theme.breakpoints.up('md')]: {
@@ -133,6 +138,10 @@ class Chrome extends Component {
             </Drawer>
           </Hidden>
         </nav>
+        <main className={this.props.classes.main}>
+          <div className={this.props.classes.toolbar} />
+          {this.props.children}
+        </main>
       </React.Fragment>
     );
   }
