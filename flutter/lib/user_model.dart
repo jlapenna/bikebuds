@@ -22,7 +22,9 @@ import 'package:scoped_model/scoped_model.dart';
 class UserModel extends Model {
   Profile _profile;
   FirebaseUser _firebaseUser;
+  Auth _auth;
 
+  Auth get auth => _auth;
   Profile get profile => _profile;
   FirebaseUser get firebaseUser => _firebaseUser;
 
@@ -32,8 +34,14 @@ class UserModel extends Model {
     notifyListeners();
   }
 
-  void updateUser(FutureOr<FirebaseUser> user) async {
+  void updateFirebaseUser(FutureOr<FirebaseUser> user) async {
     _firebaseUser = await user;
+
+    notifyListeners();
+  }
+
+  void updateAuth(FutureOr<Auth> response) async {
+    _auth = await response;
 
     notifyListeners();
   }

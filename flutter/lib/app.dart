@@ -21,6 +21,7 @@ import 'package:bikebuds/loading.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -52,37 +53,46 @@ class SignedInApp extends StatefulWidget {
 class _SignedInAppState extends State<SignedInApp> {
   final UserModel user = UserModel();
 
+  StreamSubscription<FirebaseUser> _firebaseUserSubscription;
   StreamSubscription<String> _messagingListener;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Listen for auth changes.
     var bikebuds = BikebudsApiContainer.of(context);
     var firebase = FirebaseContainer.of(context);
-    if (!bikebuds.isReady()) {
-      print('SignedInApp.didDependenciesChange: $bikebuds, $firebase');
-      user.updateProfile(bikebuds.profile);
-      user.updateUser(bikebuds.user);
-      if (_messagingListener == null) {
-        _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
-          print('Messaging.onTokenRefresh');
-          BikebudsApiContainer.of(context)
-              .registerClient(token)
-              .then((response) {
-            print('app: registerClient response: $response');
-          });
+    if (bikebuds.isReady() && this._firebaseUserSubscription == null) {
+      this._firebaseUserSubscription =
+          firebase.auth.onAuthStateChanged.listen((FirebaseUser firebaseUser) {
+        user.updateFirebaseUser(firebaseUser);
+        user.updateProfile(bikebuds.profile);
+        user.updateAuth(bikebuds.auth);
+      });
+    }
+
+    // Register FCM.
+    if (bikebuds.isReady() && _messagingListener == null) {
+      _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
+        print('Messaging.onTokenRefresh');
+        BikebudsApiContainer.of(context).registerClient(token).then((response) {
+          print('app: registerClient response: $response');
         });
-        firebase.messaging.requestNotificationPermissions();
-        firebase.messaging.configure(
-            onMessage: this.onMessage,
-            onResume: this.onResume,
-            onLaunch: this.onLaunch);
-      }
+      });
+      firebase.messaging.requestNotificationPermissions();
+      firebase.messaging.configure(
+          onMessage: this.onMessage,
+          onResume: this.onResume,
+          onLaunch: this.onLaunch);
     }
   }
 
   @override
   void dispose() {
+    if (_firebaseUserSubscription != null) {
+      _firebaseUserSubscription.cancel();
+    }
     if (_messagingListener != null) {
       _messagingListener.cancel();
     }

@@ -25,7 +25,6 @@ Widget loadingWidget(BuildContext context) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CircularProgressIndicator(),
-              SizedBox(width: 20.0),
             ],
           ),
         ],

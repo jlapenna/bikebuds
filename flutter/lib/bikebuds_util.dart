@@ -19,7 +19,6 @@ import "package:bikebuds/config.dart";
 import "package:bikebuds/firebase_util.dart";
 import "package:bikebuds/sign_in_screen.dart";
 import "package:bikebuds_api/api.dart";
-import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/widgets.dart";
 
 class BikebudsApiContainer extends StatefulWidget {
@@ -88,11 +87,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
 
   bool isReady() {
     return _api != null;
-  }
-
-  Future<FirebaseUser> get user async {
-    var firebase = FirebaseContainer.of(context);
-    return firebase.auth.currentUser();
   }
 
   Future<Profile> get profile async {
