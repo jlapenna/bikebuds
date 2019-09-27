@@ -27,7 +27,6 @@ import {
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import 'typeface-roboto';
 
@@ -38,12 +37,14 @@ import { FirebaseState } from './firebase_util';
 import AuthWrapper from './AuthWrapper';
 import Main from './Main';
 import Privacy from './Privacy';
+import SpinnerScreen from './SpinnerScreen';
 import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
 export class SignedInApp extends Component {
   static propTypes = {
+    embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     firebaseToken: PropTypes.string.isRequired,
@@ -95,7 +96,6 @@ export class SignedOutApp extends Component {
       <div data-testid="signed-out-app">
         <Router>
           <Switch>
-            <Route path="/embed/auth" render={props => <CircularProgress />} />
             <Route
               path="/signin"
               render={props => (
@@ -115,64 +115,16 @@ export class SignedOutApp extends Component {
   }
 }
 
-export class EmbedApp extends Component {
-  static propTypes = {
-    firebase: PropTypes.object.isRequired,
-  };
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      isSignedIn: undefined,
-    };
-    this.customToken = new URLSearchParams(window.location.search).get('token');
-  }
-
-  handleSignedIn = isSignedIn => {
-    this.setState({ isSignedIn: isSignedIn });
-  };
-
-  render() {
-    return (
-      <div data-testid="main-app">
-        <AuthWrapper
-          customToken={this.customToken}
-          embed={true}
-          firebase={this.props.firebase}
-          signedInHandler={this.handleSignedIn}
-          render={authWrapperState => {
-            switch (this.state.isSignedIn) {
-              case true:
-                return <SignedInApp {...authWrapperState} />;
-              case false:
-                return <SignedOutApp firebase={this.props.firebase} />;
-              default:
-                // We haven't figured out if we're signed in or not yet. Don't
-                // display anything.
-                return <div data-testid="unknown-app" />;
-            }
-          }}
-        />
-      </div>
-    );
-  }
-}
-
 export class MainApp extends Component {
   static propTypes = {
+    embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
   };
+
   constructor(props) {
     super(props);
-    this.state = {
-      isSignedIn: undefined,
-    };
     this.customToken = new URLSearchParams(window.location.search).get('token');
   }
-
-  handleSignedIn = isSignedIn => {
-    this.setState({ isSignedIn: isSignedIn });
-  };
 
   render() {
     const customToken = this.customToken;
@@ -180,19 +132,26 @@ export class MainApp extends Component {
       <div data-testid="main-app">
         <AuthWrapper
           customToken={customToken}
-          embed={false}
+          embed={this.props.embed}
           firebase={this.props.firebase}
-          signedInHandler={this.handleSignedIn}
           render={authWrapperState => {
-            switch (this.state.isSignedIn) {
-              case true:
-                return <SignedInApp {...authWrapperState} />;
-              case false:
-                return <SignedOutApp firebase={this.props.firebase} />;
-              default:
-                // We haven't figured out if we're signed in or not yet. Don't
-                // display anything.
-                return <div data-testid="unknown-app" />;
+            if (this.props.embed) {
+              return authWrapperState.isSignedIn() ? (
+                <SignedInApp embed={this.props.embed} {...authWrapperState} />
+              ) : (
+                <SpinnerScreen />
+              );
+            } else {
+              switch (authWrapperState.isSignedIn()) {
+                case true:
+                  return <SignedInApp {...authWrapperState} />;
+                case false:
+                  return <SignedOutApp firebase={this.props.firebase} />;
+                default:
+                  // We haven't figured out if we're signed in or not yet. Don't
+                  // display anything.
+                  return <div data-testid="unknown-app" />;
+              }
             }
           }}
         />
@@ -227,10 +186,10 @@ class App extends Component {
               <ToS />
             </Route>
             <Route path="/embed">
-              <EmbedApp firebase={this.state.firebase} />
+              <MainApp embed firebase={this.state.firebase} />
             </Route>
             <Route>
-              <MainApp firebase={this.state.firebase} />
+              <MainApp embed={false} firebase={this.state.firebase} />
             </Route>
           </Switch>
         </Router>

@@ -23,9 +23,9 @@ const LOG = true;
 
 class AuthWrapper extends Component {
   static propTypes = {
+    customToken: PropTypes.string,
     embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
-    signedInHandler: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -130,15 +130,6 @@ class AuthWrapper extends Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      prevState.firebaseUser !== this.state.firebaseUser ||
-      prevState.firebaseUserNext !== this.state.firebaseUserNext
-    ) {
-      this.props.signedInHandler(this._isSignedIn());
-    }
-  }
-
   handleCustomTokenLogin = () => {
     LOG &&
       console.log(
@@ -157,17 +148,13 @@ class AuthWrapper extends Component {
   };
 
   render() {
-    /*
-    if (this.token !== null) {
-      return null;
-    }
-    */
     return this.props.render({
       firebase: this.props.firebase,
       firebaseUser: this.state.firebaseUser,
       firebaseToken: this.state.firebaseToken,
       firebaseUserNext: this.state.firebaseUserNext,
       firebaseTokenNext: this.state.firebaseTokenNext,
+      isSignedIn: this._isSignedIn,
     });
   }
 }
