@@ -7,7 +7,7 @@ import 'package:bikebuds_api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../config.dart';
+import '../config.dart';
 
 class MobileEmbed extends StatefulWidget {
   @override

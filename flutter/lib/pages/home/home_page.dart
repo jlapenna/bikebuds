@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../../user_model.dart';
-import 'mobile_embed.dart';
+import '../../widgets/mobile_embed.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage();
