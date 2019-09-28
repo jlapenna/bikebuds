@@ -27,7 +27,7 @@ function main() {
   activate_virtualenv gae3 python3
 
   pushd gae/frontend
-  PORT=8080 BROWSER=none npm start
+  EDITOR=cat PORT=8080 BROWSER=none npm start
   popd
 }
 
