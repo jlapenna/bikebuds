@@ -38,7 +38,7 @@ export class FirebaseState {
     try {
       this.app = firebase.initializeApp(config);
     } catch (err) {
-      console.warn('FirebaseState: Tried to re-initialize app: %s', err);
+      console.warn('FirebaseState: Tried to re-initialize app.', err);
       this.app = firebase.app();
     }
     this.auth = firebase.auth();
@@ -46,13 +46,13 @@ export class FirebaseState {
     try {
       this.messaging = firebase.messaging();
     } catch (err) {
-      console.warn('FirebaseState: Failed to set up messaging.');
+      console.warn('FirebaseState: Failed to set up messaging.', err);
     }
 
     try {
       this.appNext = firebase.initializeApp(nextConfig, 'next');
     } catch (err) {
-      console.warn('FirebaseState: Tried to re-initialize next app: %s', err);
+      console.warn('FirebaseState: Tried to re-initialize next app.', err);
       this.app = firebase.app('next');
     }
     this.authNext = firebase.auth(this.appNext);
