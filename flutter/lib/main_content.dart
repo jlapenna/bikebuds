@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/pages/pages.dart';
+import 'package:bikebuds/user_model.dart';
+import 'package:bikebuds/widgets/mobile_embed.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class MainContent extends StatelessWidget {
   final int selectedDrawerItem;
@@ -22,7 +24,9 @@ class MainContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('MainContent: building.');
-    return pages[selectedDrawerItem].widgetBuilder();
+    //    return pages[selectedDrawerItem].widgetBuilder();
+    return ScopedModelDescendant<UserModel>(builder: (context, child, model) {
+      return MobileEmbed(null);
+    });
   }
 }
