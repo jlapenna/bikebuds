@@ -58,19 +58,16 @@ class SignInContainerState extends State<SignInContainer> {
   }
 
   _setInitialState(BuildContext context, firebase) async {
-    print('SignInScreen._setInitialState');
     var firebaseUserFuture = firebase.auth.currentUser();
     var firebaseNextUserFuture = firebase.authNext.currentUser();
     FirebaseSignInState signInState = FirebaseSignInState(
         await firebaseUserFuture, await firebaseNextUserFuture);
     setState(() {
-      print('SignInScreen._setInitialState: $signInState');
       this.signInState = signInState;
     });
   }
 
   _doSignIn() async {
-    print('SignInScreen.doSignIn: $widget.firebase');
     setState(() {
       this.signingIn = true;
     });
@@ -78,14 +75,11 @@ class SignInContainerState extends State<SignInContainer> {
     // Otherwise, try to find the user's Google Identity.
     var googleUser = googleSignIn.currentUser;
     if (googleUser == null) {
-      print('SignInScreen.doSignIn: signInSilently');
       googleUser = await googleSignIn.signInSilently();
     }
     if (googleUser == null) {
-      print('SignInScreen.doSignIn: signIn');
       googleUser = await googleSignIn.signIn();
     }
-    print('SignInScreen.doSignIn: googleUser.authenticate: ${googleUser?.id}');
 
     if (googleUser == null) {
       // The user aborted Google sign in.
@@ -106,12 +100,10 @@ class SignInContainerState extends State<SignInContainer> {
     var firebase = FirebaseContainer.of(context);
 
     // Sign into the primary project.
-    print('SignInScreen.doSignIn: signInWithCredential');
     var firebaseUser = await firebase.auth.signInWithCredential(credential);
     await firebaseUser.getIdToken(refresh: true);
 
     // Sign in with the "next" firebase project.
-    print('SignInScreen.doSignIn: next: signInWithCredential');
     var firebaseNextUser =
         await firebase.authNext.signInWithCredential(credential);
     await firebaseNextUser.getIdToken(refresh: true);
@@ -124,7 +116,6 @@ class SignInContainerState extends State<SignInContainer> {
 
   @override
   Widget build(BuildContext context) {
-    print('SignInContainerState.build');
     if (signInState == null) {
       // We do not have our dependencies, so we have not looked up
       // user state, yet.

@@ -46,7 +46,6 @@ class ConfigContainerState extends State<ConfigContainer> {
   }
 
   _loadConfig() async {
-    print('ConfigContainerState._loadConfig');
     var loadedConfig = json.decode(await rootBundle.loadString("config.json"));
     setState(() {
       this.config = loadedConfig;
@@ -55,7 +54,6 @@ class ConfigContainerState extends State<ConfigContainer> {
 
   @override
   Widget build(BuildContext context) {
-    print('ConfigContainerState.build');
     return new _InheritedConfigContainer(
       data: this,
       child: widget.child,

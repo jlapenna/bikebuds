@@ -71,7 +71,6 @@ class FirebaseContainerState extends State<FirebaseContainer> {
   }
 
   _loadFirebase() async {
-    print('FirebaseContainerState._loadFirebase');
     _loading = true;
     var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
         .loadString("android/app/google-services-next-android.json"));

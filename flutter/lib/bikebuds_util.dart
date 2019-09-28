@@ -44,7 +44,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
 
   @override
   void didChangeDependencies() {
-    print('BikebudsApiContainerState.didChangeDependencies');
     var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
     var signedIn = SignInContainer.of(context).signInState.signedIn;
@@ -55,7 +54,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
   }
 
   _loadBikebudsApi() async {
-    print("BikebudsApiContainerState._loadFirebase");
     _loading = true;
     var config = ConfigContainer.of(context).config;
     var firebase = FirebaseContainer.of(context);
@@ -71,7 +69,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     oAuth.accessToken = await firebaseUser.getIdToken(refresh: true);
 
     final api = BikebudsApi(apiClient);
-    print("BikebudsApiContainerState._loadFirebase: $api");
     setState(() {
       this._api = api;
     });
@@ -107,7 +104,6 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
       ..token = await firebaseToken
       ..type = Platform.operatingSystem.toUpperCase();
     return _api.updateClient(client, xFields: "*").then((response) {
-      print('bikebuds_util: registerClient: response: $response');
       setState(() {
         _client = response;
       });

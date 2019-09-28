@@ -75,9 +75,8 @@ class _SignedInAppState extends State<SignedInApp> {
     // Register FCM.
     if (bikebuds.isReady() && _messagingListener == null) {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
-        print('Messaging.onTokenRefresh');
         BikebudsApiContainer.of(context).registerClient(token).then((response) {
-          print('app: registerClient response: $response');
+          print('App.Messaging: bikebuds.registerClient: complete');
         });
       });
       firebase.messaging.requestNotificationPermissions();
@@ -113,7 +112,6 @@ class _SignedInAppState extends State<SignedInApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('SignedInApp.build: $user');
     return ScopedModel<UserModel>(
       model: user,
       child: ScopedModelDescendant<UserModel>(
