@@ -18,12 +18,21 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
 
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
+  static styles = {
+    root: {
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+    },
+  };
+
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
@@ -33,7 +42,7 @@ class Settings extends Component {
 
   render() {
     return (
-      <Grid container spacing={3}>
+      <Grid classname={this.props.classes.root} container spacing={3}>
         <Grid item xs={12} sm={12}>
           <ProfileCard
             firebaseUser={this.props.firebaseUser}
@@ -74,4 +83,4 @@ class Settings extends Component {
     );
   }
 }
-export default Settings;
+export default withStyles(Settings.styles)(Settings);

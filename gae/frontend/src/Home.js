@@ -18,12 +18,21 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
 
 import MeasuresCard from './MeasuresCard';
 import MeasuresSummaryCard from './MeasuresSummaryCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
+  static styles = {
+    root: {
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+    },
+  };
+
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object,
@@ -31,12 +40,12 @@ class Home extends Component {
 
   render() {
     return (
-      <div>
+      <Grid classname={this.props.classes.root} container spacing={3}>
         <MeasuresWrapper
           profile={this.props.profile}
           apiClient={this.props.apiClient}
           render={wrapperState => (
-            <Grid container spacing={3}>
+            <React.Fragment>
               <Grid item xs={12}>
                 <MeasuresSummaryCard
                   profile={this.props.profile}
@@ -55,11 +64,11 @@ class Home extends Component {
                   tooltipFormat="MMM 'YY"
                 />
               </Grid>
-            </Grid>
+            </React.Fragment>
           )}
         />
-      </div>
+      </Grid>
     );
   }
 }
-export default Home;
+export default withStyles(Home.styles)(Home);

@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
-
 import { withStyles } from '@material-ui/core/styles';
 
 import ActivitiesListCard from './ActivitiesListCard';
@@ -27,7 +26,11 @@ import EventsListCard from './EventsListCard';
 
 class Events extends Component {
   static styles = {
-    root: {},
+    root: {
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+    },
   };
 
   static propTypes = {
@@ -48,30 +51,25 @@ class Events extends Component {
 
   render() {
     return this.query !== null ? (
-      <div className={this.props.classes.root}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <EventsListCard
-              apiClient={this.props.apiClient}
-              query={this.query}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ActivitiesWrapper
-              apiClient={this.props.apiClient}
-              onResponse={this.handleActivitiesResponse}
-              render={wrapperState => (
-                <ActivitiesListCard
-                  apiClient={this.props.apiClient}
-                  profile={this.props.profile}
-                  activities={wrapperState.activities}
-                  showDate={true}
-                />
-              )}
-            />
-          </Grid>
+      <Grid classname={this.props.classes.root} container spacing={3}>
+        <Grid item xs={12}>
+          <EventsListCard apiClient={this.props.apiClient} query={this.query} />
         </Grid>
-      </div>
+        <Grid item xs={12}>
+          <ActivitiesWrapper
+            apiClient={this.props.apiClient}
+            onResponse={this.handleActivitiesResponse}
+            render={wrapperState => (
+              <ActivitiesListCard
+                apiClient={this.props.apiClient}
+                profile={this.props.profile}
+                activities={wrapperState.activities}
+                showDate={true}
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
     ) : null;
   }
 }

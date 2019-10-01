@@ -49,10 +49,6 @@ class MainScreen extends Component {
       height: '100%',
       width: '100%',
     },
-    mainContent: {
-      height: '100%',
-      width: '100%',
-    },
   });
 
   static propTypes = {
@@ -90,7 +86,6 @@ class MainScreen extends Component {
   render() {
     const mainContent = (
       <MainContent
-        className={this.props.classes.mainContent}
         match={this.props.match}
         firebase={this.props.firebase}
         firebaseUser={this.props.firebaseUser}
