@@ -59,6 +59,6 @@ global.createSignedInState = () => {
     provider: 'custom',
     token: 'authToken',
     expires: Math.floor(new Date() / 1000) + 24 * 60 * 60,
-    getIdTokenResult: () => Promise.resolve({ claims: {}, token: 'XXX_TOKEN' }),
+    getIdTokenResult: () => Promise.resolve({ claims: {}, token: 'XYZ_TOKEN' }),
   };
 };
