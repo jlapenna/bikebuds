@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { Redirect, Route } from 'react-router-dom';
+
 export class ProfileState {
   constructor(onUpdated) {
     this._onUpdated = onUpdated;
@@ -24,10 +26,10 @@ export class ProfileState {
   }
 
   update(result) {
-    this.fetched = true;
     this.signup_complete = result.signup_complete;
     this.user = result.user;
     this.athlete = result.athlete;
+    this.fetched = true;
     this._onUpdated(this);
   }
 
@@ -40,7 +42,8 @@ export class ProfileState {
 export default class ProfileWrapper extends React.Component {
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
-    profile: PropTypes.object.isRequired,
+    match: PropTypes.object.isRequired,
+    profileState: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -59,12 +62,23 @@ export default class ProfileWrapper extends React.Component {
     if (this.props.apiClient && !this.state.fetched) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds.get_profile({}).then(response => {
-        this.props.profile.update(response.body);
+        this.props.profileState.update(response.body);
       });
     }
   }
 
   render() {
-    return null;
+    if (
+      this.props.profileState.fetched &&
+      !this.props.profileState.signup_complete
+    ) {
+      return (
+        <Route>
+          <Redirect to={`${this.props.match.url}signup`} />
+        </Route>
+      );
+    } else {
+      return null;
+    }
   }
 }

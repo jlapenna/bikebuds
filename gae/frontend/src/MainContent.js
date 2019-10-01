@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import Club from './Club';
 import Events from './Events';
@@ -30,7 +30,7 @@ export default class MainContent extends React.Component {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    apiClient: PropTypes.object.isRequired,
+    apiClient: PropTypes.object,
     profile: PropTypes.object,
   };
 
@@ -38,14 +38,9 @@ export default class MainContent extends React.Component {
     if (!this.props.profile.fetched) {
       return null;
     }
-    if (!this.props.profile.signup_complete) {
-      return (
-        <Route>
-          <Redirect to={`${this.props.match.url}signup`} />
-        </Route>
-      );
+    if (!this.props.apiClient) {
+      return null;
     }
-
     return (
       <Switch>
         <Route
