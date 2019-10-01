@@ -51,28 +51,26 @@ class StandaloneSignup extends Component {
 
   render() {
     return (
-      <React.Fragment>
-        <div className={this.props.classes.root}>
-          <AppBar className={this.props.classes.appBar} position="fixed">
-            <Toolbar>
-              <Typography
-                className={this.props.classes.grow}
-                variant="h6"
-                color="inherit"
-              >
-                Bikebuds
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          <main className={this.props.classes.main}>
-            <div className={this.props.classes.toolbar} />
-            <Signup
-              firebase={this.props.firebase}
-              firebaseUser={this.props.firebaseUser}
-            />
-          </main>
-        </div>
-      </React.Fragment>
+      <div className={this.props.classes.root} data-testid="standalone-signin">
+        <AppBar className={this.props.classes.appBar} position="fixed">
+          <Toolbar>
+            <Typography
+              className={this.props.classes.grow}
+              variant="h6"
+              color="inherit"
+            >
+              Bikebuds
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <main className={this.props.classes.main}>
+          <div className={this.props.classes.toolbar} />
+          <Signup
+            firebase={this.props.firebase}
+            firebaseUser={this.props.firebaseUser}
+          />
+        </main>
+      </div>
     );
   }
 }

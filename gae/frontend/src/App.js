@@ -26,7 +26,7 @@ import {
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { withStyles, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import 'typeface-roboto';
 
@@ -42,14 +42,7 @@ import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
-class _SignedInApp extends Component {
-  static styles = theme => ({
-    root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
-    },
-  });
+class SignedInApp extends Component {
   static propTypes = {
     embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
@@ -59,37 +52,34 @@ class _SignedInApp extends Component {
 
   render() {
     return (
-      <div className={this.props.classes.root} data-testid="signed-in-app">
-        <Router>
-          <Switch>
-            <Route
-              path="/embed/"
-              render={routeProps => (
-                <Main embed {...this.props} match={routeProps.match} />
-              )}
-            />
-            <Route
-              path="/signup"
-              render={routeProps => (
-                <StandaloneSignup {...this.props} match={routeProps.match} />
-              )}
-            />
-            <Route
-              path="/"
-              render={routeProps => (
-                <Main embed={false} {...this.props} match={routeProps.match} />
-              )}
-            />
-            <Route>
-              <Redirect to="/" />
-            </Route>
-          </Switch>
-        </Router>
-      </div>
+      <Router>
+        <Switch>
+          <Route
+            path="/embed/"
+            render={routeProps => (
+              <Main embed {...this.props} match={routeProps.match} />
+            )}
+          />
+          <Route
+            path="/signup"
+            render={routeProps => (
+              <StandaloneSignup {...this.props} match={routeProps.match} />
+            )}
+          />
+          <Route
+            path="/"
+            render={routeProps => (
+              <Main embed={false} {...this.props} match={routeProps.match} />
+            )}
+          />
+          <Route>
+            <Redirect to="/" />
+          </Route>
+        </Switch>
+      </Router>
     );
   }
 }
-const SignedInApp = withStyles(_SignedInApp.styles)(_SignedInApp);
 
 export class SignedOutApp extends Component {
   static propTypes = {
@@ -98,24 +88,22 @@ export class SignedOutApp extends Component {
 
   render() {
     return (
-      <div data-testid="signed-out-app">
-        <Router>
-          <Switch>
-            <Route
-              path="/signin"
-              render={props => (
-                <SignInScreen
-                  firebase={this.props.firebase}
-                  match={props.match}
-                />
-              )}
-            />
-            <Route>
-              <Redirect to="/signin" />
-            </Route>
-          </Switch>
-        </Router>
-      </div>
+      <Router>
+        <Switch>
+          <Route
+            path="/signin"
+            render={props => (
+              <SignInScreen
+                firebase={this.props.firebase}
+                match={props.match}
+              />
+            )}
+          />
+          <Route>
+            <Redirect to="/signin" />
+          </Route>
+        </Switch>
+      </Router>
     );
   }
 }
@@ -141,56 +129,45 @@ export class MainApp extends Component {
 
   render() {
     return (
-      <div data-testid="main-app">
-        <AuthWrapper
-          embed={this.props.embed}
-          firebase={this.props.firebase}
-          render={authWrapperState => {
-            if (this.props.embed) {
-              switch (authWrapperState.isSignedIn()) {
-                case true:
-                  return (
-                    <SignedInApp
-                      embed={this.props.embed}
-                      {...authWrapperState}
-                    />
-                  );
-                default:
-                  return (
-                    <SpinnerScreen>
-                      <span data-testid="unknown-app">no authstate</span>
-                    </SpinnerScreen>
-                  );
-              }
+      <AuthWrapper
+        embed={this.props.embed}
+        firebase={this.props.firebase}
+        render={authWrapperState => {
+          if (authWrapperState.isSignedIn() === undefined) {
+            return (
+              <SpinnerScreen>
+                <span data-testid="unknown-app">Loading bikebuds...</span>
+              </SpinnerScreen>
+            );
+          }
+          if (this.props.embed) {
+            if (authWrapperState.isSignedIn()) {
+              return (
+                <SignedInApp embed={this.props.embed} {...authWrapperState} />
+              );
             } else {
-              switch (authWrapperState.isSignedIn()) {
-                case true:
-                  return (
-                    <SignedInApp
-                      embed={this.props.embed}
-                      {...authWrapperState}
-                    />
-                  );
-                case false:
-                  return (
-                    <SignedOutApp
-                      embed={this.props.embed}
-                      firebase={this.props.firebase}
-                    />
-                  );
-                default:
-                  // We haven't figured out if we're signed in or not yet. Don't
-                  // display anything.
-                  return (
-                    <SpinnerScreen>
-                      <span data-testid="unknown-app">no authstate</span>
-                    </SpinnerScreen>
-                  );
-              }
+              return (
+                <SpinnerScreen>
+                  <span data-testid="unknown-app">Loading bikebuds...</span>
+                </SpinnerScreen>
+              );
             }
-          }}
-        />
-      </div>
+          } else {
+            if (authWrapperState.isSignedIn()) {
+              return (
+                <SignedInApp embed={this.props.embed} {...authWrapperState} />
+              );
+            } else {
+              return (
+                <SignedOutApp
+                  embed={this.props.embed}
+                  firebase={this.props.firebase}
+                />
+              );
+            }
+          }
+        }}
+      />
     );
   }
 }

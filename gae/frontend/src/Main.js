@@ -49,10 +49,6 @@ class Main extends Component {
       height: '100%',
       width: '100%',
     },
-    main: {
-      height: '100%',
-      width: '100%',
-    },
     mainContent: {
       height: '100%',
       width: '100%',
@@ -104,7 +100,7 @@ class Main extends Component {
     );
 
     return (
-      <div className={this.props.classes.root}>
+      <div className={this.props.classes.root} data-testid="main">
         <SwagWrapper
           firebaseUser={this.props.firebaseUser}
           firebaseToken={this.props.firebaseToken}

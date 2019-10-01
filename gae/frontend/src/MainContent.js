@@ -37,10 +37,10 @@ export default class MainContent extends React.Component {
 
   render() {
     if (!this.props.profile.fetched) {
-      return <SpinnerScreen>no profile</SpinnerScreen>;
+      return <SpinnerScreen>Loading profile...</SpinnerScreen>;
     }
     if (!this.props.apiClient) {
-      return <SpinnerScreen>no client</SpinnerScreen>;
+      return <SpinnerScreen>Connecting to bikebuds...</SpinnerScreen>;
     }
     return (
       <Switch>

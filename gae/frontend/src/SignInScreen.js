@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import firebase from 'firebase/app';
@@ -28,6 +29,10 @@ import logoRound from './logo-round.svg';
 
 class SignInScreen extends Component {
   static styles = {
+    root: {
+      height: '100%',
+      width: '100%',
+    },
     logo: {
       display: 'block',
       margin: '20px auto 10px',
@@ -74,21 +79,36 @@ class SignInScreen extends Component {
   };
 
   render() {
-    const { classes } = this.props;
     return (
-      <div>
-        <img className={classes.logo} alt="Bikebuds Logo" src={logoRound} />
-        <StyledFirebaseAuth
-          uiConfig={this.uiConfig}
-          firebaseAuth={this.props.firebase.auth}
-        />
-        <Typography
-          className={this.props.classes.privacyFooter}
-          variant="caption"
-        >
-          <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
-        </Typography>
-      </div>
+      <Grid
+        className={this.props.classes.root}
+        data-testid="sign-in-screen"
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justify="center"
+      >
+        <Grid item xs={3}>
+          <img
+            className={this.props.classes.logo}
+            alt="Bikebuds Logo"
+            src={logoRound}
+          />
+          <StyledFirebaseAuth
+            uiConfig={this.uiConfig}
+            firebaseAuth={this.props.firebase.auth}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <Typography
+            className={this.props.classes.privacyFooter}
+            variant="caption"
+          >
+            <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
+          </Typography>
+        </Grid>
+      </Grid>
     );
   }
 }

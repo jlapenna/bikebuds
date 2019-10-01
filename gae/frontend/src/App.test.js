@@ -34,8 +34,9 @@ beforeEach(() => {
   __setMockClientForSwagWrapper({
     apis: {
       bikebuds: {
-        get_profile: () => Promise.resolve({ body: {} }),
+        get_profile: () => Promise.resolve({ body: { signup_complete: true } }),
         get_series: () => Promise.resolve({ body: { properties: {} } }),
+        update_client: () => Promise.resolve({ body: {} }),
       },
     },
   });
@@ -53,15 +54,14 @@ test('Renders unknown without crashing', async () => {
 
 test('Renders signed-in without crashing', async () => {
   const firebase = createFirebaseState();
-  const { container, getByTestId } = render(<App firebase={firebase} />);
+  const { getByTestId } = render(<App firebase={firebase} />);
 
   firebase.auth.changeAuthState(createSignedInState());
   firebase.authNext.changeAuthState(createSignedInState());
   firebase.auth.flush();
   firebase.authNext.flush();
 
-  await waitForElement(() => getByTestId('signed-in-app'));
-  expect(container.textContent).toContain('Welcome to bikebuds');
+  await waitForElement(() => getByTestId('main'));
 });
 
 test('Renders signed-out without crashing', async () => {
@@ -76,7 +76,7 @@ test('Renders signed-out without crashing', async () => {
   firebase.auth.flush();
   firebase.authNext.flush();
 
-  await waitForElement(() => getByTestId('signed-out-app'));
+  await waitForElement(() => getByTestId('mock-sign-in-screen'));
 });
 
 describe('Signed-in via dev/fakeuser config', () => {
@@ -88,7 +88,7 @@ describe('Signed-in via dev/fakeuser config', () => {
   test('Renders signed-in without crashing', async () => {
     const firebase = new FirebaseState(true /* forTest */);
     const { queryByTestId } = render(<App firebase={firebase} />);
-    expect(queryByTestId('signed-in-app')).toBeInTheDocument();
+    expect(queryByTestId('main')).toBeInTheDocument();
   });
 });
 

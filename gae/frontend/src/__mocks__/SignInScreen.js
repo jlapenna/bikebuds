@@ -27,7 +27,7 @@ class SignInScreen extends Component {
   }
 
   render() {
-    return <div>Mock Sign-in Screen</div>;
+    return <div data-testid="mock-sign-in-screen">Mock Sign-in Screen</div>;
   }
 }
 export default withStyles(SignInScreen.styles)(SignInScreen);
