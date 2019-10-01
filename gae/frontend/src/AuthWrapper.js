@@ -18,14 +18,15 @@ import PropTypes from 'prop-types';
 import { Component } from 'react';
 
 import { config } from './config';
+import { MobileEmbedEventChannel } from './MobileEmbed';
 
 const LOG = true;
 
 class AuthWrapper extends Component {
   static propTypes = {
-    customToken: PropTypes.string,
     embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
+    render: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -35,10 +36,11 @@ class AuthWrapper extends Component {
       firebaseToken: undefined,
       firebaseUserNext: undefined,
       firebaseTokenNext: undefined,
+      mobileEmbedNotified: false,
     };
   }
 
-  _isSignedIn = () => {
+  isSignedIn = () => {
     if (this.props.embed) {
       if (this.state.firebaseUser === undefined) {
         return undefined;
@@ -56,6 +58,11 @@ class AuthWrapper extends Component {
   };
 
   componentDidMount() {
+    if (!!MobileEmbedEventChannel) {
+      MobileEmbedEventChannel.postMessage(
+        JSON.stringify({ event: 'authWrapperMounted' })
+      );
+    }
     if (config.isDev && config.fakeUser) {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
@@ -64,9 +71,9 @@ class AuthWrapper extends Component {
       };
       this.setState({
         firebaseUser: firebaseUser,
-        firebaseToken: 'XXXXXXXXXXXXXX',
+        firebaseToken: 'XYZ_TOKEN',
         firebaseUserNext: firebaseUser,
-        firebaseTokenNext: 'XXXXXXXXXXXXXX',
+        firebaseTokenNext: 'XYZ_TOKEN_NEXT',
       });
       return;
     }
@@ -77,7 +84,8 @@ class AuthWrapper extends Component {
       this._onAuthStateChangedFn('firebaseUserNext', 'firebaseTokenNext')
     );
 
-    if (this.props.customToken != null) {
+    this.customToken = new URLSearchParams(window.location.search).get('token');
+    if (this.customToken != null) {
       LOG &&
         console.log('AuthWrapper.componentDidMount: handleCustomTokenLogin');
       this.handleCustomTokenLogin();
@@ -130,14 +138,22 @@ class AuthWrapper extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (!this.state.mobileEmbedNotified && this.isSignedIn()) {
+      this.setState({ mobileEmbedNotified: true });
+      if (!!MobileEmbedEventChannel) {
+        MobileEmbedEventChannel.postMessage(
+          JSON.stringify({ event: 'signedIn' })
+        );
+      }
+    }
+  }
+
   handleCustomTokenLogin = () => {
     LOG &&
-      console.log(
-        'AuthWrapper.handleCustomTokenLogin:',
-        !!this.props.customToken
-      );
+      console.log('AuthWrapper.handleCustomTokenLogin:', !!this.customToken);
     this.props.firebase.auth
-      .signInWithCustomToken(this.props.customToken)
+      .signInWithCustomToken(this.customToken)
       .then(result => {
         LOG &&
           console.log('AuthWrapper.handleCustomTokenLogin: result:', result);
@@ -154,7 +170,7 @@ class AuthWrapper extends Component {
       firebaseToken: this.state.firebaseToken,
       firebaseUserNext: this.state.firebaseUserNext,
       firebaseTokenNext: this.state.firebaseTokenNext,
-      isSignedIn: this._isSignedIn,
+      isSignedIn: this.isSignedIn,
     });
   }
 }
