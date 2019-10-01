@@ -42,7 +42,7 @@ class _EmbedChrome extends Component {
 }
 const EmbedChrome = withStyles(_EmbedChrome.styles)(_EmbedChrome);
 
-class Main extends Component {
+class MainScreen extends Component {
   static styles = theme => ({
     root: {
       display: 'flex',
@@ -129,4 +129,4 @@ class Main extends Component {
     );
   }
 }
-export default withStyles(Main.styles, { withTheme: true })(Main);
+export default withStyles(MainScreen.styles, { withTheme: true })(MainScreen);

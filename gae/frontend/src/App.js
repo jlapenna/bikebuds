@@ -35,7 +35,7 @@ import theme from './theme';
 import { FirebaseState } from './firebase_util';
 
 import AuthWrapper from './AuthWrapper';
-import Main from './Main';
+import MainScreen from './MainScreen';
 import Privacy from './Privacy';
 import SpinnerScreen from './SpinnerScreen';
 import SignInScreen from './SignInScreen';
@@ -57,7 +57,7 @@ class SignedInApp extends Component {
           <Route
             path="/embed/"
             render={routeProps => (
-              <Main embed {...this.props} match={routeProps.match} />
+              <MainScreen embed {...this.props} match={routeProps.match} />
             )}
           />
           <Route
@@ -69,7 +69,11 @@ class SignedInApp extends Component {
           <Route
             path="/"
             render={routeProps => (
-              <Main embed={false} {...this.props} match={routeProps.match} />
+              <MainScreen
+                embed={false}
+                {...this.props}
+                match={routeProps.match}
+              />
             )}
           />
           <Route>
