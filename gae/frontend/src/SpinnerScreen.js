@@ -21,13 +21,13 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 class SpinnerScreen extends Component {
-  static styles = theme => ({
+  static styles = {
     root: {
       display: 'flex',
       height: '100%',
       width: '100%',
     },
-  });
+  };
 
   render() {
     return (

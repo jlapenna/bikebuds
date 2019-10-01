@@ -35,13 +35,13 @@ import cloneDeepWith from 'lodash/cloneDeepWith';
 import DevicesFormControl from './DevicesFormControl';
 
 class PreferencesCard extends Component {
-  static styles = theme => ({
+  static styles = {
     root: {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
     },
-  });
+  };
 
   static propTypes = {
     profile: PropTypes.object.isRequired,

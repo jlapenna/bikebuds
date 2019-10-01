@@ -26,9 +26,9 @@ import ActivitiesWrapper from './ActivitiesWrapper';
 import EventsListCard from './EventsListCard';
 
 class Events extends Component {
-  static styles = theme => ({
+  static styles = {
     root: {},
-  });
+  };
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

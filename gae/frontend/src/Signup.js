@@ -24,13 +24,13 @@ import { withStyles } from '@material-ui/core/styles';
 import SignupStepper from './SignupStepper';
 
 class Signup extends React.Component {
-  static styles = theme => ({
+  static styles = {
     root: {
       'background-color': 'red',
       display: 'flex',
       height: '100%',
     },
-  });
+  };
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
