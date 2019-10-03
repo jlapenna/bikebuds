@@ -144,6 +144,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
             })
       ]),
       onWebViewCreated: (WebViewController controller) {
+        print('MobileEmbed: onWebViewCreated');
         _controllerCompleter.complete(controller);
       },
     );

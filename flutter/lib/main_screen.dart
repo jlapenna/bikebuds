@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_content.dart';
 import 'package:bikebuds/privacy_util.dart';
@@ -30,16 +31,18 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     var firebase = FirebaseContainer.of(context);
+    var frontendUrl = ConfigContainer.of(context).config["devserver_url"];
+    var pages = createPages(frontendUrl);
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),
       ),
-      drawer: buildDrawer(firebase),
-      body: MainContent(_selectedDrawerItem),
+      drawer: buildDrawer(pages, firebase),
+      body: MainContent(pages, _selectedDrawerItem),
     );
   }
 
-  Drawer buildDrawer(FirebaseContainerState firebase) {
+  Drawer buildDrawer(List<Page> pages, FirebaseContainerState firebase) {
     final List<Widget> children = [DrawerHeader(child: Container())];
     for (int i = 0; i < pages.length; i++) {
       children.add(ListTile(
