@@ -26,7 +26,7 @@ import {
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import { withStyles, MuiThemeProvider } from '@material-ui/core/styles';
 
 import 'typeface-roboto';
 
@@ -42,7 +42,14 @@ import SignInScreen from './SignInScreen';
 import StandaloneSignup from './StandaloneSignup';
 import ToS from './ToS';
 
-export class SignedInApp extends Component {
+class _SignedInApp extends Component {
+  static styles = theme => ({
+    root: {
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+    },
+  });
   static propTypes = {
     embed: PropTypes.bool.isRequired,
     firebase: PropTypes.object.isRequired,
@@ -52,12 +59,9 @@ export class SignedInApp extends Component {
 
   render() {
     return (
-      <div data-testid="signed-in-app">
+      <div className={this.props.classes.root} data-testid="signed-in-app">
         <Router>
           <Switch>
-            <Route path="/embed/auth">
-              <Redirect to="/embed/" />
-            </Route>
             <Route
               path="/embed/"
               render={routeProps => (
@@ -85,6 +89,7 @@ export class SignedInApp extends Component {
     );
   }
 }
+const SignedInApp = withStyles(_SignedInApp.styles)(_SignedInApp);
 
 export class SignedOutApp extends Component {
   static propTypes = {
@@ -123,34 +128,64 @@ export class MainApp extends Component {
 
   constructor(props) {
     super(props);
-    this.customToken = new URLSearchParams(window.location.search).get('token');
+    this.state = {
+      loading: true,
+    };
   }
 
+  updateLoadingState = loadingUpdate => {
+    this.setState({
+      loading: loadingUpdate,
+    });
+  };
+
   render() {
-    const customToken = this.customToken;
     return (
       <div data-testid="main-app">
         <AuthWrapper
-          customToken={customToken}
           embed={this.props.embed}
           firebase={this.props.firebase}
           render={authWrapperState => {
             if (this.props.embed) {
-              return authWrapperState.isSignedIn() ? (
-                <SignedInApp embed={this.props.embed} {...authWrapperState} />
-              ) : (
-                <SpinnerScreen />
-              );
+              switch (authWrapperState.isSignedIn()) {
+                case true:
+                  return (
+                    <SignedInApp
+                      embed={this.props.embed}
+                      {...authWrapperState}
+                    />
+                  );
+                default:
+                  return (
+                    <SpinnerScreen>
+                      <span data-testid="unknown-app">no authstate</span>
+                    </SpinnerScreen>
+                  );
+              }
             } else {
               switch (authWrapperState.isSignedIn()) {
                 case true:
-                  return <SignedInApp {...authWrapperState} />;
+                  return (
+                    <SignedInApp
+                      embed={this.props.embed}
+                      {...authWrapperState}
+                    />
+                  );
                 case false:
-                  return <SignedOutApp firebase={this.props.firebase} />;
+                  return (
+                    <SignedOutApp
+                      embed={this.props.embed}
+                      firebase={this.props.firebase}
+                    />
+                  );
                 default:
                   // We haven't figured out if we're signed in or not yet. Don't
                   // display anything.
-                  return <div data-testid="unknown-app" />;
+                  return (
+                    <SpinnerScreen>
+                      <span data-testid="unknown-app">no authstate</span>
+                    </SpinnerScreen>
+                  );
               }
             }
           }}
@@ -186,7 +221,7 @@ class App extends Component {
               <ToS />
             </Route>
             <Route path="/embed">
-              <MainApp embed firebase={this.state.firebase} />
+              <MainApp embed={true} firebase={this.state.firebase} />
             </Route>
             <Route>
               <MainApp embed={false} firebase={this.state.firebase} />

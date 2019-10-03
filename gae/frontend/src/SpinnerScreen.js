@@ -24,25 +24,15 @@ class SpinnerScreen extends Component {
   static styles = theme => ({
     root: {
       display: 'flex',
-    },
-    main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing(2),
-    },
-    mainContent: {
-      height: '100%',
-      width: '100%',
-    },
-    spinnerContainer: {
-      minHeight: '100vh',
     },
   });
 
   render() {
     return (
       <Grid
-        className={this.props.classes.spinnerContainer}
+        className={this.props.classes.root}
         container
         spacing={0}
         direction="column"
@@ -52,6 +42,7 @@ class SpinnerScreen extends Component {
         <Grid item>
           <CircularProgress />
         </Grid>
+        <Grid item>{this.props.children || <span>&nbsp;</span>}</Grid>
       </Grid>
     );
   }

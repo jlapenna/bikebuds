@@ -24,6 +24,7 @@ import Events from './Events';
 import Home from './Home';
 import Settings from './Settings';
 import Signup from './Signup';
+import SpinnerScreen from './SpinnerScreen';
 
 export default class MainContent extends React.Component {
   static propTypes = {
@@ -36,10 +37,10 @@ export default class MainContent extends React.Component {
 
   render() {
     if (!this.props.profile.fetched) {
-      return null;
+      return <SpinnerScreen>no profile</SpinnerScreen>;
     }
     if (!this.props.apiClient) {
-      return null;
+      return <SpinnerScreen>no client</SpinnerScreen>;
     }
     return (
       <Switch>

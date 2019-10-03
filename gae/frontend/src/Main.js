@@ -23,25 +23,39 @@ import Chrome from './Chrome';
 import FcmManager from './FcmManager';
 import MainContent from './MainContent';
 import ProfileWrapper, { ProfileState } from './ProfileWrapper';
-import SpinnerScreen from './SpinnerScreen';
 import SwagWrapper from './SwagWrapper';
+
+class _EmbedChrome extends Component {
+  static styles = theme => ({
+    root: {
+      height: '100%',
+      width: '100%',
+      padding: theme.spacing(2),
+    },
+  });
+
+  render() {
+    return (
+      <main className={this.props.classes.root}>{this.props.children}</main>
+    );
+  }
+}
+const EmbedChrome = withStyles(_EmbedChrome.styles)(_EmbedChrome);
 
 class Main extends Component {
   static styles = theme => ({
     root: {
       display: 'flex',
+      height: '100%',
+      width: '100%',
     },
     main: {
       height: '100%',
       width: '100%',
-      padding: theme.spacing(2),
     },
     mainContent: {
       height: '100%',
       width: '100%',
-    },
-    spinnerContainer: {
-      minHeight: '100vh',
     },
   });
 
@@ -77,8 +91,8 @@ class Main extends Component {
     console.log('Main.handleFcmMessage', payload);
   };
 
-  renderMainContent() {
-    var mainContent = (
+  render() {
+    const mainContent = (
       <MainContent
         className={this.props.classes.mainContent}
         match={this.props.match}
@@ -88,14 +102,7 @@ class Main extends Component {
         profile={this.state.profile}
       />
     );
-    if (this.props.embed) {
-      return <div className={this.props.classes.main}>{mainContent}</div>;
-    } else {
-      return <Chrome profile={this.state.profile} children={mainContent} />;
-    }
-  }
 
-  render() {
     return (
       <div className={this.props.classes.root}>
         <SwagWrapper
@@ -106,7 +113,8 @@ class Main extends Component {
         {this.state.apiClient && (
           <ProfileWrapper
             apiClient={this.state.apiClient}
-            profile={this.state.profile}
+            match={this.props.match}
+            profileState={this.state.profile}
           />
         )}
         {!this.props.embed && this.state.apiClient && (
@@ -116,10 +124,10 @@ class Main extends Component {
             onMessage={this.handleFcmMessage}
           />
         )}
-        {this.state.profile.fetched ? (
-          this.renderMainContent()
+        {this.props.embed ? (
+          <EmbedChrome profile={this.state.profile}>{mainContent}</EmbedChrome>
         ) : (
-          <SpinnerScreen />
+          <Chrome profile={this.state.profile}>{mainContent}</Chrome>
         )}
       </div>
     );
