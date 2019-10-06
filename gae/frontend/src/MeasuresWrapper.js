@@ -29,6 +29,7 @@ class MeasuresWrapper extends Component {
 
   constructor(props) {
     super(props);
+    this._mounted = false;
     this.state = {
       fetched: false,
       measures: undefined,
@@ -36,6 +37,9 @@ class MeasuresWrapper extends Component {
   }
 
   handleSeries = response => {
+    if (!this._mounted) {
+      return;
+    }
     var measures = [];
     if (!!response.body && response.body.properties.measures !== undefined) {
       measures = response.body.properties.measures;
@@ -55,12 +59,17 @@ class MeasuresWrapper extends Component {
   };
 
   componentDidMount() {
+    this._mounted = true;
     if (!this.state.fetched) {
       this.setState({ fetched: true });
       this.props.apiClient.bikebuds
         .get_series({ filter: 'weight' })
         .then(this.handleSeries);
     }
+  }
+
+  componentWillUnmount() {
+    this._mounted = false;
   }
 
   render() {
