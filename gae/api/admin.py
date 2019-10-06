@@ -61,13 +61,28 @@ class RemoveSubscriptionResource(Resource):
         for service in services:
             logging.info('Unsubscribing: %s from %s', callbackurl, service.key)
             client = withings_create_client(service)
+            results = []
             try:
                 result = client.unsubscribe(callbackurl)
                 logging.info(
                     'Unsubscribed %s from %s (%s)', callbackurl, service.key, result
                 )
-            except Exception:
+                results.append(
+                    {
+                        'callbackurl': callbackurl,
+                        'result': str(result),
+                        'service': str(service.key),
+                    }
+                )
+            except Exception as e:
                 logging.exception(
                     'Unable to unsubscribe %s from %s', callbackurl, service.key
                 )
-        return Responses.OK
+                results.append(
+                    {
+                        'callbackurl': callbackurl,
+                        'error': str(e),
+                        'service': str(service.key),
+                    }
+                )
+        return results

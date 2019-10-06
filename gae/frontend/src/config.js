@@ -19,6 +19,7 @@ import config_json from './config.json';
 export const config = {
   isDev: config_json['is_dev'],
   projectId: config_json['project_id'],
+  appId: config_json['web_app_id'],
   apiKey: config_json['api_key'],
   authDomain: config_json['auth_domain'],
   databaseURL: config_json['database_url'],
@@ -38,6 +39,7 @@ export const config = {
 
 export const nextConfig = {
   projectId: config_json['next_project_id'],
+  appId: config_json['next_web_app_id'],
   apiKey: config_json['next_api_key'],
   authDomain: config_json['next_auth_domain'],
   databaseURL: config_json['next_database_url'],

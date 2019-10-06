@@ -41,9 +41,17 @@ class FcmManager extends Component {
   }
 
   registerFcm = () => {
+    if (!this.props.firebase.messaging) {
+      console.log(
+        'FcmManager: not registering,',
+        this.props.firebase.messaging
+      );
+      return;
+    }
     if (config.vapidKey !== undefined) {
       this.props.firebase.messaging.usePublicVapidKey(config.vapidKey);
     }
+    console.log('FcmManager: Registering with', this.props.firebase.messaging);
     this.props.firebase.messaging
       .requestPermission()
       .then(() => {
