@@ -27,9 +27,7 @@ import ServiceCard from './ServiceCard';
 class Settings extends Component {
   static styles = {
     root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
+      flexGrow: 1,
     },
   };
 
@@ -42,7 +40,7 @@ class Settings extends Component {
 
   render() {
     return (
-      <Grid classname={this.props.classes.root} container spacing={3}>
+      <Grid className={this.props.classes.root} container spacing={3}>
         <Grid item xs={12} sm={12}>
           <ProfileCard
             firebaseUser={this.props.firebaseUser}

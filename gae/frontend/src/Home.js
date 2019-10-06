@@ -27,9 +27,7 @@ import MeasuresWrapper from './MeasuresWrapper';
 class Home extends Component {
   static styles = {
     root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
+      flexGrow: 1,
     },
   };
 
@@ -40,7 +38,7 @@ class Home extends Component {
 
   render() {
     return (
-      <Grid classname={this.props.classes.root} container spacing={3}>
+      <Grid className={this.props.classes.root} container spacing={3}>
         <MeasuresWrapper
           profile={this.props.profile}
           apiClient={this.props.apiClient}

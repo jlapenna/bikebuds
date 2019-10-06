@@ -27,9 +27,7 @@ import EventsListCard from './EventsListCard';
 class Events extends Component {
   static styles = {
     root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
+      flexGrow: 1,
     },
   };
 
@@ -51,7 +49,7 @@ class Events extends Component {
 
   render() {
     return this.query !== null ? (
-      <Grid classname={this.props.classes.root} container spacing={3}>
+      <Grid className={this.props.classes.root} container spacing={3}>
         <Grid item xs={12}>
           <EventsListCard apiClient={this.props.apiClient} query={this.query} />
         </Grid>

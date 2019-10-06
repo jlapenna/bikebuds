@@ -41,6 +41,9 @@ class PreferencesCard extends Component {
       flexDirection: 'column',
       justifyContent: 'space-between',
     },
+    contentGrid: {
+      flexGrow: 1,
+    },
   };
 
   static propTypes = {
@@ -101,7 +104,11 @@ class PreferencesCard extends Component {
     return (
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
-          <Grid container spacing={3}>
+          <Grid
+            className={this.props.classes.contentGrid}
+            container
+            spacing={3}
+          >
             <Grid item xs={12} sm={12}>
               <FormControl
                 component="fieldset"

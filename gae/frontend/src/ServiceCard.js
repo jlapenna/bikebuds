@@ -46,6 +46,9 @@ class ServiceCard extends Component {
     cardContentItem: {
       width: '100%',
     },
+    contentGrid: {
+      flexGrow: 1,
+    },
   };
 
   static propTypes = {
@@ -151,7 +154,13 @@ class ServiceCard extends Component {
   renderCardContent() {
     return (
       <CardContent className={this.props.classes.content}>
-        <Grid container direction="column" justify="center" alignItems="center">
+        <Grid
+          className={this.props.classes.contentGrid}
+          container
+          direction="column"
+          justify="center"
+          alignItems="center"
+        >
           <Grid item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
             {this.state.service === undefined && <LinearProgress />}
