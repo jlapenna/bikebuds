@@ -17,7 +17,7 @@ google-cloud-tasks==1.1.0
 
 # /services/
 stravalib==0.10.2
-git+git://github.com/jlapenna/python-nokia
+withings-api
 
 # For natural language dates and such
 Babel

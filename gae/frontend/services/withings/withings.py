@@ -22,7 +22,7 @@ from flask_cors import cross_origin
 from google.api_core.exceptions import AlreadyExists
 from google.cloud.datastore.key import Key
 
-import nokia
+import withings_api
 
 from shared import auth_util
 from shared import ds_util
@@ -174,7 +174,7 @@ def redirect(claims):
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
 
-    auth = nokia.NokiaAuth(
+    auth = withings_api.WithingsAuth(
         config.withings_creds['client_id'],
         config.withings_creds['client_secret'],
         callback_uri=get_callback_uri(dest),
@@ -202,7 +202,7 @@ def get_callback_uri(dest):
 
 
 def get_auth_url_response(dest):
-    auth = nokia.NokiaAuth(
+    auth = withings_api.WithingsAuth(
         config.withings_creds['client_id'],
         config.withings_creds['client_secret'],
         callback_uri=get_callback_uri(dest),

@@ -66,7 +66,7 @@ class BikebudsApiContainerState extends State<BikebudsApiContainer> {
     // Set an access token.
     var firebaseUser = await firebase.auth.currentUser();
     OAuth oAuth = apiClient.getAuthentication("firebase");
-    oAuth.accessToken = await firebaseUser.getIdToken(refresh: true);
+    oAuth.accessToken = (await firebaseUser.getIdToken(refresh: true)).token;
 
     final api = BikebudsApi(apiClient);
     setState(() {

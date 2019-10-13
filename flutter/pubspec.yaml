@@ -35,16 +35,16 @@ dependencies:
   cupertino_icons: ^0.1.2
 
   # https://firebase.google.com/docs/flutter/setup
-  firebase_core: ^0.4.0+6
+  firebase_core: ^0.4.0+9
 
   # https://pub.dartlang.org/packages/firebase_auth
-  firebase_auth: ^0.11.1+11
-  google_sign_in: ^4.0.4
+  firebase_auth: ^0.14.0+5
+  google_sign_in: ^4.0.7
   googleapis_auth: ^0.2.10
 
   # Firebase Plugins
-  firebase_messaging: ^5.1.2
-  cloud_firestore: ^0.12.7
+  firebase_messaging: ^5.1.6
+  cloud_firestore: ^0.12.9+5
 
   # Bikebuds API
   bikebuds_api:
@@ -52,13 +52,13 @@ dependencies:
 
   transparent_image:
 
-  datetime_picker_formfield: ^0.4.0
+  datetime_picker_formfield: ^0.4.3
 
-  url_launcher: ^5.1.0
+  url_launcher: ^5.1.6
 
   scoped_model: ^1.0.1
 
-  webview_flutter: ^0.3.11+2
+  webview_flutter: ^0.3.14+1
 
 dev_dependencies:
   flutter_test:

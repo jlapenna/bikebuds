@@ -14,7 +14,7 @@
 
 import logging
 
-import nokia
+import withings_api
 
 from shared.datastore.service import Service
 
@@ -23,7 +23,7 @@ def create_client(service):
     if not Service.has_credentials(service):
         raise Exception('Cannot create Withings client without creds: %s', service)
     # Note: token_expiry is equivelent to expires_at, provided by the API.
-    creds = nokia.NokiaCredentials(
+    creds = withings_api.WithingsCredentials(
         access_token=service['credentials'].get('access_token'),
         token_expiry=service['credentials'].get('expires_at', 0),
         token_type=service['credentials'].get('token_type'),
@@ -37,4 +37,4 @@ def create_client(service):
         logging.debug('Withings creds refresh for: %s', service.key)
         Service.update_credentials(service, new_credentials)
 
-    return nokia.NokiaApi(creds, refresh_cb=refresh_callback)
+    return withings_api.WithingsApi(creds, refresh_cb=refresh_callback)

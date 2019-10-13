@@ -14,7 +14,7 @@
 
 from google.cloud.datastore.entity import Entity
 
-import nokia
+import withings_api
 
 from shared import ds_util
 
@@ -23,7 +23,7 @@ class _MeasureConverter(object):
     @classmethod
     def to_entity(cls, measure, parent=None):
         attributes = dict()
-        for key, type_int in nokia.NokiaMeasureGroup.MEASURE_TYPES:
+        for key, type_int in withings_api.WithingsMeasureGroup.MEASURE_TYPES:
             value = measure.get_measure(type_int)
             if value is not None:
                 attributes[key] = value
