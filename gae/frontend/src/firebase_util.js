@@ -44,12 +44,6 @@ export class FirebaseState {
     this.auth = firebase.auth();
 
     try {
-      this.messaging = firebase.messaging();
-    } catch (err) {
-      console.warn('FirebaseState: Failed to set up messaging.', err);
-    }
-
-    try {
       this.appNext = firebase.initializeApp(nextConfig, 'next');
     } catch (err) {
       console.warn('FirebaseState: Tried to re-initialize next app.', err);
@@ -72,6 +66,16 @@ export class FirebaseState {
       unregisterAppObserver();
       unregisterAppNextObserver();
     };
+  };
+
+  enableMessaging = () => {
+    try {
+      this.messaging = firebase.messaging();
+      return true;
+    } catch (err) {
+      console.warn('FirebaseState: Failed to set up messaging.', err);
+      return false;
+    }
   };
 
   signOut = e => {

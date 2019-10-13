@@ -42,10 +42,7 @@ class FcmManager extends Component {
 
   registerFcm = () => {
     if (!this.props.firebase.messaging) {
-      console.log(
-        'FcmManager: not registering,',
-        this.props.firebase.messaging
-      );
+      console.log('FcmManager: not registering');
       return;
     }
     if (config.vapidKey !== undefined) {
@@ -91,6 +88,10 @@ class FcmManager extends Component {
       // No push messages when running with fake users.
       return;
     }
+    if (!this.props.firebase.enableMessaging()) {
+      return;
+    }
+
     // onTokenRefresh is only called when firebase gives the app a new token,
     // which isn't every reload, but during an "app install" so to speak.
     this.tokenListener = this.props.firebase.messaging.onTokenRefresh(token => {
