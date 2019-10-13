@@ -64,7 +64,9 @@ function set_dev_environment() {
   popd
 
   echo "Wiping flutter build cache."
-  rm -rf flutter/build/
+  pushd flutter;
+  flutter clean;
+  popd;
 }
 
 function set_prod_environment() {
@@ -75,7 +77,9 @@ function set_prod_environment() {
   popd
 
   echo "Wiping flutter build cache."
-  rm -rf flutter/build/
+  pushd flutter;
+  flutter clean;
+  popd;
 }
 
 function activate_virtualenv() {
