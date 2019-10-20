@@ -583,6 +583,19 @@ class ServiceResource(Resource):
         return WrapEntity(existing_service)
 
 
+@api.route('/disconnect/<name>')
+class ServiceDisconnect(Resource):
+    @api.doc('disconnect')
+    @api.marshal_with(service_entity_model, skip_none=True)
+    def get(self, name):
+        claims = auth_util.verify_claims(flask.request)
+        user = User.get(claims)
+        service = Service.get(name, parent=user.key)
+        del service['credentials']
+        ds_util.client.put(service)
+        return WrapEntity(service)
+
+
 @api.route('/sync/<name>')
 class SyncResource(Resource):
     @api.doc('sync_service')

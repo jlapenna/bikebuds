@@ -70,7 +70,7 @@ class ServiceCard extends Component {
       this.state.service.properties.credentials
     ) {
       this.props.apiClient.bikebuds
-        .disconnect_service({ name: this.props.serviceName })
+        .disconnect({ name: this.props.serviceName })
         .then(response => {
           this.handleService(response);
           this.setState({ actionPending: false });
