@@ -1,10 +1,13 @@
-iPython
+ipython
 
 # Talks to the datastore
 google-cloud-datastore
 
+# Talks to firebase
+firebase-admin==2.17.0
+
 # Talks oauth
-google_auth_oauthlib
+google-auth-oauthlib
 
 # Talks to the bikebuds API
 pyswagger
@@ -19,8 +22,7 @@ Babel
 # /services/                                                                                                                           
 fitbit==0.3.1
 stravalib==0.10.2
-withings-api
-measurement==2.0.1
+withings-api==2.1.2
 
 # Utility
 sortedcontainers

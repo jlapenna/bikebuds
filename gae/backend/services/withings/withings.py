@@ -16,6 +16,8 @@ import datetime
 import logging
 from urllib.parse import urlencode
 
+import withings_api
+
 from shared import ds_util
 from shared import task_util
 from shared.config import config
@@ -35,7 +37,7 @@ class Worker(object):
 
     def sync_measures(self):
         measures = sorted(
-            self.client.get_measures(lastupdate=0, updatetime=0), key=lambda x: x.date
+            self.client.measure_get_meas(lastupdate=0).measuregrps, key=lambda x: x.date
         )
         series = Series.to_entity(
             measures, self.service.key.name, parent=self.service.key
@@ -54,29 +56,47 @@ class Worker(object):
             query_string,
         )
         comment = self.service.key.to_legacy_urlsafe().decode()
-        is_subscribed = self.client.is_subscribed(callbackurl)
+        try:
+            sub = self.client.notify_get(callbackurl)
+        except withings_api.common.InvalidParamsException:
+            sub = None
         logging.debug(
-            'Currently subscribed %s: %s to %s',
-            is_subscribed,
-            self.service.key,
-            callbackurl,
+            'Current sub: %s to %s for %s', self.service.key, sub, callbackurl
         )
 
+        self._revoke_unknown_subscriptions(callbackurl)
+
+        # After previous cleanup, see if we need to re-subscribed:
+        try:
+            sub = self.client.notify_get(callbackurl)
+        except withings_api.common.InvalidParamsException:
+            sub = None
+
+        if sub:
+            self._store_sub(self, sub.callbackurl, sub.comment)
+        elif config.is_dev:
+            logging.debug(
+                'Dev server. Not registering %s to %s', self.service.key, callbackurl
+            )
+        else:
+            self._subscribe(callbackurl, comment)
+
+    def _revoke_unknown_subscriptions(self, callbackurl):
         # Existing subs.
-        subscriptions = self.client.list_subscriptions()
-        for sub in subscriptions:
+        notify_response = self.client.notify_list()
+        for sub in notify_response.profiles:
             logging.debug('Examining sub: %s to %s', self.service.key, sub)
             if (
-                config.frontend_url in sub['callbackurl']
-                and sub['callbackurl'] != callbackurl
+                config.frontend_url in sub.callbackurl
+                and sub.callbackurl != callbackurl
             ):
                 # This sub is bikebuds, but we don't recognize it.
                 try:
-                    self.client.unsubscribe(sub['callbackurl'])
+                    self.client.notify_revoke(sub.callbackurl)
                     logging.info('Unsubscribed: %s from %s', self.service.key, sub)
                     ds_util.client.delete(
                         ds_util.client.key(
-                            'Subscription', sub['callbackurl'], parent=self.service.key
+                            'Subscription', sub.callbackurl, parent=self.service.key
                         )
                     )
                 except Exception:
@@ -84,47 +104,28 @@ class Worker(object):
                         'Unsubscribe failed: %s from %s', self.service.key, sub
                     )
 
-        # After previous cleanup, see if we need to re-subscribed:
-        is_subscribed = self.client.is_subscribed(callbackurl)
-        if is_subscribed:
-            logging.debug(
-                'Already have a sub, not re-registering for %s to %s',
-                self.service.key,
-                callbackurl,
+    def _subscribe(self, callbackurl, comment):
+        try:
+            self.client.notify_subscribe(callbackurl, comment=comment)
+            logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
+            self._store_sub(callbackurl, comment)
+        except Exception:
+            logging.exception(
+                'Subscribe failed: %s to %s', self.service.key, callbackurl
             )
-            sub_entity = Subscription.to_entity(
-                {
-                    'callbackurl': callbackurl,
-                    'comment': comment,
-                    'date': datetime.datetime.now(datetime.timezone.utc),
-                },
-                callbackurl,
-                parent=self.service.key,
-            )
-            sub_entity.update()
-            ds_util.client.put(sub_entity)
-        elif config.is_dev:
-            logging.debug(
-                'Dev server. Not registering %s to %s', self.service.key, callbackurl
-            )
-        else:
-            try:
-                self.client.subscribe(callbackurl, comment=comment)
-                logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
-                entity = Subscription.to_entity(
-                    {
-                        'callbackurl': callbackurl,
-                        'comment': comment,
-                        'date': datetime.datetime.now(datetime.timezone.utc),
-                    },
-                    callbackurl,
-                    parent=self.service.key,
-                )
-                ds_util.client.put(entity)
-            except Exception:
-                logging.exception(
-                    'Subscribe failed: %s to %s', self.service.key, callbackurl
-                )
+
+    def _store_sub(self, callbackurl, comment):
+        sub_entity = Subscription.to_entity(
+            {
+                'callbackurl': callbackurl,
+                'comment': comment,
+                'date': datetime.datetime.now(datetime.timezone.utc),
+            },
+            callbackurl,
+            parent=self.service.key,
+        )
+        logging.debug('Stored: %s to %s', self.service.key, sub_entity)
+        ds_util.client.put(sub_entity)
 
 
 class EventsWorker(object):
@@ -134,7 +135,7 @@ class EventsWorker(object):
 
     def sync(self):
         measures = sorted(
-            self.client.get_measures(lastupdate=0, updatetime=0), key=lambda x: x.date
+            self.client.measure_get_meas(lastupdate=0).measuregrps, key=lambda x: x.date
         )
         series = Series.to_entity(
             measures, self.service.key.name, parent=self.service.key

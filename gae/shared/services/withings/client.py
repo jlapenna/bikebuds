@@ -15,26 +15,36 @@
 import logging
 
 import withings_api
+from withings_api.common import Credentials
 
+from shared.config import config
 from shared.datastore.service import Service
+
+_SCOPE = (
+    withings_api.AuthScope.USER_ACTIVITY,
+    withings_api.AuthScope.USER_METRICS,
+    withings_api.AuthScope.USER_INFO,
+)
 
 
 def create_client(service):
     if not Service.has_credentials(service):
         raise Exception('Cannot create Withings client without creds: %s', service)
-    # Note: token_expiry is equivelent to expires_at, provided by the API.
-    creds = withings_api.WithingsCredentials(
-        access_token=service['credentials'].get('access_token'),
-        token_expiry=service['credentials'].get('expires_at', 0),
-        token_type=service['credentials'].get('token_type'),
-        refresh_token=service['credentials'].get('refresh_token'),
-        user_id=service['credentials'].get('user_id'),
-        client_id=service['credentials'].get('client_id'),
-        consumer_secret=service['credentials'].get('consumer_secret'),
-    )
+    service_creds = service['credentials']
+    creds = Credentials(**service_creds)
 
     def refresh_callback(new_credentials):
         logging.debug('Withings creds refresh for: %s', service.key)
         Service.update_credentials(service, new_credentials)
 
     return withings_api.WithingsApi(creds, refresh_cb=refresh_callback)
+
+
+def create_auth(callback_uri):
+    return withings_api.WithingsAuth(
+        client_id=config.withings_creds['client_id'],
+        consumer_secret=config.withings_creds['client_secret'],
+        callback_uri=callback_uri,
+        scope=_SCOPE,
+        mode=None,  # A bug in the library sets 'demo' by default.
+    )

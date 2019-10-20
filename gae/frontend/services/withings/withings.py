@@ -22,8 +22,6 @@ from flask_cors import cross_origin
 from google.api_core.exceptions import AlreadyExists
 from google.cloud.datastore.key import Key
 
-import withings_api
-
 from shared import auth_util
 from shared import ds_util
 from shared import task_util
@@ -31,6 +29,7 @@ from shared.config import config
 from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
 from shared.datastore.user import User
+from shared.services.withings.client import create_auth
 from shared.responses import Responses
 
 
@@ -174,23 +173,10 @@ def redirect(claims):
     code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
 
-    auth = withings_api.WithingsAuth(
-        config.withings_creds['client_id'],
-        config.withings_creds['client_secret'],
-        callback_uri=get_callback_uri(dest),
-    )
-    creds = auth.get_credentials(code)
-    creds_dict = dict(
-        access_token=creds.access_token,
-        token_expiry=creds.token_expiry,
-        token_type=creds.token_type,
-        refresh_token=creds.refresh_token,
-        user_id=creds.user_id,
-        client_id=creds.client_id,
-        consumer_secret=creds.consumer_secret,
-    )
+    auth = create_auth(callback_uri=get_callback_uri(dest))
 
-    Service.update_credentials(service, creds_dict)
+    creds = auth.get_credentials(code)._asdict()
+    Service.update_credentials(service, creds)
 
     task_util.sync_service(service)
 
@@ -202,11 +188,7 @@ def get_callback_uri(dest):
 
 
 def get_auth_url_response(dest):
-    auth = withings_api.WithingsAuth(
-        config.withings_creds['client_id'],
-        config.withings_creds['client_secret'],
-        callback_uri=get_callback_uri(dest),
-    )
+    auth = create_auth(callback_uri=get_callback_uri(dest))
     if flask.request.method == 'POST':
         return flask.jsonify({'authorize_url': auth.get_authorize_url()})
     else:
