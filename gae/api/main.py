@@ -104,13 +104,25 @@ class DateTimeNaive(fields.DateTime):
 key_model = api.model('EntityKey', {'path': fields.Raw})
 
 
+sync_state_model = api.model(
+    'SyncState',
+    {
+        'syncing': fields.Boolean(default=False),
+        'successful': fields.Boolean(default=False),
+        'error': fields.String,
+        'enqueued_at': fields.DateTime,
+        'started_at': fields.DateTime,
+        'updated_at': fields.DateTime,
+    },
+)
+
+
 service_model = api.model(
     'Service',
     {
         'credentials': CredentialsField(default=False),
-        'sync_date': fields.DateTime,
         'sync_enabled': fields.Boolean(default=False),
-        'sync_successful': fields.Boolean(default=False),
+        'sync_state': fields.Nested(sync_state_model),
     },
 )
 service_entity_model = EntityModel(service_model)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import logging
 
 from google.cloud.datastore.entity import Entity
@@ -27,9 +28,12 @@ class Service(object):
         key = ds_util.client.key('Service', name, parent=parent)
         service = ds_util.client.get(key)
         if service:
+            if 'sync_state' not in service:
+                service['sync_state'] = {}
             return service
         service = Entity(key)
         service['sync_enabled'] = True
+        service['sync_state'] = {}
         ds_util.client.put(service)
         return service
 
@@ -65,3 +69,37 @@ class Service(object):
             and service.get('credentials')
             and (required_key is None or service['credentials'].get(required_key))
         )
+
+    @classmethod
+    def set_sync_enqueued(cls, service):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        service['sync_state']['updated_at'] = now
+        service['sync_state']['syncing'] = True
+        service['sync_state']['enqueued_at'] = now
+        service['sync_state']['started_at'] = None
+        if 'successful' in service['sync_state']:
+            del service['sync_state']['successful']
+        if 'error' in service['sync_state']:
+            del service['sync_state']['error']
+        ds_util.client.put(service)
+
+    @classmethod
+    def set_sync_started(cls, service):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        service['sync_state']['updated_at'] = now
+        service['sync_state']['started_at'] = now
+        service['sync_state']['syncing'] = True
+        ds_util.client.put(service)
+
+    @classmethod
+    def set_sync_finished(cls, service, error=None):
+        service['sync_state']['updated_at'] = datetime.datetime.now(
+            datetime.timezone.utc
+        )
+        service['sync_state']['syncing'] = False
+        if error is None:
+            service['sync_state']['successful'] = True
+        else:
+            service['sync_state']['successful'] = False
+            service['sync_state']['error'] = error
+        ds_util.client.put(service)

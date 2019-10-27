@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import unittest
+import warnings
 
 from shared.config import config
 
@@ -21,6 +23,21 @@ import bikebuds_api
 
 class MainTest(unittest.TestCase):
     def setUp(self):
+        self._disable_warnings()
+        configuration = self._create_configuration()
+        self.admin_api = bikebuds_api.AdminApi(bikebuds_api.ApiClient(configuration))
+        self.api = bikebuds_api.BikebudsApi(bikebuds_api.ApiClient(configuration))
+
+    def _disable_warnings(self):
+        # Due to a python requests design choice, we receive a warning about
+        # leaking connection. This is expected and pretty much out of our
+        # authority but it can be annoying in tests, hence we suppress the
+        # warning. See Issue psf/requests/issues/1882
+        warnings.filterwarnings(
+            action="ignore", message="unclosed", category=ResourceWarning
+        )
+
+    def _create_configuration(self):
         configuration = bikebuds_api.Configuration()
         configuration.host = config.api_url
 
@@ -32,9 +49,7 @@ class MainTest(unittest.TestCase):
 
         # Configure OAuth2 access token for authorization: firebase
         configuration.access_token = 'XYZXYZXYZ'
-
-        self.admin_api = bikebuds_api.AdminApi(bikebuds_api.ApiClient(configuration))
-        self.api = bikebuds_api.BikebudsApi(bikebuds_api.ApiClient(configuration))
+        return configuration
 
     def test_profile(self):
         profile = self.api.get_profile()
@@ -44,6 +59,20 @@ class MainTest(unittest.TestCase):
     def test_sync(self):
         service = self.api.get_service(name='withings')
         self.assertEqual('jlapenna.test.1@gmail.com', service.key.path[0]['name'])
+        self.assertFalse(service.properties.sync_state.syncing)
 
-        result = self.api.sync_service(name='withings')
-        self.assertEqual('jlapenna.test.1@gmail.com', result.key.path[0]['name'])
+        service = self.api.sync_service(name='withings')
+        self.assertTrue(
+            service.properties.sync_state.syncing,
+            'Service should be syncing, was: %s' % (service.properties.sync_state,),
+        )
+
+        remaining_sleep = 10
+        while service.properties.sync_state.syncing and remaining_sleep > 0:
+            remaining_sleep -= 1
+            time.sleep(1)
+            service = self.api.get_service(name='withings')
+        self.assertFalse(
+            service.properties.sync_state.syncing,
+            'Service should have finished, was: %s' % (service.properties.sync_state,),
+        )

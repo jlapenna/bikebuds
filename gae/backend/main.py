@@ -14,7 +14,6 @@
 
 import logging
 
-
 import flask
 
 from google.cloud.datastore.entity import Entity
@@ -89,31 +88,33 @@ def sync_task():
 @app.route('/tasks/sync/service/<service_name>', methods=['POST'])
 def sync_service_task(service_name):
     params = task_util.get_payload(flask.request)
-    state_key = params['state_key']
-    service = ds_util.client.get(params['service_key'])
 
-    logging.debug('Validating state key')
+    state_key = params['state_key']
     if state_key is None:
         logging.warn('Invalid state_key. params: %s', params)
-        return Responses.OK_INVALID_STATE_KEY
 
-    logging.debug('Validating credentials')
+    service = ds_util.client.get(params['service_key'])
     if not Service.has_credentials(service):
         logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        task_util.maybe_finish_sync_services(state_key)
         return Responses.OK_NO_CREDENTIALS
 
     try:
+        Service.set_sync_started(service)
         if service_name == 'withings':
             _do(withings.Worker(service), work_key=service.key)
         elif service_name == 'fitbit':
             _do(bbfitbit.Worker(service), work_key=service.key)
         elif service_name == 'strava':
             _do(strava.Worker(service), work_key=service.key)
-    except SyncException:
+        Service.set_sync_finished(service)
+        task_util.maybe_finish_sync_services(state_key)
+        return Responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        task_util.maybe_finish_sync_services(state_key)
         return Responses.OK_SYNC_EXCEPTION
-
-    task_util.maybe_finish_sync_services(service, state_key)
-    return Responses.OK
 
 
 @app.route('/tasks/process_event', methods=['POST'])
@@ -175,7 +176,7 @@ def _do(worker, work_key=None, method='sync'):
         logging.info('Worker completed: %s/%s', work_name, work_key)
     except Exception:
         logging.exception('Worker failed: %s/%s', work_name, work_key)
-        raise SyncException('Worker failed: %s/%s', work_name, work_key)
+        raise SyncException('Worker failed: %s/%s' % (work_name, work_key))
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):

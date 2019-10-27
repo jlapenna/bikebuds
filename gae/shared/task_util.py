@@ -28,6 +28,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from shared import ds_util
 from shared.config import config
 from shared.credentials import credentials
+from shared.datastore.service import Service
 
 
 # Create a client.
@@ -143,9 +144,12 @@ def sync_services(services):
 
         tasks = []
         for service in services:
-            service['sync_date'] = datetime.datetime.now(datetime.timezone.utc)
-            service['syncing'] = True
-
+            if service['sync_state'].get('syncing'):
+                logging.debug(
+                    'Not enqueuing sync for %s; already started.', service.key
+                )
+                continue
+            Service.set_sync_enqueued(service)
             tasks.append(
                 {
                     'entity': _params_entity(
@@ -176,7 +180,11 @@ def get_payload(request):
     return _deserialize_entity(request.get_data())
 
 
-def maybe_finish_sync_services(service, state_key):
+def maybe_finish_sync_services(state_key=None):
+    if not state_key:
+        logging.warn('Cannot Increment completed tasks')
+        return
+
     # We have to do this "do" nonsense, because when on dev we fake tasks by
     # just triggering them via http, and the transaction hasn't written the
     # values yet, so the other server can't read them if they get processed
@@ -186,10 +194,6 @@ def maybe_finish_sync_services(service, state_key):
         state = ds_util.client.get(state_key)
         state['completed_tasks'] += 1
         ds_util.client.put(state)
-
-        service['syncing'] = False
-        service['sync_successful'] = True
-        ds_util.client.put(service)
 
         if state['completed_tasks'] == state['total_tasks']:
             logging.debug('Completed all pending tasks for %s', state.key)
