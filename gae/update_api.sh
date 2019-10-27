@@ -6,24 +6,31 @@ source tools/scripts/base.sh
 API="bikebuds"
 VERSION="v1"
 
+REPO_PATH="$(get_repo_path)";
+GENERATOR_PATH="${REPO_PATH}/generated/openapi-generator";
 
 function main() {
-  local repo_path="$(get_repo_path)";
+  generate dart "${REPO_PATH}/generated/bikebuds_api";
+  generate python "${REPO_PATH}/generated/python_bikebuds_api";
+}
 
-  local openapi_generator_path="${repo_path}/generated/openapi-generator";
-  local target_path="${repo_path}/generated/bikebuds_api";
-
+function generate() {
+  local lang="$1"
+  local target_path="$2"
   echo "Generating discovery doc for javascript and dart."
-  pushd $openapi_generator_path;
+  pushd $GENERATOR_PATH;
   rm -rf $target_path
   java -jar modules/openapi-generator-cli/target/openapi-generator-cli.jar \
       generate \
       -i http://localhost:8082/swagger.json \
-      -g dart \
+      -g "${lang}" \
       --additional-properties=pubName=bikebuds_api \
+      --additional-properties=packageName=bikebuds_api \
+      --additional-properties=projectName=bikebuds-api \
       -o $target_path \
       -DbrowserClient=false \
       ;
+  popd
 }
 
 main "$@"
