@@ -35,8 +35,7 @@ function main() {
     export DATASTORE_HOST=${EMULATOR_HOST}
   fi
 
-  pushd "${client_path}"
-  ipython --InteractiveShellApp.exec_files="['startup.py']" $@
+  ipython --InteractiveShellApp.exec_files="['gae/client/startup.py']" $@
 }
 
 main "$@"

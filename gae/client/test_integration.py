@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Copyright 2019 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Integration testing for bikebuds
+
+Run this script directly from the client virtualenv to get credentials:
+  ./gae/client/test_integration.py
+
+Then run it as a unittest.
+  ./tools/scripts/run_integration_tests.sh
+
+"""
+
 import time
 import unittest
 import warnings
 
-from shared.config import config
 
 import bikebuds_api
+
+import auth_helper
 
 
 class MainTest(unittest.TestCase):
     def setUp(self):
         self._disable_warnings()
-        configuration = self._create_configuration()
+        flow_creds = auth_helper.load_credentials()
+        configuration = auth_helper.load_configuration(flow_creds)
         self.admin_api = bikebuds_api.AdminApi(bikebuds_api.ApiClient(configuration))
         self.api = bikebuds_api.BikebudsApi(bikebuds_api.ApiClient(configuration))
 
@@ -37,28 +51,12 @@ class MainTest(unittest.TestCase):
             action="ignore", message="unclosed", category=ResourceWarning
         )
 
-    def _create_configuration(self):
-        configuration = bikebuds_api.Configuration()
-        configuration.host = config.api_url
-
-        # Configure API key authorization: api_key
-        configuration.api_key['key'] = config.python_client_testing_api_key
-
-        # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-        # configuration.api_key_prefix['key'] = 'Bearer'
-
-        # Configure OAuth2 access token for authorization: firebase
-        configuration.access_token = 'XYZXYZXYZ'
-        return configuration
-
     def test_profile(self):
         profile = self.api.get_profile()
-        self.assertEqual('jlapenna.test.1@gmail.com', profile.user.key.path[0]['name'])
         self.assertEqual(35056021, profile.athlete.properties.id)
 
     def test_sync(self):
         service = self.api.get_service(name='withings')
-        self.assertEqual('jlapenna.test.1@gmail.com', service.key.path[0]['name'])
         self.assertFalse(service.properties.sync_state.syncing)
 
         service = self.api.sync_service(name='withings')
@@ -78,6 +76,10 @@ class MainTest(unittest.TestCase):
         )
         self.assertTrue(
             service.properties.sync_state.successful,
-            'Service should have been successful, was: %s'
+            'Sync should have been successful, was: %s'
             % (service.properties.sync_state,),
         )
+
+
+if __name__ == '__main__':
+    auth_helper.fetch_credentials()

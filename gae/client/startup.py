@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
+#
+# Copyright 2019 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging  # noqa: F401
-import os
 
-from google_auth_oauthlib import flow
 from google.cloud.datastore import Client  # noqa: F401
 from google.cloud.datastore.key import Key  # noqa: F401
 
@@ -11,16 +23,16 @@ from shared.config import config  # noqa: F401
 from shared import ds_util  # noqa: F401
 from shared import task_util  # noqa: F401
 
-# OAuth to Google - Gets a google ID token, access token & refresh token.
-oauth_flow = flow.InstalledAppFlow.from_client_secrets_file(
-    os.path.join(config.base_path, 'service_keys/python-client-testing-oauth.json'),
-    scopes=[
-        'openid',
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-    ],
-)
+import auth_helper  # noqa: F401
+import ds_helper  # noqa: F401
+import bikebuds_api  # noqa: F401
 
-
-def run_flow():
-    return flow.run_local_server(host='localhost', port=8095, open_browser=True)
+flow_creds = auth_helper.load_credentials()
+if flow_creds:
+    configuration = auth_helper.load_configuration(flow_creds)
+    admin_api = bikebuds_api.AdminApi(bikebuds_api.ApiClient(configuration))
+    api = bikebuds_api.BikebudsApi(bikebuds_api.ApiClient(configuration))
+else:
+    configuration = None
+    admin_api = None
+    api = None

@@ -35,10 +35,8 @@ function main() {
     export DATASTORE_HOST=${EMULATOR_HOST}
   fi
 
-  pushd "${client_path}"
-  python -m unittest 
+  python -m unittest discover -s "${client_path}"
   result=$?;
-  popd
 
   deactivate
 
