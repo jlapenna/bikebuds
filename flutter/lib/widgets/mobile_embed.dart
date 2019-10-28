@@ -33,7 +33,7 @@ enum AuthState {
 }
 
 class MobileEmbed extends StatefulWidget {
-  final Uri target;
+  final String target;
 
   MobileEmbed(this.target);
 
@@ -50,6 +50,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
   AuthState _authState = AuthState.UNDEFINED;
 
   WebViewController _controller;
+  MobileEmbedJsController _mobileEmbedJsController;
 
   _MobileEmbedState() {
     _eventHandlers['signedIn'] = (event, payload) async {
@@ -62,16 +63,16 @@ class _MobileEmbedState extends State<MobileEmbed> {
       this.setState(() {
         print('MobileEmbed: controller.then: complete');
         this._controller = controller;
+        this._mobileEmbedJsController = MobileEmbedJsController(controller);
       });
     });
   }
 
   void loadAuthUrl() {
-    print('MobileEmbed.loadAuthUrl');
     final config = ConfigContainer.of(context).config;
     Uri url = Uri.parse(config["devserver_url"] + "/embed/auth")
         .replace(queryParameters: {'token': this._auth.token});
-    print('MobileEmbed.navigate: ${url.path}, ' +
+    print('MobileEmbed.loadAuthUrl: ${url.path}, ' +
         'hasToken: ${url.queryParameters['token'] != null}');
     this._controller.loadUrl(url.toString());
     setState(() {
@@ -80,6 +81,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
   }
 
   void buildAuthEval(BuildContext context) {
+    print('MobileEmbed.buildAuthEval: ${this._authState}');
     switch (this._authState) {
       case AuthState.UNDEFINED:
         setState(() {
@@ -109,27 +111,22 @@ class _MobileEmbedState extends State<MobileEmbed> {
       case AuthState.LOADED_AUTH_URL:
         break;
       case AuthState.AUTHENTICATED:
-        maybeLoadTargetUrl();
+        this._mobileEmbedJsController.navigate(widget.target);
         break;
       case AuthState.FAILED:
         break;
     }
   }
 
-  void maybeLoadTargetUrl() async {
-    Uri currentUrl = Uri.parse(await _controller.currentUrl());
-    if (currentUrl != widget.target) {
-      _controller.loadUrl(widget.target.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    print('MobileEmbed.build');
     buildAuthEval(context);
 
     return WebView(
       initialUrl: null,
       onPageFinished: (String url) {
+        url = url.replaceFirst(RegExp('token=.+'), "token=REDACTED");
         print('MobileEmbed.onPageFinished: $url');
       },
       javascriptMode: JavascriptMode.unrestricted,
@@ -151,13 +148,22 @@ class _MobileEmbedState extends State<MobileEmbed> {
   }
 }
 
-class MobileEmbedJsInterface {
+class MobileEmbedJsController {
   WebViewController _controller;
 
-  MobileEmbedJsInterface(this._controller);
+  MobileEmbedJsController(this._controller);
 
   Future<bool> doSomething() async {
-    return json
-        .decode(await this._controller.evaluateJavascript("doSomething()"));
+    print('MobileEmbed: doSomething');
+    return json.decode(await this
+        ._controller
+        .evaluateJavascript("window.MobileEmbed.doSomething()"));
+  }
+
+  Future<bool> navigate(String dest) async {
+    print('MobileEmbed: navigate: $dest');
+    return json.decode(await this
+        ._controller
+        .evaluateJavascript("window.MobileEmbed.navigate('$dest')"));
   }
 }

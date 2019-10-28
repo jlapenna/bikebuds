@@ -14,4 +14,42 @@
  * limitations under the License.
  */
 
+import PropTypes from 'prop-types';
+import { Component } from 'react';
+
 export const MobileEmbedEventChannel = window.MobileEmbedEventChannel;
+
+export class MobileEmbedJsController extends Component {
+  static propTypes = {
+    history: PropTypes.object.isRequired,
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      target: null,
+    };
+  }
+
+  doSomething = () => {
+    console.log('MobileEmbedJsController: doSomething');
+  };
+
+  navigate = dest => {
+    console.log('MobileEmbedJsController: navigate:', dest);
+    this.props.history.push(dest);
+    this.setState({ target: dest });
+  };
+
+  componentDidMount() {
+    var mobileEmbed = {
+      doSomething: this.doSomething,
+      navigate: this.navigate,
+    };
+    window.MobileEmbed = mobileEmbed;
+  }
+
+  render() {
+    return null;
+  }
+}

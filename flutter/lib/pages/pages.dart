@@ -18,17 +18,16 @@ import 'settings/settings_page.dart';
 
 List<Page> createPages(dynamic frontendUrl) {
   return List.unmodifiable([
-    Page('Home', () => HomePage(), Uri.parse(frontendUrl + "/embed/")),
-    Page('Rides', () => EventsPage(), Uri.parse(frontendUrl + "/embed/events")),
-    Page('Settings', () => SettingsPage(),
-        Uri.parse(frontendUrl + "/embed/settings")),
+    Page('Home', () => HomePage(), "/embed/"),
+    Page('Rides', () => EventsPage(), "/embed/events"),
+    Page('Settings', () => SettingsPage(), "/embed/settings"),
   ]);
 }
 
 class Page {
   final String title;
   final dynamic widgetBuilder;
-  final Uri target;
+  final String target;
 
   const Page(this.title, this.widgetBuilder, this.target);
 }

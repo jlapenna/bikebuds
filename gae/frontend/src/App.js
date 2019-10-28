@@ -57,23 +57,19 @@ class SignedInApp extends Component {
           <Route
             path="/embed/"
             render={routeProps => (
-              <MainScreen embed {...this.props} match={routeProps.match} />
+              <MainScreen embed {...this.props} {...routeProps} />
             )}
           />
           <Route
             path="/signup"
             render={routeProps => (
-              <StandaloneSignup {...this.props} match={routeProps.match} />
+              <StandaloneSignup {...this.props} {...routeProps} />
             )}
           />
           <Route
             path="/"
             render={routeProps => (
-              <MainScreen
-                embed={false}
-                {...this.props}
-                match={routeProps.match}
-              />
+              <MainScreen embed={false} {...this.props} {...routeProps} />
             )}
           />
           <Route>

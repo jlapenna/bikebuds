@@ -24,6 +24,7 @@ import FcmManager from './FcmManager';
 import MainContent from './MainContent';
 import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 import SwagWrapper from './SwagWrapper';
+import { MobileEmbedJsController } from 'MobileEmbed';
 
 class _EmbedChrome extends Component {
   static styles = theme => ({
@@ -34,9 +35,16 @@ class _EmbedChrome extends Component {
     },
   });
 
+  static propTypes = {
+    history: PropTypes.object.isRequired,
+  };
+
   render() {
     return (
-      <main className={this.props.classes.root}>{this.props.children}</main>
+      <main className={this.props.classes.root}>
+        <MobileEmbedJsController {...this.props} />
+        {this.props.children}
+      </main>
     );
   }
 }
@@ -116,7 +124,12 @@ class MainScreen extends Component {
           />
         )}
         {this.props.embed ? (
-          <EmbedChrome profile={this.state.profile}>{mainContent}</EmbedChrome>
+          <EmbedChrome
+            history={this.props.history}
+            profile={this.state.profile}
+          >
+            {mainContent}
+          </EmbedChrome>
         ) : (
           <Chrome profile={this.state.profile}>{mainContent}</Chrome>
         )}
