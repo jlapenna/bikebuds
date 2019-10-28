@@ -50,21 +50,21 @@ dependencies:
   bikebuds_api:
     path: ../generated/bikebuds_api
 
-  transparent_image:
+  transparent_image: ^1.0.0
 
   datetime_picker_formfield: ^0.4.3
 
-  url_launcher: ^5.1.6
+  url_launcher: ^5.2.5
 
   scoped_model: ^1.0.1
 
-  webview_flutter: ^0.3.14+1
+  webview_flutter: ^0.3.15+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  mockito: ^4.0.0
+  mockito: ^4.1.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

@@ -1,28 +1,28 @@
-ipython
+ipython==7.9.0
 
 # Talks to the datastore
-google-cloud-datastore
+google-cloud-datastore==1.10.0
 
 # Talks to firebase
-firebase-admin==2.17.0
+firebase-admin==3.1.0
 
 # Talks oauth
-google-auth-oauthlib
+google-auth-oauthlib==0.4.1
 
 # Talks to the bikebuds API
-pyswagger
-requests
+pyswagger==0.8.39
+requests==2.22.0
 
 # tasks_util.py
-google-cloud-tasks
+google-cloud-tasks==1.2.1
 
 # For natural language dates and such
-Babel
+Babel==2.7.0
 
 # /services/                                                                                                                           
 fitbit==0.3.1
 stravalib==0.10.2
-withings-api==2.1.2
+withings-api==2.1.3
 
 # Utility
-sortedcontainers
+sortedcontainers==2.1.0

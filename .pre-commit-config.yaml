@@ -34,7 +34,7 @@ repos:
       - id: prettier
         exclude: index\.yaml|\.(js|jsx|ts|tsx)$
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v6.4.0
+    rev: v6.6.0
     hooks:
       - id: eslint
         entry: ./gae/frontend/node_modules/.bin/eslint --fix

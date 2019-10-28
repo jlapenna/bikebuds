@@ -34,13 +34,13 @@ function main() {
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 
-  pip install grpcio
+  #pip install grpcio
 
   echo "Pip installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 
-  pip3 install pre-commit
+  pip3 install grpcio pre-commit pur
 
   echo "Pip3 installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
