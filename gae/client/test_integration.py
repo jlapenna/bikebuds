@@ -76,3 +76,8 @@ class MainTest(unittest.TestCase):
             service.properties.sync_state.syncing,
             'Service should have finished, was: %s' % (service.properties.sync_state,),
         )
+        self.assertTrue(
+            service.properties.sync_state.successful,
+            'Service should have been successful, was: %s'
+            % (service.properties.sync_state,),
+        )
