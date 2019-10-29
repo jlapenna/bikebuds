@@ -30,6 +30,8 @@ _SCOPE = (
 def create_client(service):
     if not Service.has_credentials(service):
         raise Exception('Cannot create Withings client without creds: %s', service)
+    if 'expires_at' in service['credentials']:
+        del service['credentials']['expires_at']
     service_creds = service['credentials']
     creds = Credentials(**service_creds)
 
