@@ -75,8 +75,13 @@ def verify_claims(request, impersonate=None):
     id_token = request.headers['Authorization'].split(' ').pop()
 
     claims = None
-    if 'UseAltAuth' in request.headers:
-        # This is a standard oauth token from my python client.
+    firebase_user = None
+    try:
+        claims = google.oauth2.id_token.verify_firebase_token(
+            id_token, google.auth.transport.requests.Request()
+        )
+        firebase_user = auth.get_user(claims['sub'])
+    except ValueError:
         claims = google.oauth2.id_token.verify_oauth2_token(
             id_token, google.auth.transport.requests.Request()
         )
@@ -84,18 +89,9 @@ def verify_claims(request, impersonate=None):
         # find the firebase user.
         if claims['iss'] == 'https://accounts.google.com':
             firebase_user = auth.get_user_by_email(claims['email'])
-            claims = {'sub': firebase_user.uid}
-    else:
-        # This is a firebase token.
-        try:
-            claims = google.oauth2.id_token.verify_firebase_token(
-                id_token, google.auth.transport.requests.Request()
-            )
-            firebase_user = auth.get_user(claims['sub'])
-        except ValueError:
-            flask.abort(403, 'id_token already expired.')
+            claims = {'sub': firebase_user.uid, 'email': claims['email']}
 
-    if not claims:
+    if not claims or not firebase_user:
         flask.abort(401, 'Unable to validate id_token')
 
     return claims
