@@ -16,7 +16,8 @@ import datetime
 import logging
 from urllib.parse import urlencode
 
-import withings_api
+from withings_api.common import MeasureGetMeasGroupCategory
+from withings_api.common import InvalidParamsException
 
 from shared import ds_util
 from shared import task_util
@@ -37,7 +38,10 @@ class Worker(object):
 
     def sync_measures(self):
         measures = sorted(
-            self.client.measure_get_meas(lastupdate=0).measuregrps, key=lambda x: x.date
+            self.client.measure_get_meas(
+                category=MeasureGetMeasGroupCategory.REAL, lastupdate=0
+            ).measuregrps,
+            key=lambda x: x.date,
         )
         series = Series.to_entity(
             measures, self.service.key.name, parent=self.service.key
@@ -58,7 +62,7 @@ class Worker(object):
         comment = self.service.key.to_legacy_urlsafe().decode()
         try:
             sub = self.client.notify_get(callbackurl)
-        except withings_api.common.InvalidParamsException:
+        except InvalidParamsException:
             sub = None
         logging.debug(
             'Current sub: %s to %s for %s', self.service.key, sub, callbackurl
@@ -69,7 +73,7 @@ class Worker(object):
         # After previous cleanup, see if we need to re-subscribed:
         try:
             sub = self.client.notify_get(callbackurl)
-        except withings_api.common.InvalidParamsException:
+        except InvalidParamsException:
             sub = None
 
         if sub:
@@ -135,7 +139,10 @@ class EventsWorker(object):
 
     def sync(self):
         measures = sorted(
-            self.client.measure_get_meas(lastupdate=0).measuregrps, key=lambda x: x.date
+            self.client.measure_get_meas(
+                category=MeasureGetMeasGroupCategory.REAL, lastupdate=0
+            ).measuregrps,
+            key=lambda x: x.date,
         )
         series = Series.to_entity(
             measures, self.service.key.name, parent=self.service.key
