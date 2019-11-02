@@ -17,6 +17,8 @@
 import flask
 import logging
 
+from shared.config import config
+
 
 # Alias our logger for later hacks.
 bb_logger = logging.getLogger()
@@ -24,6 +26,19 @@ bb_logger = logging.getLogger()
 LOG_HEADERS = False
 LOG_QUERY = False
 LOG_RESPONSES = False
+
+LOGS_TO_SILENCE = [
+    'urllib3.connectionpool',
+    'oauth2client.contrib.multistore_file',
+    'requests_oauthlib.oauth2_session',
+    'stravalib.model.Activity',
+    'stravalib.model.Athlete',
+    'stravalib.model.Club',
+    'google.auth.transport.requests',
+    'google_auth_httplib2',
+]
+
+PROD_ONLY_LOGS_TO_SILENCE = []
 
 
 def all_logging():
@@ -93,15 +108,8 @@ def after(response):
 
 
 def silence_logs():
-    logs_to_silence = [
-        'urllib3.connectionpool',
-        'requests_oauthlib.oauth2_session',
-        'oauth2client.contrib.multistore_file',
-        'stravalib.model.Activity',
-        'stravalib.model.Athlete',
-        'stravalib.model.Club',
-        'google.auth.transport.requests',
-        'google_auth_httplib2',
-    ]
-    for log in logs_to_silence:
+    for log in LOGS_TO_SILENCE:
         logging.getLogger(log).setLevel(logging.ERROR)
+    if not config.is_dev:
+        for log in PROD_ONLY_LOGS_TO_SILENCE:
+            logging.getLogger(log).setLevel(logging.ERROR)
