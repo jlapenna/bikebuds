@@ -52,13 +52,11 @@ class Home extends Component {
               </Grid>
               <Grid item xs={12}>
                 <MeasuresCard
-                  apiClient={this.props.apiClient}
                   profile={this.props.profile}
                   measures={wrapperState.measures}
-                  title="Historical Weight"
                   intervalUnit="M"
                   intervalFormat="MMM 'YY"
-                  intervalCount="120"
+                  intervalCount={120}
                   tooltipFormat="MMM 'YY"
                 />
               </Grid>

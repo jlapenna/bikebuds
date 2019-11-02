@@ -54,7 +54,11 @@ class MeasuresCard extends Component {
 
   static styles = {
     root: {
-      height: '400px',
+      minHeight: '300px',
+    },
+    content: {
+      width: '100%',
+      height: '300px',
     },
   };
 
@@ -63,8 +67,6 @@ class MeasuresCard extends Component {
     this.state = {
       measures: undefined,
       ticks: [],
-      weightDomain: ['dataMin - 1', 'dataMax + 1'],
-      fatDomain: ['dataMin - 1', 'dataMax + 1'],
     };
   }
 
@@ -145,10 +147,10 @@ class MeasuresCard extends Component {
 
   renderChart() {
     return (
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer>
         <LineChart
           data={this.state.measures}
-          margin={{ top: 12, right: 12, left: 12, bottom: 96 }}
+          margin={{ top: 12, right: 12, left: 12, bottom: 12 }}
         >
           <XAxis
             type="number"
@@ -160,7 +162,7 @@ class MeasuresCard extends Component {
             tick={{ position: 'bottom', angle: -45 }}
             domain={['dataMin', 'dataMax']}
             textAnchor="end"
-            padding={{ left: 12, right: 12 }}
+            height={50}
           />
           <YAxis
             dataKey="weightAvg"
@@ -168,7 +170,7 @@ class MeasuresCard extends Component {
             name="Weight"
             tickFormatter={tick => tick.toFixed(1)}
             interval={0}
-            domain={this.state.weightDomain}
+            domain={['dataMin - 1', 'dataMax + 1']}
           >
             <Label color="#03dac6" value="Weight" angle={-90} position="left" />
           </YAxis>
@@ -178,7 +180,7 @@ class MeasuresCard extends Component {
             orientation="right"
             tickFormatter={tick => tick.toFixed(1)}
             interval={0}
-            domain={this.state.fatDomain}
+            domain={['dataMin - 1', 'dataMax + 1']}
           >
             <Label value="Fat %" angle={-90} position="right" />
           </YAxis>

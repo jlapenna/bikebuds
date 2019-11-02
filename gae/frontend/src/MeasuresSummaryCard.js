@@ -26,7 +26,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Typography from '@material-ui/core/Typography';
 
 import moment from 'moment';
 
@@ -42,15 +41,18 @@ class MeasuresSummaryCard extends Component {
 
   static styles = {
     root: {
-      height: '400px',
+      minHeight: '320px',
+    },
+    content: {
+      minHeight: '320px',
       position: 'relative',
     },
-    summaryTable: {
+    measuresTable: {
       position: 'absolute',
       top: '0px',
       'z-index': 2,
     },
-    summaryChart: {
+    measuresChart: {
       position: 'absolute',
       top: '0px',
       'z-index': 1,
@@ -62,8 +64,6 @@ class MeasuresSummaryCard extends Component {
     super(props);
     this.state = {
       measures: undefined,
-      weightDomain: ['dataMin - 1', 'dataMax + 1'],
-      fatDomain: ['dataMin - 1', 'dataMax + 1'],
     };
   }
 
@@ -80,7 +80,7 @@ class MeasuresSummaryCard extends Component {
     var weekAgo = today.clone().subtract(1, 'w');
     var monthAgo = today.clone().subtract(1, 'M');
     var sixMonthsAgo = today.clone().subtract(6, 'M');
-    var yearAgo = today.clone().subtract(1, 'Y');
+    var yearAgo = today.clone().subtract(1, 'y');
     var ticks = [yearAgo, sixMonthsAgo, monthAgo, weekAgo, today];
     var ticksIndex = ticks.length - 1;
     var measures = [];
@@ -114,11 +114,11 @@ class MeasuresSummaryCard extends Component {
 
   renderChart() {
     return (
-      <div className={this.props.classes.root}>
-        <Table className={this.props.classes.summaryTable}>
+      <React.Fragment>
+        <Table size="medium" className={this.props.classes.measuresTable}>
           <TableHead>
             <TableRow>
-              <TableCell>Date</TableCell>
+              <TableCell></TableCell>
               <TableCell>Weight</TableCell>
               <TableCell>Body Fat</TableCell>
             </TableRow>
@@ -141,15 +141,8 @@ class MeasuresSummaryCard extends Component {
             ))}
           </TableBody>
         </Table>
-        <ResponsiveContainer
-          width="100%"
-          height={400}
-          className={this.props.classes.summaryChart}
-        >
-          <LineChart
-            data={this.state.measures}
-            margin={{ top: 12, right: 0, left: 0, bottom: 12 }}
-          >
+        <ResponsiveContainer className={this.props.classes.measuresChart}>
+          <LineChart data={this.state.measures}>
             <XAxis
               type="number"
               dataKey="date"
@@ -164,7 +157,7 @@ class MeasuresSummaryCard extends Component {
               axisLine={false}
               tick={false}
               tickLine={false}
-              domain={this.state.weightDomain}
+              domain={['dataMin - 1', 'dataMax + 1']}
             />
             <YAxis
               dataKey="fat_ratio"
@@ -173,7 +166,7 @@ class MeasuresSummaryCard extends Component {
               tick={false}
               tickLine={false}
               orientation="right"
-              domain={this.state.fatDomain}
+              domain={['dataMin - 1', 'dataMax + 1']}
             />
             <Line
               dataKey="weight"
@@ -196,7 +189,7 @@ class MeasuresSummaryCard extends Component {
             />
           </LineChart>
         </ResponsiveContainer>
-      </div>
+      </React.Fragment>
     );
   }
 
@@ -204,7 +197,6 @@ class MeasuresSummaryCard extends Component {
     return (
       <Card className={this.props.classes.root}>
         <CardContent className={this.props.classes.content}>
-          <Typography variant="h5">Weight</Typography>
           {this.state.measures === undefined && <LinearProgress />}
           {this.state.measures !== undefined &&
             this.state.measures.length > 0 &&
