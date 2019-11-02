@@ -19,36 +19,11 @@ import React, { Component } from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import Chrome from './Chrome';
+import Chrome, { EmbedChrome } from './Chrome';
 import FcmManager from './FcmManager';
 import MainContent from './MainContent';
 import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 import SwagWrapper from './SwagWrapper';
-import { MobileEmbedJsController } from 'MobileEmbed';
-
-class _EmbedChrome extends Component {
-  static styles = theme => ({
-    root: {
-      height: '100%',
-      width: '100%',
-      padding: theme.spacing(2),
-    },
-  });
-
-  static propTypes = {
-    history: PropTypes.object.isRequired,
-  };
-
-  render() {
-    return (
-      <main className={this.props.classes.root}>
-        <MobileEmbedJsController {...this.props} />
-        {this.props.children}
-      </main>
-    );
-  }
-}
-const EmbedChrome = withStyles(_EmbedChrome.styles)(_EmbedChrome);
 
 class MainScreen extends Component {
   static styles = theme => ({
