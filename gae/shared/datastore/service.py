@@ -38,6 +38,10 @@ class Service(object):
         return service
 
     @classmethod
+    def clear_credentials(cls, service):
+        cls.update_credentials(service, new_credentials=None)
+
+    @classmethod
     def update_credentials(cls, service, new_credentials):
         updated = False
         if new_credentials is None or not new_credentials:

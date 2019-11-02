@@ -603,7 +603,7 @@ class ServiceDisconnect(Resource):
         claims = auth_util.verify_claims(flask.request)
         user = User.get(claims)
         service = Service.get(name, parent=user.key)
-        del service['credentials']
+        Service.clear_credentials(service)
         ds_util.client.put(service)
         return WrapEntity(service)
 

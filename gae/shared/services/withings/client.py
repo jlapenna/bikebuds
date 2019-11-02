@@ -29,15 +29,18 @@ _SCOPE = (
 
 def create_client(service):
     if not Service.has_credentials(service):
-        raise Exception('Cannot create Withings client without creds: %s', service)
-    if 'expires_at' in service['credentials']:
-        del service['credentials']['expires_at']
+        raise Exception('Cannot create Withings client without creds: %s' % (service,))
     service_creds = service['credentials']
     creds = Credentials(**service_creds)
 
     def refresh_callback(new_credentials):
+        """Updates credentials.
+
+        Params:
+            new_credentials: withings_api.Credentials
+        """
         logging.debug('Withings creds refresh for: %s', service.key)
-        Service.update_credentials(service, new_credentials)
+        Service.update_credentials(service, new_credentials._asdict())
 
     return withings_api.WithingsApi(creds, refresh_cb=refresh_callback)
 
