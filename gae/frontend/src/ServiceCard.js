@@ -209,10 +209,12 @@ class ServiceCard extends Component {
 
   renderCardActions() {
     var connectText;
-    if (this.state.service && this.state.service.properties.credentials) {
+    if (this.state.service === undefined) {
+      connectText = '';
+    } else if (this.state.service.properties.credentials) {
       connectText = 'Disconnect';
     } else if (this.state.service) {
-      connectText = 'Disconnect';
+      connectText = 'Connect';
     }
     return (
       <CardActions>
