@@ -67,6 +67,7 @@ class MeasuresCard extends Component {
     this.state = {
       measures: undefined,
       ticks: [],
+      showFatLine: false,
     };
   }
 
@@ -77,6 +78,7 @@ class MeasuresCard extends Component {
       .subtract(this.props.intervalCount, this.props.intervalUnit);
     var measures = [];
     var ticks = [];
+    var showFatLine = false;
     var intervalMeasures = [];
     for (var i = 0; i < newMeasures.length; i++) {
       var measure = newMeasures[newMeasures.length - 1 - i];
@@ -113,6 +115,7 @@ class MeasuresCard extends Component {
           };
           if (fatCount > 0) {
             newMeasure['fat_ratio'] = fatSum / fatCount;
+            showFatLine = true;
           }
           measures.unshift(newMeasure);
         }
@@ -131,6 +134,7 @@ class MeasuresCard extends Component {
     this.setState({
       measures: measures,
       ticks: ticks,
+      showFatLine: showFatLine,
     });
   };
 
@@ -152,6 +156,13 @@ class MeasuresCard extends Component {
           data={this.state.measures}
           margin={{ top: 12, right: 12, left: 12, bottom: 12 }}
         >
+          <CartesianGrid stroke="#f5f5f5" />
+          <Tooltip
+            formatter={value => value.toFixed(1)}
+            labelFormatter={value =>
+              moment(Number(value)).format(this.props.tooltipFormat)
+            }
+          />
           <XAxis
             type="number"
             dataKey="date"
@@ -166,7 +177,7 @@ class MeasuresCard extends Component {
           />
           <YAxis
             dataKey="weightAvg"
-            yAxisId={0}
+            yAxisId="weight"
             name="Weight"
             tickFormatter={tick => tick.toFixed(1)}
             interval={0}
@@ -174,28 +185,11 @@ class MeasuresCard extends Component {
           >
             <Label color="#03dac6" value="Weight" angle={-90} position="left" />
           </YAxis>
-          <YAxis
-            dataKey="fat_ratio"
-            yAxisId={1}
-            orientation="right"
-            tickFormatter={tick => tick.toFixed(1)}
-            interval={0}
-            domain={['dataMin - 1', 'dataMax + 1']}
-          >
-            <Label value="Fat %" angle={-90} position="right" />
-          </YAxis>
-          <CartesianGrid stroke="#f5f5f5" />
-          <Tooltip
-            formatter={value => value.toFixed(1)}
-            labelFormatter={value =>
-              moment(Number(value)).format(this.props.tooltipFormat)
-            }
-          />
           <Line
             dataKey="weightAvg"
             name="Weight"
             type="natural"
-            yAxisId={0}
+            yAxisId="weight"
             connectNulls
             isAnimationActive={false}
             stroke="#03dac6"
@@ -208,15 +202,28 @@ class MeasuresCard extends Component {
               stroke="#03dac6"
             />
           </Line>
-          <Line
-            dataKey="fat_ratio"
-            name="Fat %"
-            type="natural"
-            yAxisId={1}
-            connectNulls
-            isAnimationActive={false}
-            stroke="#ff4081"
-          />
+          {this.state.showFatLine && (
+            <YAxis
+              dataKey="fat_ratio"
+              yAxisId="fat_ratio"
+              orientation="right"
+              tickFormatter={tick => tick.toFixed(1)}
+              interval={0}
+              domain={['dataMin - 1', 'dataMax + 1']}
+            >
+              <Label value="Fat %" angle={-90} position="right" />
+            </YAxis>
+          )}
+          {this.state.showFatLine && (
+            <Line
+              dataKey="fat_ratio"
+              name="Fat %"
+              type="natural"
+              yAxisId="fat_ratio"
+              isAnimationActive={false}
+              stroke="#ff4081"
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     );
