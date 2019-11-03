@@ -41,7 +41,15 @@ class MeasuresSummaryCard extends Component {
 
   static styles = {
     root: {
+      /* Relative lets the progressIndicator position itself. */
+      position: 'relative',
       minHeight: '320px',
+    },
+    progressIndicator: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
     },
     content: {
       minHeight: '320px',
@@ -196,8 +204,10 @@ class MeasuresSummaryCard extends Component {
   render() {
     return (
       <Card className={this.props.classes.root}>
+        {this.state.measures === undefined && (
+          <LinearProgress className={this.props.classes.progressIndicator} />
+        )}
         <CardContent className={this.props.classes.content}>
-          {this.state.measures === undefined && <LinearProgress />}
           {this.state.measures !== undefined &&
             this.state.measures.length > 0 &&
             this.renderChart()}

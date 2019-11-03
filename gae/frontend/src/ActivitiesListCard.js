@@ -35,12 +35,20 @@ import ActivityDetail from './ActivityDetail';
 class ActivitiesListCard extends Component {
   static styles = {
     root: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
+      /* Relative lets the progressIndicator position itself. */
+      position: 'relative',
+    },
+    progressIndicator: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
     },
     content: {
       height: '400px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
     },
     contentGridElement: {
       height: '100%',
@@ -186,9 +194,11 @@ class ActivitiesListCard extends Component {
   render() {
     return (
       <Card className={this.props.classes.root}>
+        {this.props.activities === undefined && (
+          <LinearProgress className={this.props.classes.progressIndicator} />
+        )}
         <CardContent className={this.props.classes.content}>
           <Typography variant="h5">Activities</Typography>
-          {this.props.activities === undefined && <LinearProgress />}
           {this.renderCardContent()}
         </CardContent>
       </Card>

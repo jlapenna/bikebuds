@@ -22,7 +22,6 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -39,6 +38,16 @@ import { createSession } from './session_util';
 class ServiceCard extends Component {
   static styles = {
     root: {
+      /* Relative lets the progressIndicator position itself. */
+      position: 'relative',
+    },
+    progressIndicator: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+    },
+    content: {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
@@ -142,9 +151,7 @@ class ServiceCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('ServiceCard.componentDidUpdate', prevProps);
     if (this.props.apiClient && this.state.service === undefined) {
-      console.log('ServiceCard.componentDidUpdate: apiClient and no state');
       this.props.apiClient.bikebuds
         .get_service({ name: this.props.serviceName })
         .then(this.handleService);
@@ -163,7 +170,6 @@ class ServiceCard extends Component {
         >
           <Grid item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.service === undefined && <LinearProgress />}
             {this.state.service &&
             this.state.service.properties.sync_date != null ? (
               <i>
@@ -203,12 +209,9 @@ class ServiceCard extends Component {
 
   renderCardActions() {
     var connectText;
-    if (
-      this.state.service === undefined ||
-      !this.state.service.properties.credentials
-    ) {
-      connectText = 'Connect';
-    } else {
+    if (this.state.service && this.state.service.properties.credentials) {
+      connectText = 'Disconnect';
+    } else if (this.state.service) {
       connectText = 'Disconnect';
     }
     return (
@@ -224,7 +227,6 @@ class ServiceCard extends Component {
           onClick={this.handleSync}
         >
           Sync
-          {this.state.actionPending && <CircularProgress size={20} />}
         </Button>
         <Button
           color="secondary"
@@ -234,7 +236,6 @@ class ServiceCard extends Component {
           onClick={this.handleConnect}
         >
           {connectText}
-          {this.state.actionPending && <CircularProgress size={20} />}
         </Button>
       </CardActions>
     );
@@ -243,6 +244,9 @@ class ServiceCard extends Component {
   render() {
     return (
       <Card className={this.props.classes.root}>
+        {(this.state.actionPending || this.state.service === undefined) && (
+          <LinearProgress className={this.props.classes.progressIndicator} />
+        )}
         {this.renderCardContent()}
         {this.renderCardActions()}
       </Card>
