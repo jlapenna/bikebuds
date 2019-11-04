@@ -1,23 +1,24 @@
-// copyright 2019 google inc. all rights reserved.
+// Copyright 2019 Google Inc. All Rights Reserved.
 //
-// licensed under the apache license, version 2.0 (the "license");
-// you may not use this file except in compliance with the license.
-// you may obtain a copy of the license at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/license-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-// unless required by applicable law or agreed to in writing, software
-// distributed under the license is distributed on an "as is" basis,
-// without warranties or conditions of any kind, either express or implied.
-// see the license for the specific language governing permissions and
-// limitations under the license.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:bikebuds/bikebuds_util.dart';
+import 'package:bikebuds/bikebuds_api_state.dart';
 import 'package:bikebuds_api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../config.dart';
@@ -69,7 +70,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
   }
 
   void loadAuthUrl() {
-    final config = ConfigContainer.of(context).config;
+    var config = Provider.of<Config>(context).config;
     Uri url = Uri.parse(config["devserver_url"] + "/embed/auth")
         .replace(queryParameters: {'token': this._auth.token});
     print('MobileEmbed.loadAuthUrl: ${url.path}, ' +
@@ -87,7 +88,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
         setState(() {
           this._authState = AuthState.FETCHING_TOKEN;
         });
-        var bikebuds = BikebudsApiContainer.of(context);
+        var bikebuds = Provider.of<BikebudsApiState>(context);
         bikebuds.auth.then((Auth auth) {
           print('MobileEmbed: bikebuds.auth complete');
           this.setState(() {

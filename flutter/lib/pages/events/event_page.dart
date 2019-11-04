@@ -20,6 +20,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 class EventPage extends StatefulWidget {
   final DocumentSnapshot event;
@@ -31,7 +32,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  FirebaseContainerState firebase;
+  FirebaseState firebase;
 
   DocumentSnapshot event;
 
@@ -68,7 +69,7 @@ class _EventPageState extends State<EventPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    this.firebase = FirebaseContainer.of(context);
+    this.firebase = Provider.of<FirebaseState>(context);
   }
 
   void titleFocusListener() {

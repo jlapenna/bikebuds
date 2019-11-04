@@ -13,22 +13,27 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import 'profile_card.dart';
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage();
+class Loading extends StatelessWidget {
+  const Loading();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ProfileCard(),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CircularProgressIndicator(),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

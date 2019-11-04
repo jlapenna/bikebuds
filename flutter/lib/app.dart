@@ -14,16 +14,16 @@
 
 import 'dart:async';
 
-import 'package:bikebuds/bikebuds_util.dart';
+import 'package:bikebuds/bikebuds_api_state.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/loading.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
-import 'package:bikebuds/user_model.dart';
+import 'package:bikebuds/user_state.dart';
+import 'package:bikebuds/widgets/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:provider/provider.dart';
 
 void main() => runApp(App());
 
@@ -33,15 +33,26 @@ const Color ACCENT_COLOR = Color(0xFFff4081);
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ConfigContainer(
-      child: FirebaseContainer(
-        child: SignInContainer(
-          child: BikebudsApiContainer(
-            child: SignedInApp(),
-          ),
-        ),
-      ),
-    );
+    return MultiProvider(providers: [
+      FutureProvider.value(
+          value: loadConfig(context),
+          initialData: Config(Map<String, dynamic>())),
+      ChangeNotifierProvider<FirebaseState>.value(
+          value: FirebaseState(context)),
+      ChangeNotifierProxyProvider<FirebaseState, FirebaseSignInState>(
+          initialBuilder: (_) => FirebaseSignInState(),
+          builder: (_, firebaseState, firebaseSignInState) =>
+              firebaseSignInState..firebaseState = firebaseState),
+      ChangeNotifierProxyProvider3<Config, FirebaseState, FirebaseSignInState,
+              BikebudsApiState>(
+          initialBuilder: (_) => BikebudsApiState(),
+          builder: (_, config, firebase, signInState, bikebudsApiState) =>
+              bikebudsApiState
+                ..config = config
+                ..firebaseState = firebase
+                ..signInState = signInState),
+      ChangeNotifierProvider.value(value: UserState()),
+    ], child: SignInScreen(signedInBuilder: (context) => SignedInApp()));
   }
 }
 
@@ -51,7 +62,7 @@ class SignedInApp extends StatefulWidget {
 }
 
 class _SignedInAppState extends State<SignedInApp> {
-  final UserModel user = UserModel();
+  final UserState user = UserState();
 
   StreamSubscription<FirebaseUser> _firebaseUserSubscription;
   StreamSubscription<String> _messagingListener;
@@ -61,21 +72,21 @@ class _SignedInAppState extends State<SignedInApp> {
     super.didChangeDependencies();
 
     // Listen for auth changes.
-    var bikebuds = BikebudsApiContainer.of(context);
-    var firebase = FirebaseContainer.of(context);
+    var firebase = Provider.of<FirebaseState>(context);
+    var bikebuds = Provider.of<BikebudsApiState>(context);
     if (bikebuds.isReady() && this._firebaseUserSubscription == null) {
-      this._firebaseUserSubscription =
-          firebase.auth.onAuthStateChanged.listen((FirebaseUser firebaseUser) {
-        user.updateFirebaseUser(firebaseUser);
-        user.updateProfile(bikebuds.profile);
-        user.updateAuth(bikebuds.auth);
+      this._firebaseUserSubscription = firebase.auth.onAuthStateChanged
+          .listen((FirebaseUser firebaseUser) async {
+        user
+          ..firebaseUser = firebaseUser
+          ..profile = await bikebuds.profile;
       });
     }
 
     // Register FCM.
     if (bikebuds.isReady() && _messagingListener == null) {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
-        BikebudsApiContainer.of(context).registerClient(token).then((response) {
+        bikebuds.registerClient(token).then((response) {
           print('App.Messaging: bikebuds.registerClient: complete');
         });
       });
@@ -112,21 +123,13 @@ class _SignedInAppState extends State<SignedInApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<UserModel>(
-      model: user,
-      child: ScopedModelDescendant<UserModel>(
-          builder: (context, child, model) => buildApp(context)),
-    );
-  }
-
-  Widget buildApp(BuildContext context) {
     // TODO: Check the profile here, look for signup_complete and block
     // full-app rendering if we aren't signed up.
     //User user = UserModel.of(context)?.bikebudsUser;
 
-    var bikebuds = BikebudsApiContainer.of(context);
+    var bikebuds = Provider.of<BikebudsApiState>(context);
     if (!bikebuds.isReady()) {
-      return loadingWidget(context);
+      return const Loading();
     }
     return MaterialApp(
       title: 'Bikebuds',

@@ -19,29 +19,27 @@ import 'package:url_launcher/url_launcher.dart';
 showPrivacyDialog(BuildContext context) {
   showDialog(
     context: context,
-    builder: _builder,
-  );
-}
-
-Widget _builder(BuildContext context) {
-  return AlertDialog(
-    content: Column(
-      children: <Widget>[
-        ListTile(
-          title: Text("Terms of Service"),
-          onTap: () {
-            launch("https://bikebuds.com/tos");
-            Navigator.pop(context);
-          },
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: Column(
+          children: <Widget>[
+            ListTile(
+              title: Text("Terms of Service"),
+              onTap: () {
+                launch("https://bikebuds.com/tos");
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text("Privacy Policy"),
+              onTap: () {
+                launch("https://bikebuds.com/privacy");
+                Navigator.pop(context);
+              },
+            ),
+          ],
         ),
-        ListTile(
-          title: Text("Privacy Policy"),
-          onTap: () {
-            launch("https://bikebuds.com/privacy");
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    ),
+      );
+    },
   );
 }

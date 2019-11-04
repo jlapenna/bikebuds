@@ -13,10 +13,8 @@
 // limitations under the License.
 
 import 'package:bikebuds/pages/pages.dart';
-import 'package:bikebuds/user_model.dart';
 import 'package:bikebuds/widgets/mobile_embed.dart';
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 class MainContent extends StatelessWidget {
   final List<Page> pages;
@@ -27,11 +25,8 @@ class MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Page page = pages[selectedDrawerItem];
-    print('MainContent: page: ${page.target}');
-    return ScopedModelDescendant<UserModel>(builder: (context, child, model) {
-      return page.target != null
-          ? MobileEmbed(page.target)
-          : page.widgetBuilder();
-    });
+    return page.target != null
+        ? MobileEmbed(page.target)
+        : page.widgetBuilder();
   }
 }

@@ -12,23 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import "package:bikebuds_api/api.dart";
+import "package:flutter/widgets.dart";
 
-import 'profile_card.dart';
+class ClientStateEntityState with ChangeNotifier {
+  ClientStateEntity _client;
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage();
+  get client => _client;
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ProfileCard(),
-        ],
-      ),
-    );
+  set client(ClientStateEntity entity) {
+    client = entity;
+    notifyListeners();
   }
 }

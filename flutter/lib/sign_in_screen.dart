@@ -13,79 +13,47 @@
 // limitations under the License.
 
 import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/loading.dart';
 import 'package:bikebuds/privacy_util.dart';
+import 'package:bikebuds/widgets/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
-class SignInContainer extends StatefulWidget {
-  final Widget child;
+class SignInScreen extends StatefulWidget {
+  final WidgetBuilder signedInBuilder;
 
-  SignInContainer({@required this.child});
+  SignInScreen({@required this.signedInBuilder});
 
-  static SignInContainerState of(BuildContext context) {
-    return (context.inheritFromWidgetOfExactType(_InheritedSignIn)
-            as _InheritedSignIn)
-        .data;
-  }
-
-  @override
-  SignInContainerState createState() => new SignInContainerState();
+  SignInScreenState createState() => new SignInScreenState();
 }
 
-class SignInContainerState extends State<SignInContainer> {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-
-  // null means we haven't gotten our dependencies, yet.
-  // A value means we've determined if the user is signed in at all.
-  // The value inside determines sign in state.
-  FirebaseSignInState signInState;
+class SignInScreenState extends State<SignInScreen> {
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Determines if we've actively initialized a sign-in flow.
-  bool signingIn = false;
-
-  @override
-  void didChangeDependencies() {
-    var firebase = FirebaseContainer.of(context);
-    if (firebase != null &&
-        firebase.auth != null &&
-        firebase.authNext != null) {
-      _setInitialState(context, firebase);
-    }
-    super.didChangeDependencies();
-  }
-
-  _setInitialState(BuildContext context, firebase) async {
-    var firebaseUserFuture = firebase.auth.currentUser();
-    var firebaseNextUserFuture = firebase.authNext.currentUser();
-    FirebaseSignInState signInState = FirebaseSignInState(
-        await firebaseUserFuture, await firebaseNextUserFuture);
-    setState(() {
-      this.signInState = signInState;
-    });
-  }
+  bool _signingIn = false;
 
   _doSignIn() async {
     setState(() {
-      this.signingIn = true;
+      this._signingIn = true;
     });
 
     // Otherwise, try to find the user's Google Identity.
-    var googleUser = googleSignIn.currentUser;
+    var googleUser = _googleSignIn.currentUser;
     if (googleUser == null) {
-      googleUser = await googleSignIn.signInSilently();
+      googleUser = await _googleSignIn.signInSilently();
     }
     if (googleUser == null) {
-      googleUser = await googleSignIn.signIn();
+      googleUser = await _googleSignIn.signIn();
     }
 
     if (googleUser == null) {
       // The user aborted Google sign in.
       setState(() {
-        this.signingIn = false;
-        this.signInState = null;
+        this._signingIn = false;
+        Provider.of<FirebaseSignInState>(context).update(null, null);
       });
       return;
     }
@@ -97,7 +65,7 @@ class SignInContainerState extends State<SignInContainer> {
       idToken: googleAuth.idToken,
     );
 
-    var firebase = FirebaseContainer.of(context);
+    var firebase = Provider.of<FirebaseState>(context);
 
     // Sign into the primary project.
     var authResult = await firebase.auth.signInWithCredential(credential);
@@ -110,18 +78,18 @@ class SignInContainerState extends State<SignInContainer> {
     await authResult.user.getIdToken(refresh: true);
     await authResultNext.user.getIdToken(refresh: true);
 
+    Provider.of<FirebaseSignInState>(context)
+        .update(authResult.user, authResultNext.user);
+
     setState(() {
-      this.signingIn = false;
-      this.signInState =
-          FirebaseSignInState(authResult.user, authResultNext.user);
+      this._signingIn = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (signInState == null) {
-      // We do not have our dependencies, so we have not looked up
-      // user state, yet.
+    var signInState = Provider.of<FirebaseSignInState>(context);
+    if (!signInState.isInitialized) {
       return new Container(width: 0.0, height: 0.0, color: Colors.white);
     }
     if (!signInState.signedIn) {
@@ -129,14 +97,12 @@ class SignInContainerState extends State<SignInContainer> {
       // We might be in the process of signing in, though...
       return MaterialApp(
         home: Scaffold(
-          body: signingIn ? loadingWidget(context) : _buildStartSignIn(context),
+          body: _signingIn ? const Loading() : _buildStartSignIn(context),
         ),
       );
+    } else {
+      return widget.signedInBuilder(context);
     }
-    return new _InheritedSignIn(
-      data: this,
-      child: widget.child,
-    );
   }
 
   Widget _buildStartSignIn(BuildContext context) {
@@ -162,22 +128,4 @@ class SignInContainerState extends State<SignInContainer> {
       ),
     );
   }
-}
-
-class _InheritedSignIn extends InheritedWidget {
-  // Data is your entire state. In our case just 'User'
-  final SignInContainerState data;
-
-  // You must pass through a child and your state.
-  const _InheritedSignIn({
-    Key key,
-    @required this.data,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-  // This is a built in method which you can use to check if
-  // any state has changed. If not, no reason to rebuild all the widgets
-  // that rely on your state.
-  @override
-  bool updateShouldNotify(_InheritedSignIn old) => true;
 }

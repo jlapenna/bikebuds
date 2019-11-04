@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'package:bikebuds_api/api.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 
-Widget loadingWidget(BuildContext context) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              CircularProgressIndicator(),
-            ],
-          ),
-        ],
-      ),
-    ],
-  );
+class UserState with ChangeNotifier {
+  FirebaseUser _firebaseUser;
+  Profile _profile;
+
+  FirebaseUser get firebaseUser => _firebaseUser;
+
+  set firebaseUser(FirebaseUser value) {
+    _firebaseUser = value;
+    notifyListeners();
+  }
+
+  Profile get profile => _profile;
+
+  set profile(Profile value) {
+    _profile = value;
+    notifyListeners();
+  }
 }

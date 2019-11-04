@@ -16,6 +16,7 @@ import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/pages/events/event_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../date_util.dart';
 
@@ -29,7 +30,7 @@ class EventsList extends StatefulWidget {
 class _EventsListState extends State<EventsList> {
   @override
   Widget build(BuildContext context) {
-    var firebase = FirebaseContainer.of(context);
+    var firebase = Provider.of<FirebaseState>(context);
     return StreamBuilder<QuerySnapshot>(
         stream: firebase.firestore.collection('events').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

@@ -17,6 +17,7 @@ import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_content.dart';
 import 'package:bikebuds/privacy_util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'pages/pages.dart';
 
@@ -30,8 +31,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var firebase = FirebaseContainer.of(context);
-    var frontendUrl = ConfigContainer.of(context).config["devserver_url"];
+    var firebase = Provider.of<FirebaseState>(context);
+    var frontendUrl = Provider.of<Config>(context).config["devserver_url"];
     var pages = createPages(frontendUrl);
     return Scaffold(
       appBar: AppBar(
@@ -42,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Drawer buildDrawer(List<Page> pages, FirebaseContainerState firebase) {
+  Drawer buildDrawer(List<Page> pages, FirebaseState firebase) {
     final List<Widget> children = [DrawerHeader(child: Container())];
     for (int i = 0; i < pages.length; i++) {
       children.add(ListTile(

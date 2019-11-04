@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds_api/api.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
+import '../../client_state_entity_state.dart';
+import '../../user_state.dart';
+
 class ProfileCard extends StatelessWidget {
-  final FirebaseUser firebaseUser;
-  final Profile profile;
-  final ClientStateEntity clientState;
-
-  ProfileCard(this.firebaseUser, this.profile, [this.clientState]);
-
   @override
   Widget build(BuildContext context) {
-    var photoUrl =
-        profile?.athlete?.properties?.profileMedium ?? firebaseUser?.photoUrl;
+    var clientState = Provider.of<ClientStateEntityState>(context);
+    var userState = Provider.of<UserState>(context);
+    var photoUrl = userState.profile?.athlete?.properties?.profileMedium ??
+        userState.firebaseUser?.photoUrl;
     var profilePhoto = photoUrl == null
         ? MemoryImage(
             kTransparentImage,
@@ -37,13 +35,14 @@ class ProfileCard extends StatelessWidget {
       backgroundImage: profilePhoto,
       radius: 64,
     );
-    var name = firebaseUser == null
+    var name = userState.firebaseUser == null
         ? ""
-        : firebaseUser?.displayName ?? firebaseUser?.email;
+        : userState.firebaseUser?.displayName ?? userState.firebaseUser?.email;
 
-    var city = profile?.athlete?.properties?.city ?? "";
+    var city = userState.profile?.athlete?.properties?.city ?? "";
 
-    var registered = clientState?.properties?.token == null ? "" : "Registered";
+    var registered =
+        clientState?.client?.properties?.token == null ? "" : "Registered";
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

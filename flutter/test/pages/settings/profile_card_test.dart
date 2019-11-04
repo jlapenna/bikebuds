@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:bikebuds/client_state_entity_state.dart';
 import 'package:bikebuds/pages/settings/profile_card.dart';
-import 'package:bikebuds_api/api.dart';
+import 'package:bikebuds/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 import '../../bikebuds_api_testutil.dart';
 import '../../firebase_testutil.dart';
@@ -24,12 +26,19 @@ void main() {
   testWidgets('profile card smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
 
-    FirebaseUserMock mockFirebaseUser = newFirebaseUserMock();
-    Profile fakeProfile = newProfileFake();
+    var userState = UserState();
+    userState.firebaseUser = newFirebaseUserMock();
+    userState.profile = newProfileFake();
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileCard(mockFirebaseUser, fakeProfile),
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: ClientStateEntityState()),
+            ChangeNotifierProvider.value(value: userState),
+          ],
+          child: ProfileCard(),
+        ),
       ),
     );
 
