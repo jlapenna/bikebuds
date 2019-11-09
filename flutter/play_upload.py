@@ -23,6 +23,11 @@ from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.client import AccessTokenRefreshError
 from apiclient.discovery import build
 
+# https://stackoverflow.com/questions/55589133/how-to-upload-app-bundle-aab-to-play-store-using-google-play-publisher-api
+import mimetypes
+
+mimetypes.add_type("application/octet-stream", ".aab")
+
 
 def upload(package, service, apk, track):
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
@@ -39,7 +44,7 @@ def upload(package, service, apk, track):
 
         apk_response = (
             service.edits()
-            .apks()
+            .bundles()
             .upload(editId=edit_id, packageName=package, media_body=apk)
             .execute()
         )

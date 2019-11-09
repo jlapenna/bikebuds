@@ -19,8 +19,9 @@
 source tools/scripts/base.sh
 
 ANDROID_BUILD_GRADLE="flutter/android/app/build.gradle"
-ANDROID_APK_LOCATION="flutter/build/app/outputs/apk/release/app-release.apk"
-ANDROID_RELEASE_OUTPUT_JSON="flutter/build/app/outputs/apk/release/output.json"
+ANDROID_AAB_LOCATION="flutter/build/app/outputs/bundle/release/app.aab"
+ANDROID_RELEASE_OUTPUT_JSON="flutter/build/app/intermediates/merged_manifests/release/output.json"
+API_SERVICE_JSON="environments/prod/service_keys/play-developer-api.json"
 
 function ctrl_c() {
   echo "Trapped and ignored ctrl+c"
@@ -55,8 +56,9 @@ function main() {
   echo ""
   echo "Building..."
   pushd flutter
-  flutter build apk \
+  flutter build appbundle \
       -t lib/app.dart \
+      --target-platform android-arm,android-arm64 \
       --build-number="${version_code}" \
       --build-name="${version_code}"
 
@@ -71,13 +73,13 @@ function main() {
     echo "Unable to build!"
   else
     echo ""
-    echo "Built ${version_code} at ${repo_path}/${ANDROID_APK_LOCATION}"
+    echo "Built ${version_code} at ${repo_path}/${ANDROID_AAB_LOCATION}"
     cat "${ANDROID_RELEASE_OUTPUT_JSON}" \
         | python -m json.tool | pygmentize -l json
     python flutter/play_upload.py \
         -p cc.bikebuds \
-        -a flutter/build/app/outputs/apk/release/app-release.apk \
-        -s environments/prod/service_keys/play-developer-api.json \
+        -a "${ANDROID_AAB_LOCATION}" \
+        -s "${API_SERVICE_JSON}" \
         -t internal
   fi
 
