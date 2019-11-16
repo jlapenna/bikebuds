@@ -58,28 +58,34 @@ function get_virtualenv_path() {
 
 function set_dev_environment() {
   echo "Activating dev environment."
-  pushd environments
-  rm env
-  ln -sf dev env
-  popd
+  local current_env="$(basename $(realpath environments/env))"
+  if [[ "$current_env" != "dev" ]]; then
+    pushd environments
+    rm env
+    ln -sf dev env
+    popd
 
-  echo "Wiping flutter build cache."
-  pushd flutter;
-  flutter clean;
-  popd;
+    echo "Wiping flutter build cache."
+    pushd flutter;
+    flutter clean;
+    popd;
+  fi;
 }
 
 function set_prod_environment() {
   echo "Activating prod environment."
-  pushd environments
-  rm env
-  ln -sf prod env
-  popd
+  local current_env="$(basename $(realpath environments/env))"
+  if [[ "$current_env" != "prod" ]]; then
+    pushd environments
+    rm env
+    ln -sf prod env
+    popd
 
-  echo "Wiping flutter build cache."
-  pushd flutter;
-  flutter clean;
-  popd;
+    echo "Wiping flutter build cache."
+    pushd flutter;
+    flutter clean;
+    popd;
+  fi;
 }
 
 function activate_virtualenv() {
