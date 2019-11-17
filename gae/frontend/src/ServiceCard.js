@@ -31,6 +31,7 @@ import Typography from '@material-ui/core/Typography';
 import Moment from 'react-moment';
 import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
+import makeCancelable from 'makecancelable';
 
 import { config } from './config';
 import { createSession } from './session_util';
@@ -72,18 +73,31 @@ class ServiceCard extends Component {
     };
   }
 
+  componentWillUnmount() {
+    if (this._cancelDisconnect) {
+      this._cancelDisconnect();
+    }
+    if (this._cancelSync) {
+      this._cancelSync();
+    }
+  }
+
   handleConnect = () => {
     this.setState({ actionPending: true });
     if (
       this.state.service.properties.credentials !== undefined &&
       this.state.service.properties.credentials
     ) {
-      this.props.apiClient.bikebuds
-        .disconnect({ name: this.props.serviceName })
-        .then(response => {
+      this._cancelDisconnect = makeCancelable(
+        this.props.apiClient.bikebuds.disconnect({
+          name: this.props.serviceName,
+        }),
+        response => {
           this.handleService(response);
           this.setState({ actionPending: false });
-        });
+        },
+        console.error
+      );
     } else {
       createSession(this.props.firebase, response => {
         if (response.status === 200) {
@@ -120,13 +134,16 @@ class ServiceCard extends Component {
 
   handleSync = () => {
     this.setState({ actionPending: true });
-    this.props.apiClient.bikebuds
-      .sync_service({ name: this.props.serviceName })
-      .then(response => {
+    this._cancelSync = makeCancelable(
+      this.props.apiClient.bikebuds.sync_service({
+        name: this.props.serviceName,
+      }),
+      response => {
         this.handleService(response);
         this.setState({ actionPending: false });
-      });
-    return;
+      },
+      console.error
+    );
   };
 
   handleSyncSwitchChange = event => {
