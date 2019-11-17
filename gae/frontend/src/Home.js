@@ -17,19 +17,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
+import Hidden from '@material-ui/core/Hidden';
 
 import MeasuresCard from './MeasuresCard';
 import MeasuresSummaryCard from './MeasuresSummaryCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
 class Home extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       flexGrow: 1,
     },
-  };
+  });
 
   static propTypes = {
     apiClient: PropTypes.object.isRequired,

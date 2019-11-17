@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -37,7 +37,7 @@ import { config } from './config';
 import { createSession } from './session_util';
 
 class ServiceCard extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
@@ -59,7 +59,7 @@ class ServiceCard extends Component {
     contentGrid: {
       flexGrow: 1,
     },
-  };
+  });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

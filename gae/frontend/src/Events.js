@@ -18,18 +18,18 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import ActivitiesListCard from './ActivitiesListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 import EventsListCard from './EventsListCard';
 
 class Events extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       flexGrow: 1,
     },
-  };
+  });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

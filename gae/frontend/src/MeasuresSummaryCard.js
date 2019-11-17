@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -34,12 +34,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from 'recharts';
 import { localMoment } from './convert';
 
 class MeasuresSummaryCard extends Component {
-  static propTypes = {
-    profile: PropTypes.object.isRequired,
-    measures: PropTypes.array,
-  };
-
-  static styles = {
+  static styles = createStyles({
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
@@ -66,6 +61,11 @@ class MeasuresSummaryCard extends Component {
       'z-index': 1,
       opacity: 0.5,
     },
+  });
+
+  static propTypes = {
+    profile: PropTypes.object.isRequired,
+    measures: PropTypes.array,
   };
 
   constructor(props) {

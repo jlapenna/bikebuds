@@ -19,22 +19,22 @@ import React, { Component } from 'react';
 
 import { Link } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 
 class ClubAvatar extends Component {
-  static propTypes = {
-    club: PropTypes.object.isRequired,
-  };
-
-  static styles = {
+  static styles = createStyles({
     avatar: {
       'max-height': 32,
       'max-width': 32,
       width: 'auto',
       height: 'auto',
     },
+  });
+
+  static propTypes = {
+    club: PropTypes.object.isRequired,
   };
 
   render() {

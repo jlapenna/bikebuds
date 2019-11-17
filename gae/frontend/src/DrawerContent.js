@@ -19,7 +19,7 @@ import PropTypes from 'prop-types';
 
 import { NavLink } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -27,17 +27,18 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 class DrawerContent extends React.Component {
-  static styles = theme => ({
-    list: {
-      height: '100%',
-    },
-    footer: {
-      bottom: 0,
-    },
-    active: {
-      backgroundColor: theme.palette.action.selected,
-    },
-  });
+  static styles = theme =>
+    createStyles({
+      list: {
+        height: '100%',
+      },
+      footer: {
+        bottom: 0,
+      },
+      active: {
+        backgroundColor: theme.palette.action.selected,
+      },
+    });
 
   static propTypes = {
     profile: PropTypes.object,

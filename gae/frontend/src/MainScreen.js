@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import Chrome, { EmbedChrome } from './Chrome';
 import FcmManager from './FcmManager';
@@ -26,13 +26,14 @@ import ProfileWrapper, { ProfileState } from './ProfileWrapper';
 import SwagWrapper from './SwagWrapper';
 
 class MainScreen extends Component {
-  static styles = theme => ({
-    root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
-    },
-  });
+  static styles = theme =>
+    createStyles({
+      root: {
+        display: 'flex',
+        height: '100%',
+        width: '100%',
+      },
+    });
 
   static propTypes = {
     embed: PropTypes.bool.isRequired,

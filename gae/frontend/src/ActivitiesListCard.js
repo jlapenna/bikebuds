@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
@@ -33,7 +33,7 @@ import moment from 'moment';
 import ActivityDetail from './ActivityDetail';
 
 class ActivitiesListCard extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
@@ -54,7 +54,7 @@ class ActivitiesListCard extends Component {
       height: '100%',
       overflow: 'auto',
     },
-  };
+  });
 
   static propTypes = {
     profile: PropTypes.object,

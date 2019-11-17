@@ -17,10 +17,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 class EventDetail extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '100%',
       width: '100%',
@@ -29,7 +29,7 @@ class EventDetail extends Component {
       'flex-direction': 'column',
       'align-items': 'center',
     },
-  };
+  });
 
   static propTypes = {
     event: PropTypes.object,

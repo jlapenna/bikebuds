@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 import {
@@ -33,7 +33,7 @@ import { readableDistance, readableDuration, readableSpeed } from './convert';
 const MAP_LIBRARIES = ['geometry'];
 
 class _ActivityMap extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '100%',
       width: '100%',
@@ -56,7 +56,7 @@ class _ActivityMap extends Component {
       height: '100%',
       width: '100%',
     },
-  };
+  });
 
   state = {
     mapMounted: false,
@@ -85,11 +85,13 @@ class _ActivityMap extends Component {
     ) {
       var decodedPolyline = [];
       if (this.props.activity.properties.map.summary_polyline) {
+        // @ts-ignore
         decodedPolyline = window.google.maps.geometry.encoding.decodePath(
           this.props.activity.properties.map.summary_polyline
         );
       }
 
+      // @ts-ignore
       var bounds = new window.google.maps.LatLngBounds();
       decodedPolyline.forEach(point => {
         bounds.extend(point);

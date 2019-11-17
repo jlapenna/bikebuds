@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -27,7 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 
 class DevicesFormControl extends Component {
-  static styles = {};
+  static styles = createStyles({});
 
   static propTypes = {
     apiClient: PropTypes.object.isRequired,

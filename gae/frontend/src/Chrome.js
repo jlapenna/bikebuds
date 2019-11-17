@@ -26,20 +26,21 @@ import { MobileEmbedJsController } from 'MobileEmbed';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import DrawerContent from './DrawerContent';
 
 const drawerWidth = 240;
 
 class _EmbedChrome extends Component {
-  static styles = theme => ({
-    root: {
-      height: '100%',
-      width: '100%',
-      padding: theme.spacing(2),
-    },
-  });
+  static styles = theme =>
+    createStyles({
+      root: {
+        height: '100%',
+        width: '100%',
+        padding: theme.spacing(2),
+      },
+    });
 
   static propTypes = {
     history: PropTypes.object.isRequired,

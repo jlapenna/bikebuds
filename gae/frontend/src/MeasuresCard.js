@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -40,19 +40,7 @@ import {
 import { localMoment } from './convert';
 
 class MeasuresCard extends Component {
-  static defaultProps = {
-    intervalUnit: 'M',
-    intervalCount: 12,
-    intervalFormat: "MMM 'YY",
-    tooltipFormat: 'LLL',
-  };
-
-  static propTypes = {
-    profile: PropTypes.object.isRequired,
-    measures: PropTypes.array,
-  };
-
-  static styles = {
+  static styles = createStyles({
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
@@ -68,6 +56,18 @@ class MeasuresCard extends Component {
       width: '100%',
       height: '300px',
     },
+  });
+
+  static defaultProps = {
+    intervalUnit: 'M',
+    intervalCount: 12,
+    intervalFormat: "MMM 'YY",
+    tooltipFormat: 'LLL',
+  };
+
+  static propTypes = {
+    profile: PropTypes.object.isRequired,
+    measures: PropTypes.array,
   };
 
   constructor(props) {

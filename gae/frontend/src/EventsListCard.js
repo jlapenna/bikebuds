@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
@@ -30,7 +30,7 @@ import Typography from '@material-ui/core/Typography';
 import EventDetail from './EventDetail';
 
 class EventsListCard extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '400px',
     },
@@ -41,7 +41,7 @@ class EventsListCard extends Component {
       height: '100%',
       overflow: 'auto',
     },
-  };
+  });
 
   static propTypes = {
     apiClient: PropTypes.object.isRequired,
