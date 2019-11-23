@@ -34,7 +34,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Label,
 } from 'recharts';
 
 import { localMoment } from './convert';
@@ -162,7 +161,7 @@ class MeasuresCard extends Component {
       <ResponsiveContainer>
         <LineChart
           data={this.state.measures}
-          margin={{ top: 12, right: 12, left: 12, bottom: 12 }}
+          margin={{ top: 12, right: 12, bottom: 12 }}
         >
           <CartesianGrid stroke="#f5f5f5" />
           <Tooltip
@@ -190,9 +189,7 @@ class MeasuresCard extends Component {
             tickFormatter={tick => tick.toFixed(1)}
             interval={0}
             domain={['dataMin - 1', 'dataMax + 1']}
-          >
-            <Label color="#03dac6" value="Weight" angle={-90} position="left" />
-          </YAxis>
+          />
           <Line
             dataKey="weightAvg"
             name="Weight"
@@ -218,9 +215,7 @@ class MeasuresCard extends Component {
               tickFormatter={tick => tick.toFixed(1)}
               interval={0}
               domain={['dataMin - 1', 'dataMax + 1']}
-            >
-              <Label value="Fat %" angle={-90} position="right" />
-            </YAxis>
+            />
           )}
           {this.state.showFatLine && (
             <Line

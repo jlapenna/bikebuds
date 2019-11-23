@@ -52,14 +52,26 @@ class Home extends Component {
                 />
               </Grid>
               <Grid item xs={12}>
-                <MeasuresCard
-                  profile={this.props.profile}
-                  measures={wrapperState.measures}
-                  intervalUnit="M"
-                  intervalFormat="MMM 'YY"
-                  intervalCount={120}
-                  tooltipFormat="MMM 'YY"
-                />
+                <Hidden mdUp>
+                  <MeasuresCard
+                    profile={this.props.profile}
+                    measures={wrapperState.measures}
+                    intervalUnit="W"
+                    intervalFormat="D MMM 'YY"
+                    intervalCount={52}
+                    tooltipFormat="D MMM 'YY"
+                  />
+                </Hidden>
+                <Hidden smDown>
+                  <MeasuresCard
+                    profile={this.props.profile}
+                    measures={wrapperState.measures}
+                    intervalUnit="W"
+                    intervalFormat="D MMM 'YY"
+                    intervalCount={208}
+                    tooltipFormat="MMM 'YY"
+                  />
+                </Hidden>
               </Grid>
             </React.Fragment>
           )}
