@@ -20,6 +20,8 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 
+import BikebudsFetcher from './bikebuds_api';
+import RoutesListCard from './RoutesListCard';
 import ActivitiesListCard from './ActivitiesListCard';
 import ActivitiesWrapper from './ActivitiesWrapper';
 import EventsListCard from './EventsListCard';
@@ -48,10 +50,32 @@ class Events extends Component {
   }
 
   render() {
-    return this.query !== null ? (
+    return (
       <Grid className={this.props.classes.root} container spacing={3}>
         <Grid item xs={12}>
-          <EventsListCard apiClient={this.props.apiClient} query={this.query} />
+          {this.query !== null && (
+            <EventsListCard
+              apiClient={this.props.apiClient}
+              query={this.query}
+            />
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          <BikebudsFetcher
+            fetcher={
+              !!this.props.apiClient
+                ? this.props.apiClient.bikebuds.get_routes
+                : undefined
+            }
+            params={{}}
+            render={wrapperState => (
+              <RoutesListCard
+                profile={this.props.profile}
+                response={wrapperState.response}
+                showDate={true}
+              />
+            )}
+          />
         </Grid>
         <Grid item xs={12}>
           <ActivitiesWrapper
@@ -66,7 +90,7 @@ class Events extends Component {
           />
         </Grid>
       </Grid>
-    ) : null;
+    );
   }
 }
 export default withStyles(Events.styles)(Events);
