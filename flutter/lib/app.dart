@@ -40,13 +40,13 @@ class App extends StatelessWidget {
       ChangeNotifierProvider<FirebaseState>.value(
           value: FirebaseState(context)),
       ChangeNotifierProxyProvider<FirebaseState, FirebaseSignInState>(
-          initialBuilder: (_) => FirebaseSignInState(),
-          builder: (_, firebaseState, firebaseSignInState) =>
+          create: (_) => FirebaseSignInState(),
+          update: (_, firebaseState, firebaseSignInState) =>
               firebaseSignInState..firebaseState = firebaseState),
       ChangeNotifierProxyProvider3<Config, FirebaseState, FirebaseSignInState,
               BikebudsApiState>(
-          initialBuilder: (_) => BikebudsApiState(),
-          builder: (_, config, firebase, signInState, bikebudsApiState) =>
+          create: (_) => BikebudsApiState(),
+          update: (_, config, firebase, signInState, bikebudsApiState) =>
               bikebudsApiState
                 ..config = config
                 ..firebaseState = firebase

@@ -92,7 +92,6 @@ class FirebaseState with ChangeNotifier {
     var appNext = await _loadAppNext(options);
     var authNext = FirebaseAuth.fromApp(appNext);
     var firestore = Firestore(app: appNext);
-    await firestore.settings(timestampsInSnapshotsEnabled: true);
     this.appNext = appNext;
     this.authNext = authNext;
     this.firestore = firestore;
