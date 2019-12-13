@@ -57,6 +57,7 @@ class ActivitiesListCard extends Component {
   });
 
   static propTypes = {
+    activities: PropTypes.arrayOf(PropTypes.object),
     profile: PropTypes.object,
     showAthlete: PropTypes.bool,
     showDate: PropTypes.bool,

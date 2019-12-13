@@ -56,10 +56,8 @@ class Events extends Component {
         <Grid item xs={12}>
           <ActivitiesWrapper
             apiClient={this.props.apiClient}
-            onResponse={this.handleActivitiesResponse}
             render={wrapperState => (
               <ActivitiesListCard
-                apiClient={this.props.apiClient}
                 profile={this.props.profile}
                 activities={wrapperState.activities}
                 showDate={true}
