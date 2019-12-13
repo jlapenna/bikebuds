@@ -72,7 +72,7 @@ export class FirebaseState {
   };
 
   enableMessaging = () => {
-    if (this.messaging !== null) {
+    if (this.messaging) {
       return true;
     }
     try {

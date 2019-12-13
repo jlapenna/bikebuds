@@ -42,7 +42,7 @@ class Events extends Component {
     if (props.firebase.firestore !== null) {
       this.query = props.firebase.firestore.collection('events');
     } else {
-      console.warn('Events: firestore not supported:', props.firebase);
+      console.warn('Events: firestore not enabled');
       this.query = null;
     }
     this.state = {};
