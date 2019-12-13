@@ -11,6 +11,11 @@ indexes:
   properties:
   - name: "modified"
     direction: desc
+- kind: "Route"
+  ancestor: yes
+  properties:
+  - name: "id"
+    direction: desc
 - kind: "Activity"
   ancestor: yes
   properties:

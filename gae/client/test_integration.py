@@ -55,11 +55,21 @@ class MainTest(unittest.TestCase):
         profile = self.api.get_profile()
         self.assertEqual(35056021, profile.athlete.properties.id)
 
+    def test_routes(self):
+        self._ensure_service('strava')
+
+        routes = self.api.get_routes()
+        ids = [route.properties.id for route in routes]
+        self.assertIn(22930717, ids)
+
     def test_sync(self):
-        service = self.api.get_service(name='withings')
+        self._ensure_service('withings')
+
+    def _ensure_service(self, name):
+        service = self.api.get_service(name=name)
         self.assertFalse(service.properties.sync_state.syncing)
 
-        service = self.api.sync_service(name='withings')
+        service = self.api.sync_service(name=name)
         self.assertTrue(
             service.properties.sync_state.syncing,
             'Service should be syncing, was: %s' % (service.properties.sync_state,),
@@ -69,7 +79,7 @@ class MainTest(unittest.TestCase):
         while service.properties.sync_state.syncing and remaining_sleep > 0:
             remaining_sleep -= 1
             time.sleep(1)
-            service = self.api.get_service(name='withings')
+            service = self.api.get_service(name=name)
         self.assertFalse(
             service.properties.sync_state.syncing,
             'Service should have finished, was: %s' % (service.properties.sync_state,),

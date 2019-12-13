@@ -382,6 +382,25 @@ client_state_model = api.model(
 )
 client_state_entity_model = EntityModel(client_state_model)
 
+route_model = api.model(
+    'Route',
+    {
+        'id': fields.Integer,
+        'athlete': fields.Nested(athlete_model, skip_none=True),
+        'description': fields.String,
+        'distance': fields.Float,
+        'elevation_gain': fields.Float,
+        'map': fields.Nested(map_model, skip_none=True),
+        'name': fields.String,
+        'private': fields.Boolean,
+        'starred': fields.Boolean,
+        'sub_type': fields.String,
+        'timestamp': fields.DateTime,
+        'type': fields.String,
+    },
+)
+route_entity_model = EntityModel(route_model)
+
 
 auth_model = api.model('Auth', {'token': fields.String})
 auth_entity_model = EntityModel(auth_model)
@@ -551,6 +570,21 @@ filter_parser = reqparse.RequestParser()
 filter_parser.add_argument(
     'filter', type=str, help='A filter for measures in a series.'
 )
+
+
+@api.route('/routes')
+class RoutesResource(Resource):
+    @api.doc('get_routes')
+    @api.marshal_with(route_entity_model, skip_none=True, as_list=True)
+    def get(self):
+        claims = auth_util.verify_claims(flask.request)
+        user = User.get(claims)
+        service = Service.get('strava', parent=user.key)
+        routes_query = ds_util.client.query(
+            kind='Route', ancestor=service.key, order=['-id']
+        )
+        routes = [WrapEntity(a) for a in routes_query.fetch()]
+        return routes
 
 
 @api.route('/series')

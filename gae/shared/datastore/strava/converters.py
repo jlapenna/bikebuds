@@ -387,8 +387,40 @@ class _PolylineMapConverter(object):
         return entity
 
 
+class _RouteConverter(object):
+    __ALL_FIELDS = SortedSet(['id'])
+    __INCLUDE_IN_INDEXES = SortedSet(['id'])
+    __STORED_FIELDS = SortedSet([])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod
+    def to_entity(cls, route, parent=None):
+        properties_dict = route.to_dict()
+        properties_dict['id'] = route.id
+
+        if route.athlete is not None:
+            properties_dict['athlete'] = _AthleteConverter.to_entity(
+                route.athlete, parent=parent
+            )
+        if route.map is not None:
+            properties_dict['map'] = _PolylineMapConverter.to_entity(route.map)
+
+        entity = Entity(
+            ds_util.client.key(
+                'Route',
+                route.id,
+                parent=parent,
+                exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+            )
+        )
+        entity.update(properties_dict)
+        return entity
+
+
 class StravaConverters(object):
     Activity = _ActivityConverter
     Athlete = _AthleteConverter
     Club = _ClubConverter
     PolylineMap = _PolylineMapConverter
+    Route = _RouteConverter

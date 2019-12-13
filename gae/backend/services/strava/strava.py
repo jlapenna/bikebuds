@@ -15,6 +15,7 @@
 from shared import ds_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
+from shared.datastore.route import Route
 
 from services.strava.client import ClientWrapper
 
@@ -27,6 +28,7 @@ class Worker(object):
     def sync(self):
         self.sync_athlete()
         self.sync_activities()
+        self.sync_routes()
 
     def sync_athlete(self):
         self.client.ensure_access()
@@ -46,6 +48,12 @@ class Worker(object):
             activity_entity = Activity.to_entity(activity, parent=self.service.key)
             activity_entity['clubs'] = athlete_clubs
             ds_util.client.put(activity_entity)
+
+    def sync_routes(self):
+        self.client.ensure_access()
+
+        for route in self.client.get_routes():
+            ds_util.client.put(Route.to_entity(route, parent=self.service.key))
 
     def _sync_activity(self, activity_id):
         """Gets additional info: description, calories and embed_token."""
