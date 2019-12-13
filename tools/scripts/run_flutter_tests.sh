@@ -19,7 +19,7 @@ load_config;
 
 function main() {
   pushd flutter
-  flutter test
+  flutter test --no-pub
 }
 
 main "$@"
