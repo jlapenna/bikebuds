@@ -53,7 +53,7 @@ class MainTest(unittest.TestCase):
         ClientWrapperMock,
     ):
         service = Entity(ds_util.client.key('Service', 'strava'))
-        service['credentials'] = {'access_token': 'XXX'}
+        service['credentials'] = {'access_token': 'XYZ_TOKEN'}
 
         query_mock.side_effect = [MockQuery(_test_events()), MockQuery([])]
 
