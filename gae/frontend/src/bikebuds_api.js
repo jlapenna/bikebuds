@@ -14,24 +14,60 @@
  * limitations under the License.
  */
 
-export function createPayload(request) {
-  /*
-  var impersonate = new URLSearchParams(window.location.search).get(
-    'impersonate'
-  );
-  if (impersonate !== null) {
-    if (request === undefined) {
-      request = {};
-    }
-    var header = request['header'];
-    if (header === undefined) {
-      header = {};
-      request['header'] = header;
-    }
-    header['impersonate'] = impersonate;
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+
+import makeCancelable from 'makecancelable';
+
+class BikebudsFetcher extends Component {
+  static propTypes = {
+    fetcher: PropTypes.func.isRequired,
+    params: PropTypes.object.isRequired,
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      fetched: false,
+      response: undefined,
+    };
   }
-  request = { payload: request };
-  console.log('createPayload: ', request);
-  */
-  return { payload: request };
+
+  handleUpdateRequestState = response => {
+    this.setState({
+      response: response,
+    });
+  };
+
+  componentDidMount() {
+    // Triggers componentDidUpdate on mount.
+    this.setState({});
+  }
+
+  componentWillUnmount() {
+    if (this._cancelFetcher) {
+      this._cancelFetcher();
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.fetcher !== this.props.fetcher) {
+      this.setState({ fetched: false });
+    }
+    if (this.props.fetcher && !this.state.fetched) {
+      this.setState({ fetched: true });
+      this._cancelFetcher = makeCancelable(
+        this.props.fetcher(this.props.params),
+        this.handleUpdateRequestState,
+        console.error
+      );
+    }
+  }
+
+  render() {
+    return (
+      <div className="BikebudsFetcher">{this.props.render(this.state)}</div>
+    );
+  }
 }
+export default BikebudsFetcher;
