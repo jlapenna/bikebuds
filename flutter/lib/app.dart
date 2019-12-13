@@ -134,6 +134,13 @@ class _SignedInAppState extends State<SignedInApp> {
     return MaterialApp(
       title: 'Bikebuds',
       theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: PRIMARY_COLOR,
+        accentColor: ACCENT_COLOR,
+        buttonColor: PRIMARY_COLOR,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
         primaryColor: PRIMARY_COLOR,
         accentColor: ACCENT_COLOR,
         buttonColor: PRIMARY_COLOR,

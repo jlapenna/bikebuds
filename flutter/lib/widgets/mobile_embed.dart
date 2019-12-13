@@ -70,11 +70,14 @@ class _MobileEmbedState extends State<MobileEmbed> {
   }
 
   void loadAuthUrl() {
+    var colorType =
+        Theme.of(context).brightness == Brightness.dark ? 'dark' : 'light';
     var config = Provider.of<Config>(context).config;
-    Uri url = Uri.parse(config["devserver_url"] + "/embed/auth")
-        .replace(queryParameters: {'token': this._auth.token});
+    Uri url = Uri.parse(config["devserver_url"] + "/embed/auth").replace(
+        queryParameters: {'token': this._auth.token, 'colorType': colorType});
     print('MobileEmbed.loadAuthUrl: ${url.path}, ' +
-        'hasToken: ${url.queryParameters['token'] != null}');
+        'hasToken: ${url.queryParameters['token'] != null}, ' +
+        'colorType: $colorType');
     this._controller.loadUrl(url.toString());
     setState(() {
       this._authState = AuthState.LOADED_AUTH_URL;

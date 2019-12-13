@@ -30,7 +30,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import 'typeface-roboto';
 
-import theme from './theme';
+import { createTheme } from './theme';
 
 import { FirebaseState } from './firebase_util';
 
@@ -179,10 +179,19 @@ class App extends Component {
     this.state = {
       firebase:
         props.firebase !== undefined ? props.firebase : new FirebaseState(),
+      colorType: 'dark',
     };
   }
 
+  componentDidMount() {
+    var colorType = new URLSearchParams(window.location.search).get(
+      'colorType'
+    );
+    this.setState({ colorType: colorType ? colorType : 'dark' });
+  }
+
   render() {
+    var theme = createTheme(this.state.colorType);
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
