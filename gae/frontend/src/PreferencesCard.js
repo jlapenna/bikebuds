@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -31,11 +31,12 @@ import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
 import cloneDeepWith from 'lodash/cloneDeepWith';
+import makeCancelable from 'makecancelable';
 
 import DevicesFormControl from './DevicesFormControl';
 
 class PreferencesCard extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       display: 'flex',
       flexDirection: 'column',
@@ -44,9 +45,10 @@ class PreferencesCard extends Component {
     contentGrid: {
       flexGrow: 1,
     },
-  };
+  });
 
   static propTypes = {
+    apiClient: PropTypes.object.isRequired,
     profile: PropTypes.object.isRequired,
   };
 
@@ -56,6 +58,12 @@ class PreferencesCard extends Component {
       updatingRemote: false,
     };
   }
+
+  componentWillUnmount = () => {
+    if (this._cancelUpdatePreferences) {
+      this._cancelUpdatePreferences();
+    }
+  };
 
   handlePreferences = response => {
     this.props.profile.updatePreferences(response.body);
@@ -95,9 +103,13 @@ class PreferencesCard extends Component {
     this.props.profile.updatePreferences({ preferences: newPreferences });
 
     // Remote
-    this.props.apiClient.bikebuds
-      .update_preferences({ payload: newPreferences })
-      .then(this.handlePreferences);
+    this._cancelUpdatePreferences = makeCancelable(
+      this.props.apiClient.bikebuds.update_preferences({
+        payload: newPreferences,
+      }),
+      this.handlePreferences,
+      console.error
+    );
   };
 
   render() {

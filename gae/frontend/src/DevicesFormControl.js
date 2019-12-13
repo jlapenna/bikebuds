@@ -24,6 +24,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
+import makeCancelable from 'makecancelable';
 import moment from 'moment';
 
 class DevicesFormControl extends Component {
@@ -36,9 +37,34 @@ class DevicesFormControl extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      fetched: false,
       service: undefined,
       actionPending: false,
     };
+  }
+
+  componentDidMount() {
+    this.setState({});
+  }
+
+  componentWillUnmount() {
+    if (this._cancelGetClients) {
+      this._cancelGetClients();
+    }
+    if (this._cancelUpdateClient) {
+      this._cancelUpdateClient();
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.apiClient && !this.state.fetched) {
+      this.setState({ fetched: true });
+      this._cancelGetClients = makeCancelable(
+        this.props.apiClient.bikebuds.get_clients(),
+        this.handleClients,
+        console.error
+      );
+    }
   }
 
   handleClients = response => {
@@ -54,20 +80,14 @@ class DevicesFormControl extends Component {
     client.properties.active = event.target.checked;
     this.setState({ clients: this.state.clients });
 
-    this.props.apiClient.bikebuds.update_client({
-      payload: client.properties,
-    });
+    this._cancelUpdateClient = makeCancelable(
+      this.props.apiClient.bikebuds.update_client({
+        payload: client.properties,
+      }),
+      () => {},
+      console.error
+    );
   };
-
-  componentDidMount() {
-    this.setState({});
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.apiClient && this.state.clients === undefined) {
-      this.props.apiClient.bikebuds.get_clients().then(this.handleClients);
-    }
-  }
 
   render() {
     return (
