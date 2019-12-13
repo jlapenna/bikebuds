@@ -35,7 +35,7 @@ def upload(package, service, apk, track):
     )
 
     http_auth = credentials.authorize(http=httplib2.Http())
-    service = build('androidpublisher', 'v2', http=http_auth)
+    service = build('androidpublisher', 'v3', http=http_auth)
 
     try:
         edit_request = service.edits().insert(body={}, packageName=package)
@@ -58,14 +58,22 @@ def upload(package, service, apk, track):
                 editId=edit_id,
                 track=track,
                 packageName=package,
-                body={u'versionCodes': [apk_response['versionCode']]},
+                body={
+                    u'releases': [
+                        {
+                            u'name': str(apk_response['versionCode']),
+                            u'versionCodes': [str(apk_response['versionCode'])],
+                            u'status': u'completed',
+                        }
+                    ]
+                },
             )
             .execute()
         )
 
         print(
             'Track %s is set for version code(s) %s'
-            % (track_response['track'], str(track_response['versionCodes']))
+            % (track_response['track'], str(track_response['releases']))
         )
 
         commit_request = (
