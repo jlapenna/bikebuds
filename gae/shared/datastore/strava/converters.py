@@ -14,6 +14,7 @@
 
 """Converts stravalib objects into Entities."""
 
+import datetime
 import hashlib
 import pytz
 
@@ -398,6 +399,9 @@ class _RouteConverter(object):
     def to_entity(cls, route, parent=None):
         properties_dict = route.to_dict()
         properties_dict['id'] = route.id
+        properties_dict['timestamp'] = datetime.datetime.fromtimestamp(
+            route.timestamp
+        ).replace(tzinfo=None)
 
         if route.athlete is not None:
             properties_dict['athlete'] = _AthleteConverter.to_entity(
