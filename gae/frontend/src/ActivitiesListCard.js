@@ -57,7 +57,7 @@ class ActivitiesListCard extends Component {
   });
 
   static propTypes = {
-    activities: PropTypes.arrayOf(PropTypes.object),
+    response: PropTypes.object,
     profile: PropTypes.object,
     showAthlete: PropTypes.bool,
     showDate: PropTypes.bool,
@@ -66,11 +66,11 @@ class ActivitiesListCard extends Component {
   constructor(props) {
     super(props);
     if (
-      this.props.activities !== undefined &&
-      this.props.activities.length > 0
+      this.props.response !== undefined &&
+      this.props.response.body.length > 0
     ) {
       this.state = {
-        selectedActivity: this.props.activities[0],
+        selectedActivity: this.props.response.body[0],
         selectedIndex: 0,
       };
     } else {
@@ -101,19 +101,19 @@ class ActivitiesListCard extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (
-      this.props.activities !== prevProps.activities &&
-      this.props.activities !== undefined &&
-      this.props.activities.length > 0
+      this.props.response !== undefined &&
+      this.props.response !== prevProps.response &&
+      this.props.response.body.length > 0
     ) {
       this.setState({
-        selectedActivity: this.props.activities[0],
+        selectedActivity: this.props.response.body[0],
         selectedIndex: 0,
       });
     }
   }
 
   renderCardContent() {
-    if (this.props.activities === undefined) {
+    if (this.props.response === undefined) {
       return;
     }
     return (
@@ -130,7 +130,7 @@ class ActivitiesListCard extends Component {
           lg={4}
         >
           <List>
-            {this.props.activities.map((activity, index) => {
+            {this.props.response.body.map((activity, index) => {
               var fullName = undefined;
               if (
                 this.props.showAthlete &&
@@ -195,7 +195,7 @@ class ActivitiesListCard extends Component {
   render() {
     return (
       <Card className={this.props.classes.root}>
-        {this.props.activities === undefined && (
+        {this.props.response === undefined && (
           <LinearProgress className={this.props.classes.progressIndicator} />
         )}
         <CardContent className={this.props.classes.content}>

@@ -23,7 +23,6 @@ import { createStyles, withStyles } from '@material-ui/core/styles';
 import BikebudsFetcher from './bikebuds_api';
 import RoutesListCard from './RoutesListCard';
 import ActivitiesListCard from './ActivitiesListCard';
-import ActivitiesWrapper from './ActivitiesWrapper';
 import EventsListCard from './EventsListCard';
 
 class Events extends Component {
@@ -78,12 +77,17 @@ class Events extends Component {
           />
         </Grid>
         <Grid item xs={12}>
-          <ActivitiesWrapper
-            apiClient={this.props.apiClient}
+          <BikebudsFetcher
+            fetcher={
+              !!this.props.apiClient
+                ? this.props.apiClient.bikebuds.get_activities
+                : undefined
+            }
+            params={{}}
             render={wrapperState => (
               <ActivitiesListCard
                 profile={this.props.profile}
-                activities={wrapperState.activities}
+                response={wrapperState.response}
                 showDate={true}
               />
             )}
