@@ -43,6 +43,10 @@ class App extends StatelessWidget {
           create: (_) => FirebaseSignInState(),
           update: (_, firebaseState, firebaseSignInState) =>
               firebaseSignInState..firebaseState = firebaseState),
+      ChangeNotifierProxyProvider<FirebaseSignInState, UserState>(
+          create: (_) => UserState(),
+          update: (_, firebaseState, userState) =>
+              userState..firebaseUser = firebaseState.user),
       ChangeNotifierProxyProvider3<Config, FirebaseState, FirebaseSignInState,
               BikebudsApiState>(
           create: (_) => BikebudsApiState(),
@@ -51,7 +55,6 @@ class App extends StatelessWidget {
                 ..config = config
                 ..firebaseState = firebase
                 ..signInState = signInState),
-      ChangeNotifierProvider.value(value: UserState()),
     ], child: SignInScreen(signedInBuilder: (context) => SignedInApp()));
   }
 }
@@ -62,8 +65,6 @@ class SignedInApp extends StatefulWidget {
 }
 
 class _SignedInAppState extends State<SignedInApp> {
-  final UserState user = UserState();
-
   StreamSubscription<FirebaseUser> _firebaseUserSubscription;
   StreamSubscription<String> _messagingListener;
 
@@ -77,7 +78,7 @@ class _SignedInAppState extends State<SignedInApp> {
     if (bikebuds.isReady() && this._firebaseUserSubscription == null) {
       this._firebaseUserSubscription = firebase.auth.onAuthStateChanged
           .listen((FirebaseUser firebaseUser) async {
-        user
+        Provider.of<UserState>(context)
           ..firebaseUser = firebaseUser
           ..profile = await bikebuds.profile;
       });

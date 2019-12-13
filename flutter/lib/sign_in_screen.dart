@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/privacy_util.dart';
 import 'package:bikebuds/widgets/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignInScreen extends StatefulWidget {
   final WidgetBuilder signedInBuilder;
@@ -121,7 +121,22 @@ class SignInScreenState extends State<SignInScreen> {
           FlatButton(
             child: Text("Privacy - ToS"),
             onPressed: () {
-              showPrivacyDialog(context);
+              showAboutDialog(context: context, children: <Widget>[
+                ListTile(
+                  title: Text("Terms of Service"),
+                  onTap: () {
+                    launch("https://bikebuds.com/tos");
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text("Privacy Policy"),
+                  onTap: () {
+                    launch("https://bikebuds.com/privacy");
+                    Navigator.pop(context);
+                  },
+                ),
+              ]);
             },
           ),
         ],

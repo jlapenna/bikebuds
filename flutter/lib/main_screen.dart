@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import 'package:bikebuds/config.dart';
-import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_content.dart';
-import 'package:bikebuds/privacy_util.dart';
+import 'package:bikebuds/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'pages/pages.dart';
 
@@ -31,20 +32,39 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var firebase = Provider.of<FirebaseState>(context);
+    var userState = Provider.of<UserState>(context);
     var frontendUrl = Provider.of<Config>(context).config["devserver_url"];
     var pages = createPages(frontendUrl);
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),
       ),
-      drawer: buildDrawer(pages, firebase),
+      drawer: buildDrawer(pages, userState),
       body: MainContent(pages, _selectedDrawerItem),
     );
   }
 
-  Drawer buildDrawer(List<Page> pages, FirebaseState firebase) {
-    final List<Widget> children = [DrawerHeader(child: Container())];
+  Drawer buildDrawer(List<Page> pages, UserState userState) {
+    var name = userState.firebaseUser == null
+        ? ""
+        : userState.firebaseUser?.displayName ?? userState.firebaseUser?.email;
+    var email =
+        userState.firebaseUser == null ? "" : userState.firebaseUser?.email;
+    var photoUrl = userState.profile?.athlete?.properties?.profileMedium ??
+        userState.firebaseUser?.photoUrl;
+    var profilePhoto = photoUrl == null
+        ? MemoryImage(
+            kTransparentImage,
+          )
+        : NetworkImage(photoUrl);
+    final List<Widget> children = [
+      UserAccountsDrawerHeader(
+          accountEmail: Text(email),
+          accountName: Text(name),
+          currentAccountPicture: CircleAvatar(
+            backgroundImage: profilePhoto,
+          ))
+    ];
     for (int i = 0; i < pages.length; i++) {
       children.add(ListTile(
         title: Text(pages[i].title),
@@ -73,15 +93,27 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   children: <Widget>[
                     Divider(),
-                    ListTile(
-                      title: Center(
+                    AboutListTile(
+                      child: Center(
                         child: Text('ToS - Privacy'),
                       ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        showPrivacyDialog(context);
-                      },
-                    ),
+                      aboutBoxChildren: <Widget>[
+                        ListTile(
+                          title: Text("Terms of Service"),
+                          onTap: () {
+                            launch("https://bikebuds.com/tos");
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ListTile(
+                          title: Text("Privacy Policy"),
+                          onTap: () {
+                            launch("https://bikebuds.com/privacy");
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
