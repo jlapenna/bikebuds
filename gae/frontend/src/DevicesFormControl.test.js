@@ -20,7 +20,13 @@ import ReactDOM from 'react-dom';
 import DevicesFormControl from './DevicesFormControl';
 
 it('renders without crashing', () => {
+  const apiClient = {
+    bikebuds: {
+      get_clients: () => Promise.resolve({ body: [] }),
+    },
+  };
+
   const div = document.createElement('div');
-  ReactDOM.render(<DevicesFormControl />, div);
+  ReactDOM.render(<DevicesFormControl apiClient={apiClient} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

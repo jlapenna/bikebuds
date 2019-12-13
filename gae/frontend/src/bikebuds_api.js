@@ -33,12 +33,6 @@ class BikebudsFetcher extends Component {
     };
   }
 
-  handleUpdateRequestState = response => {
-    this.setState({
-      response: response,
-    });
-  };
-
   componentDidMount() {
     // Triggers componentDidUpdate on mount.
     this.setState({});
@@ -63,6 +57,12 @@ class BikebudsFetcher extends Component {
       );
     }
   }
+
+  handleUpdateRequestState = response => {
+    this.setState({
+      response: response,
+    });
+  };
 
   render() {
     return (

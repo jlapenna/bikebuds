@@ -22,6 +22,7 @@ import SignInScreen from './SignInScreen';
 
 it('renders without crashing', () => {
   var firebase = new FirebaseState(true /* forTest */);
+
   const div = document.createElement('div');
   ReactDOM.render(<SignInScreen firebase={firebase} />, div);
   ReactDOM.unmountComponentAtNode(div);

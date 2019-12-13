@@ -25,9 +25,16 @@ import SignupStepper from './SignupStepper';
 firebase.initializeApp(config);
 
 it('renders without crashing', () => {
+  const firebase = createFirebaseState();
+
   const div = document.createElement('div');
   ReactDOM.render(
-    <SignupStepper firebaseUser={{}} apiClient={null} onFinished={() => {}} />,
+    <SignupStepper
+      firebase={firebase}
+      firebaseUser={{}}
+      apiClient={null}
+      onFinished={() => {}}
+    />,
     div
   );
   ReactDOM.unmountComponentAtNode(div);

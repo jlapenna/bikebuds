@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -97,7 +97,7 @@ class ClubFetcher extends Component {
 }
 
 class _ClubWidget extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       width: '100%',
     },
@@ -108,7 +108,7 @@ class _ClubWidget extends Component {
       height: '176px',
       width: '360px',
     },
-  };
+  });
 
   static propTypes = {
     profile: PropTypes.object.isRequired,

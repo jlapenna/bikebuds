@@ -38,8 +38,11 @@ export class FirebaseState {
     try {
       this.app = firebase.initializeApp(config);
     } catch (err) {
-      console.warn('FirebaseState: Tried to re-initialize app.', err);
-      this.app = firebase.app();
+      if (err.code === 'app/duplicate-app') {
+        this.app = firebase.app();
+      } else {
+        console.error('FirebaseState: Failed initializing firebase.', err);
+      }
     }
     this.auth = firebase.auth();
 
@@ -69,6 +72,9 @@ export class FirebaseState {
   };
 
   enableMessaging = () => {
+    if (this.messaging !== null) {
+      return true;
+    }
     try {
       this.messaging = firebase.messaging();
       return true;

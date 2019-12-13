@@ -18,18 +18,18 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import PreferencesCard from './PreferencesCard';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
 class Settings extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       flexGrow: 1,
     },
-  };
+  });
 
   static propTypes = {
     apiClient: PropTypes.object.isRequired,

@@ -22,7 +22,7 @@ import { Link } from 'react-router-dom';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -40,7 +40,7 @@ class ProfileCard extends Component {
     profile: PropTypes.object,
   };
 
-  static styles = {
+  static styles = createStyles({
     root: {
       display: 'flex',
       flexDirection: 'column',
@@ -53,7 +53,7 @@ class ProfileCard extends Component {
     clubContainer: {
       'min-height': 56,
     },
-  };
+  });
 
   constructor(props) {
     super(props);

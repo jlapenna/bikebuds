@@ -16,18 +16,19 @@
 
 import React, { Component } from 'react';
 
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
 
 class SpinnerScreen extends Component {
-  static styles = {
-    root: {
-      display: 'flex',
-      height: '100%',
-      width: '100%',
-    },
-  };
+  static styles = theme =>
+    createStyles({
+      root: {
+        display: 'flex',
+        height: '100%',
+        width: '100%',
+      },
+    });
 
   render() {
     return (

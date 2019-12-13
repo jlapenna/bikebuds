@@ -17,32 +17,32 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import { withStyles } from '@material-ui/core/styles';
-
 import Signup from './Signup';
 
 class StandaloneSignup extends Component {
-  static styles = theme => ({
-    root: {
-      display: 'flex',
-    },
-    toolbar: theme.mixins.toolbar,
-    appBar: {
-      [theme.breakpoints.up('md')]: {
-        width: '100%',
-        zIndex: theme.zIndex.drawer + 1,
+  static styles = theme =>
+    createStyles({
+      root: {
+        display: 'flex',
       },
-    },
-    main: {
-      height: '100%',
-      width: '100%',
-      padding: theme.spacing(2),
-    },
-  });
+      toolbar: theme.mixins.toolbar,
+      appBar: {
+        [theme.breakpoints.up('md')]: {
+          width: '100%',
+          zIndex: theme.zIndex.drawer + 1,
+        },
+      },
+      main: {
+        height: '100%',
+        width: '100%',
+        padding: theme.spacing(2),
+      },
+    });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

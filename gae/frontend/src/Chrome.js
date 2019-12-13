@@ -17,18 +17,17 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import { MobileEmbedJsController } from 'MobileEmbed';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import { createStyles, withStyles } from '@material-ui/core/styles';
-
 import DrawerContent from './DrawerContent';
+import { MobileEmbedJsController } from 'MobileEmbed';
 
 const drawerWidth = 240;
 
@@ -58,37 +57,38 @@ class _EmbedChrome extends Component {
 export const EmbedChrome = withStyles(_EmbedChrome.styles)(_EmbedChrome);
 
 class Chrome extends Component {
-  static styles = theme => ({
-    drawerPaper: {
-      width: drawerWidth,
-    },
-    drawer: {
-      [theme.breakpoints.up('md')]: {
+  static styles = theme =>
+    createStyles({
+      drawerPaper: {
         width: drawerWidth,
-        flexShrink: 0,
       },
-      height: '100%',
-      'text-align': 'center',
-    },
-    main: {
-      height: '100%',
-      width: '100%',
-      padding: theme.spacing(2),
-    },
-    toolbar: theme.mixins.toolbar,
-    appBar: {
-      [theme.breakpoints.up('md')]: {
+      drawer: {
+        [theme.breakpoints.up('md')]: {
+          width: drawerWidth,
+          flexShrink: 0,
+        },
+        height: '100%',
+        'text-align': 'center',
+      },
+      main: {
+        height: '100%',
         width: '100%',
-        zIndex: theme.zIndex.drawer + 1,
+        padding: theme.spacing(2),
       },
-    },
-    menuButton: {
-      marginRight: 20,
-      [theme.breakpoints.up('md')]: {
-        display: 'none',
+      toolbar: theme.mixins.toolbar,
+      appBar: {
+        [theme.breakpoints.up('md')]: {
+          width: '100%',
+          zIndex: theme.zIndex.drawer + 1,
+        },
       },
-    },
-  });
+      menuButton: {
+        marginRight: 20,
+        [theme.breakpoints.up('md')]: {
+          display: 'none',
+        },
+      },
+    });
   static propTypes = {
     profile: PropTypes.object,
   };

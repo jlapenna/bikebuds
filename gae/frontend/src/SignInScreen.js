@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
@@ -28,7 +28,7 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import logoRound from './logo-round.svg';
 
 class SignInScreen extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '100%',
       width: '100%',
@@ -40,11 +40,10 @@ class SignInScreen extends Component {
     privacyFooter: {
       'text-align': 'center',
     },
-  };
+  });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    match: PropTypes.object.isRequired,
   };
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {

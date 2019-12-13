@@ -21,17 +21,28 @@ import PreferencesCard from './PreferencesCard';
 import { ProfileState } from './ProfileWrapper';
 
 it('renders without crashing', () => {
-  const div = document.createElement('div');
   const firebaseUser = {
     displayName: 'Display Name',
     photoUrl: '/logo-round.svg',
   };
+  const apiClient = {
+    bikebuds: {
+      get_clients: () => Promise.resolve({ body: [] }),
+    },
+  };
+
   // this.props.profile.user.properties.preferences.units
   const profile = new ProfileState();
   profile.user = { properties: { preferences: { units: 'IMPERIAL' } } };
   profile.athlete = { properties: {} };
+
+  const div = document.createElement('div');
   ReactDOM.render(
-    <PreferencesCard firebaseUser={firebaseUser} profile={profile} />,
+    <PreferencesCard
+      apiClient={apiClient}
+      firebaseUser={firebaseUser}
+      profile={profile}
+    />,
     div
   );
   ReactDOM.unmountComponentAtNode(div);

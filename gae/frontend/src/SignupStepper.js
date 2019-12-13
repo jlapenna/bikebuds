@@ -17,7 +17,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
 import MobileStepper from '@material-ui/core/MobileStepper';
@@ -35,27 +35,28 @@ import Privacy from './Privacy';
 import ToS from './ToS';
 
 class SignupStepper extends React.Component {
-  static styles = theme => ({
-    root: {
-      height: '100%',
-    },
-    stepBody: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-    },
-    stepContent: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-    },
-    stepper: {},
-    mobileButton: {
-      marginRight: theme.spacing(1),
-      marginLeft: theme.spacing(1),
-    },
-    desktopButton: {
-      marginRight: theme.spacing(1),
-    },
-  });
+  static styles = theme =>
+    createStyles({
+      root: {
+        height: '100%',
+      },
+      stepBody: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+      },
+      stepContent: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+      },
+      stepper: {},
+      mobileButton: {
+        marginRight: theme.spacing(1),
+        marginLeft: theme.spacing(1),
+      },
+      desktopButton: {
+        marginRight: theme.spacing(1),
+      },
+    });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

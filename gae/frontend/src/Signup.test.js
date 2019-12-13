@@ -25,10 +25,9 @@ import Signup from './Signup';
 firebase.initializeApp(config);
 
 it('renders without crashing', () => {
+  const firebase = createFirebaseState();
+
   const div = document.createElement('div');
-  ReactDOM.render(
-    <Signup firebaseUser={{}} gapiReady={null} onFinished={() => {}} />,
-    div
-  );
+  ReactDOM.render(<Signup firebase={firebase} firebaseUser={{}} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

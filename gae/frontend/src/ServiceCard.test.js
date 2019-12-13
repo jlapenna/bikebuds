@@ -20,7 +20,8 @@ import ReactDOM from 'react-dom';
 import ServiceCard from './ServiceCard';
 
 it('renders without crashing', () => {
+  const firebase = createFirebaseState();
   const div = document.createElement('div');
-  ReactDOM.render(<ServiceCard />, div);
+  ReactDOM.render(<ServiceCard firebase={firebase} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

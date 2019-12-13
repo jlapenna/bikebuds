@@ -136,7 +136,7 @@ class _ActivityMap extends Component {
 const ActivityMap = withStyles(_ActivityMap.styles)(_ActivityMap);
 
 class ActivityDetail extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '100%',
       width: '100%',
@@ -156,7 +156,7 @@ class ActivityDetail extends Component {
     activitySummaryItem: {
       width: '100%',
     },
-  };
+  });
 
   static propTypes = {
     profile: PropTypes.object,

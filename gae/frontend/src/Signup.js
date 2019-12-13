@@ -19,18 +19,18 @@ import React from 'react';
 
 import { Redirect } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import SignupStepper from './SignupStepper';
 
 class Signup extends React.Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       'background-color': 'red',
       display: 'flex',
       height: '100%',
     },
-  };
+  });
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,

@@ -136,7 +136,7 @@ class _RouteMap extends Component {
 const RouteMap = withStyles(_RouteMap.styles)(_RouteMap);
 
 class RouteDetail extends Component {
-  static styles = {
+  static styles = createStyles({
     root: {
       height: '100%',
       width: '100%',
@@ -156,7 +156,7 @@ class RouteDetail extends Component {
     routeSummaryItem: {
       width: '100%',
     },
-  };
+  });
 
   static propTypes = {
     profile: PropTypes.object,
