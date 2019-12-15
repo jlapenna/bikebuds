@@ -62,7 +62,9 @@ class ServiceCard extends Component {
   });
 
   static propTypes = {
+    apiClient: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
+    serviceName: PropTypes.string.isRequired,
   };
 
   constructor(props) {

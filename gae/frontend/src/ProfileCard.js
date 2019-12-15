@@ -19,9 +19,6 @@ import React, { Component } from 'react';
 
 import { Link } from 'react-router-dom';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
-
 import { createStyles, withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -36,8 +33,10 @@ import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
   static propTypes = {
+    apiClient: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
+    match: PropTypes.object.isRequired,
     profile: PropTypes.object,
   };
 

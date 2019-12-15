@@ -53,27 +53,26 @@ class Settings extends Component {
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
             firebase={this.props.firebase}
-            serviceName="fitbit"
+            serviceName={'fitbit'}
             apiClient={this.props.apiClient}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
             firebase={this.props.firebase}
-            serviceName="strava"
+            serviceName={'strava'}
             apiClient={this.props.apiClient}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
             firebase={this.props.firebase}
-            serviceName="withings"
+            serviceName={'withings'}
             apiClient={this.props.apiClient}
           />
         </Grid>
         <Grid item xs={12}>
           <PreferencesCard
-            firebaseUser={this.props.firebaseUser}
             apiClient={this.props.apiClient}
             profile={this.props.profile}
           />
