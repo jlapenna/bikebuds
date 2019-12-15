@@ -43,6 +43,7 @@ class Settings extends Component {
       <Grid className={this.props.classes.root} container spacing={3}>
         <Grid item xs={12} sm={12}>
           <ProfileCard
+            firebase={this.props.firebase}
             firebaseUser={this.props.firebaseUser}
             apiClient={this.props.apiClient}
             match={this.props.match}

@@ -88,7 +88,7 @@ export class FirebaseState {
     console.log('FirebaseState.signOut', e);
     var signOutPromise = this.auth.signOut();
     var nextSignOutPromise = this.authNext.signOut();
-    return Promise.app(signOutPromise, nextSignOutPromise);
+    return Promise.all([signOutPromise, nextSignOutPromise]);
   };
 }
 

@@ -36,6 +36,7 @@ import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
   static propTypes = {
+    firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     profile: PropTypes.object,
   };
@@ -67,7 +68,7 @@ class ProfileCard extends Component {
   };
 
   handleSignOut = () => {
-    firebase.auth.signOut().then(() => {
+    this.props.firebase.signOut().then(() => {
       window.location.reload();
     });
   };
