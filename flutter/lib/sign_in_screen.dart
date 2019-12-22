@@ -53,7 +53,7 @@ class SignInScreenState extends State<SignInScreen> {
       // The user aborted Google sign in.
       setState(() {
         this._signingIn = false;
-        Provider.of<FirebaseSignInState>(context).update(null, null);
+        Provider.of<FirebaseSignInState>(context).signOut();
       });
       return;
     }
@@ -79,7 +79,7 @@ class SignInScreenState extends State<SignInScreen> {
     await authResultNext.user.getIdToken(refresh: true);
 
     Provider.of<FirebaseSignInState>(context)
-        .update(authResult.user, authResultNext.user);
+        .signIn(authResult.user, authResultNext.user);
 
     setState(() {
       this._signingIn = false;

@@ -51,17 +51,25 @@ class FirebaseSignInState with ChangeNotifier {
     if (_firebaseState.isLoaded()) {
       var firebaseUserFuture = _firebaseState.auth.currentUser();
       var firebaseNextUserFuture = _firebaseState.authNext.currentUser();
-      this.update(await firebaseUserFuture, await firebaseNextUserFuture);
+      this._update(await firebaseUserFuture, await firebaseNextUserFuture);
     }
   }
 
-  void update(FirebaseUser user, FirebaseUser userNext) {
+  void _update(FirebaseUser user, FirebaseUser userNext) {
     _initialized = true;
     this.user = user;
     this.userNext = userNext;
     if (!_disposed) {
       notifyListeners();
     }
+  }
+
+  void signIn(FirebaseUser user, FirebaseUser userNext) {
+    this._update(user, userNext);
+  }
+
+  void signOut() {
+    _update(null, null);
   }
 
   get isInitialized => _initialized;
