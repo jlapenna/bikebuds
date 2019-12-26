@@ -179,19 +179,24 @@ class App extends Component {
     this.state = {
       firebase:
         props.firebase !== undefined ? props.firebase : new FirebaseState(),
-      colorType: 'dark',
     };
+    this.defaultColorType = 'light';
   }
 
   componentDidMount() {
-    var colorType = new URLSearchParams(window.location.search).get(
+    this.defaultColorType = new URLSearchParams(window.location.search).get(
       'colorType'
     );
-    this.setState({ colorType: colorType ? colorType : 'dark' });
   }
 
   render() {
-    var theme = createTheme(this.state.colorType);
+    var newColorType = new URLSearchParams(window.location.search).get(
+      'colorType'
+    );
+    if (newColorType) {
+      this.defaultColorType = newColorType;
+    }
+    var theme = createTheme(this.defaultColorType);
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />

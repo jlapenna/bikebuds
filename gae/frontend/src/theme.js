@@ -30,5 +30,5 @@ const baseTheme = createMuiTheme({
 export default createMuiTheme(baseTheme);
 
 export function createTheme(colorType) {
-  return baseTheme;
+  return createMuiTheme({ ...baseTheme, ...{ palette: { type: colorType } } });
 }
