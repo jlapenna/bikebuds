@@ -24,7 +24,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../config.dart';
 
 enum AuthState {
-  UNDEFINED,
+  NOT_STARTED,
   FETCHING_TOKEN,
   FETCHED_TOKEN,
   LOADING_AUTH_URL,
@@ -48,7 +48,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
       Completer<WebViewController>();
 
   Auth _auth;
-  AuthState _authState = AuthState.UNDEFINED;
+  AuthState _authState = AuthState.NOT_STARTED;
 
   WebViewController _controller;
   MobileEmbedJsController _mobileEmbedJsController;
@@ -73,12 +73,12 @@ class _MobileEmbedState extends State<MobileEmbed> {
     var colorType =
         Theme.of(context).brightness == Brightness.dark ? 'dark' : 'light';
     var config = Provider.of<Config>(context).config;
-    Uri url = Uri.parse(config["devserver_url"] + "/embed/auth").replace(
+    Uri uri = Uri.parse(config["devserver_url"] + "/embed/auth").replace(
         queryParameters: {'token': this._auth.token, 'colorType': colorType});
-    print('MobileEmbed.loadAuthUrl: ${url.path}, ' +
-        'hasToken: ${url.queryParameters['token'] != null}, ' +
+    print('MobileEmbed.loadAuthUrl: ${uri.path}, ' +
+        'hasToken: ${uri.queryParameters['token'] != null}, ' +
         'colorType: $colorType');
-    this._controller.loadUrl(url.toString());
+    this._controller.loadUrl(uri.toString());
     setState(() {
       this._authState = AuthState.LOADED_AUTH_URL;
     });
@@ -87,7 +87,7 @@ class _MobileEmbedState extends State<MobileEmbed> {
   void buildAuthEval(BuildContext context) {
     print('MobileEmbed.buildAuthEval: ${this._authState}');
     switch (this._authState) {
-      case AuthState.UNDEFINED:
+      case AuthState.NOT_STARTED:
         setState(() {
           this._authState = AuthState.FETCHING_TOKEN;
         });
@@ -97,6 +97,11 @@ class _MobileEmbedState extends State<MobileEmbed> {
           this.setState(() {
             this._authState = AuthState.FETCHED_TOKEN;
             this._auth = auth;
+          });
+        }).catchError((err) {
+          print('MobileEmbed: bikebuds.auth failed, $err');
+          this.setState(() {
+            this._authState = AuthState.FAILED;
           });
         });
         break;
