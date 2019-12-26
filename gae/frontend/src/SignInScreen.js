@@ -44,6 +44,7 @@ class SignInScreen extends Component {
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
+    match: PropTypes.object.isRequired,
   };
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
