@@ -145,14 +145,12 @@ class _SignedInAppState extends State<SignedInApp> {
     var bikebuds = Provider.of<BikebudsApiState>(context);
     return MaterialApp(
       title: 'Bikebuds',
-      theme: ThemeData(
-        brightness: Brightness.light,
+      theme: ThemeData.light().copyWith(
         primaryColor: PRIMARY_COLOR,
         accentColor: ACCENT_COLOR,
         buttonColor: PRIMARY_COLOR,
       ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
+      darkTheme: ThemeData.dark().copyWith(
         primaryColor: PRIMARY_COLOR,
         accentColor: ACCENT_COLOR,
         buttonColor: PRIMARY_COLOR,
