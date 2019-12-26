@@ -16,20 +16,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class Loading extends StatelessWidget {
-  const Loading();
+  final message;
+
+  const Loading({this.message});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(),
-              ],
+            CircularProgressIndicator(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  Text(message ?? "", style: Theme.of(context).textTheme.body1),
             ),
           ],
         ),

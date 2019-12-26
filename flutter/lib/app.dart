@@ -50,11 +50,12 @@ class App extends StatelessWidget {
       ChangeNotifierProxyProvider3<Config, FirebaseState, FirebaseSignInState,
               BikebudsApiState>(
           create: (_) => BikebudsApiState(),
-          update: (_, config, firebase, signInState, bikebudsApiState) =>
+          update: (_, config, firebaseState, firebaseSignInState,
+                  bikebudsApiState) =>
               bikebudsApiState
                 ..config = config
-                ..firebaseState = firebase
-                ..signInState = signInState),
+                ..firebaseState = firebaseState
+                ..firebaseSignInState = firebaseSignInState),
     ], child: SignInScreen(signedInBuilder: (context) => SignedInApp()));
   }
 }
@@ -65,6 +66,7 @@ class SignedInApp extends StatefulWidget {
 }
 
 class _SignedInAppState extends State<SignedInApp> {
+  bool _bikebudsFetched = false;
   StreamSubscription<FirebaseUser> _firebaseUserSubscription;
   StreamSubscription<String> _messagingListener;
 
@@ -74,21 +76,33 @@ class _SignedInAppState extends State<SignedInApp> {
 
     // Listen for auth changes.
     var firebase = Provider.of<FirebaseState>(context);
+    var firebaseSignInState = Provider.of<FirebaseSignInState>(context);
     var bikebuds = Provider.of<BikebudsApiState>(context);
-    if (bikebuds.isReady() && this._firebaseUserSubscription == null) {
-      this._firebaseUserSubscription = firebase.auth.onAuthStateChanged
-          .listen((FirebaseUser firebaseUser) async {
-        Provider.of<UserState>(context)
-          ..firebaseUser = firebaseUser
-          ..profile = await bikebuds.profile;
+
+    // TODO: Turn this into a stream.
+    if (bikebuds.isReady && this._bikebudsFetched) {
+      this._bikebudsFetched = true;
+      bikebuds.profile.then((profile) {
+        Provider.of<UserState>(context)..profile = profile;
+      }).catchError((err) {
+        print('$this: Failed to fetch profile: $err');
+      });
+    }
+
+    if (this._firebaseUserSubscription == null) {
+      this._firebaseUserSubscription = firebaseSignInState
+          .onAuthStateChanged((FirebaseUser firebaseUser) async {
+        Provider.of<UserState>(context)..firebaseUser = firebaseUser;
       });
     }
 
     // Register FCM.
-    if (bikebuds.isReady() && _messagingListener == null) {
+    if (bikebuds.isReady && _messagingListener == null) {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
         bikebuds.registerClient(token).then((response) {
-          print('App.Messaging: bikebuds.registerClient: complete');
+          print('SignedInApp: bikebuds.registerClient: Complete');
+        }).catchError((err) {
+          print('SignedInApp: bikebuds.registerClient: Failed: $err');
         });
       });
       firebase.messaging.requestNotificationPermissions();
@@ -97,6 +111,10 @@ class _SignedInAppState extends State<SignedInApp> {
           onResume: this.onResume,
           onLaunch: this.onLaunch);
     }
+
+    // TODO: Check the profile here, look for signup_complete and block
+    // full-app rendering if we aren't signed up.
+    //User user = UserModel.of(context)?.bikebudsUser;
   }
 
   @override
@@ -124,14 +142,7 @@ class _SignedInAppState extends State<SignedInApp> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Check the profile here, look for signup_complete and block
-    // full-app rendering if we aren't signed up.
-    //User user = UserModel.of(context)?.bikebudsUser;
-
     var bikebuds = Provider.of<BikebudsApiState>(context);
-    if (!bikebuds.isReady()) {
-      return const Loading();
-    }
     return MaterialApp(
       title: 'Bikebuds',
       theme: ThemeData(
@@ -149,7 +160,9 @@ class _SignedInAppState extends State<SignedInApp> {
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) {
-          return MainScreen();
+          return bikebuds.isReady
+              ? MainScreen()
+              : Loading(message: "Loading bikebuds...");
         },
       },
     );

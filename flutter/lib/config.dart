@@ -20,6 +20,11 @@ class Config {
   final Map<String, dynamic> config;
 
   Config(this.config);
+
+  @override
+  toString() {
+    return 'Config(length: ${config.keys.length})';
+  }
 }
 
 Future<Config> loadConfig(BuildContext context) {

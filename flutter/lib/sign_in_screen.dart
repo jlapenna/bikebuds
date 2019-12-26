@@ -65,18 +65,18 @@ class SignInScreenState extends State<SignInScreen> {
       idToken: googleAuth.idToken,
     );
 
-    var firebase = Provider.of<FirebaseState>(context);
+    var firebaseSignInState = Provider.of<FirebaseSignInState>(context);
 
-    // Sign into the primary project.
-    var authResult = await firebase.auth.signInWithCredential(credential);
+    // Sign into both projects.
+    var authResult = await firebaseSignInState.signInWithCredential(credential);
 
     // Sign in with the "next" firebase project.
     var authResultNext =
-        await firebase.authNext.signInWithCredential(credential);
+        await firebaseSignInState.signInWithCredentialNext(credential);
 
     // Refresh ID Tokens, triggering an auth-state change.
-    await authResult.user.getIdToken(refresh: true);
-    await authResultNext.user.getIdToken(refresh: true);
+    await authResult.user.getIdToken();
+    await authResultNext.user.getIdToken();
 
     Provider.of<FirebaseSignInState>(context)
         .signIn(authResult.user, authResultNext.user);
@@ -89,20 +89,19 @@ class SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     var signInState = Provider.of<FirebaseSignInState>(context);
-    if (!signInState.isInitialized) {
-      return new Container(width: 0.0, height: 0.0, color: Colors.white);
-    }
-    if (!signInState.signedIn) {
-      // We have determined initial sign-in state, we're not signed in.
-      // We might be in the process of signing in, though...
-      return MaterialApp(
-        home: Scaffold(
-          body: _signingIn ? const Loading() : _buildStartSignIn(context),
-        ),
-      );
-    } else {
+    if (signInState.signedIn) {
       return widget.signedInBuilder(context);
     }
+
+    // We have determined initial sign-in state, we're not signed in.
+    // We might be in the process of signing in, though...
+    return MaterialApp(
+      home: Scaffold(
+        body: _signingIn
+            ? const Loading(message: "Signing in...")
+            : _buildStartSignIn(context),
+      ),
+    );
   }
 
   Widget _buildStartSignIn(BuildContext context) {

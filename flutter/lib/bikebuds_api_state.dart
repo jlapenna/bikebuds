@@ -22,68 +22,117 @@ import "package:flutter/widgets.dart";
 
 class BikebudsApiState with ChangeNotifier {
   bool _disposed = false;
-  bool _loading = false;
 
   Config _config;
+  FirebaseSignInState _firebaseSignInState;
   FirebaseState _firebaseState;
-  FirebaseSignInState _signInState;
 
-  BikebudsApi _api;
+  BikebudsApi _api = BikebudsApi(ApiClient());
 
   @override
   void dispose() {
     this._disposed = true;
-    this._firebaseState.removeListener(_update);
-    this._signInState.removeListener(_update);
+    if (_firebaseSignInState != null) {
+      _firebaseSignInState.removeListener(_listenFirebaseSignInState);
+    }
+    if (_firebaseState != null) {
+      this._firebaseState.removeListener(_listenFirebaseState);
+    }
     super.dispose();
   }
 
+  @override
+  toString() {
+    return 'BikebudsApiState($isReady)';
+  }
+
   set config(Config value) {
+    assert(value != null);
+    if (value == _config) {
+      // No changes.
+      return;
+    }
+    print('$this: config changed: $_config -> $value');
+
+    // Assign the new value.
     _config = value;
+    _api.apiClient.basePath = (_config).config["api_url"];
+
+    if (!_disposed) {
+      notifyListeners();
+    }
   }
 
   set firebaseState(FirebaseState value) {
+    assert(value != null);
+    if (value == _firebaseState) {
+      // No changes.
+      return;
+    }
+    print('$this: firebaseState changed: $_firebaseState -> $value');
+
+    // Remove the existing listener.
     if (_firebaseState != null) {
-      _firebaseState.removeListener(_update);
+      _firebaseState.removeListener(_listenFirebaseState);
     }
+
     _firebaseState = value;
-    _firebaseState.addListener(_update);
+    _firebaseState.addListener(_listenFirebaseState);
+    _listenFirebaseState();
   }
 
-  set signInState(FirebaseSignInState value) {
-    if (_signInState != null) {
-      _signInState.removeListener(_update);
+  _listenFirebaseState() async {
+    print('$this: _listenFirebaseState');
+    ApiKeyAuth apiKeyAuth = _api.apiClient.getAuthentication("api_key");
+    apiKeyAuth.apiKey = (await _firebaseState.options).apiKey;
+
+    if (!_disposed) {
+      notifyListeners();
     }
-    _signInState = value;
-    _signInState.addListener(_update);
   }
 
-  _update() async {
-    if (!_disposed &&
-        !_loading &&
-        _firebaseState.app != null &&
-        _signInState.signedIn) {
-      _loading = true;
-      var apiClient = ApiClient(basePath: (_config).config["api_url"]);
+  set firebaseSignInState(FirebaseSignInState value) {
+    assert(value != null);
+    if (value == _firebaseSignInState) {
+      // No changes.
+      return;
+    }
+    print(
+        '$this: firebaseSignInState changed: $_firebaseSignInState -> $value');
 
-      // Set an API Key.
-      ApiKeyAuth apiKeyAuth = apiClient.getAuthentication("api_key");
-      apiKeyAuth.apiKey = (await _firebaseState.app.options).apiKey;
+    // Remove the existing listener.
+    if (_firebaseSignInState != null) {
+      _firebaseSignInState.removeListener(_listenFirebaseSignInState);
+    }
 
-      // Set an access token.
-      var firebaseUser = await _firebaseState.auth.currentUser();
-      OAuth oAuth = apiClient.getAuthentication("firebase");
-      oAuth.accessToken = (await firebaseUser.getIdToken(refresh: true)).token;
+    // Assign the new value and listener.
+    _firebaseSignInState = value;
+    _firebaseSignInState.addListener(_listenFirebaseSignInState);
+    _listenFirebaseSignInState();
+  }
 
-      this._api = BikebudsApi(apiClient);
-      if (!_disposed) {
-        notifyListeners();
+  _listenFirebaseSignInState() async {
+    print('$this: _listenFirebaseSignInState');
+    if (_firebaseSignInState.signedIn) {
+      try {
+        var firebaseUser = _firebaseSignInState.user;
+        OAuth oAuth = _api.apiClient.getAuthentication("firebase");
+        oAuth.accessToken = (await firebaseUser.getIdToken()).token;
+      } catch (err) {
+        print("$this: _listenFirebaseSignInState failed: $err");
       }
     }
+
+    if (!_disposed) {
+      notifyListeners();
+    }
   }
 
-  bool isReady() {
-    return _api != null;
+  bool get isReady {
+    return _config != null &&
+        _firebaseState != null &&
+        _firebaseSignInState != null &&
+        _firebaseSignInState.signedIn;
   }
 
   Future<Profile> get profile {

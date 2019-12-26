@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 class FirebaseSignInState with ChangeNotifier {
   FirebaseState _firebaseState;
+  bool _disposed = false;
+
   FirebaseUser user;
   FirebaseUser userNext;
-  bool _initialized = false;
-  bool _disposed = false;
 
   @override
   dispose() {
@@ -36,7 +38,7 @@ class FirebaseSignInState with ChangeNotifier {
 
   @override
   String toString() {
-    return 'FirebaseSignInState($_initialized, ${user?.uid}, ${userNext?.uid})';
+    return 'FirebaseSignInState(${user?.uid}, ${userNext?.uid})#${shortHash(this)}';
   }
 
   set firebaseState(FirebaseState value) {
@@ -49,14 +51,14 @@ class FirebaseSignInState with ChangeNotifier {
 
   void _onFirebaseStateChanged() async {
     if (_firebaseState.isLoaded()) {
-      var firebaseUserFuture = _firebaseState.auth.currentUser();
-      var firebaseNextUserFuture = _firebaseState.authNext.currentUser();
+      var firebaseUserFuture = _firebaseState._auth.currentUser();
+      var firebaseNextUserFuture = _firebaseState._authNext.currentUser();
       this._update(await firebaseUserFuture, await firebaseNextUserFuture);
     }
   }
 
   void _update(FirebaseUser user, FirebaseUser userNext) {
-    _initialized = true;
+    print('$this: _update: ${user?.uid}, ${userNext.uid}');
     this.user = user;
     this.userNext = userNext;
     if (!_disposed) {
@@ -72,25 +74,41 @@ class FirebaseSignInState with ChangeNotifier {
     _update(null, null);
   }
 
-  get isInitialized => _initialized;
+  StreamSubscription<FirebaseUser> onAuthStateChanged(Function fn) {
+    return _firebaseState._auth.onAuthStateChanged.listen(fn);
+  }
+
+  signInWithCredential(credential) {
+    return _firebaseState._auth.signInWithCredential(credential);
+  }
+
+  signInWithCredentialNext(credential) {
+    return _firebaseState._authNext.signInWithCredential(credential);
+  }
+
   get signedIn => user != null && userNext != null;
 }
 
 class FirebaseState with ChangeNotifier {
-  final FirebaseApp app = FirebaseApp.instance;
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseApp _app = FirebaseApp.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseMessaging messaging = FirebaseMessaging();
-
-  FirebaseApp appNext;
-  FirebaseAuth authNext;
   Firestore firestore;
+
+  FirebaseApp _appNext;
+  FirebaseAuth _authNext;
 
   FirebaseState(BuildContext context) {
     _loadFirebase(context);
   }
 
+  @override
+  String toString() {
+    return 'FirebaseState($_app, $_appNext)#${shortHash(this)}';
+  }
+
   bool isLoaded() {
-    return app != null && appNext != null;
+    return _app != null && _appNext != null;
   }
 
   _loadFirebase(BuildContext context) async {
@@ -100,8 +118,8 @@ class FirebaseState with ChangeNotifier {
     var appNext = await _loadAppNext(options);
     var authNext = FirebaseAuth.fromApp(appNext);
     var firestore = Firestore(app: appNext);
-    this.appNext = appNext;
-    this.authNext = authNext;
+    this._appNext = appNext;
+    this._authNext = authNext;
     this.firestore = firestore;
     notifyListeners();
   }
@@ -128,5 +146,9 @@ class FirebaseState with ChangeNotifier {
     } catch (e) {
       return await FirebaseApp.appNamed("next");
     }
+  }
+
+  get options {
+    return _app.options;
   }
 }
