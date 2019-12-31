@@ -152,4 +152,8 @@ class BikebudsApiState with ChangeNotifier {
       return response;
     });
   }
+
+  Future<SeriesEntity> getSeries({filter}) {
+    return _api.getSeries(filter: filter, xFields: "*");
+  }
 }
