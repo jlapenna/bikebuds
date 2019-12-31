@@ -566,12 +566,6 @@ class ProfileResource(Resource):
         )
 
 
-filter_parser = reqparse.RequestParser()
-filter_parser.add_argument(
-    'filter', type=str, help='A filter for measures in a series.'
-)
-
-
 @api.route('/routes')
 class RoutesResource(Resource):
     @api.doc('get_routes')
@@ -585,6 +579,12 @@ class RoutesResource(Resource):
         )
         routes = [WrapEntity(a) for a in routes_query.fetch()]
         return routes
+
+
+filter_parser = reqparse.RequestParser()
+filter_parser.add_argument(
+    'filter', help='A filter for measures in a series.', location='args'
+)
 
 
 @api.route('/series')
@@ -601,7 +601,12 @@ class SeriesResource(Resource):
         )
         if series is None:
             return WrapEntity(None)
-        args = filter_parser.parse_args()
+
+        args = {'filter': None}
+        try:
+            args = filter_parser.parse_args()
+        except Exception:
+            logging.exception('Failed to parse filter, skipping filter.')
         if args['filter']:
             series['measures'] = [m for m in series['measures'] if args['filter'] in m]
         return WrapEntity(series)
