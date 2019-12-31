@@ -20,9 +20,10 @@ repos:
         pass_filenames: false
         files: gae/frontend/src.*\.(js)$
   - repo: https://github.com/Cretezy/flutter-format-pre-commit
-    rev: 4a1df675bb74dea371c17934933e257e46f8dd98
+    rev: 'master'
     hooks:
       - id: flutter-format
+        files: flutter/*.*dart$
   - repo: https://github.com/python/black
     rev: 19.3b0
     hooks:
