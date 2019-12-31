@@ -20,22 +20,22 @@ repos:
         pass_filenames: false
         files: gae/frontend/src.*\.(js)$
   - repo: https://github.com/Cretezy/flutter-format-pre-commit
-    rev: 'master'
+    rev: 4a1df675bb74dea371c17934933e257e46f8dd98
     hooks:
       - id: flutter-format
         files: flutter/*.*dart$
   - repo: https://github.com/python/black
-    rev: 19.3b0
+    rev: 19.10b0
     hooks:
       - id: black
-        language_version: python3.6
+        language_version: python3.7
   - repo: https://github.com/prettier/prettier
-    rev: 1.18.2
+    rev: 1.19.1
     hooks:
       - id: prettier
         exclude: index\.yaml|\.(js|jsx|ts|tsx)$
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v6.6.0
+    rev: v6.8.0
     hooks:
       - id: eslint
         entry: ./gae/frontend/node_modules/.bin/eslint --fix
@@ -53,11 +53,11 @@ repos:
           - eslint-plugin-jsx-a11y
           - prettier
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.8
+    rev: 3.7.9
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v2.4.0
     hooks:
       - id: check-yaml
       - id: detect-private-key
