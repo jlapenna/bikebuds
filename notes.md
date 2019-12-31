@@ -370,3 +370,10 @@ token_expiry == time at which the token expires.
 expires_in == delta until expiration.
 
 My API stores expires_in.
+
+# Manual compile:
+
+```shell
+cd flutter/android;
+/home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 assembleDebug && /home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 installDebug && adb shell am start-activity cc.bikebuds/.MainActivity
+```
