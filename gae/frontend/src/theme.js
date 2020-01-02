@@ -16,19 +16,16 @@
 
 import { createMuiTheme } from '@material-ui/core/styles';
 
-const baseTheme = createMuiTheme({
-  palette: {
-    type: 'dark',
-    primary: {
-      main: '#03dac6',
-    },
-    secondary: {
-      main: '#ff4081',
-    },
-  },
-});
-export default createMuiTheme(baseTheme);
-
 export function createTheme(colorType) {
-  return createMuiTheme({ ...baseTheme, ...{ palette: { type: colorType } } });
+  return createMuiTheme({
+    palette: {
+      type: colorType,
+      primary: {
+        main: '#03dac6',
+      },
+      secondary: {
+        main: '#ff4081',
+      },
+    },
+  });
 }
