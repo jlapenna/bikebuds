@@ -58,7 +58,7 @@ class FirebaseSignInState with ChangeNotifier {
   }
 
   void _update(FirebaseUser user, FirebaseUser userNext) {
-    print('$this: _update: ${user?.uid}, ${userNext.uid}');
+    print('$this: _update: ${user?.uid}, ${userNext?.uid}');
     this.user = user;
     this.userNext = userNext;
     if (!_disposed) {
