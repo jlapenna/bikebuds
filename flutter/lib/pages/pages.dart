@@ -14,10 +14,12 @@
 
 import 'events/events_page.dart';
 import 'home/home_page.dart';
+import 'measures/measures_page.dart';
 import 'settings/settings_page.dart';
 
 List<Page> createPages(dynamic frontendUrl) {
   return List.unmodifiable([
+    Page('Measures', () => MeasuresPage(), null),
     Page('Home', () => HomePage(), "/embed/"),
     Page('Rides', () => EventsPage(), "/embed/events"),
     Page('Settings', () => SettingsPage(), "/embed/settings"),

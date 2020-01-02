@@ -18,6 +18,7 @@ import 'dart:io';
 import "package:bikebuds/config.dart";
 import "package:bikebuds/firebase_util.dart";
 import "package:bikebuds_api/api.dart";
+import 'package:flutter/foundation.dart';
 import "package:flutter/widgets.dart";
 
 class BikebudsApiState with ChangeNotifier {

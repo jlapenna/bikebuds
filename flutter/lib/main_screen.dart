@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     var userState = Provider.of<UserState>(context);
-    var frontendUrl = Provider.of<Config>(context).config["devserver_url"];
+    var frontendUrl = Provider.of<Config>(context)?.config["devserver_url"];
     var pages = createPages(frontendUrl);
     return Scaffold(
       appBar: AppBar(

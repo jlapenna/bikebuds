@@ -377,3 +377,9 @@ My API stores expires_in.
 cd flutter/android;
 /home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 assembleDebug && /home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 installDebug && adb shell am start-activity cc.bikebuds/.MainActivity
 ```
+
+# Update python packages
+
+```shell
+for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pushd; done;
+```
