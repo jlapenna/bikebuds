@@ -22,9 +22,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SignInScreen extends StatefulWidget {
-  final WidgetBuilder signedInBuilder;
-
-  SignInScreen({@required this.signedInBuilder});
+  SignInScreen();
 
   SignInScreenState createState() => new SignInScreenState();
 }
@@ -35,52 +33,70 @@ class SignInScreenState extends State<SignInScreen> {
   // Determines if we've actively initialized a sign-in flow.
   bool _signingIn = false;
 
-  _doSignIn() async {
+  Future _asyncSignIn() async {
+    print('SignInScreen: _asyncSignIn');
     setState(() {
       this._signingIn = true;
     });
 
-    // Otherwise, try to find the user's Google Identity.
+    var firebaseState = Provider.of<FirebaseState>(context, listen: false);
     var googleUser = _googleSignIn.currentUser;
-    if (googleUser == null) {
+    print('SignInScreen: Current user: ${googleUser?.id}');
+    assert(googleUser == null || googleUser.id != null,
+        "$googleUser should not have a null id");
+
+    // Try silent sign in.
+    if (googleUser?.id == null) {
+      print('SignInScreen: Awaiting signInSilently');
       googleUser = await _googleSignIn.signInSilently();
     }
-    if (googleUser == null) {
+    print('SignInScreen: Finished silent signin attempt. ${googleUser?.id}');
+    assert(googleUser == null || googleUser.id != null,
+        "$googleUser should not have a null id");
+
+    // Try manual sign in.
+    if (googleUser?.id == null) {
+      print('SignInScreen: Awaiting signIn');
       googleUser = await _googleSignIn.signIn();
     }
+    print('SignInScreen: Current user: ${googleUser?.id}');
+    assert(googleUser == null || googleUser.id != null,
+        "$googleUser should not have a null id");
 
-    if (googleUser == null) {
-      // The user aborted Google sign in.
+    // If we couldn't sign in, abort sign in.
+    if (googleUser?.id == null) {
+      print('SignInScreen: User aborted signIn.');
       setState(() {
         this._signingIn = false;
-        Provider.of<FirebaseSignInState>(context).signOut();
+        firebaseState.signOut();
       });
       return;
     }
 
     // Get auth credentials to sign into firebase.
+    print('SignInScreen: Awaiting authentication for ${googleUser.id}');
     var googleAuth = await googleUser.authentication;
+    print('SignInScreen: Building credentials');
     final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
     );
 
-    var firebaseSignInState = Provider.of<FirebaseSignInState>(context);
-
-    // Sign into both projects.
-    var authResult = await firebaseSignInState.signInWithCredential(credential);
+    // Sign in with the "app" firebase project.
+    print('SignInScreen: Awaiting SignInWithCredential');
+    var authResult = await firebaseState.signInWithCredential(credential);
 
     // Sign in with the "next" firebase project.
+    print('SignInScreen: Awaiting Next SignInWithCredential');
     var authResultNext =
-        await firebaseSignInState.signInWithCredentialNext(credential);
+        await firebaseState.signInWithCredentialNext(credential);
 
     // Refresh ID Tokens, triggering an auth-state change.
+    print('SignInScreen: Awaiting Tokens');
     await authResult.user.getIdToken();
     await authResultNext.user.getIdToken();
 
-    Provider.of<FirebaseSignInState>(context)
-        .signIn(authResult.user, authResultNext.user);
-
+    print('SignInScreen: Finished Sign-in');
     setState(() {
       this._signingIn = false;
     });
@@ -88,20 +104,9 @@ class SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var signInState = Provider.of<FirebaseSignInState>(context);
-    if (signInState.signedIn) {
-      return widget.signedInBuilder(context);
-    }
-
-    // We have determined initial sign-in state, we're not signed in.
-    // We might be in the process of signing in, though...
-    return MaterialApp(
-      home: Scaffold(
-        body: _signingIn
-            ? const Loading(message: "Signing in...")
-            : _buildStartSignIn(context),
-      ),
-    );
+    return (_signingIn)
+        ? const Loading(message: "Signing in...")
+        : _buildStartSignIn(context);
   }
 
   Widget _buildStartSignIn(BuildContext context) {
@@ -111,32 +116,45 @@ class SignInScreenState extends State<SignInScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Image.asset("assets/logo-round.png"),
-          RaisedButton(
-            color: Colors.white,
-            child: Text("Sign in with Google"),
-            onPressed: () => _doSignIn(),
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Image.asset("assets/logo-round.png"),
+                RaisedButton(
+                    color: Colors.white,
+                    child: Text("Sign in with Google"),
+                    onPressed: () => _asyncSignIn().catchError((err) {
+                          print('SignInScreen: Failed to _asyncSignIn: $err');
+                        })),
+              ],
+            ),
           ),
-          FlatButton(
-            child: Text("Privacy - ToS"),
-            onPressed: () {
-              showAboutDialog(context: context, children: <Widget>[
-                ListTile(
-                  title: Text("Terms of Service"),
-                  onTap: () {
-                    launch("https://bikebuds.com/tos");
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text("Privacy Policy"),
-                  onTap: () {
-                    launch("https://bikebuds.com/privacy");
-                    Navigator.pop(context);
-                  },
-                ),
-              ]);
-            },
+          Expanded(
+            flex: 0,
+            child: FlatButton(
+              child: Text("Privacy - ToS"),
+              onPressed: () {
+                showAboutDialog(context: context, children: <Widget>[
+                  ListTile(
+                    title: Text("Terms of Service"),
+                    onTap: () {
+                      launch("https://bikebuds.com/tos");
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Privacy Policy"),
+                    onTap: () {
+                      launch("https://bikebuds.com/privacy");
+                      Navigator.pop(context);
+                    },
+                  ),
+                ]);
+              },
+            ),
           ),
         ],
       ),

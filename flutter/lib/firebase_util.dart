@@ -22,81 +22,26 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-class FirebaseSignInState with ChangeNotifier {
-  FirebaseState _firebaseState;
-  bool _disposed = false;
-
-  FirebaseUser user;
-  FirebaseUser userNext;
-
-  @override
-  dispose() {
-    _disposed = true;
-    _firebaseState.removeListener(_onFirebaseStateChanged);
-    super.dispose();
-  }
-
-  @override
-  String toString() {
-    return 'FirebaseSignInState(${user?.uid}, ${userNext?.uid})#${shortHash(this)}';
-  }
-
-  set firebaseState(FirebaseState value) {
-    if (_firebaseState != null) {
-      _firebaseState.removeListener(_onFirebaseStateChanged);
-    }
-    _firebaseState = value;
-    _firebaseState.addListener(_onFirebaseStateChanged);
-  }
-
-  void _onFirebaseStateChanged() async {
-    if (_firebaseState.isLoaded()) {
-      var firebaseUserFuture = _firebaseState._auth.currentUser();
-      var firebaseNextUserFuture = _firebaseState._authNext.currentUser();
-      this._update(await firebaseUserFuture, await firebaseNextUserFuture);
-    }
-  }
-
-  void _update(FirebaseUser user, FirebaseUser userNext) {
-    print('$this: _update: ${user?.uid}, ${userNext?.uid}');
-    this.user = user;
-    this.userNext = userNext;
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  void signIn(FirebaseUser user, FirebaseUser userNext) {
-    this._update(user, userNext);
-  }
-
-  void signOut() {
-    _update(null, null);
-  }
-
-  StreamSubscription<FirebaseUser> onAuthStateChanged(Function fn) {
-    return _firebaseState._auth.onAuthStateChanged.listen(fn);
-  }
-
-  signInWithCredential(credential) {
-    return _firebaseState._auth.signInWithCredential(credential);
-  }
-
-  signInWithCredentialNext(credential) {
-    return _firebaseState._authNext.signInWithCredential(credential);
-  }
-
-  get signedIn => user != null && userNext != null;
-}
+class FirebaseSignInState with ChangeNotifier {}
 
 class FirebaseState with ChangeNotifier {
+  bool _authInitialized = false;
   final FirebaseApp _app = FirebaseApp.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseMessaging messaging = FirebaseMessaging();
-  Firestore firestore;
 
+  bool _disposed = false;
+
+  bool _authInitializedNext = false;
   FirebaseApp _appNext;
   FirebaseAuth _authNext;
+
+  StreamSubscription<FirebaseUser> _sub;
+  StreamSubscription<FirebaseUser> _subNext;
+
+  Firestore firestore;
+  FirebaseUser user;
+  FirebaseUser userNext;
 
   FirebaseState(BuildContext context) {
     _loadFirebase(context);
@@ -107,20 +52,37 @@ class FirebaseState with ChangeNotifier {
     return 'FirebaseState($_app, $_appNext)#${shortHash(this)}';
   }
 
-  bool isLoaded() {
-    return _app != null && _appNext != null;
+  @override
+  dispose() {
+    if (_sub != null) {
+      _sub.cancel();
+      _sub = null;
+    }
+    if (_subNext != null) {
+      _subNext.cancel();
+      _subNext = null;
+    }
+    super.dispose();
   }
 
   _loadFirebase(BuildContext context) async {
     var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
         .loadString("android/app/google-services-next-android.json"));
     FirebaseOptions options = _toFirebaseOptions(loadedJson);
+
     var appNext = await _loadAppNext(options);
     var authNext = FirebaseAuth.fromApp(appNext);
     var firestore = Firestore(app: appNext);
+    // Only after we have all three components do we assign.
     this._appNext = appNext;
     this._authNext = authNext;
     this.firestore = firestore;
+    _auth.currentUser().then((firebaseUser) {
+      // Only after we're set up for firebase do we listen.
+      _sub = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+      _subNext = _authNext.onAuthStateChanged.listen(_onAuthStateChangedNext);
+    });
+
     notifyListeners();
   }
 
@@ -148,7 +110,50 @@ class FirebaseState with ChangeNotifier {
     }
   }
 
+  _onAuthStateChanged(FirebaseUser firebaseUser) {
+    this.user = firebaseUser;
+
+    // We've processed at least one firebase auth event.
+    this._authInitialized = true;
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
+  _onAuthStateChangedNext(FirebaseUser firebaseUser) {
+    this.userNext = firebaseUser;
+    print('$this: onAuthStateChangedNext: ${user?.uid}, ${userNext?.uid}');
+
+    // We've processed at least one firebase auth event.
+    this._authInitializedNext = true;
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
   get options {
-    return _app.options;
+    try {
+      return _app?.options;
+    } catch (err) {
+      // Its possible firebase failed to load (like with no net connectivity)
+      // and it doesn't protect itself from NPEs.
+      print('$this: Warning: Failed reading options: $err');
+    }
+  }
+
+  get authInitialized => _authInitialized && _authInitializedNext;
+  get loaded => _app != null && _appNext != null;
+  get signedIn => user != null && userNext != null;
+
+  signOut() {
+    return Future.wait([_auth.signOut(), _authNext.signOut()]);
+  }
+
+  signInWithCredential(credential) {
+    return _auth.signInWithCredential(credential);
+  }
+
+  signInWithCredentialNext(credential) {
+    return _authNext.signInWithCredential(credential);
   }
 }

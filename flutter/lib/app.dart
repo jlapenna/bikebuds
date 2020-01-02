@@ -35,29 +35,52 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(providers: [
-      FutureProvider.value(
-          value: loadConfig(context),
-          initialData: Config(Map<String, dynamic>())),
-      ChangeNotifierProvider<FirebaseState>.value(
-          value: FirebaseState(context)),
-      ChangeNotifierProxyProvider<FirebaseState, FirebaseSignInState>(
-          create: (_) => FirebaseSignInState(),
-          update: (_, firebaseState, firebaseSignInState) =>
-              firebaseSignInState..firebaseState = firebaseState),
-      ChangeNotifierProxyProvider<FirebaseSignInState, UserState>(
+      FutureProvider(
+          create: loadConfig, initialData: Config(Map<String, dynamic>())),
+      ChangeNotifierProvider<FirebaseState>(
+          create: (_) => FirebaseState(context)),
+      ChangeNotifierProxyProvider<FirebaseState, UserState>(
           create: (_) => UserState(),
           update: (_, firebaseState, userState) =>
               userState..firebaseUser = firebaseState.user),
-      ChangeNotifierProxyProvider3<Config, FirebaseState, FirebaseSignInState,
-              BikebudsApiState>(
+      ChangeNotifierProxyProvider2<Config, FirebaseState, BikebudsApiState>(
           create: (_) => BikebudsApiState(),
-          update: (_, config, firebaseState, firebaseSignInState,
-                  bikebudsApiState) =>
+          update: (_, config, firebaseState, bikebudsApiState) =>
               bikebudsApiState
                 ..config = config
-                ..firebaseState = firebaseState
-                ..firebaseSignInState = firebaseSignInState),
-    ], child: SignInScreen(signedInBuilder: (context) => SignedInApp()));
+                ..firebaseState = firebaseState),
+    ], child: AppDelegate());
+  }
+}
+
+class AppDelegate extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var firebaseState = Provider.of<FirebaseState>(context);
+    print('AppDelegate: build: initialized: ${firebaseState.authInitialized},' +
+        'signedIn: ${firebaseState.signedIn}');
+    return firebaseState.signedIn
+        ? SignedInApp()
+        : firebaseState.authInitialized ? SignedOutApp() : Container();
+  }
+}
+
+class SignedOutApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Bikebuds',
+        theme: ThemeData.light().copyWith(
+          primaryColor: PRIMARY_COLOR,
+          accentColor: ACCENT_COLOR,
+          buttonColor: PRIMARY_COLOR,
+        ),
+        darkTheme: ThemeData.dark().copyWith(
+          primaryColor: PRIMARY_COLOR,
+          accentColor: ACCENT_COLOR,
+          buttonColor: PRIMARY_COLOR,
+        ),
+        home: Scaffold(body: SignInScreen()));
   }
 }
 
@@ -77,7 +100,6 @@ class _SignedInAppState extends State<SignedInApp> {
 
     // Listen for auth changes.
     var firebase = Provider.of<FirebaseState>(context);
-    var firebaseSignInState = Provider.of<FirebaseSignInState>(context);
     var bikebuds = Provider.of<BikebudsApiState>(context);
 
     // TODO: Turn this into a stream.
@@ -87,13 +109,6 @@ class _SignedInAppState extends State<SignedInApp> {
         Provider.of<UserState>(context)..profile = profile;
       }).catchError((err) {
         print('$this: Failed to fetch profile: $err');
-      });
-    }
-
-    if (this._firebaseUserSubscription == null) {
-      this._firebaseUserSubscription = firebaseSignInState
-          .onAuthStateChanged((FirebaseUser firebaseUser) async {
-        Provider.of<UserState>(context)..firebaseUser = firebaseUser;
       });
     }
 
