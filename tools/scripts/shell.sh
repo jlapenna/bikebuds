@@ -25,6 +25,7 @@ function source_files() {
     \( \
     -path "./$(realpath --relative-to=. $REPO_PATH/virtualenv)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/.dart_tool)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/client/lib)" -o \
