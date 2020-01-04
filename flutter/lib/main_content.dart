@@ -14,6 +14,7 @@
 
 import 'package:bikebuds/pages/pages.dart';
 import 'package:bikebuds/widgets/mobile_embed.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MainContent extends StatelessWidget {
@@ -25,7 +26,7 @@ class MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Page page = pages[selectedDrawerItem];
-    return page.target != null
+    return (!kIsWeb && page.target != null)
         ? MobileEmbed(page.target)
         : page.widgetBuilder();
   }

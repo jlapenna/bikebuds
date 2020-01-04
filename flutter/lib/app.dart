@@ -22,6 +22,7 @@ import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -97,7 +98,7 @@ class _SignedInAppState extends State<SignedInApp> {
     }
 
     // Register FCM.
-    if (bikebuds.isReady && _messagingListener == null) {
+    if (!kIsWeb && bikebuds.isReady && _messagingListener == null) {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
         bikebuds.registerClient(token).then((response) {
           print('SignedInApp: bikebuds.registerClient: Complete');
