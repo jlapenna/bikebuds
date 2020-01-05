@@ -18,9 +18,9 @@
 
 source tools/scripts/base.sh
 
-ANDROID_BUILD_GRADLE="flutter/android/app/build.gradle"
-ANDROID_AAB_LOCATION="flutter/build/app/outputs/bundle/release/app.aab"
-ANDROID_RELEASE_OUTPUT_JSON="flutter/build/app/intermediates/merged_manifests/release/output.json"
+ANDROID_BUILD_GRADLE="android/app/build.gradle"
+ANDROID_AAB_LOCATION="build/app/outputs/bundle/release/app.aab"
+ANDROID_RELEASE_OUTPUT_JSON="build/app/intermediates/merged_manifests/release/output.json"
 API_SERVICE_JSON="environments/prod/service_keys/play-developer-api.json"
 
 function ctrl_c() {
@@ -29,21 +29,98 @@ function ctrl_c() {
 trap ctrl_c INT
 
 function main() {
-  # Args
-  local build_number="$(printf '%02d' $1)"
-
   # Verify repo
   local repo_path="$(get_repo_path)";
 
-  set_prod_environment
+  # Flag defaults
+  local android="";
+  local ios="";
+  local web="";
+  local build_number="00"
 
-  # Construct version_code.
+  while getopts "awn:" OPTION
+  do
+    case $OPTION in
+      a)
+        android="android"
+        ;;
+      i)
+        ios="ios"
+        ;;
+      w)
+        web="web"
+        ;;
+      n)
+        build_number="$(printf '%02d' $OPTARG)"
+        echo "Build Number: $build_number"
+        ;;
+      \?)
+        echo "Help, -a for android; -w for web, -n for a build number"
+        exit
+        ;;
+    esac
+  done
+
+  if [[ "$android" == "" && "$ios" == "" && "$web" == "" ]]; then
+    echo "No releases selected, aborting";
+    exit;
+  fi
+
+  # Constuct a version code (from build number and date)
   local date_string="$(date '+%Y%m%d')"
   local version_code="${date_string}${build_number}"
 
+  # Enable the prod environment.
+  set_prod_environment
+  pushd flutter
+
+  if [[ "$android" ]]; then
+    build_android "${version_code}"
+  fi;
+  if [[ "$web" ]]; then
+    build_web "${version_code}"
+  fi;
+
+  # Restore the original environment.
+  popd
+  set_dev_environment
+}
+
+function build_web() {
+  local version_code="$1";
+
   echo ""
-  echo "Releasing ${version_code}."
+  echo "Web"
+
   echo ""
+  echo "Building..."
+  flutter build web \
+      -t lib/app.dart \
+      --release \
+      ;
+
+  local build_code="$?"
+  if [[ ${build_code} != 0 ]]; then
+    echo ""
+    echo "Unable to build!"
+  else
+    echo ""
+    echo "Releasing..."
+
+    pushd ../firebase/bikebuds-next
+    firebase deploy \
+        --only hosting \
+        --message "Build: ${build_version}" \
+        ;
+    popd
+  fi
+}
+
+function build_android() {
+  local version_code="$1";
+
+  echo ""
+  echo "Android: ${version_code}."
 
   echo ""
   echo "Temporarily modifying build.gradle."
@@ -55,39 +132,36 @@ function main() {
 
   echo ""
   echo "Building..."
-  pushd flutter
   flutter build appbundle \
       -t lib/app.dart \
       --target-platform android-arm,android-arm64 \
       --build-number="${version_code}" \
-      --build-name="${version_code}"
+      --build-name="${version_code}" \
+      ;
 
   local build_code="$?"
-  if [ "$build_code" -ne 0 ]; then
-    echo "Unable to build!"
-  fi
-  popd
-
-  if [ "$build_code" -ne 0 ]; then
+  if [[ ${build_code} != 0 ]]; then
     echo ""
     echo "Unable to build!"
   else
     echo ""
-    echo "Built ${version_code} at ${repo_path}/${ANDROID_AAB_LOCATION}"
+    echo "Built ${version_code} at ${ANDROID_AAB_LOCATION}"
     cat "${ANDROID_RELEASE_OUTPUT_JSON}" \
-        | python -m json.tool | pygmentize -l json
-    python flutter/play_upload.py \
+        | python -m json.tool | pygmentize -l json \
+        ;
+
+    echo ""
+    echo "Releasing..."
+    python play_upload.py \
         -p cc.bikebuds \
         -a "${ANDROID_AAB_LOCATION}" \
         -s "${API_SERVICE_JSON}" \
-        -t internal
+        -t internal \
+        ;
   fi
 
   echo "Reverting build.gradle."
   git checkout "${ANDROID_BUILD_GRADLE}"
-
-  # And restore the dev environment config.
-  set_dev_environment
 }
 
 main "$@"
