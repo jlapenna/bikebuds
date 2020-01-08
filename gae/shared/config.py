@@ -23,10 +23,6 @@ class _Config(object):
         for key, value in base_config.items():
             setattr(self, key, value)
 
-        self.origins = _devOrProd(
-            '*', [self.frontend_url, self.api_url, self.backend_url]
-        )
-
         self.fitbit_creds = json.load(
             open(os.path.join(base_path, 'service_keys/fitbit.json'))
         )

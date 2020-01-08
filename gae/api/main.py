@@ -39,7 +39,7 @@ from shared.datastore.series import Series
 from admin import api as admin_api
 
 app = Flask(__name__)
-CORS(app, origins=config.origins)
+CORS(app, origins=config.cors_origins)
 
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
