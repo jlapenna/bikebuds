@@ -31,25 +31,45 @@ void main() => runApp(App());
 const Color PRIMARY_COLOR = Color(0xFF03dac6);
 const Color ACCENT_COLOR = Color(0xFFff4081);
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  var _loader;
+
+  @override
+  void initState() {
+    _loader = loadConfig(context);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(providers: [
-      FutureProvider(
-          create: loadConfig, initialData: Config(Map<String, dynamic>())),
-      ChangeNotifierProvider<FirebaseState>(
-          create: (_) => FirebaseState(context)),
-      ChangeNotifierProxyProvider<FirebaseState, UserState>(
-          create: (_) => UserState(),
-          update: (_, firebaseState, userState) =>
-              userState..firebaseUser = firebaseState.user),
-      ChangeNotifierProxyProvider2<Config, FirebaseState, BikebudsApiState>(
-          create: (_) => BikebudsApiState(),
-          update: (_, config, firebaseState, bikebudsApiState) =>
-              bikebudsApiState
-                ..config = config
-                ..firebaseState = firebaseState),
-    ], child: AppDelegate());
+    return FutureBuilder<Config>(
+        future: _loader,
+        builder: (context, AsyncSnapshot<Config> snapshot) {
+          if (!snapshot.hasData) {
+            return Container();
+          }
+          return MultiProvider(providers: [
+            Provider<Config>.value(value: snapshot.data),
+            ChangeNotifierProvider<FirebaseState>(
+                create: (_) => FirebaseState(context)),
+            ChangeNotifierProxyProvider<FirebaseState, UserState>(
+                create: (_) => UserState(),
+                update: (_, firebaseState, userState) =>
+                    userState..firebaseUser = firebaseState.user),
+            ChangeNotifierProxyProvider2<Config, FirebaseState,
+                    BikebudsApiState>(
+                create: (_) => BikebudsApiState(),
+                update: (_, config, firebaseState, bikebudsApiState) =>
+                    bikebudsApiState
+                      ..config = config
+                      ..firebaseState = firebaseState),
+          ], child: AppDelegate());
+        });
   }
 }
 

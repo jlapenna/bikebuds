@@ -19,7 +19,7 @@ import 'package:flutter/widgets.dart';
 class Config {
   final Map<String, dynamic> config;
 
-  Config(this.config);
+  const Config(this.config);
 
   @override
   toString() {

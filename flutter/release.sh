@@ -21,7 +21,7 @@ source tools/scripts/base.sh
 ANDROID_BUILD_GRADLE="android/app/build.gradle"
 ANDROID_AAB_LOCATION="build/app/outputs/bundle/release/app.aab"
 ANDROID_RELEASE_OUTPUT_JSON="build/app/intermediates/merged_manifests/release/output.json"
-API_SERVICE_JSON="environments/prod/service_keys/play-developer-api.json"
+API_SERVICE_JSON="../environments/prod/service_keys/play-developer-api.json"
 
 function ctrl_c() {
   echo "Trapped and ignored ctrl+c"
