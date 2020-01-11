@@ -240,7 +240,7 @@ class SignupStepper extends React.Component {
     }
 
     let activeStep = steps[activeStepIndex];
-    let stepContent = activeStep ? activeStep.content(this.props) : null;
+    let stepContent = activeStep ? activeStep.content() : null;
 
     return (
       <div className={classes.root}>
