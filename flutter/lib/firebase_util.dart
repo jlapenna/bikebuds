@@ -30,8 +30,6 @@ class FirebaseState with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseMessaging messaging = FirebaseMessaging();
 
-  bool _disposed = false;
-
   bool _authInitializedNext = false;
   FirebaseApp _appNext;
   FirebaseAuth _authNext;
@@ -115,9 +113,7 @@ class FirebaseState with ChangeNotifier {
 
     // We've processed at least one firebase auth event.
     this._authInitialized = true;
-    if (!_disposed) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   _onAuthStateChangedNext(FirebaseUser firebaseUser) {
@@ -126,9 +122,7 @@ class FirebaseState with ChangeNotifier {
 
     // We've processed at least one firebase auth event.
     this._authInitializedNext = true;
-    if (!_disposed) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   get options {

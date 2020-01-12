@@ -24,4 +24,8 @@ class ClientStateEntityState with ChangeNotifier {
     client = entity;
     notifyListeners();
   }
+
+  ClientStateEntityState update() {
+    return this;
+  }
 }

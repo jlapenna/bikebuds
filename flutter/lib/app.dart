@@ -15,12 +15,14 @@
 import 'dart:async';
 
 import 'package:bikebuds/bikebuds_api_state.dart';
+import 'package:bikebuds/client_state_entity_state.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
+import 'package:bikebuds_api/api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +70,15 @@ class _AppState extends State<App> {
                     bikebudsApiState
                       ..config = config
                       ..firebaseState = firebaseState),
+            ChangeNotifierProxyProvider<BikebudsApiState,
+                    ClientStateEntityState>(
+                create: (_) => ClientStateEntityState(),
+                update: (_, bikebudsApiState, clientStateEntityState) =>
+                    clientStateEntityState.update()),
+            ChangeNotifierProxyProvider<FirebaseState, UserState>(
+                create: (_) => UserState(),
+                update: (_, firebaseState, userState) =>
+                    userState..firebaseUser = firebaseState.user),
           ], child: AppDelegate());
         });
   }
@@ -123,10 +134,10 @@ class _SignedInAppState extends State<SignedInApp> {
     var bikebuds = Provider.of<BikebudsApiState>(context);
 
     // TODO: Turn this into a stream.
-    if (bikebuds.isReady && this._bikebudsFetched) {
+    if (bikebuds.isReady && !this._bikebudsFetched) {
       this._bikebudsFetched = true;
       bikebuds.profile.then((profile) {
-        Provider.of<UserState>(context)..profile = profile;
+        Provider.of<UserState>(context, listen: false)..profile = profile;
       }).catchError((err) {
         print('$this: Failed to fetch profile: $err');
       });
@@ -135,8 +146,10 @@ class _SignedInAppState extends State<SignedInApp> {
     // Register FCM.
     if (!kIsWeb && bikebuds.isReady && _messagingListener == null) {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
-        bikebuds.registerClient(token).then((response) {
+        bikebuds.registerClient(token).then((ClientStateEntity response) {
           print('SignedInApp: bikebuds.registerClient: Complete');
+          Provider.of<ClientStateEntityState>(context, listen: false)
+            ..client = response;
         }).catchError((err) {
           print('SignedInApp: bikebuds.registerClient: Failed: $err');
         });

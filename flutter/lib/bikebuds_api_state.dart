@@ -22,7 +22,6 @@ import 'package:flutter/foundation.dart';
 import "package:flutter/widgets.dart";
 
 class BikebudsApiState with ChangeNotifier {
-  bool _disposed = false;
   bool _addedAuth = false;
 
   Config _config;
@@ -50,10 +49,7 @@ class BikebudsApiState with ChangeNotifier {
         print("$this: _listenFirebaseState failed: $err");
       }
     }
-
-    if (!_disposed) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   set config(Config value) {
@@ -68,9 +64,7 @@ class BikebudsApiState with ChangeNotifier {
     _config = value;
     _api.apiClient.basePath = (_config).config["api_url"];
 
-    if (!_disposed) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   set firebaseState(FirebaseState value) {
