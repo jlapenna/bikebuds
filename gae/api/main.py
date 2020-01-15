@@ -26,8 +26,8 @@ from shared import auth_util
 from shared import ds_util
 from shared import logging_util
 from shared import task_util
+from shared import responses
 from shared.config import config
-from shared.responses import Responses
 
 from shared.datastore.athlete import Athlete
 from shared.datastore.client_state import ClientState
@@ -678,7 +678,7 @@ class AuthResource(Resource):
 
 @app.route('/_ah/warmup')
 def warmup():
-    return Responses.OK
+    return responses.OK
 
 
 @app.before_request

@@ -30,7 +30,7 @@ from shared.datastore.athlete import Athlete
 from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
 from shared.datastore.user import User
-from shared.responses import Responses
+from shared import responses
 
 
 SERVICE_NAME = 'strava'
@@ -47,7 +47,7 @@ def events_get():
     verify_token = flask.request.args.get('hub.verify_token')
 
     if verify_token != config.strava_creds['verify_token']:
-        return Responses.INVALID_TOKEN
+        return responses.INVALID_TOKEN
 
     return flask.jsonify({'hub.challenge': challenge})
 
@@ -112,7 +112,7 @@ def events_post():
             logging.debug('Queued Strava event: %s', event_entity.key)
         except AlreadyExists:
             logging.debug('Duplicate Strava event: %s', event_entity.key)
-    return Responses.OK
+    return responses.OK
 
 
 @module.route('/services/strava/init', methods=['GET', 'POST'])

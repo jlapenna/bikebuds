@@ -26,7 +26,7 @@ from shared import task_util
 
 from shared.datastore.service import Service
 from shared.datastore.user import User
-from shared.responses import Responses
+from shared import responses
 
 from services.bbfitbit import bbfitbit
 from services.strava import strava
@@ -59,7 +59,7 @@ def cleanup_task():
 
     _do_cleanup(0, datastore_state, cleanup)
 
-    return Responses.OK
+    return responses.OK
 
 
 @app.route('/sync/<name>', methods=['POST'])
@@ -68,7 +68,7 @@ def sync_trigger(name):
     user = User.get(claims)
 
     task_util.sync_service(Service.get(name, parent=user.key))
-    return Responses.OK
+    return responses.OK
 
 
 @app.route('/tasks/sync', methods=['GET'])
@@ -82,7 +82,7 @@ def sync_task():
         if Service.has_credentials(service)
     ]
     task_util.sync_services(services)
-    return Responses.OK
+    return responses.OK
 
 
 @app.route('/tasks/sync/service/<service_name>', methods=['POST'])
@@ -98,7 +98,7 @@ def sync_service_task(service_name):
         logging.warn('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
         task_util.maybe_finish_sync_services(state_key)
-        return Responses.OK_NO_CREDENTIALS
+        return responses.OK_NO_CREDENTIALS
 
     try:
         Service.set_sync_started(service)
@@ -110,11 +110,11 @@ def sync_service_task(service_name):
             _do(strava.Worker(service), work_key=service.key)
         Service.set_sync_finished(service)
         task_util.maybe_finish_sync_services(state_key)
-        return Responses.OK
+        return responses.OK
     except SyncException as e:
         Service.set_sync_finished(service, error=str(e))
         task_util.maybe_finish_sync_services(state_key)
-        return Responses.OK_SYNC_EXCEPTION
+        return responses.OK_SYNC_EXCEPTION
 
 
 @app.route('/tasks/process_event', methods=['POST'])
@@ -132,11 +132,11 @@ def process_event_task():
 
     if service is None:
         logging.warning('Cannot process event %s, no service', event_key)
-        return Responses.OK_NO_SERVICE
+        return responses.OK_NO_SERVICE
 
     if not Service.has_credentials(service):
         logging.warning('Cannot process event %s, no credentials', event_key)
-        return Responses.OK_NO_CREDENTIALS
+        return responses.OK_NO_CREDENTIALS
 
     try:
         if service_key.name == 'withings':
@@ -146,8 +146,8 @@ def process_event_task():
         elif service_key.name == 'strava':
             _do(StravaEventsWorker(service), work_key=service.key)
     except SyncException:
-        return Responses.OK_SYNC_EXCEPTION
-    return Responses.OK
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 @app.route('/tasks/process_weight_trend', methods=['POST'])
@@ -164,8 +164,8 @@ def process_weight_trend_task():
         elif service_name == 'strava':
             pass
     except SyncException:
-        return Responses.OK_SYNC_EXCEPTION
-    return Responses.OK
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 def _do(worker, work_key=None, method='sync'):
@@ -190,7 +190,7 @@ def _do_cleanup(version, datastore_state, cleanup_fn):
 
 @app.route('/unittest', methods=['POST'])
 def unittest():
-    return Responses.OK
+    return responses.OK
 
 
 @app.before_request

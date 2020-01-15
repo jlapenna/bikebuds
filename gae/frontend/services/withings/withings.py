@@ -30,7 +30,7 @@ from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
 from shared.datastore.user import User
 from shared.services.withings.client import create_auth
-from shared.responses import Responses
+from shared import responses
 
 
 SERVICE_NAME = 'withings'
@@ -49,7 +49,7 @@ def events_head():
             'Invalid sub_secret: Provided %s, expected %s'
             % (sub_secret, config.withings_creds['sub_secret'])
         )
-    return Responses.OK
+    return responses.OK
 
 
 @module.route('/services/withings/events', methods=['POST'])
@@ -130,7 +130,7 @@ def events_post():
             }
         )
         ds_util.client.put(sub_event_failure)
-        return Responses.OK_SUB_EVENT_FAILED
+        return responses.OK_SUB_EVENT_FAILED
 
     # We can proess this entity.
     event_entity = SubscriptionEvent.to_entity(
@@ -149,7 +149,7 @@ def events_post():
         logging.info('Queued Withings event: %s', event_entity.key)
     except AlreadyExists:
         logging.info('Duplicate Withings event: %s', event_entity.key)
-    return Responses.OK
+    return responses.OK
 
 
 @module.route('/services/withings/init', methods=['GET', 'POST'])

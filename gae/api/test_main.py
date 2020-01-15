@@ -14,7 +14,7 @@
 
 import unittest
 
-from shared.responses import Responses
+from shared import responses
 
 import main
 
@@ -26,4 +26,4 @@ class MainTest(unittest.TestCase):
 
     def test_index(self):
         r = self.client.get('/unittest')
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)

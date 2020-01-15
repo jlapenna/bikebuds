@@ -18,8 +18,8 @@ import unittest
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
+from shared import responses
 from shared import task_util
-from shared.responses import Responses
 
 import main
 
@@ -36,7 +36,7 @@ class MainTest(unittest.TestCase):
 
     def test_base(self):
         r = self.client.post('/unittest')
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
 
     @mock.patch('main.StravaEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
@@ -58,7 +58,7 @@ class MainTest(unittest.TestCase):
             '/tasks/process_event',
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
         strava_worker_mock.assert_called_once()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
@@ -81,7 +81,7 @@ class MainTest(unittest.TestCase):
             '/tasks/process_event',
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
         withings_worker_mock.assert_called_once()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
@@ -102,7 +102,7 @@ class MainTest(unittest.TestCase):
             '/tasks/process_event',
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
-        self.assertEqual(r.status_code, Responses.OK_NO_SERVICE.code)
+        self.assertEqual(r.status_code, responses.OK_NO_SERVICE.code)
         withings_worker_mock.assert_not_called()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
@@ -124,5 +124,5 @@ class MainTest(unittest.TestCase):
             '/tasks/process_event',
             data=task_util.task_body_for_test(event_key=event_entity.key),
         )
-        self.assertEqual(r.status_code, Responses.OK_NO_CREDENTIALS.code)
+        self.assertEqual(r.status_code, responses.OK_NO_CREDENTIALS.code)
         withings_worker_mock.assert_not_called()

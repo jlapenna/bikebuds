@@ -20,7 +20,7 @@ from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 from shared.config import config
-from shared.responses import Responses
+from shared import responses
 
 import main
 
@@ -35,7 +35,7 @@ class MainTest(unittest.TestCase):
 
     def test_base(self):
         r = self.client.get('/unittest')
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
 
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
@@ -50,7 +50,7 @@ class MainTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_called_once()
 
@@ -67,7 +67,7 @@ class MainTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        self.assertEqual(r.status_code, Responses.OK_SUB_EVENT_FAILED.code)
+        self.assertEqual(r.status_code, responses.OK_SUB_EVENT_FAILED.code)
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_not_called()
 
@@ -81,7 +81,7 @@ class MainTest(unittest.TestCase):
         athlete_get_by_id_mock.return_value = mock_athlete
 
         r = self.client.post('/services/strava/events', json=_strava_create_event())
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_called_once()
 
@@ -92,7 +92,7 @@ class MainTest(unittest.TestCase):
         self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
     ):
         r = self.client.post('/services/strava/events', json=_strava_create_event())
-        self.assertEqual(r.status_code, Responses.OK.code)
+        self.assertEqual(r.status_code, responses.OK.code)
 
         # We expect a failure entity to be written and process to not be
         # called.

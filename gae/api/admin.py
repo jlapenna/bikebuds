@@ -21,7 +21,7 @@ from flask_restplus import Resource, Namespace
 from shared import auth_util
 from shared import ds_util
 from shared import task_util
-from shared.responses import Responses
+from shared import responses
 from shared.services.withings.client import create_client as withings_create_client
 
 api = Namespace('admin', 'Bikebuds Admin API')
@@ -35,7 +35,7 @@ class ProcessEventsResource(Resource):
         sub_events_query = ds_util.client.query(kind='SubscriptionEvent')
         for sub_event in sub_events_query.fetch():
             task_util.process_event(sub_event.key)
-        return Responses.OK
+        return responses.OK
 
 
 @api.route('/subscription/remove')
@@ -48,7 +48,7 @@ class RemoveSubscriptionResource(Resource):
         logging.info('Unsubscribing: %s', callbackurl)
 
         if callbackurl is None or 'withings' not in callbackurl:
-            return Responses.BAD_REQUEST
+            return responses.BAD_REQUEST
 
         services_query = ds_util.client.query(kind='Service')
         services_query.add_filter('sync_enabled', '=', True)
