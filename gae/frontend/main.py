@@ -28,11 +28,13 @@ from shared.config import config
 from shared import responses
 
 from services.bbfitbit import bbfitbit
+from services.slack import slack
 from services.strava import strava
 from services.withings import withings
 
 app = flask.Flask(__name__)
 app.register_blueprint(bbfitbit.module)
+app.register_blueprint(slack.module)
 app.register_blueprint(strava.module)
 app.register_blueprint(withings.module)
 CORS(app, origins=config.cors_origins)

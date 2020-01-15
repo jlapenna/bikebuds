@@ -32,6 +32,9 @@ class _Config(object):
         self.withings_creds = json.load(
             open(os.path.join(base_path, 'service_keys/withings.json'))
         )
+        self.slack_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/slack.json'))
+        )
 
 
 def _devOrProd(dev, prod):
