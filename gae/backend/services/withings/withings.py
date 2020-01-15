@@ -77,7 +77,7 @@ class Worker(object):
             sub = None
 
         if sub:
-            self._store_sub(self, sub.callbackurl, sub.comment)
+            self._store_sub(sub.callbackurl, sub.comment)
         elif config.is_dev:
             logging.debug(
                 'Dev server. Not registering %s to %s', self.service.key, callbackurl
