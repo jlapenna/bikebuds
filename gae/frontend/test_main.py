@@ -37,6 +37,13 @@ class MainTest(unittest.TestCase):
         r = self.client.get('/unittest')
         self.assertEqual(r.status_code, responses.OK.code)
 
+
+class WithingsTest(unittest.TestCase):
+    def setUp(self):
+        main.app.debug = True
+        main.app.testing = True
+        self.client = main.app.test_client()
+
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
     def test_withings_event_valid(self, process_event_mock, ds_util_put_mock):
@@ -71,6 +78,23 @@ class MainTest(unittest.TestCase):
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_not_called()
 
+
+class StravaTest(unittest.TestCase):
+    def setUp(self):
+        main.app.debug = True
+        main.app.testing = True
+        self.client = main.app.test_client()
+
+    def _create_event(self):
+        return {
+            "aspect_type": "create",
+            "event_time": 1549151211,
+            "object_id": 2156802368,
+            "object_type": "activity",
+            "owner_id": 35056021,
+            "subscription_id": 133263,
+        }
+
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.task_util.process_event')
@@ -80,7 +104,7 @@ class MainTest(unittest.TestCase):
         mock_athlete = Entity(ds_util.client.key('Service', 'strava', 'Athlete'))
         athlete_get_by_id_mock.return_value = mock_athlete
 
-        r = self.client.post('/services/strava/events', json=_strava_create_event())
+        r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_called_once()
@@ -91,21 +115,10 @@ class MainTest(unittest.TestCase):
     def test_strava_event_unknown_athlete(
         self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
     ):
-        r = self.client.post('/services/strava/events', json=_strava_create_event())
+        r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
 
         # We expect a failure entity to be written and process to not be
         # called.
         ds_util_put_mock.assert_called_once()
         process_event_mock.assert_not_called()
-
-
-def _strava_create_event():
-    return {
-        "aspect_type": "create",
-        "event_time": 1549151211,
-        "object_id": 2156802368,
-        "object_type": "activity",
-        "owner_id": 35056021,
-        "subscription_id": 133263,
-    }

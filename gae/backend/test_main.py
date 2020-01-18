@@ -38,6 +38,12 @@ class MainTest(unittest.TestCase):
         r = self.client.post('/unittest')
         self.assertEqual(r.status_code, responses.OK.code)
 
+
+class StravaTest(unittest.TestCase):
+    def setUp(self):
+        main.app.testing = True
+        self.client = main.app.test_client()
+
     @mock.patch('main.StravaEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_valid_strava(
@@ -60,6 +66,12 @@ class MainTest(unittest.TestCase):
         )
         self.assertEqual(r.status_code, responses.OK.code)
         strava_worker_mock.assert_called_once()
+
+
+class WithingsTest(unittest.TestCase):
+    def setUp(self):
+        main.app.testing = True
+        self.client = main.app.test_client()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.get')
