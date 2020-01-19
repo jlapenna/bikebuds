@@ -332,13 +332,71 @@ curl -H 'Content-Type: application/json' -X POST 'http://localhost:8081/services
 
 # Withings web push.
 
-# Subscribing
+## Subscribing
 
 One subscription per user, subscribed on every user sync. nokia_client.subscribe()
 
 ## Pushing a test event
 
 curl -H 'Content-Type: application/x-www-form-urlencoded' -X POST 'http://localhost:8081/services/withings/events?sub_secret=XXXXXXXXXXXX&service_key=URLSAFE_SERVICE_KEY' -d 'userid=17012450&startdate=1532017199&enddate=1532017200&appli=1'
+
+# Slack web push
+
+## Receiving events
+
+### ngrok
+
+https://ngrok.com/
+
+http://localhost:4040
+
+1.  Run ngrok
+2.  Go to https://api.slack.com/apps/AKU8ZGJG1/event-subscriptions and update the url.
+
+### Examples
+
+**Link Posted**
+
+```
+POST /services/slack/events HTTP/1.1
+Host: localhost
+User-Agent: Slackbot 1.0 (+https://api.slack.com/robots)
+Content-Length: 374
+Accept: */*
+Accept-Encoding: gzip,deflate
+Content-Type: application/json
+X-Forwarded-For: 54.172.190.75
+X-Forwarded-Proto: https
+X-Original-Host: f624e67e.ngrok.io
+X-Slack-Request-Timestamp: 1579378856
+X-Slack-Signature: v0=375c8a390daffc9f54131f9669ea415bcb92afe4bdb01ec5d2a22072e129e345
+
+{
+   "event" : {
+      "links" : [
+         {
+            "url" : "https://www.strava.com/routes/23137957",
+            "domain" : "strava.com"
+         }
+      ],
+      "channel" : "CL2QA9X1C",
+      "user" : "UL2NGJARL",
+      "type" : "link_shared",
+      "message_ts" : "1579378855.001300"
+   },
+   "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
+   "api_app_id" : "AKU8ZGJG1",
+   "event_id" : "EvSFJZPZGA",
+   "type" : "event_callback",
+   "event_time" : 1579378856,
+   "authed_users" : [
+      "USR4L7ZGW"
+   ],
+   "team_id" : "TL2DVHG3H"
+}
+
+
+```
 
 # Play Store Automatic publication
 
@@ -383,3 +441,15 @@ cd flutter/android;
 ```shell
 for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pushd; done;
 ```
+
+# Slack web push
+
+1.  Run ngrok
+2.  Go to https://api.slack.com/apps/AKU8ZGJG1/event-subscriptions and update the url.
+3.
+
+## ngrok
+
+https://ngrok.com/
+
+http://localhost:4040

@@ -3,7 +3,7 @@
 source tools/scripts/base.sh
 load_config
 
-QUEUES="default events notifications"
+QUEUES="default events notifications slack"
 
 function main() {
   for queue in ${QUEUES}; do 

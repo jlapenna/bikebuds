@@ -138,3 +138,23 @@ class WithingsTest(unittest.TestCase):
         )
         self.assertEqual(r.status_code, responses.OK_NO_CREDENTIALS.code)
         withings_worker_mock.assert_not_called()
+
+
+class SlackTest(unittest.TestCase):
+    def setUp(self):
+        main.app.testing = True
+        self.client = main.app.test_client()
+
+    @mock.patch('main.slack.process_slack_event', return_value=responses.OK)
+    def test_process_slack_event_task_valid(self, slack_process_slack_event_mock):
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', 'slack-E232eq2ee')
+        )
+        event_entity.update({'event_id': 'EVENT_ID'})
+
+        r = self.client.post(
+            '/tasks/process_slack_event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+        slack_process_slack_event_mock.assert_called_once()
+        self.assertEqual(r.status_code, responses.OK.code)

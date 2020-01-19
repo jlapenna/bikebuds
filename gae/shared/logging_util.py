@@ -44,7 +44,7 @@ PROD_ONLY_LOGS_TO_SILENCE = []
 def all_logging():
     # Standardize default logging.
     logging.basicConfig(
-        format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s] %(message)s'  # noqa: E501
+        format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s]\t%(message)s'  # noqa: E501
     )
 
 

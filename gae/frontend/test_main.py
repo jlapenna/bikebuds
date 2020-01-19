@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import mock
+import time
 import unittest
 from urllib.parse import urlencode
 
@@ -45,8 +47,8 @@ class WithingsTest(unittest.TestCase):
         self.client = main.app.test_client()
 
     @mock.patch('shared.ds_util.client.put')
-    @mock.patch('shared.task_util.process_event')
-    def test_withings_event_valid(self, process_event_mock, ds_util_put_mock):
+    @mock.patch('shared.task_util._create_task_locally')
+    def test_withings_event_valid(self, _create_task_locally_mock, ds_util_put_mock):
         query_string = urlencode(
             {
                 'sub_secret': config.withings_creds['sub_secret'],
@@ -59,11 +61,13 @@ class WithingsTest(unittest.TestCase):
         )
         self.assertEqual(r.status_code, responses.OK.code)
         ds_util_put_mock.assert_called_once()
-        process_event_mock.assert_called_once()
+        _create_task_locally_mock.assert_called_once()
 
     @mock.patch('shared.ds_util.client.put')
-    @mock.patch('shared.task_util.process_event')
-    def test_withings_event_bad_service_key(self, process_event_mock, ds_util_put_mock):
+    @mock.patch('shared.task_util._create_task_locally')
+    def test_withings_event_bad_service_key(
+        self, _create_task_locally_mock, ds_util_put_mock
+    ):
         query_string = urlencode(
             {
                 'sub_secret': config.withings_creds['sub_secret'],
@@ -76,7 +80,7 @@ class WithingsTest(unittest.TestCase):
         )
         self.assertEqual(r.status_code, responses.OK_SUB_EVENT_FAILED.code)
         ds_util_put_mock.assert_called_once()
-        process_event_mock.assert_not_called()
+        _create_task_locally_mock.assert_not_called()
 
 
 class StravaTest(unittest.TestCase):
@@ -97,9 +101,9 @@ class StravaTest(unittest.TestCase):
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id')
     @mock.patch('shared.ds_util.client.put')
-    @mock.patch('shared.task_util.process_event')
+    @mock.patch('shared.task_util._create_task_locally')
     def test_strava_event_valid(
-        self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
+        self, _create_task_locally_mock, ds_util_put_mock, athlete_get_by_id_mock
     ):
         mock_athlete = Entity(ds_util.client.key('Service', 'strava', 'Athlete'))
         athlete_get_by_id_mock.return_value = mock_athlete
@@ -107,13 +111,13 @@ class StravaTest(unittest.TestCase):
         r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
         ds_util_put_mock.assert_called_once()
-        process_event_mock.assert_called_once()
+        _create_task_locally_mock.assert_called_once()
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id', return_value=None)
     @mock.patch('shared.ds_util.client.put')
-    @mock.patch('shared.task_util.process_event')
+    @mock.patch('shared.task_util._create_task_locally')
     def test_strava_event_unknown_athlete(
-        self, process_event_mock, ds_util_put_mock, athlete_get_by_id_mock
+        self, _create_task_locally_mock, ds_util_put_mock, athlete_get_by_id_mock
     ):
         r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
@@ -121,4 +125,75 @@ class StravaTest(unittest.TestCase):
         # We expect a failure entity to be written and process to not be
         # called.
         ds_util_put_mock.assert_called_once()
-        process_event_mock.assert_not_called()
+        _create_task_locally_mock.assert_not_called()
+
+
+class SlackTest(unittest.TestCase):
+    def setUp(self):
+        main.app.debug = True
+        main.app.testing = True
+        self.client = main.app.test_client()
+
+    def _headers(self):
+        return {
+            'X-Slack-Request-Timestamp': int(time.time()),
+            'X-Slack-Signature': 'SLACK_SIGNATURE',
+        }
+
+    @mock.patch('services.slack.slack.slack_events_adapter.server.verify_signature')
+    def test_slack_challenge_response(self, verify_signature_mock):
+        """Verifies the slack adapter returns a challenge response."""
+        verify_signature_mock.return_value = True
+        challenge = 'CHALLENGE_STRING'
+        resp = self.client.post(
+            '/services/slack/events',
+            headers=self._headers(),
+            json={
+                'token': 'unYFPYx2dZIR4Eb2MwfabpoI',
+                'type': 'challenge',
+                'challenge': challenge,
+            },
+        )
+        self.assertEqual(resp.status_code, responses.OK.code)
+        self.assertEqual(resp.data.decode('utf-8'), challenge)
+
+    @mock.patch('services.slack.slack.slack_events_adapter.server.verify_signature')
+    @mock.patch('shared.task_util._create_task_locally')
+    def test_slack_event(self, _create_task_locally, verify_signature_mock):
+        """Verifies we handle events correctly.
+
+        https://api.slack.com/events/link_shared
+        """
+        verify_signature_mock.return_value = True
+        self.client.post(
+            '/services/slack/events',
+            headers=self._headers(),
+            json=json.loads(
+                """
+        {
+           "event" : {
+              "links" : [
+                 {
+                    "url" : "https://www.strava.com/routes/23137957",
+                    "domain" : "strava.com"
+                 }
+              ],
+              "channel" : "CL2QA9X1C",
+              "user" : "UL2NGJARL",
+              "type" : "link_shared",
+              "message_ts" : "1579378855.001300"
+           },
+           "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
+           "api_app_id" : "AKU8ZGJG1",
+           "event_id" : "EvSFJZPZGA",
+           "type" : "event_callback",
+           "event_time" : 1579378856,
+           "authed_users" : [
+              "USR4L7ZGW"
+           ],
+           "team_id" : "TL2DVHG3H"
+        }
+        """
+            ),
+        )
+        _create_task_locally.assert_called_once()

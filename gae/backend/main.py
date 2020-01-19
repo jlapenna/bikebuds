@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ from shared.datastore.user import User
 from shared import responses
 
 from services.bbfitbit import bbfitbit
+from services.slack import slack
 from services.strava import strava
 from services.strava.events_worker import EventsWorker as StravaEventsWorker
 from services.withings import withings
@@ -148,6 +149,23 @@ def process_event_task():
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
+
+
+@app.route('/tasks/process_slack_event', methods=['POST'])
+def process_slack_event_task():
+    try:
+        params = task_util.get_payload(flask.request)
+    except Exception:
+        logging.exception('Failed to get payload: %s', flask.request.data)
+        return responses.INTERNAL_SERVER_ERROR
+
+    try:
+        event = params['event']
+        logging.info('Processing: Key: %s', event.key)
+        return slack.process_slack_event(event)
+    except Exception:
+        logging.exception('Failed to process event: %s', params)
+        return responses.INTERNAL_SERVER_ERROR
 
 
 @app.route('/tasks/process_weight_trend', methods=['POST'])

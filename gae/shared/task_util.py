@@ -38,6 +38,9 @@ _default_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'default'
 )
 _events_parent = _client.queue_path(config.project_id, config.tasks_location, 'events')
+_slack_events_parent = _client.queue_path(
+    config.project_id, config.tasks_location, 'slack'
+)
 _notifications_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'notifications'
 )
@@ -95,21 +98,30 @@ def _queue_task(
         # Add the payload to the request.
         task['app_engine_http_request']['body'] = converted_payload
 
-    logging.debug('Queueing task: %s', task['app_engine_http_request']['relative_uri'])
     if config.is_dev:
-        # Override when running locally.
-        if service == 'default':
-            service == 'frontend'
-        url = getattr(config, service + '_url') + relative_uri
-        response = requests.post(url, data=converted_payload)
-        logging.info(
-            'Queued task: %s response: %s',
-            task['app_engine_http_request']['relative_uri'],
-            response,
+        logging.debug(
+            'locally executing: %s', task['app_engine_http_request']['relative_uri']
         )
-        return response
+        return _create_task_locally(task, service, relative_uri, converted_payload)
+    else:
+        logging.debug(
+            'Queueing task: %s', task['app_engine_http_request']['relative_uri']
+        )
+        return _client.create_task(parent, task)
 
-    return _client.create_task(parent, task)
+
+def _create_task_locally(task, service, relative_uri, converted_payload):
+    if service == 'default':
+        # Override when running locally.
+        service == 'frontend'
+    url = getattr(config, service + '_url') + relative_uri
+    response = requests.post(url, data=converted_payload)
+    logging.info(
+        'Queued task: %s response: %s',
+        task['app_engine_http_request']['relative_uri'],
+        response,
+    )
+    return response
 
 
 def _params_entity(**kwargs):
@@ -218,6 +230,16 @@ def process_event(event_key):
         service='backend',
         parent=_events_parent,
         delay_timedelta=datetime.timedelta(seconds=5),
+    )
+
+
+def process_slack_event(event):
+    return _queue_task(
+        name=event.key.name,
+        entity=_params_entity(event=event),
+        relative_uri='/tasks/process_slack_event',
+        service='backend',
+        parent=_slack_events_parent,
     )
 
 

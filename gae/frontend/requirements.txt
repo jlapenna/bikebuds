@@ -33,3 +33,6 @@ sortedcontainers==2.1.0
 # Stackdriver
 google-cloud-profiler==1.0.9
 google-python-cloud-debugger==2.14
+
+# Slack
+git+git://github.com/jlapenna/python-slack-events-api@master

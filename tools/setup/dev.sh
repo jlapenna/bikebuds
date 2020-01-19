@@ -60,6 +60,9 @@ function main() {
   echo "Now make sure dart, flutter, and android tools are in your path, then press enter."
   read
 
+  echo "Now make sure ngrok is installed and authenticated, then press enter."
+  read
+
   echo "Downloading an openapi-generator for dart."
   git clone https://github.com/openapitools/openapi-generator generated/openapi-generator
   pushd generated/openapi-generator
