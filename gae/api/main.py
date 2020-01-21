@@ -406,6 +406,21 @@ auth_model = api.model('Auth', {'token': fields.String})
 auth_entity_model = EntityModel(auth_model)
 
 
+filter_parser = reqparse.RequestParser()
+filter_parser.add_argument(
+    'filter', help='A filter for measures in a series.', location='args'
+)
+
+
+def get_filter_arg():
+    try:
+        args = filter_parser.parse_args()
+        return args['filter']
+    except Exception:
+        logging.exception('Failed to parse filter, skipping filter.')
+        return None
+
+
 @api.route('/activities')
 class ActivitiesResource(Resource):
     @api.doc('get_activities')
@@ -581,12 +596,6 @@ class RoutesResource(Resource):
         return routes
 
 
-filter_parser = reqparse.RequestParser()
-filter_parser.add_argument(
-    'filter', help='A filter for measures in a series.', location='args'
-)
-
-
 @api.route('/series')
 @api.expect(filter_parser)
 class SeriesResource(Resource):
@@ -602,13 +611,9 @@ class SeriesResource(Resource):
         if series is None:
             return WrapEntity(None)
 
-        args = {'filter': None}
-        try:
-            args = filter_parser.parse_args()
-        except Exception:
-            logging.exception('Failed to parse filter, skipping filter.')
-        if args['filter']:
-            series['measures'] = [m for m in series['measures'] if args['filter'] in m]
+        filter_arg = get_filter_arg()
+        if filter_arg:
+            series['measures'] = [m for m in series['measures'] if filter_arg in m]
         return WrapEntity(series)
 
 
