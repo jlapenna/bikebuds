@@ -25,5 +25,5 @@ class MainTest(unittest.TestCase):
         self.client = main.app.test_client()
 
     def test_index(self):
-        r = self.client.get('/unittest')
+        r = self.client.get('/bikebuds/unittest')
         self.assertEqual(r.status_code, responses.OK.code)
