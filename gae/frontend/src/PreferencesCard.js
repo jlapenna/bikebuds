@@ -48,7 +48,7 @@ class PreferencesCard extends Component {
   });
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     profile: PropTypes.object.isRequired,
   };
 
@@ -104,7 +104,7 @@ class PreferencesCard extends Component {
 
     // Remote
     this._cancelUpdatePreferences = makeCancelable(
-      this.props.apiClient.bikebuds.update_preferences({
+      this.props.bikebudsApi.update_preferences({
         payload: newPreferences,
       }),
       this.handlePreferences,
@@ -200,7 +200,7 @@ class PreferencesCard extends Component {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={12}>
-              <DevicesFormControl apiClient={this.props.apiClient} />
+              <DevicesFormControl bikebudsApi={this.props.bikebudsApi} />
             </Grid>
           </Grid>
         </CardContent>

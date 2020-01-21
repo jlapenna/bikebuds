@@ -41,7 +41,7 @@ export class ProfileState {
 
 export default class ProfileWrapper extends React.Component {
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
     profileState: PropTypes.object.isRequired,
   };
@@ -59,9 +59,9 @@ export default class ProfileWrapper extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.apiClient && !this.state.fetched) {
+    if (this.props.bikebudsApi && !this.state.fetched) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds.get_profile({}).then(response => {
+      this.props.bikebudsApi.get_profile({}).then(response => {
         this.props.profileState.update(response.body);
       });
     }

@@ -22,7 +22,7 @@ import { config } from './config';
 class FcmManager extends Component {
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     onMessage: PropTypes.func,
     onReady: PropTypes.func,
   };
@@ -137,7 +137,7 @@ class FcmManager extends Component {
       this.state.fcmToken !== prevState.fcmToken &&
       this.state.fcmToken != null
     ) {
-      this.props.apiClient.bikebuds
+      this.props.bikebudsApi
         .update_client({
           payload: {
             active: true,

@@ -31,7 +31,7 @@ export default class MainContent extends React.Component {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
-    apiClient: PropTypes.object,
+    bikebudsApi: PropTypes.object,
     profile: PropTypes.object,
   };
 
@@ -39,7 +39,7 @@ export default class MainContent extends React.Component {
     if (!this.props.profile.fetched) {
       return <SpinnerScreen>Loading profile...</SpinnerScreen>;
     }
-    if (!this.props.apiClient) {
+    if (!this.props.bikebudsApi) {
       return <SpinnerScreen>Connecting to bikebuds...</SpinnerScreen>;
     }
     return (
@@ -49,7 +49,7 @@ export default class MainContent extends React.Component {
           render={props => (
             <Club
               clubId={Number(props.match.params.club_id)}
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
               profile={this.props.profile}
             />
           )}
@@ -60,7 +60,7 @@ export default class MainContent extends React.Component {
           render={props => (
             <Events
               firebase={this.props.firebase}
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
             />
           )}
         />
@@ -68,7 +68,7 @@ export default class MainContent extends React.Component {
           path={`${this.props.match.path}settings`}
           render={props => (
             <Settings
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
               firebase={this.props.firebase}
               firebaseUser={this.props.firebaseUser}
               match={this.props.match}
@@ -86,7 +86,7 @@ export default class MainContent extends React.Component {
           exact
           render={props => (
             <Home
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
               profile={this.props.profile}
             />
           )}

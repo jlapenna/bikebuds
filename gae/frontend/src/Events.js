@@ -34,7 +34,7 @@ class Events extends Component {
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -54,7 +54,7 @@ class Events extends Component {
         <Grid item xs={12}>
           {this.query !== null && (
             <EventsListCard
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
               query={this.query}
             />
           )}
@@ -62,8 +62,8 @@ class Events extends Component {
         <Grid item xs={12}>
           <BikebudsFetcher
             fetcher={
-              !!this.props.apiClient
-                ? this.props.apiClient.bikebuds.get_routes
+              !!this.props.bikebudsApi
+                ? this.props.bikebudsApi.get_routes
                 : undefined
             }
             params={{}}
@@ -79,8 +79,8 @@ class Events extends Component {
         <Grid item xs={12}>
           <BikebudsFetcher
             fetcher={
-              !!this.props.apiClient
-                ? this.props.apiClient.bikebuds.get_activities
+              !!this.props.bikebudsApi
+                ? this.props.bikebudsApi.get_activities
                 : undefined
             }
             params={{}}

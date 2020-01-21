@@ -62,7 +62,7 @@ class MeasuresWrapper extends Component {
     this._mounted = true;
     if (!this.state.fetched) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds
+      this.props.bikebudsApi
         .get_series({ filter: 'weight' })
         .then(this.handleSeries);
     }

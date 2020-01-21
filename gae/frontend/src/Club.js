@@ -32,7 +32,7 @@ import ActivitiesListCard from './ActivitiesListCard';
 class ClubFetcher extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -77,15 +77,15 @@ class ClubFetcher extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (
-      this.props.apiClient &&
+      this.props.bikebudsApi &&
       !this.state.fetched &&
       this.state.club === undefined
     ) {
       this.setState({ fetched: true });
-      this.props.apiClient.bikebuds
+      this.props.bikebudsApi
         .get_club({ club_id: this.props.clubId })
         .then(this.handleClub, this.handleClub);
-      this.props.apiClient.bikebuds
+      this.props.bikebudsApi
         .get_club_activities({ club_id: this.props.clubId })
         .then(this.handleActivities, this.handleActivities);
     }
@@ -205,7 +205,7 @@ class _ClubWidget extends Component {
             md={9}
           >
             <ActivitiesListCard
-              apiClient={this.props.apiClient}
+              bikebudsApi={this.props.bikebudsApi}
               profile={this.props.profile}
               activities={this.props.activities}
               showAthlete={true}
@@ -222,7 +222,7 @@ export const ClubWidget = withStyles(_ClubWidget.styles)(_ClubWidget);
 export default class Club extends Component {
   static propTypes = {
     clubId: PropTypes.number.isRequired,
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     profile: PropTypes.object.isRequired,
   };
 

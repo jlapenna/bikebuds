@@ -33,7 +33,7 @@ import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,

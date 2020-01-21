@@ -24,7 +24,7 @@ import Events from './Events';
 
 it('renders without crashing', () => {
   var firebase = new FirebaseState(true /* forTest */);
-  const apiClient = {
+  const bikebudsApi = {
     bikebuds: {
       get_activities: () => Promise.resolve({ body: [] }),
       get_routes: () => Promise.resolve({ body: [] }),
@@ -34,7 +34,7 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <Events firebase={firebase} apiClient={apiClient} />
+      <Events firebase={firebase} bikebudsApi={bikebudsApi} />
     </Router>,
     div
   );

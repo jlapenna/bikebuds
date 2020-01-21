@@ -44,7 +44,7 @@ class EventsListCard extends Component {
   });
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     query: PropTypes.object.isRequired,
   };
 
@@ -87,7 +87,7 @@ class EventsListCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.apiClient && this.unsubscribe === undefined) {
+    if (this.props.bikebudsApi && this.unsubscribe === undefined) {
       this.unsubscribe = this.props.query.onSnapshot(this.handleUpdateEvents);
     }
   }

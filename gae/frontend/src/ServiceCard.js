@@ -62,7 +62,7 @@ class ServiceCard extends Component {
   });
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     serviceName: PropTypes.string.isRequired,
   };
@@ -91,7 +91,7 @@ class ServiceCard extends Component {
       this.state.service.properties.credentials
     ) {
       this._cancelDisconnect = makeCancelable(
-        this.props.apiClient.bikebuds.disconnect({
+        this.props.bikebudsApi.disconnect({
           name: this.props.serviceName,
         }),
         response => {
@@ -137,7 +137,7 @@ class ServiceCard extends Component {
   handleSync = () => {
     this.setState({ actionPending: true });
     this._cancelSync = makeCancelable(
-      this.props.apiClient.bikebuds.sync_service({
+      this.props.bikebudsApi.sync_service({
         name: this.props.serviceName,
       }),
       response => {
@@ -157,7 +157,7 @@ class ServiceCard extends Component {
 
     this.setState(newState);
 
-    this.props.apiClient.bikebuds
+    this.props.bikebudsApi
       .update_service({
         name: this.props.serviceName,
         payload: { sync_enabled: event.target.checked },
@@ -170,8 +170,8 @@ class ServiceCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.apiClient && this.state.service === undefined) {
-      this.props.apiClient.bikebuds
+    if (this.props.bikebudsApi && this.state.service === undefined) {
+      this.props.bikebudsApi
         .get_service({ name: this.props.serviceName })
         .then(this.handleService);
     }

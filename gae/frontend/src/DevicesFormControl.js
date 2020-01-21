@@ -31,7 +31,7 @@ class DevicesFormControl extends Component {
   static styles = createStyles({});
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -57,10 +57,10 @@ class DevicesFormControl extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.apiClient && !this.state.fetched) {
+    if (this.props.bikebudsApi && !this.state.fetched) {
       this.setState({ fetched: true });
       this._cancelGetClients = makeCancelable(
-        this.props.apiClient.bikebuds.get_clients(),
+        this.props.bikebudsApi.get_clients(),
         this.handleClients,
         console.error
       );
@@ -81,7 +81,7 @@ class DevicesFormControl extends Component {
     this.setState({ clients: this.state.clients });
 
     this._cancelUpdateClient = makeCancelable(
-      this.props.apiClient.bikebuds.update_client({
+      this.props.bikebudsApi.update_client({
         payload: client.properties,
       }),
       () => {},

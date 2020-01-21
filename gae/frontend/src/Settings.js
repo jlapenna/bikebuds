@@ -32,7 +32,7 @@ class Settings extends Component {
   });
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object,
     profile: PropTypes.object,
@@ -45,7 +45,7 @@ class Settings extends Component {
           <ProfileCard
             firebase={this.props.firebase}
             firebaseUser={this.props.firebaseUser}
-            apiClient={this.props.apiClient}
+            bikebudsApi={this.props.bikebudsApi}
             match={this.props.match}
             profile={this.props.profile}
           />
@@ -54,26 +54,26 @@ class Settings extends Component {
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'fitbit'}
-            apiClient={this.props.apiClient}
+            bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'strava'}
-            apiClient={this.props.apiClient}
+            bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'withings'}
-            apiClient={this.props.apiClient}
+            bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
         <Grid item xs={12}>
           <PreferencesCard
-            apiClient={this.props.apiClient}
+            bikebudsApi={this.props.bikebudsApi}
             profile={this.props.profile}
           />
         </Grid>

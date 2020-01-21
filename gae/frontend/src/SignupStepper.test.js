@@ -32,7 +32,7 @@ it('renders without crashing', () => {
     <SignupStepper
       firebase={firebase}
       firebaseUser={{}}
-      apiClient={null}
+      bikebudsApi={null}
       onFinished={() => {}}
     />,
     div

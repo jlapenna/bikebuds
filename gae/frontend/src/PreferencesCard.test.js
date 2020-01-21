@@ -25,10 +25,8 @@ it('renders without crashing', () => {
     displayName: 'Display Name',
     photoUrl: '/logo-round.svg',
   };
-  const apiClient = {
-    bikebuds: {
-      get_clients: () => Promise.resolve({ body: [] }),
-    },
+  const bikebudsApi = {
+    get_clients: () => Promise.resolve({ body: [] }),
   };
 
   // this.props.profile.user.properties.preferences.units
@@ -39,7 +37,7 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(
     <PreferencesCard
-      apiClient={apiClient}
+      bikebudsApi={bikebudsApi}
       firebaseUser={firebaseUser}
       profile={profile}
     />,

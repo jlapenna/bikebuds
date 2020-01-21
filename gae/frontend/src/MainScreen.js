@@ -46,14 +46,15 @@ class MainScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      apiClient: null,
+      bikebudsApi: null,
       profile: new ProfileState(this.handleProfileUpdated),
     };
   }
 
   handleSwagReady = client => {
     this.setState({
-      apiClient: client.apis,
+      bikebudsApi: client.apis.bikebuds,
+      adminApi: client.apis.admin,
     });
   };
 
@@ -73,7 +74,7 @@ class MainScreen extends Component {
         match={this.props.match}
         firebase={this.props.firebase}
         firebaseUser={this.props.firebaseUser}
-        apiClient={this.state.apiClient}
+        bikebudsApi={this.state.bikebudsApi}
         profile={this.state.profile}
       />
     );
@@ -85,17 +86,17 @@ class MainScreen extends Component {
           firebaseToken={this.props.firebaseToken}
           onReady={this.handleSwagReady}
         />
-        {this.state.apiClient && (
+        {this.state.bikebudsApi && (
           <ProfileWrapper
-            apiClient={this.state.apiClient}
+            bikebudsApi={this.state.bikebudsApi}
             match={this.props.match}
             profileState={this.state.profile}
           />
         )}
-        {!this.props.embed && this.state.apiClient && (
+        {!this.props.embed && this.state.bikebudsApi && (
           <FcmManager
             firebase={this.props.firebase}
-            apiClient={this.state.apiClient}
+            bikebudsApi={this.state.bikebudsApi}
             onMessage={this.handleFcmMessage}
           />
         )}

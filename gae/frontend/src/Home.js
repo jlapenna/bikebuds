@@ -33,7 +33,7 @@ class Home extends Component {
   });
 
   static propTypes = {
-    apiClient: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     profile: PropTypes.object,
   };
 
@@ -42,7 +42,7 @@ class Home extends Component {
       <Grid className={this.props.classes.root} container spacing={3}>
         <MeasuresWrapper
           profile={this.props.profile}
-          apiClient={this.props.apiClient}
+          bikebudsApi={this.props.bikebudsApi}
           render={wrapperState => (
             <React.Fragment>
               <Grid item xs={12}>
