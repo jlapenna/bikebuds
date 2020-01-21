@@ -75,6 +75,18 @@ class ServiceCard extends Component {
     };
   }
 
+  componentDidMount() {
+    this.setState({});
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.bikebudsApi && this.state.service === undefined) {
+      this.props.bikebudsApi
+        .get_service({ name: this.props.serviceName })
+        .then(this.handleService);
+    }
+  }
+
   componentWillUnmount() {
     if (this._cancelDisconnect) {
       this._cancelDisconnect();
@@ -164,18 +176,6 @@ class ServiceCard extends Component {
       })
       .then(this.handleService);
   };
-
-  componentDidMount() {
-    this.setState({});
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.bikebudsApi && this.state.service === undefined) {
-      this.props.bikebudsApi
-        .get_service({ name: this.props.serviceName })
-        .then(this.handleService);
-    }
-  }
 
   renderCardContent() {
     return (

@@ -41,6 +41,7 @@ class DrawerContent extends React.Component {
     });
 
   static propTypes = {
+    firebaseUser: PropTypes.object.isRequired,
     profile: PropTypes.object,
   };
 
@@ -91,6 +92,16 @@ class DrawerContent extends React.Component {
           >
             <ListItemText>Settings</ListItemText>
           </ListItem>
+          {this.props.firebaseUser.admin && (
+            <ListItem
+              button
+              key="Admin"
+              component={DrawerItemLink}
+              to={{ pathname: '/admin', search: window.location.search }}
+            >
+              <ListItemText>Admin</ListItemText>
+            </ListItem>
+          )}
         </List>
         <div className={this.props.classes.footer}>
           <Typography variant="caption">

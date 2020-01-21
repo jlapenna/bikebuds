@@ -66,6 +66,7 @@ class AuthWrapper extends Component {
     if (config.isDev && config.fakeUser) {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
+        admin: true,
         displayName: 'Fake User',
         photoUrl: '/logo-round.svg',
       };

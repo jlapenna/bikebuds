@@ -90,6 +90,7 @@ class Chrome extends Component {
       },
     });
   static propTypes = {
+    firebaseUser: PropTypes.object.isRequired,
     profile: PropTypes.object,
   };
 
@@ -143,6 +144,7 @@ class Chrome extends Component {
             >
               <div className={this.props.classes.toolbar} />
               <DrawerContent
+                firebaseUser={this.props.firebaseUser}
                 profile={this.props.profile}
                 onClick={() => this.setState({ mobileOpen: false })}
               />
@@ -158,6 +160,7 @@ class Chrome extends Component {
             >
               <div className={this.props.classes.toolbar} />
               <DrawerContent
+                firebaseUser={this.props.firebaseUser}
                 profile={this.props.profile}
                 onClick={() => this.setState({ mobileOpen: false })}
               />

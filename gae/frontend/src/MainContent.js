@@ -19,6 +19,7 @@ import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
 
+import Admin from './Admin';
 import Club from './Club';
 import Events from './Events';
 import Home from './Home';
@@ -31,6 +32,7 @@ export default class MainContent extends React.Component {
     match: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
+    adminApi: PropTypes.object,
     bikebudsApi: PropTypes.object,
     profile: PropTypes.object,
   };
@@ -76,6 +78,20 @@ export default class MainContent extends React.Component {
             />
           )}
         />
+        {this.props.firebaseUser.admin && (
+          <Route
+            path={`${this.props.match.path}admin`}
+            render={props => (
+              <Admin
+                adminApi={this.props.adminApi}
+                firebase={this.props.firebase}
+                firebaseUser={this.props.firebaseUser}
+                match={this.props.match}
+                profile={this.props.profile}
+              />
+            )}
+          />
+        )}
         <Route
           path={`${this.props.match.path}signup`}
           exact

@@ -74,6 +74,7 @@ class MainScreen extends Component {
         match={this.props.match}
         firebase={this.props.firebase}
         firebaseUser={this.props.firebaseUser}
+        adminApi={this.state.adminApi}
         bikebudsApi={this.state.bikebudsApi}
         profile={this.state.profile}
       />
@@ -102,13 +103,19 @@ class MainScreen extends Component {
         )}
         {this.props.embed ? (
           <EmbedChrome
+            firebaseUser={this.props.firebaseUser}
             history={this.props.history}
             profile={this.state.profile}
           >
             {mainContent}
           </EmbedChrome>
         ) : (
-          <Chrome profile={this.state.profile}>{mainContent}</Chrome>
+          <Chrome
+            firebaseUser={this.props.firebaseUser}
+            profile={this.state.profile}
+          >
+            {mainContent}
+          </Chrome>
         )}
       </div>
     );
