@@ -365,18 +365,3 @@ def get_filter_arg():
     except Exception:
         logging.exception('Failed to parse filter, skipping filter.')
         return None
-
-
-admin_parser = reqparse.RequestParser()
-admin_parser.add_argument(
-    'admin', type=bool, help='Acting as an admin.', location='args'
-)
-
-
-def get_admin_arg():
-    try:
-        args = admin_parser.parse_args()
-        return args['admin']
-    except Exception:
-        logging.exception('Failed to parse admin, not an admin request.')
-        return False

@@ -16,15 +16,62 @@ import logging
 
 import flask
 
-from flask_restplus import Resource, Namespace
+from flask_restplus import Resource, Namespace, fields
+
+import stravalib
 
 from shared import auth_util
 from shared import ds_util
 from shared import task_util
 from shared import responses
+from shared.config import config
+from shared.datastore.bot import Bot
+from shared.datastore.service import Service
 from shared.services.withings.client import create_client as withings_create_client
 
+from models import (
+    service_entity_model,
+    WrapEntity,
+)
+
 api = Namespace('admin', 'Bikebuds Admin API')
+
+
+auth_url_model = api.model('AuthUrl', {'auth_url': fields.String})
+
+
+bot_model = api.model(
+    'Bot', {'strava': fields.Nested(service_entity_model, skip_none=True)}
+)
+
+
+@api.route('/bot')
+class BotResource(Resource):
+    @api.doc('get_bot')
+    @api.marshal_with(bot_model, skip_none=True)
+    def get(self):
+        auth_util.verify_admin(flask.request)
+        user = Bot.get()
+        strava = Service.get('strava', parent=user.key)
+        return {'strava': WrapEntity(strava)}
+
+
+@api.route('/strava_auth_url')
+class StravaAuthUrl(Resource):
+    @api.doc('get_strava_auth_url')
+    @api.marshal_with(auth_url_model, skip_none=True)
+    def get(self):
+        auth_util.verify_admin(flask.request)
+        redirect_uri = config.frontend_url + '/services/strava/echo'
+
+        client = stravalib.client.Client()
+        url = client.authorization_url(
+            client_id=config.strava_creds['client_id'],
+            redirect_uri=redirect_uri,
+            approval_prompt='force',
+            scope=['activity:read_all', 'profile:read_all'],
+        )
+        return {'auth_url': url}
 
 
 @api.route('/process_events')

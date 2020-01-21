@@ -32,7 +32,6 @@ from shared.datastore.series import Series
 
 from models import (
     activity_entity_model,
-    admin_parser,
     auth_model,
     client_state_entity_model,
     client_state_model,
@@ -249,7 +248,6 @@ class SeriesResource(Resource):
 
 
 @api.route('/service/<name>')
-@api.expect(admin_parser)
 class ServiceResource(Resource):
     @api.doc('get_service')
     @api.marshal_with(service_entity_model, skip_none=True)
