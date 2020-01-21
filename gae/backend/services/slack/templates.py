@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ROUTE_BLOCK = """
+ROUTE_BLOCK = r"""
 {
     "blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "<https://www.strava.com/route/%(id)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>\\n%(description)s\\nCreated on %(created)s"
+                "text": "<https://www.strava.com/route/%(id)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>\n%(description)s\nCreated on %(timestamp)s"
             },
             "accessory": {
                 "type": "image",
@@ -35,11 +35,11 @@ ROUTE_BLOCK = """
             "fields": [
                 {
                     "type": "mrkdwn",
-                    "text": "*Distance:* %(distance)s"
+                    "text": "*Distance:* %(distance)smi"
                 },
                 {
                     "type": "mrkdwn",
-                    "text": "*Elevation:* %(elevation_gain)s"
+                    "text": "*Elevation:* %(elevation_gain)sft"
                 }
             ]
         }

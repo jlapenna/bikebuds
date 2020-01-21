@@ -130,8 +130,7 @@ def init(claims):
 
 
 @module.route('/services/strava/echo', methods=['GET'])
-@auth_util.claims_required
-def echo(claims):
+def echo():
     """Step 2. Echos an authentication url that can be used to store credentials."""
     url = flask.request.url.replace('echo', 'admin')
     return ECHO_RESPONSE % (url,)

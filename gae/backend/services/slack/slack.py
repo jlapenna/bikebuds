@@ -14,11 +14,19 @@
 
 import json
 import logging
+import urllib
 
-from shared import responses
-from shared.slack_util import slack_client
+from babel.dates import format_date
+from measurement.measures import Distance
 
 from services.slack.templates import ROUTE_BLOCK
+from services.strava.client import ClientWrapper
+from shared import responses
+from shared.config import config
+from shared.datastore.bot import Bot
+from shared.datastore.route import Route
+from shared.datastore.service import Service
+from shared.slack_util import slack_client
 
 
 def process_slack_event(event):
@@ -28,38 +36,60 @@ def process_slack_event(event):
         event: An entity representing a full event message, including event_id, etc.
     """
     logging.debug('process_slack_event: %s', event)
-    logging.debug('process_slack_event: %s', event['event']['type'])
     if event['event']['type'] == 'link_shared':
         return process_link_shared(event)
     return responses.OK_SUB_EVENT_UNKNOWN
 
 
 def process_link_shared(event):
+    service = Service.get('strava', parent=Bot.key())
+    client = ClientWrapper(service)
+    unfurls = dict(
+        (link['url'], _unfurl(client, link)) for link in event['event']['links']
+    )
     response = slack_client.chat_unfurl(
         channel=event['event']['channel'],
         ts=event['event']['message_ts'],
-        unfurls=dict((link['url'], _unfurl(link)) for link in event['event']['links']),
+        unfurls=unfurls,
     )
     if not response['ok']:
-        logging.error('process_link_shared: failed: %s', response)
+        logging.error('process_link_shared: failed: %s with %s', response, unfurls)
         return responses.INTERNAL_SERVER_ERROR
     logging.debug('process_link_shared: %s', response)
     return responses.OK
 
 
-def _unfurl(link):
-    route = {
-        'id': '',
-        'created': '',
-        'description': '',
-        'distance': '',
-        'elevation_gain': '',
-        'name': '',
-        'athlete.id': '',
-        'athlete.firstname': '',
-        'athlete.lastname': '',
-        'map_image_url': 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
-    }
-
+def _unfurl(client, link):
     if '/routes/' in link['url']:
-        return json.loads(ROUTE_BLOCK % route)
+        url = urllib.parse.urlparse(link['url'])
+        route = client.get_route(url.path.split('/')[-1])
+        route = Route.to_entity(route)
+        return _route_block(route)
+
+
+def _route_block(route):
+    route_sub = {
+        'id': route['id'],
+        'timestamp': format_date(route['timestamp'], format='medium'),
+        'description': route['description'],
+        'distance': round(Distance(m=route['distance']).mi, 2),
+        'elevation_gain': round(Distance(m=route['elevation_gain']).ft),
+        'name': route['name'],
+        'athlete.id': route['athlete']['id'],
+        'athlete.firstname': route['athlete']['firstname'],
+        'athlete.lastname': route['athlete']['lastname'],
+        'map_image_url': _generate_url(route),
+    }
+    return json.loads(ROUTE_BLOCK % route_sub)
+
+
+def _generate_url(route):
+    url = 'https://maps.googleapis.com/maps/api/staticmap?'
+    params = {
+        'key': config.api_key,
+        'size': '512x512',
+        'maptype': 'roadmap',
+        'path': 'enc:' + route['map']['summary_polyline'],
+        'format': 'jpg',
+    }
+    return url + urllib.parse.urlencode(params)
