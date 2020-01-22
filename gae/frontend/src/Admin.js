@@ -27,6 +27,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import makeCancelable from 'makecancelable';
 import JSONPretty from 'react-json-pretty';
 
+import { createSession } from './session_util';
+
 class Admin extends Component {
   static styles = createStyles({
     root: {
@@ -65,17 +67,24 @@ class Admin extends Component {
 
   handleConnect = () => {
     this.setState({ actionPending: true });
-    this._cancelDisconnect = makeCancelable(
-      this.props.adminApi.get_strava_auth_url(),
-      response => {
-        console.log(response);
-        this.setState({
-          actionPending: false,
-          authUrl: response.body.auth_url,
-          dialogOpen: true,
-        });
+    createSession(this.props.firebase, response => {
+      if (response.status === 200) {
+        this._cancelDisconnect = makeCancelable(
+          this.props.adminApi.get_strava_auth_url(),
+          response => {
+            console.log(response);
+            this.setState({
+              actionPending: false,
+              authUrl: response.body.auth_url,
+              dialogOpen: true,
+            });
+          }
+        );
+      } else {
+        console.warn('Unable to create a session.', response);
+        this.setState({ actionPending: false });
       }
-    );
+    });
   };
 
   handleClose = () => {
