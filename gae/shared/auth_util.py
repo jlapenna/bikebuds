@@ -51,27 +51,30 @@ def claims_required(func):
     def wrapper():
         try:
             claims = verify(flask.request)
-        except auth.AuthError as e:
-            return e.message, e.code
+        except Exception as e:
+            return 'Unauthorized', e.code
         return func(claims)
 
     return wrapper
 
 
 def verify(request):
-    if request.method == 'POST':
-        return verify_claims(request)
-    elif request.method == 'GET':
-        return verify_claims_from_cookie(request)
-
-
-def verify_claims(request, impersonate=None):
-    """Return valid claims or throw an AuthError."""
     if config.is_dev and config.fake_user:
         return fake_claims()
 
+    claims = _verify_claims_from_headers(request)
+    if claims:
+        return claims
+    claims = _verify_claims_from_cookie(request)
+    if claims:
+        return claims
+    flask.abort(401, 'Unable to authenticate.')
+
+
+def _verify_claims_from_headers(request, impersonate=None):
+    """Return valid claims or throw an Exception."""
     if 'Authorization' not in request.headers:
-        flask.abort(401, 'Unable to find bearer in headers')
+        return None
     id_token = request.headers['Authorization'].split(' ').pop()
 
     claims = None
@@ -97,11 +100,8 @@ def verify_claims(request, impersonate=None):
     return claims
 
 
-def verify_claims_from_cookie(request):
-    """Return valid claims or throw an AuthError."""
-    if config.is_dev and config.fake_user:
-        return fake_claims()
-
+def _verify_claims_from_cookie(request):
+    """Return valid claims or throw an Exception."""
     session_cookie = request.cookies.get('session')
     # Verify the session cookie. In this case an additional check is added to
     # detect if the user's Firebase session was revoked, user deleted/disabled,
@@ -113,7 +113,7 @@ def verify_claims_from_cookie(request):
 
 
 def verify_admin(request):
-    claims = verify_claims(flask.request)
+    claims = verify(flask.request)
     if not claims.get('admin'):
         flask.abort(403, 'User is not an admin')
     return claims

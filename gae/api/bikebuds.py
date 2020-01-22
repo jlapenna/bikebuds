@@ -56,7 +56,7 @@ class ActivitiesResource(Resource):
     @api.doc('get_activities')
     @api.marshal_with(activity_entity_model, skip_none=True, as_list=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get('strava', parent=user.key)
         activities_query = ds_util.client.query(
@@ -75,7 +75,7 @@ class ClientsResource(Resource):
     @api.doc('get_clients')
     @api.marshal_with(client_state_entity_model, skip_none=True, as_list=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         clients_query = ds_util.client.query(
             kind='ClientState', ancestor=user.key, order=['-modified']
@@ -88,7 +88,7 @@ class ClientResource(Resource):
     @api.doc('get_client')
     @api.marshal_with(client_state_entity_model, skip_none=True)
     def get(self, client_id):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         return WrapEntity(ClientState.get(client_id, parent=user.key))
 
@@ -98,7 +98,7 @@ class UpdateClientResource(Resource):
     @api.doc('update_client', body=client_state_model)
     @api.marshal_with(client_state_entity_model, skip_none=True)
     def post(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         new_client = api.payload
         existing_client = ClientState.get(new_client['token'], parent=user.key)
@@ -114,7 +114,7 @@ class ClubResource(Resource):
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
         club_id = int(club_id)
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
 
         user = User.get(claims)
         strava = Service.get('strava', parent=user.key)
@@ -142,7 +142,7 @@ class ClubActivitiesResource(Resource):
     @api.marshal_with(activity_entity_model, skip_none=True, as_list=True)
     def get(self, club_id):
         club_id = int(club_id)
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
 
         user = User.get(claims)
         strava = Service.get('strava', parent=user.key)
@@ -176,7 +176,7 @@ class UserResource(Resource):
     @api.doc('get_user')
     @api.marshal_with(user_entity_model, skip_none=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         return WrapEntity(user)
 
@@ -186,7 +186,7 @@ class PreferencesResource(Resource):
     @api.doc('update_preferences', body=preferences_model)
     @api.marshal_with(preferences_model, skip_none=True)
     def post(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         user['preferences'].update(api.payload)
         ds_util.client.put(user)
@@ -198,7 +198,7 @@ class ProfileResource(Resource):
     @api.doc('get_profile')
     @api.marshal_with(profile_model, skip_none=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         strava = Service.get('strava', parent=user.key)
         strava_connected = Service.has_credentials(strava)
@@ -216,7 +216,7 @@ class RoutesResource(Resource):
     @api.doc('get_routes')
     @api.marshal_with(route_entity_model, skip_none=True, as_list=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get('strava', parent=user.key)
         routes_query = ds_util.client.query(
@@ -232,7 +232,7 @@ class SeriesResource(Resource):
     @api.doc('get_series')
     @api.marshal_with(series_entity_model, skip_none=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service_name = user['preferences']['weight_service'].lower()
         series = Series.get(
@@ -252,7 +252,7 @@ class ServiceResource(Resource):
     @api.doc('get_service')
     @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get(name, parent=user.key)
         return WrapEntity(service)
@@ -260,7 +260,7 @@ class ServiceResource(Resource):
     @api.doc('update_service', body=service_entity_model)
     @api.marshal_with(service_entity_model, skip_none=True)
     def post(self, name):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         new_service = api.payload
         existing_service = Service.get(name, parent=user.key)
@@ -274,7 +274,7 @@ class ServiceDisconnect(Resource):
     @api.doc('disconnect')
     @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get(name, parent=user.key)
         Service.clear_credentials(service)
@@ -287,7 +287,7 @@ class SyncResource(Resource):
     @api.doc('sync_service')
     @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get(name, parent=user.key)
 
@@ -300,7 +300,7 @@ class AuthResource(Resource):
     @api.doc('auth')
     @api.marshal_with(auth_model, skip_none=True)
     def get(self):
-        claims = auth_util.verify_claims(flask.request)
+        claims = auth_util.verify(flask.request)
         custom_token = auth_util.create_custom_token(claims)
         return {'token': custom_token.decode('utf-8')}
 
