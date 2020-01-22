@@ -19,9 +19,9 @@ import React, { Component } from 'react';
 
 import Swagger from 'swagger-client';
 
-import { config } from './config';
+import { config, firebase_config } from './config';
 
-const bikebudsDiscoveryUrl = config.api3Url + '/swagger.json';
+const bikebudsDiscoveryUrl = config.api_url + '/swagger.json';
 
 class SwagWrapper extends Component {
   static propTypes = {
@@ -42,7 +42,7 @@ class SwagWrapper extends Component {
     this._swaggerLoader = Swagger({
       url: bikebudsDiscoveryUrl,
       authorizations: {
-        api_key: config.apiKey,
+        api_key: firebase_config.apiKey,
         firebase: { token: authDict },
       },
     }).then(client => {

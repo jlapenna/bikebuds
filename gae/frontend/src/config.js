@@ -15,34 +15,9 @@
  */
 
 import config_json from './config.json';
+import firebase_web_json from './firebase-web.json';
+import firebase_web_next_json from './firebase-web-next.json';
 
-export const config = {
-  isDev: config_json['is_dev'],
-  projectId: config_json['project_id'],
-  appId: config_json['web_app_id'],
-  apiKey: config_json['api_key'],
-  authDomain: config_json['auth_domain'],
-  databaseURL: config_json['database_url'],
-  mapsApiKey: config_json['maps_api_key'],
-  storageBucket: config_json['storage_bucket'],
-  messagingSenderId: config_json['message_sender_id'],
-  vapidKey: config_json['vapid_key'],
-  devserverUrl: config_json['devserver_url'],
-  frontendUrl: config_json['frontend_url'],
-  apiUrl: config_json['api_url'],
-  backendUrl: config_json['backend_url'],
-  devserver3Url: config_json['devserver_url'],
-  api3Url: config_json['api_url'],
-  backend3Url: config_json['backend_url'],
-  fakeUser: config_json['fake_user'],
-};
-
-export const nextConfig = {
-  projectId: config_json['next_project_id'],
-  appId: config_json['next_web_app_id'],
-  apiKey: config_json['next_api_key'],
-  authDomain: config_json['next_auth_domain'],
-  databaseURL: config_json['next_database_url'],
-  storageBucket: config_json['next_storage_bucket'],
-  messagingSenderId: config_json['next_message_sender_id'],
-};
+export const config = config_json;
+export const firebase_config = firebase_web_json;
+export const firebase_next_config = firebase_web_next_json;

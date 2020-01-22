@@ -86,7 +86,7 @@ def _route_block(route):
 def _generate_url(route):
     url = 'https://maps.googleapis.com/maps/api/staticmap?'
     params = {
-        'key': config.api_key,
+        'key': config.firebase_web_creds['apiKey'],
         'size': '512x512',
         'maptype': 'roadmap',
         'path': 'enc:' + route['map']['summary_polyline'],

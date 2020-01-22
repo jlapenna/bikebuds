@@ -81,8 +81,8 @@ test('Renders signed-out without crashing', async () => {
 
 describe('Signed-in via dev/fakeuser config', () => {
   beforeEach(() => {
-    config.isDev = true;
-    config.fakeUser = 'jlapenna@gmail.com';
+    config.is_dev = true;
+    config.fake_user = 'jlapenna@gmail.com';
   });
 
   test('Renders signed-in without crashing', async () => {

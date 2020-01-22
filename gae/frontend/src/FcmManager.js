@@ -84,7 +84,7 @@ class FcmManager extends Component {
   };
 
   componentDidMount() {
-    if (config.isDev && config.fakeUser) {
+    if (config.is_dev && config.fake_user) {
       // No push messages when running with fake users.
       return;
     }
@@ -122,7 +122,7 @@ class FcmManager extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (config.isDev && config.fakeUser) {
+    if (config.is_dev && config.fake_user) {
       // No push messages when running with fake users.
       return;
     }

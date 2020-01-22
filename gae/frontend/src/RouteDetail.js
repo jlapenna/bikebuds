@@ -27,7 +27,7 @@ import {
   Polyline,
 } from '@react-google-maps/api';
 
-import { config } from './config';
+import { firebase_config } from './config';
 import { readableDistance, readableDuration, readableSpeed } from './convert';
 
 const MAP_LIBRARIES = ['geometry'];
@@ -109,7 +109,7 @@ class _RouteMap extends Component {
     return (
       <LoadScript
         id="script-loader"
-        googleMapsApiKey={config.mapsApiKey}
+        googleMapsApiKey={firebase_config.apiKey}
         libraries={MAP_LIBRARIES}
         loadingElement={<div className={this.props.classes.loadingElement} />}
       >

@@ -23,6 +23,10 @@ class _Config(object):
         for key, value in base_config.items():
             setattr(self, key, value)
 
+        self.firebase_web_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/firebase-web.json'))
+        )
+
         self.fitbit_creds = json.load(
             open(os.path.join(base_path, 'service_keys/fitbit.json'))
         )

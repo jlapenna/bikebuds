@@ -21,7 +21,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/messaging';
 
-import { config, nextConfig } from './config';
+import { firebase_config, firebase_next_config } from './config';
 
 export class FirebaseState {
   constructor(forTest) {
@@ -36,7 +36,7 @@ export class FirebaseState {
       return;
     }
     try {
-      this.app = firebase.initializeApp(config);
+      this.app = firebase.initializeApp(firebase_config);
     } catch (err) {
       if (err.code === 'app/duplicate-app') {
         this.app = firebase.app();
@@ -47,7 +47,7 @@ export class FirebaseState {
     this.auth = firebase.auth();
 
     try {
-      this.appNext = firebase.initializeApp(nextConfig, 'next');
+      this.appNext = firebase.initializeApp(firebase_next_config, 'next');
     } catch (err) {
       console.warn('FirebaseState: Tried to re-initialize next app.', err);
       this.app = firebase.app('next');

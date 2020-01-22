@@ -63,7 +63,7 @@ class AuthWrapper extends Component {
         JSON.stringify({ event: 'authWrapperMounted' })
       );
     }
-    if (config.isDev && config.fakeUser) {
+    if (config.is_dev && config.fake_user) {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
         admin: true,

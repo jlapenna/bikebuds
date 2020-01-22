@@ -21,7 +21,7 @@ export function createSession(firebase, responseCallback) {
     responseCallback({ status: 200 });
   }
   firebase.auth.currentUser.getIdTokenResult().then(idTokenResult => {
-    fetch(config.frontendUrl + '/services/session', {
+    fetch(config.frontend_url + '/services/session', {
       /* Set header for the XMLHttpRequest to get data from the web server
        * associated with userIdToken */
       headers: {

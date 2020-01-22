@@ -13,7 +13,7 @@ beforeEach(() => {
   // For config.json overrides.
   Object.assign(originalConfig, config);
   config.isDev = false;
-  config.fakeUser = '';
+  config.fake_user = '';
 });
 
 afterEach(() => {

@@ -63,7 +63,7 @@ class ProfileCard extends Component {
   }
 
   handleConnectServices = () => {
-    window.location.replace(config.frontendUrl + '/signup');
+    window.location.replace(config.frontend_url + '/signup');
   };
 
   handleSignOut = () => {

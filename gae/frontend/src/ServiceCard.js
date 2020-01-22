@@ -116,7 +116,7 @@ class ServiceCard extends Component {
       createSession(this.props.firebase, response => {
         if (response.status === 200) {
           window.location.replace(
-            config.frontendUrl +
+            config.frontend_url +
               '/services/' +
               this.props.serviceName +
               '/init?dest=/settings'
