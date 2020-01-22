@@ -49,8 +49,8 @@ class ClientWrapper(object):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except exc.AccessUnauthorized as e:
-                logging.info("Token expired, refreshing.", e)
+            except exc.AccessUnauthorized:
+                logging.info("Token expired, refreshing.")
                 if self._refresh_access_token():
                     return func(*args, **kwargs)
 
