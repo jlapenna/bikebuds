@@ -31,3 +31,7 @@ class Bot(object):
         user = Entity(key)
         ds_util.client.put(user)
         return user
+
+    @classmethod
+    def key(cls):
+        return ds_util.client.key('Bot', 'default')
