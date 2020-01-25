@@ -141,10 +141,6 @@ def sync_service(service):
 
 
 def sync_services(services):
-    # We have to do this "do" nonsense, because when on dev we fake tasks by
-    # just triggering them via http, and the transaction hasn't written the
-    # values yet, so the other server can't read them if they get processed
-    # before the transaction completes.
     def do():
         state = Entity(
             ds_util.client.key(
@@ -181,11 +177,7 @@ def sync_services(services):
         for task in tasks:
             _queue_task(**task)
 
-    if not config.is_dev:
-        with ds_util.client.transaction():
-            do()
-    else:
-        do()
+    _maybe_transact(do)
 
 
 def get_payload(request):
@@ -194,16 +186,16 @@ def get_payload(request):
 
 def maybe_finish_sync_services(state_key=None):
     if not state_key:
-        logging.warn('Cannot Increment completed tasks')
+        logging.warn('No sync state key provided to finish.')
         return
 
-    # We have to do this "do" nonsense, because when on dev we fake tasks by
-    # just triggering them via http, and the transaction hasn't written the
-    # values yet, so the other server can't read them if they get processed
-    # before the transaction completes.
     def do():
-        logging.debug('Incrementing completed tasks for %s', state_key)
         state = ds_util.client.get(state_key)
+        if state is None:
+            logging.debug('Cannot finish unknown sync: %s', state_key)
+            return
+
+        logging.debug('Incrementing completed tasks for %s', state_key)
         state['completed_tasks'] += 1
         ds_util.client.put(state)
 
@@ -215,11 +207,19 @@ def maybe_finish_sync_services(state_key=None):
             #    'service': 'backend',
             #    })
 
-    if not config.is_dev:
-        with ds_util.client.transaction():
-            do()
+    _maybe_transact(do)
+
+
+def _maybe_transact(fn, *args, **kwargs):
+    # We have to fn this "fn" nonsense, because when on dev we fake tasks by
+    # just triggering them via http, and the transaction hasn't written the
+    # values yet, so the other server can't read them if they get processed
+    # before the transaction completes.
+    if config.is_dev:
+        fn(*args, **kwargs)
     else:
-        do()
+        with ds_util.client.transaction():
+            fn(*args, **kwargs)
 
 
 def process_event(event_key):
