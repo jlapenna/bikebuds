@@ -85,14 +85,17 @@ def _verify_claims_from_headers(request, impersonate=None):
         )
         firebase_user = auth.get_user(claims['sub'])
     except ValueError:
-        claims = google.oauth2.id_token.verify_oauth2_token(
-            id_token, google.auth.transport.requests.Request()
-        )
-        # The claims have an email address that we have verified. Use that to
-        # find the firebase user.
-        if claims['iss'] == 'https://accounts.google.com':
-            firebase_user = auth.get_user_by_email(claims['email'])
-            claims = {'sub': firebase_user.uid, 'email': claims['email']}
+        try:
+            claims = google.oauth2.id_token.verify_oauth2_token(
+                id_token, google.auth.transport.requests.Request()
+            )
+            # The claims have an email address that we have verified. Use that to
+            # find the firebase user.
+            if claims['iss'] == 'https://accounts.google.com':
+                firebase_user = auth.get_user_by_email(claims['email'])
+                claims = {'sub': firebase_user.uid, 'email': claims['email']}
+        except ValueError:
+            logging.exception('Unable to verify claims')
 
     if not claims or not firebase_user:
         flask.abort(401, 'Unable to validate id_token')
