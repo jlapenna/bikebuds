@@ -86,8 +86,8 @@ class Events extends Component {
             params={{}}
             render={wrapperState => (
               <ActivitiesListCard
+                activities={wrapperState.response}
                 profile={this.props.profile}
-                response={wrapperState.response}
                 showDate={true}
               />
             )}

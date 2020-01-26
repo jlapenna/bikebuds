@@ -53,7 +53,7 @@ class ClubFetcher extends Component {
       return;
     }
     this.setState({
-      activities: response.body,
+      activities: response,
     });
   };
 
@@ -112,7 +112,7 @@ class _ClubWidget extends Component {
 
   static propTypes = {
     profile: PropTypes.object.isRequired,
-    activities: PropTypes.array,
+    activities: PropTypes.object,
     club: PropTypes.object,
     error: PropTypes.string,
   };
@@ -178,7 +178,7 @@ class _ClubWidget extends Component {
                           var url = '';
                           return (
                             <Grid item key={index}>
-                              <Button alt={member.firstname} href={url}>
+                              <Button href={url}>
                                 <Avatar
                                   alt={member.firstname}
                                   src={member.profile_medium}
@@ -205,7 +205,6 @@ class _ClubWidget extends Component {
             md={9}
           >
             <ActivitiesListCard
-              bikebudsApi={this.props.bikebudsApi}
               profile={this.props.profile}
               activities={this.props.activities}
               showAthlete={true}

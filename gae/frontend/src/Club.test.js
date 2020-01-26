@@ -19,11 +19,11 @@ import ReactDOM from 'react-dom';
 
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import Club, { ClubWidget } from './Club';
+import { ClubWidget } from './Club';
 
 it('renders without crashing', () => {
   const profile = {};
-  const activities = [];
+  const activities = { body: [] };
   const club = { properties: { members: [] } };
 
   const div = document.createElement('div');
