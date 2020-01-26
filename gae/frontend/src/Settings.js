@@ -35,6 +35,7 @@ class Settings extends Component {
     bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object,
+    match: PropTypes.object,
     profile: PropTypes.object,
   };
 
