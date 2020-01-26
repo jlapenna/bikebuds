@@ -23,7 +23,7 @@ export function localMoment(dateMoment) {
 }
 
 export function readableDuration(seconds, profile) {
-  return moment.duration(Number(seconds), 'seconds').format('hh:mm:ss');
+  return moment.duration(seconds, 'seconds').format('hh:mm:ss');
 }
 
 export function readableDistance(meters, profile) {
@@ -31,32 +31,59 @@ export function readableDistance(meters, profile) {
     return undefined;
   }
   if (getUnitPref(profile) === 'IMPERIAL') {
-    return convert(meters)
-      .from('m')
-      .to('mi')
-      .toFixed(2);
+    return (
+      convert(meters)
+        .from('m')
+        .to('mi')
+        .toFixed(2) + 'mi'
+    );
   } else {
-    return convert(meters)
-      .from('m')
-      .to('km')
-      .toFixed(2);
+    return (
+      convert(meters)
+        .from('m')
+        .to('km')
+        .toFixed(2) + 'km'
+    );
+  }
+}
+
+export function readableElevation(meters, profile) {
+  if (meters === undefined) {
+    return undefined;
+  }
+  if (getUnitPref(profile) === 'IMPERIAL') {
+    return (
+      convert(meters)
+        .from('m')
+        .to('ft')
+        .toFixed(2) + 'ft'
+    );
+  } else {
+    return (
+      convert(meters)
+        .from('m')
+        .to('m')
+        .toFixed(2) + 'm'
+    );
   }
 }
 
 export function readableSpeed(meters_per_second, profile) {
-  if (meters_per_second === undefined) {
+  if (!meters_per_second) {
     return undefined;
   }
   var speed = convert(meters_per_second)
     .from('m/s')
     .to('km/h');
   if (getUnitPref(profile) === 'IMPERIAL') {
-    return convert(speed)
-      .from('km')
-      .to('mi')
-      .toFixed(2);
+    return (
+      convert(speed)
+        .from('km')
+        .to('mi')
+        .toFixed(2) + 'mph'
+    );
   } else {
-    return speed.toFixed(2);
+    return speed.toFixed(2) + 'km/h';
   }
 }
 
