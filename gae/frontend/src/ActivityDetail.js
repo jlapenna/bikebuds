@@ -192,10 +192,12 @@ class ActivityDetail extends Component {
               <Typography variant="subtitle1">Distance</Typography>
               <Typography variant="h4">{distance}</Typography>
             </div>
-            <div className={this.props.classes.activitySummaryItem}>
-              <Typography variant="subtitle1">Speed</Typography>
-              <Typography variant="h4">{average_speed}</Typography>
-            </div>
+            {average_speed && (
+              <div className={this.props.classes.activitySummaryItem}>
+                <Typography variant="subtitle1">Speed</Typography>
+                <Typography variant="h4">{average_speed}</Typography>
+              </div>
+            )}
             <div className={this.props.classes.activitySummaryItem}>
               <Typography variant="subtitle1">Moving Time</Typography>
               <Typography variant="h4">{duration}</Typography>

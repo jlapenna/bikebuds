@@ -28,7 +28,7 @@ import {
 } from '@react-google-maps/api';
 
 import { firebase_config } from './config';
-import { readableDistance, readableDuration, readableSpeed } from './convert';
+import { readableDistance, readableElevation } from './convert';
 
 const MAP_LIBRARIES = ['geometry'];
 
@@ -177,9 +177,8 @@ class RouteDetail extends Component {
       this.props.route.properties.distance,
       this.props.profile
     );
-    const duration = readableDuration(this.props.route.properties.moving_time);
-    const average_speed = readableSpeed(
-      this.props.route.properties.average_speed,
+    const elevation_gain = readableElevation(
+      this.props.route.properties.elevation_gain,
       this.props.profile
     );
     return (
@@ -191,12 +190,8 @@ class RouteDetail extends Component {
               <Typography variant="h4">{distance}</Typography>
             </div>
             <div className={this.props.classes.routeSummaryItem}>
-              <Typography variant="subtitle1">Speed</Typography>
-              <Typography variant="h4">{average_speed}</Typography>
-            </div>
-            <div className={this.props.classes.routeSummaryItem}>
-              <Typography variant="subtitle1">Moving Time</Typography>
-              <Typography variant="h4">{duration}</Typography>
+              <Typography variant="subtitle1">Elevation</Typography>
+              <Typography variant="h4">{elevation_gain}</Typography>
             </div>
             <Hidden mdDown>
               <div className={this.props.classes.routeSummaryItem}>
