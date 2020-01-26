@@ -24,9 +24,11 @@ from shared import ds_util
 from shared import logging_util
 from shared import task_util
 
+from shared import responses
+from shared.datastore.bot import Bot
 from shared.datastore.service import Service
 from shared.datastore.user import User
-from shared import responses
+from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 
 from services.bbfitbit import bbfitbit
 from services.slack import slack
@@ -88,6 +90,7 @@ def sync_task():
 
 @app.route('/tasks/sync/service/<service_name>', methods=['POST'])
 def sync_service_task(service_name):
+    logging.debug('Syncing: %s', service_name)
     params = task_util.get_payload(flask.request)
 
     state_key = params['state_key']
@@ -116,6 +119,14 @@ def sync_service_task(service_name):
         Service.set_sync_finished(service, error=str(e))
         task_util.maybe_finish_sync_services(state_key)
         return responses.OK_SYNC_EXCEPTION
+
+
+@app.route('/tasks/sync/club/<club_id>', methods=['GET', 'POST'])
+def sync_club(club_id):
+    logging.debug('Syncing: %s', club_id)
+    service = Service.get('strava', parent=Bot.key())
+    _do(StravaClubWorker(club_id, service), work_key=service.key)
+    return responses.OK
 
 
 @app.route('/tasks/process_event', methods=['POST'])

@@ -19,7 +19,7 @@ from shared import ds_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
 
-from services.strava.client import ClientWrapper
+from shared.services.strava.client import ClientWrapper
 
 
 class EventsWorker(object):

@@ -23,6 +23,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 
 import makeCancelable from 'makecancelable';
 import JSONPretty from 'react-json-pretty';
@@ -38,6 +40,7 @@ class Admin extends Component {
 
   static propTypes = {
     adminApi: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
   };
@@ -49,11 +52,25 @@ class Admin extends Component {
       authUrl: null,
       dialogOpen: false,
       bot: undefined,
+      clubs: undefined,
+      track_club_id: '',
     };
   }
 
   componentDidMount() {
     this.setState({});
+  }
+
+  componentWillUnmount() {
+    if (this._cancelStravaAuth) {
+      this._cancelStravaAuth();
+    }
+    if (this._cancelSyncClub) {
+      this._cancelSyncClub();
+    }
+    if (this._cancelTrackClub) {
+      this._cancelTrackClub();
+    }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -63,13 +80,19 @@ class Admin extends Component {
         .get_bot({ name: this.props.serviceName })
         .then(response => this.setState({ bot: response.body }));
     }
+    if (this.props.adminApi && this.state.clubs === undefined) {
+      this.setState({ clubs: null });
+      this.props.adminApi
+        .get_clubs()
+        .then(response => this.setState({ clubs: response }));
+    }
   }
 
   handleConnect = () => {
     this.setState({ actionPending: true });
     createSession(this.props.firebase, response => {
       if (response.status === 200) {
-        this._cancelDisconnect = makeCancelable(
+        this._cancelStravaAuth = makeCancelable(
           this.props.adminApi.get_strava_auth_url(),
           response => {
             console.log(response);
@@ -87,8 +110,34 @@ class Admin extends Component {
     });
   };
 
-  handleClose = () => {
-    this.setState({ dialogOpen: false });
+  handleSyncClub = club_id => {
+    this.setState({ actionPending: true });
+    this._cancelSyncClub = makeCancelable(
+      this.props.adminApi.sync_club({ club_id: club_id }),
+      response =>
+        this.setState((state, props) => {
+          for (var i = 0; i < state.clubs.body.length; i++) {
+            if (state.clubs.body[i].id === club_id) {
+              state.clubs.body[i] = response.body;
+            }
+          }
+          return { clubs: state.clubs, actionPending: false };
+        })
+    );
+  };
+
+  handleUntrackClub = club_id => {
+    this._cancelUntrackClub = makeCancelable(
+      this.props.adminApi.untrack_club({ club_id: club_id }),
+      response => this.setState({ track_club_id: '', clubs: undefined })
+    );
+  };
+
+  handleTrackClub = event => {
+    this._cancelTrackClub = makeCancelable(
+      this.props.adminApi.track_club({ club_id: this.state.track_club_id }),
+      response => this.setState({ track_club_id: '', clubs: undefined })
+    );
   };
 
   render() {
@@ -97,16 +146,61 @@ class Admin extends Component {
     }
     return (
       <React.Fragment>
-        <Button
-          color="primary"
-          disabled={this.state.actionPending}
-          onClick={this.handleConnect}
-        >
-          Connect your strava bot account
-        </Button>
+        <Grid container>
+          <Grid item>
+            <Button
+              color="primary"
+              variant="contained"
+              disabled={this.state.actionPending}
+              onClick={this.handleConnect}
+            >
+              Connect your strava bot account
+            </Button>
+            <JSONPretty id="json-pretty" data={this.state.bot}></JSONPretty>
+            <form noValidate autoComplete="off" onSubmit={this.handleTrackClub}>
+              <TextField
+                id="track-club-id"
+                label="Club ID"
+                value={this.state.track_club_id}
+                onChange={event =>
+                  this.setState({ track_club_id: event.target.value })
+                }
+              />
+              <Button
+                color="primary"
+                variant="contained"
+                disabled={this.state.actionPending}
+                onClick={this.handleTrackClub}
+              >
+                Track Club
+              </Button>
+            </form>
+          </Grid>
+          {this.state.clubs &&
+            this.state.clubs.body.map((club, index) => (
+              <Grid key={index} item>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  disabled={this.state.actionPending}
+                  onClick={() => this.handleSyncClub(club.properties.id)}
+                >
+                  Sync club
+                </Button>
+                <Button
+                  color="primary"
+                  disabled={this.state.actionPending}
+                  onClick={() => this.handleUntrackClub(club.properties.id)}
+                >
+                  Untrack
+                </Button>
+                <JSONPretty id="json-pretty" data={club}></JSONPretty>
+              </Grid>
+            ))}
+        </Grid>
         <Dialog
           open={this.state.dialogOpen}
-          onClose={this.handleClose}
+          onClose={() => this.setState({ dialogOpen: false })}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
@@ -123,7 +217,6 @@ class Admin extends Component {
             </DialogContentText>
           </DialogContent>
         </Dialog>
-        <JSONPretty id="json-pretty" data={this.state.bot}></JSONPretty>
       </React.Fragment>
     );
   }

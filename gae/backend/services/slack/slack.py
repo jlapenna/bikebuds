@@ -20,7 +20,7 @@ from babel.dates import format_date
 from measurement.measures import Distance
 
 from services.slack.templates import ROUTE_BLOCK
-from services.strava.client import ClientWrapper
+from shared.services.strava.client import ClientWrapper
 from shared import responses
 from shared.config import config
 from shared.datastore.bot import Bot

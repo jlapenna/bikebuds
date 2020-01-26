@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from shared import ds_util
-from shared.datastore.strava.converters import StravaConverters
+"""Helpers for generating various hashes."""
+
+import hashlib
 
 
-class Club(object):
-    @classmethod
-    def get(cls, club_id, parent=None):
-        return ds_util.client.get(
-            ds_util.client.key('Club', int(club_id), parent=parent)
-        )
-
-    @classmethod
-    def to_entity(cls, club, parent=None):
-        return StravaConverters.Club.to_entity(club, parent=parent)
+def hash_name(*args):
+    if len(args) == 0:
+        raise TypeError("Expected non-zero-length hash_name args")
+    hash_string = '-'.join([str(arg) for arg in args])
+    return hashlib.sha1(hash_string.encode()).hexdigest()

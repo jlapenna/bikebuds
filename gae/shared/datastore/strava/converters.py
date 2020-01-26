@@ -15,7 +15,6 @@
 """Converts stravalib objects into Entities."""
 
 import datetime
-import hashlib
 import pytz
 
 from google.cloud.datastore.entity import Entity
@@ -23,6 +22,7 @@ from google.cloud.datastore.helpers import GeoPoint
 from sortedcontainers import SortedSet
 
 from shared import ds_util
+from shared.hash_util import hash_name
 
 
 class _ActivityConverter(object):
@@ -178,19 +178,26 @@ class _ActivityConverter(object):
         if activity.max_speed is not None:
             properties_dict['max_speed'] = activity.max_speed.num
 
-        # Some values we have to build.
-        hash_string = '-'.join(
-            (
-                activity.name,
-                "{0:.0f}".format(activity.moving_time.seconds),
-                "{0:.0f}".format(activity.elapsed_time.seconds),
-                "{0:.0f}".format(activity.distance.num),
-            )
-        )
-        properties_dict['activity_hash'] = hashlib.md5(hash_string.encode()).hexdigest()
+        # Some values we have to build, like if we get an activity from a club
+        # request. It only populates a few fields:
+        # ('name', 'Test Activity')
+        # ('distance', 90764.4)
+        # ('moving_time', '4:32:13')
+        # ('elapsed_time', '5:57:06')
+        # ('total_elevation_gain', 1988.4)
+        # ('type', 'Ride')
 
+        hash_string = hash_name(
+            "{0:.0f}".format(activity.moving_time.seconds),
+            "{0:.0f}".format(activity.elapsed_time.seconds),
+            "{0:.0f}".format(activity.distance.num),
+            "{0:.0f}".format(activity.total_elevation_gain.num),
+        )
+        properties_dict['activity_hash'] = hash_string
+
+        name = activity.id if activity.id else hash_string
         entity = Entity(
-            ds_util.client.key('Activity', activity.id, parent=parent),
+            ds_util.client.key('Activity', name, parent=parent),
             exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
         )
         entity.update(properties_dict)
@@ -330,6 +337,7 @@ class _ClubConverter(object):
             'featured',
             'id',
             'member_count',
+            'members',
             'membership',
             'name',
             'owner',
@@ -359,7 +367,7 @@ class _ClubConverter(object):
         properties_dict['id'] = club.id
 
         entity = Entity(
-            ds_util.client.key('Club', club.id, parent=parent),
+            ds_util.client.key('Club', int(club.id), parent=parent),
             exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
         )
         entity.update(properties_dict)

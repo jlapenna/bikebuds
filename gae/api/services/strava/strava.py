@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,18 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from shared import ds_util
-from shared.datastore.strava.converters import StravaConverters
-
-
-class Club(object):
-    @classmethod
-    def get(cls, club_id, parent=None):
-        return ds_util.client.get(
-            ds_util.client.key('Club', int(club_id), parent=parent)
-        )
-
-    @classmethod
-    def to_entity(cls, club, parent=None):
-        return StravaConverters.Club.to_entity(club, parent=parent)

@@ -24,6 +24,7 @@ from shared import ds_util
 from shared import task_util
 
 from shared.datastore.athlete import Athlete
+from shared.datastore.bot import Bot
 from shared.datastore.client_state import ClientState
 from shared.datastore.club import Club
 from shared.datastore.user import User
@@ -114,24 +115,14 @@ class ClubResource(Resource):
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
         club_id = int(club_id)
-        claims = auth_util.verify(flask.request)
+        auth_util.verify(flask.request)
 
-        user = User.get(claims)
-        strava = Service.get('strava', parent=user.key)
-        athlete = Athlete.get_private(strava.key)
-        if athlete is None:
-            flask.abort(500)
+        bot_strava = Service.get('strava', parent=Bot.key())
+        club = Club.get(club_id, parent=bot_strava.key)
 
         # Find the user's club reference.
-        club = Club.get(club_id, parent=strava.key)
         if club is None:
             flask.abort(404)
-
-        athlete_query = ds_util.client.query(
-            kind='Athlete', order=['firstname', 'lastname']
-        )
-        athlete_query.add_filter('clubs.id', '=', club_id)
-        club['members'] = [a for a in athlete_query.fetch()]
 
         return WrapEntity(club)
 
@@ -142,33 +133,19 @@ class ClubActivitiesResource(Resource):
     @api.marshal_with(activity_entity_model, skip_none=True, as_list=True)
     def get(self, club_id):
         club_id = int(club_id)
-        claims = auth_util.verify(flask.request)
+        auth_util.verify(flask.request)
 
-        user = User.get(claims)
-        strava = Service.get('strava', parent=user.key)
-        athlete = Athlete.get_private(strava.key)
-        if athlete is None:
-            flask.abort(500)
+        bot_strava = Service.get('strava', parent=Bot.key())
+        club = Club.get(club_id, parent=bot_strava.key)
 
-        club = Club.get(club_id, parent=strava.key)
+        # Find the user's club reference.
         if club is None:
             flask.abort(404)
 
-        # Find all their activities in the past two weeks.
-        two_weeks = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
-            days=14
-        )
-        activities_query = ds_util.client.query(kind='Activity')
-        activities_query.add_filter('start_date', '>', two_weeks)
-        activities_query.add_filter('clubs', '=', club_id)
+        activities_query = ds_util.client.query(kind='Activity', ancestor=club.key)
         all_activities = [a for a in activities_query.fetch()]
 
-        return [
-            WrapEntity(a)
-            for a in sorted(
-                all_activities, key=lambda value: value['start_date'], reverse=True
-            )
-        ]
+        return [WrapEntity(a) for a in all_activities]
 
 
 @api.route('/user')
@@ -289,9 +266,10 @@ class SyncResource(Resource):
     def get(self, name):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
-        service = Service.get(name, parent=user.key)
 
+        service = Service.get(name, parent=user.key)
         task_util.sync_service(service)
+
         return WrapEntity(service)
 
 

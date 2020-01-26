@@ -17,7 +17,7 @@ from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
 from shared.datastore.route import Route
 
-from services.strava.client import ClientWrapper
+from shared.services.strava.client import ClientWrapper
 
 
 class Worker(object):

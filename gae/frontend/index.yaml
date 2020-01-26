@@ -19,6 +19,10 @@ indexes:
   properties:
   - name: "modified"
     direction: desc
+- kind: "Activity"
+  ancestor: yes
+  properties:
+  - name: "start_date"
 - kind: "Route"
   ancestor: yes
   properties:
@@ -34,10 +38,6 @@ indexes:
   - name: "clubs.id"
   - name: "firstname"
   - name: "lastname"
-- kind: "Activity"
-  ancestor: yes
-  properties:
-  - name: "start_date"
 - kind: "Athlete"
   properties:
   - name: "club.id"

@@ -453,3 +453,5 @@ for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pus
 https://ngrok.com/
 
 http://localhost:4040
+
+generated/bin/ngrok http --host-header=localhost 8081

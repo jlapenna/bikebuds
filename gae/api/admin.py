@@ -22,14 +22,17 @@ import stravalib
 
 from shared import auth_util
 from shared import ds_util
-from shared import task_util
 from shared import responses
+from shared import task_util
 from shared.config import config
 from shared.datastore.bot import Bot
+from shared.datastore.club import Club
 from shared.datastore.service import Service
+from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 from shared.services.withings.client import create_client as withings_create_client
 
 from models import (
+    club_entity_model,
     service_entity_model,
     WrapEntity,
 )
@@ -133,3 +136,57 @@ class RemoveSubscriptionResource(Resource):
                     }
                 )
         return results
+
+
+@api.route('/clubs')
+class GetClubsResource(Resource):
+    @api.doc('get_clubs')
+    @api.marshal_with(club_entity_model, skip_none=True)
+    def get(self):
+        auth_util.verify_admin(flask.request)
+
+        service = Service.get('strava', parent=Bot.key())
+        club_query = ds_util.client.query(kind='Club', ancestor=service.key)
+
+        return [WrapEntity(club) for club in club_query.fetch()]
+
+
+@api.route('/sync/club/<club_id>')
+class SyncClubResource(Resource):
+    @api.doc('sync_club')
+    @api.marshal_with(club_entity_model, skip_none=True)
+    def get(self, club_id):
+        auth_util.verify_admin(flask.request)
+
+        service = Service.get('strava', parent=Bot.key())
+        club = StravaClubWorker(club_id, service).sync()
+
+        return WrapEntity(club)
+
+
+@api.route('/club/track/<club_id>')
+class ClubTrackResource(Resource):
+    @api.doc('track_club')
+    @api.marshal_with(club_entity_model, skip_none=True)
+    def get(self, club_id):
+        auth_util.verify_admin(flask.request)
+
+        service = Service.get('strava', parent=Bot.key())
+        club = StravaClubWorker(club_id, service).sync_club()
+
+        return WrapEntity(club)
+
+
+@api.route('/club/untrack/<club_id>')
+class ClubUntrackResource(Resource):
+    @api.doc('untrack_club')
+    @api.marshal_with(club_entity_model, skip_none=True)
+    def get(self, club_id):
+        auth_util.verify_admin(flask.request)
+
+        service = Service.get('strava', parent=Bot.key())
+        club = Club.get(club_id, parent=service.key)
+        if club is not None:
+            ds_util.client.delete(club.key)
+
+        return None
