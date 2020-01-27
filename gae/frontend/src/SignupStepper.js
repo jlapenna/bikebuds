@@ -110,6 +110,7 @@ class SignupStepper extends React.Component {
         serviceName: 'strava',
         buttonLabel: 'Connect',
       },
+      /* Don't require withings or fitbit for now.
       {
         label: 'Connect Withings',
         content: () => {
@@ -128,6 +129,7 @@ class SignupStepper extends React.Component {
         serviceName: 'fitbit',
         buttonLabel: 'Connect',
       },
+      */
       {
         label: 'Wrap up',
         content: () => {
