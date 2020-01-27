@@ -17,12 +17,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import Admin from './Admin';
 import Club from './Club';
 import Events from './Events';
-import Home from './Home';
+import Health from './Health';
 import Settings from './Settings';
 import Signup from './Signup';
 import SpinnerScreen from './SpinnerScreen';
@@ -57,7 +57,7 @@ export default class MainContent extends React.Component {
           )}
         />
         <Route
-          path={`${this.props.match.path}events`}
+          path={`${this.props.match.path}activities`}
           exact
           render={props => (
             <Events
@@ -74,6 +74,16 @@ export default class MainContent extends React.Component {
               firebase={this.props.firebase}
               firebaseUser={this.props.firebaseUser}
               match={this.props.match}
+              profile={this.props.profile}
+            />
+          )}
+        />
+        <Route
+          path={`${this.props.match.path}health`}
+          exact
+          render={props => (
+            <Health
+              bikebudsApi={this.props.bikebudsApi}
               profile={this.props.profile}
             />
           )}
@@ -99,12 +109,7 @@ export default class MainContent extends React.Component {
         <Route
           path={`${this.props.match.path}`}
           exact
-          render={props => (
-            <Home
-              bikebudsApi={this.props.bikebudsApi}
-              profile={this.props.profile}
-            />
-          )}
+          render={props => <Redirect to="/activities" />}
         />
       </Switch>
     );

@@ -25,7 +25,7 @@ import MeasuresCard from './MeasuresCard';
 import MeasuresSummaryCard from './MeasuresSummaryCard';
 import MeasuresWrapper from './MeasuresWrapper';
 
-class Home extends Component {
+class Health extends Component {
   static styles = createStyles({
     root: {
       flexGrow: 1,
@@ -80,4 +80,4 @@ class Home extends Component {
     );
   }
 }
-export default withStyles(Home.styles)(Home);
+export default withStyles(Health.styles)(Health);

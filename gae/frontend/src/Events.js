@@ -23,7 +23,6 @@ import { createStyles, withStyles } from '@material-ui/core/styles';
 import BikebudsFetcher from './bikebuds_api';
 import RoutesListCard from './RoutesListCard';
 import ActivitiesListCard from './ActivitiesListCard';
-import EventsListCard from './EventsListCard';
 
 class Events extends Component {
   static styles = createStyles({
@@ -51,14 +50,6 @@ class Events extends Component {
   render() {
     return (
       <Grid className={this.props.classes.root} container spacing={3}>
-        <Grid item xs={12}>
-          {this.query !== null && (
-            <EventsListCard
-              bikebudsApi={this.props.bikebudsApi}
-              query={this.query}
-            />
-          )}
-        </Grid>
         <Grid item xs={12}>
           <BikebudsFetcher
             fetcher={
