@@ -33,6 +33,12 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
+- kind: "Activity"
+  ancestor: yes
+  properties:
+  - name: "id"
+  - name: "start_date"
+    direction: desc
 - kind: "Athlete"
   properties:
   - name: "clubs.id"

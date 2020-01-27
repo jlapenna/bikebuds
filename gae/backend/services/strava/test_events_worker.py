@@ -17,7 +17,7 @@ import unittest
 
 from google.cloud.datastore.entity import Entity
 
-from stravalib.model import Activity
+from stravalib.model import Activity, Athlete
 
 from services.strava.events_worker import EventsWorker
 from shared.datastore.subscription import SubscriptionEvent
@@ -59,6 +59,7 @@ class MainTest(unittest.TestCase):
 
         client_mock = mock.Mock()
         client_mock.get_activity.side_effect = _activity_generator
+        client_mock.get_athlete.return_value = Athlete()
         ClientWrapperMock.return_value = client_mock
 
         worker = EventsWorker(service)

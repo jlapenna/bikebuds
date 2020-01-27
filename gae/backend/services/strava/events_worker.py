@@ -38,10 +38,12 @@ class EventsWorker(object):
         batches = collections.defaultdict(list)
         for event in events:
             batches[(event['object_id'], event['object_type'])].append(event)
-        for (object_id, object_type), batch in batches.items():
-            self._process_event_batch(object_id, object_type, batch)
 
-    def _process_event_batch(self, object_id, object_type, batch):
+        athlete = self.client.get_athlete()
+        for (object_id, object_type), batch in batches.items():
+            self._process_event_batch(athlete, object_id, object_type, batch)
+
+    def _process_event_batch(self, athlete, object_id, object_type, batch):
         with ds_util.client.transaction():
             logging.debug(
                 'process_event_batch:  %s, %s, %s',
@@ -53,25 +55,29 @@ class EventsWorker(object):
             # We're no longer going to need these.
             ds_util.client.delete_multi((event.key for event in batch))
 
-            if object_type != 'activity':
-                logging.warn('Update object_type not implemented: %s', object_type)
-                return
+            if object_type == 'activity':
+                operations = [event['aspect_type'] for event in batch]
 
-            operations = [event['aspect_type'] for event in batch]
-
-            if 'delete' in operations:
-                activity_key = ds_util.client.key(
-                    'Activity', object_id, parent=self.service.key
+                if 'delete' in operations:
+                    activity_key = ds_util.client.key(
+                        'Activity', object_id, parent=self.service.key
+                    )
+                    ds_util.client.delete(activity_key)
+                    logging.info('Deleted: Entity: %s', activity_key)
+                else:
+                    activity = self.client.get_activity(object_id)
+                    activity_entity = Activity.to_entity(
+                        activity, detailed_athlete=athlete, parent=self.service.key
+                    )
+                    ds_util.client.put(activity_entity)
+                    logging.info('Created: %s -> %s', activity.id, activity_entity.key)
+            elif object_type == 'athlete':
+                ds_util.client.put(Athlete.to_entity(athlete, parent=self.service.key))
+                activities_query = ds_util.client.query(
+                    kind='Activity', ancestor=self.service.key
                 )
-                ds_util.client.delete(activity_key)
-                logging.info('Deleted: Entity: %s', activity_key)
+                for activity in activities_query.fetch():
+                    activity['athlete'] = athlete
+                    ds_util.client.put(activity)
             else:
-                activity = self.client.get_activity(object_id)
-                activity_entity = Activity.to_entity(activity, parent=self.service.key)
-                # get_activity returns a MetaAthelte, which only has an
-                # athlete_id, replace from the stored athlete entity.
-                athlete_entity = Athlete.get_private(self.service.key)
-                activity_entity['athlete'] = athlete_entity
-                ds_util.client.put(activity_entity)
-                activity_key = activity_entity.key
-                logging.info('Created: %s -> %s', activity.id, activity_key)
+                logging.warn('Update object_type not implemented: %s', object_type)

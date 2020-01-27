@@ -284,9 +284,6 @@ class _AthleteConverter(object):
         properties_dict = athlete.to_dict()
         properties_dict['id'] = athlete.id
 
-        # Some values are always returned and always transformed.
-        # ... not in Athlete.
-
         # Some values are optional but need to be transformed.
         if athlete.weight is not None:
             properties_dict['weight'] = athlete.weight.num

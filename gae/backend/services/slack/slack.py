@@ -26,6 +26,7 @@ from shared.config import config
 from shared.datastore.bot import Bot
 from shared.datastore.route import Route
 from shared.datastore.service import Service
+from shared import ds_util
 from shared.slack_util import slack_client
 
 
@@ -44,14 +45,20 @@ def process_slack_event(event):
 def process_link_shared(event):
     service = Service.get('strava', parent=Bot.key())
     client = ClientWrapper(service)
-    unfurls = dict(
-        (link['url'], _unfurl(client, link)) for link in event['event']['links']
-    )
+    unfurls = {}
+    for link in event['event']['links']:
+        unfurl = _unfurl(client, link)
+        if unfurl:
+            unfurls[link['url']] = unfurl
+    if not unfurls:
+        return responses.OK
+
     response = slack_client.chat_unfurl(
         channel=event['event']['channel'],
         ts=event['event']['message_ts'],
         unfurls=unfurls,
     )
+
     if not response['ok']:
         logging.error('process_link_shared: failed: %s with %s', response, unfurls)
         return responses.INTERNAL_SERVER_ERROR
@@ -61,13 +68,31 @@ def process_link_shared(event):
 
 def _unfurl(client, link):
     if '/routes/' in link['url']:
-        url = urllib.parse.urlparse(link['url'])
-        route = client.get_route(url.path.split('/')[-1])
-        route = Route.to_entity(route)
-        return _route_block(route)
+        route_id = _get_id(link)
+        route = client.get_route(route_id)
+        route_entity = Route.to_entity(route)
+        return _route_block(link['url'], route_entity)
+    elif '/activities/' in link['url']:
+        activity_id = _get_id(link)
+        activities_query = ds_util.client.query(kind='Activity')
+        activities_query.add_filter('id', '=', activity_id)
+        all_activities = [a for a in activities_query.fetch()]
+
+        if all_activities:
+            activity_entity = all_activities[0]
+            if activity_entity.get('private'):
+                return None
+            return _activity_block(link['url'], activity_entity)
+        else:
+            return None
 
 
-def _route_block(route):
+def _get_id(link):
+    url = urllib.parse.urlparse(link['url'])
+    return int(url.path.split('/')[-1])
+
+
+def _route_block(url, route):
     route_sub = {
         'id': route['id'],
         'timestamp': format_date(route['timestamp'], format='medium'),
@@ -79,8 +104,26 @@ def _route_block(route):
         'athlete.firstname': route['athlete']['firstname'],
         'athlete.lastname': route['athlete']['lastname'],
         'map_image_url': _generate_url(route),
+        'url': url,
     }
     return json.loads(ROUTE_BLOCK % route_sub)
+
+
+def _activity_block(url, activity):
+    activity_sub = {
+        'id': activity['id'],
+        'timestamp': format_date(activity['start_date'], format='medium'),
+        'description': activity['description'],
+        'distance': round(Distance(m=activity['distance']).mi, 2),
+        'elevation_gain': round(Distance(m=activity['total_elevation_gain']).ft),
+        'name': activity['name'],
+        'athlete.id': activity['athlete']['id'],
+        'athlete.firstname': activity['athlete']['firstname'],
+        'athlete.lastname': activity['athlete']['lastname'],
+        'map_image_url': _generate_url(activity),
+        'url': url,
+    }
+    return json.loads(ROUTE_BLOCK % activity_sub)
 
 
 def _generate_url(route):

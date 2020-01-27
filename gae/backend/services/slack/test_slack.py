@@ -34,7 +34,9 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.slack_util.slack_client.chat_unfurl')
     @mock.patch('services.slack.slack.ClientWrapper')
     @mock.patch('shared.ds_util.client.get')
-    def test_link(self, ds_util_client_get_mock, ClientWrapperMock, chat_unfurl_mock):
+    def test_route_link(
+        self, ds_util_client_get_mock, ClientWrapperMock, chat_unfurl_mock
+    ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'validrefreshtoken'}
         ds_util_client_get_mock.return_value = service
@@ -77,6 +79,114 @@ class MainTest(unittest.TestCase):
         chat_unfurl_mock.assert_called_once()
         self.assertEqual(result, responses.OK)
 
+    @mock.patch('shared.slack_util.slack_client.chat_unfurl')
+    @mock.patch('shared.services.strava.client.ClientWrapper')
+    @mock.patch('shared.ds_util.client.query')
+    @mock.patch('shared.ds_util.client.get')
+    def test_activity_link(
+        self,
+        ds_util_client_get_mock,
+        ds_util_client_query_mock,
+        ClientWrapperMock,
+        chat_unfurl_mock,
+    ):
+        service = Entity(ds_util.client.key('Service', 'strava'))
+        service['credentials'] = {'access_token': 'validrefreshtoken'}
+        ds_util_client_get_mock.return_value = service
+
+        query_mock = mock.Mock()
+        query_mock.add_filter.return_value = None
+        query_mock.fetch.return_value = [activity_entity_for_test(3046711547)]
+        ds_util_client_query_mock.return_value = query_mock
+
+        chat_unfurl_mock.return_value = {'ok': True}
+
+        event = json.loads(
+            """
+            {
+               "event_id" : "EvSFJZPZGA",
+               "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
+               "authed_users" : [
+                  "USR4L7ZGW"
+               ],
+               "event_time" : 1579378856,
+               "type" : "event_callback",
+               "event" : {
+                  "channel" : "CL2QA9X1C",
+                  "links" : [
+                     {
+                        "domain" : "strava.com",
+                        "url" : "https://www.strava.com/activities/3046711547"
+                     }
+                  ],
+                  "user" : "UL2NGJARL",
+                  "message_ts" : "1579378855.001300",
+                  "type" : "link_shared"
+               },
+               "team_id" : "TL2DVHG3H",
+               "api_app_id" : "AKU8ZGJG1"
+            }
+        """
+        )
+        result = slack.process_slack_event(event)
+
+        chat_unfurl_mock.assert_called_once()
+        self.assertEqual(result, responses.OK)
+
+    @mock.patch('shared.slack_util.slack_client.chat_unfurl')
+    @mock.patch('shared.services.strava.client.ClientWrapper')
+    @mock.patch('shared.ds_util.client.query')
+    @mock.patch('shared.ds_util.client.get')
+    def test_activity_link_unknown(
+        self,
+        ds_util_client_get_mock,
+        ds_util_client_query_mock,
+        ClientWrapperMock,
+        chat_unfurl_mock,
+    ):
+        service = Entity(ds_util.client.key('Service', 'strava'))
+        service['credentials'] = {'access_token': 'validrefreshtoken'}
+        ds_util_client_get_mock.return_value = service
+
+        query_mock = mock.Mock()
+        query_mock.add_filter.return_value = None
+        query_mock.fetch.return_value = []
+        ds_util_client_query_mock.return_value = query_mock
+
+        chat_unfurl_mock.return_value = {'ok': True}
+
+        event = json.loads(
+            """
+            {
+               "event_id" : "EvSFJZPZGA",
+               "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
+               "authed_users" : [
+                  "USR4L7ZGW"
+               ],
+               "event_time" : 1579378856,
+               "type" : "event_callback",
+               "event" : {
+                  "channel" : "CL2QA9X1C",
+                  "links" : [
+                     {
+                        "domain" : "strava.com",
+                        "url" : "https://www.strava.com/activities/3046711547"
+                     }
+                  ],
+                  "user" : "UL2NGJARL",
+                  "message_ts" : "1579378855.001300",
+                  "type" : "link_shared"
+               },
+               "team_id" : "TL2DVHG3H",
+               "api_app_id" : "AKU8ZGJG1"
+            }
+        """
+        )
+        result = slack.process_slack_event(event)
+
+        chat_unfurl_mock.assert_not_called()
+        self.assertEqual(result, responses.OK)
+
     def test_generate_url(self):
         route = route_for_test()
         # Strip out the key params to avoid deailing with it in the expected url.
@@ -86,7 +196,16 @@ class MainTest(unittest.TestCase):
 
     def test_route_block(self):
         route = route_for_test()
-        block = slack._route_block(route)
+        block = slack._route_block(
+            {'url': 'https://www.strava.com/routes/10285651'}, route
+        )
+        self.assertTrue(block)
+
+    def test_activity_block(self):
+        activity = activity_entity_for_test(11111)
+        block = slack._activity_block(
+            {'url': 'https://www.strava.com/activities/11111'}, activity
+        )
         self.assertTrue(block)
 
 
@@ -109,6 +228,25 @@ def route_for_test():
         }
     )
     return route
+
+
+def activity_entity_for_test(activity_id):
+    activity = Entity(ds_util.client.key('Activity', activity_id))
+    activity['name'] = 'Activity ' + str(activity_id)
+    activity['id'] = activity_id
+    activity['description'] = 'Description: ' + str(activity_id)
+    activity['distance'] = 10
+    activity['moving_time'] = 200
+    activity['elapsed_time'] = 100
+    activity['total_elevation_gain'] = 300
+    activity['start_date'] = datetime.datetime.fromtimestamp(1503517240)
+    activity['athlete'] = Entity(ds_util.client.key('Athlete', 111))
+    activity['athlete']['id'] = 111
+    activity['athlete']['firstname'] = 'ActivityFirstName'
+    activity['athlete']['lastname'] = 'ActivityLastName'
+    activity['map'] = Entity(ds_util.client.key('Map', 111))
+    activity['map']['summary_polyline'] = SUMMARY_POLYLINE
+    return activity
 
 
 def route_generator(route_id):

@@ -19,7 +19,7 @@ ROUTE_BLOCK = r"""
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "<https://www.strava.com/route/%(id)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>\n%(description)s\nCreated on %(timestamp)s"
+                "text": "<%(url)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>\n%(description)s\n\nCreated on %(timestamp)s"
             },
             "accessory": {
                 "type": "image",

@@ -40,13 +40,14 @@ class Worker(object):
         self.client.ensure_access()
 
         athlete = self.client.get_athlete()
-        athlete_clubs = [club.id for club in athlete.clubs]
 
-        # Track the clubs that these activities were a part of, by annotating
-        # them with the athlete's clubs.
         for activity in self.client.get_activities():
-            activity_entity = Activity.to_entity(activity, parent=self.service.key)
-            activity_entity['clubs'] = athlete_clubs
+            # Track full activity info (detailed), not returned by the normal
+            # get_activities (summary) request.
+            detailed_activity = self.client.get_activity(activity.id)
+            activity_entity = Activity.to_entity(
+                detailed_activity, detailed_athlete=athlete, parent=self.service.key
+            )
             ds_util.client.put(activity_entity)
 
     def sync_routes(self):
