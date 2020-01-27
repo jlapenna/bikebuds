@@ -114,7 +114,7 @@ class _ActivityConverter(object):
             'moving_time',
             'map',
             'name',
-            'start_date',
+            'photos' 'start_date',
             'start_date_local',
             'start_latlng',
         ]
@@ -171,6 +171,11 @@ class _ActivityConverter(object):
 
         if activity.map is not None:
             properties_dict['map'] = _PolylineMapConverter.to_entity(activity.map)
+
+        if activity.photos is not None:
+            properties_dict['photos'] = _PhotosSummaryConverter.to_entity(
+                activity.photos
+            )
 
         if activity.average_speed is not None:
             properties_dict['average_speed'] = activity.average_speed.num
@@ -371,6 +376,52 @@ class _ClubConverter(object):
         # entity.update(**dict(
         #    (k, v) for k, v
         #    in properties_dict.items() if k in [__STORED_FIELDS]))
+        return entity
+
+
+class _PhotosSummaryConverter(object):
+    """DetailedActivity.photos"""
+
+    __ALL_FIELDS = SortedSet(['count', 'primary'])
+    __INCLUDE_IN_INDEXES = SortedSet([])
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod
+    def to_entity(cls, photos_summary, parent=None):
+        properties_dict = photos_summary.to_dict()
+
+        if photos_summary.primary is not None:
+            properties_dict['primary'] = _PhotosPrimaryConverter.to_entity(
+                photos_summary.primary, parent=parent
+            )
+
+        entity = Entity(
+            ds_util.client.key(
+                'PhotosSummary', exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+            )
+        )
+        entity.update(properties_dict)
+        return entity
+
+
+class _PhotosPrimaryConverter(object):
+    """DetailedActivity.photos.primary"""
+
+    __ALL_FIELDS = SortedSet(['id', 'source', 'unique_id', 'urls'])
+    __INCLUDE_IN_INDEXES = SortedSet(['id'])
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod
+    def to_entity(cls, photos_primary, parent=None):
+        properties_dict = photos_primary.to_dict()
+        properties_dict['id'] = photos_primary.id
+
+        entity = Entity(
+            ds_util.client.key(
+                'PhotosPrimary', exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+            )
+        )
+        entity.update(properties_dict)
         return entity
 
 

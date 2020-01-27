@@ -220,6 +220,24 @@ athlete_model = api.model(
 )
 athlete_entity_model = EntityModel(athlete_model)
 
+photos_primary_model = api.model(
+    'PhotosPrimary',
+    {
+        'id': fields.Integer,
+        'source': fields.String,
+        'unique_id': fields.String,
+        'urls': fields.String,
+    },
+)
+
+photos_summary_model = api.model(
+    'PhotosSummary',
+    {
+        'count': fields.Integer,
+        'primary': fields.Nested(photos_primary_model, skip_none=True),
+    },
+)
+
 activity_model = api.model(
     'Activity',
     {
@@ -266,7 +284,7 @@ activity_model = api.model(
         # 'partner_brand_tag': fields.String,
         # 'partner_logo_url': fields.String,
         # 'photo_count': fields.Integer,
-        # 'photos': fields.String,
+        'photos': fields.Nested(photos_summary_model, skip_none=True),
         # 'pr_count': fields.Integer,
         # 'segment_efforts': fields.String,
         # 'segment_leaderboard_opt_out': fields.String,
