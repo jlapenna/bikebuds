@@ -47,9 +47,9 @@ class ClubWorker(object):
             club = Club.get(self.club_id, parent=self.service.key)
             ds_util.client.delete_multi(
                 activity.key
-                for activity in ds_util.client.query(
-                    kind='Activity', ancestor=club.key
-                ).fetch()
+                for activity in ds_util.client.query(kind='Activity', ancestor=club.key)
+                .keys_only()
+                .fetch()
             )
             for activity in self.client.get_club_activities(club.id):
                 activity_entity = Activity.to_entity(activity, parent=club.key)
