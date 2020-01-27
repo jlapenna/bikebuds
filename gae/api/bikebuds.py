@@ -67,8 +67,7 @@ class ActivitiesResource(Resource):
             datetime.timezone.utc
         ) - datetime.timedelta(days=365)
         activities_query.add_filter('start_date', '>', one_year_ago)
-        activities = [WrapEntity(a) for a in activities_query.fetch()]
-        return activities
+        return [WrapEntity(a) for a in activities_query.fetch(limit=20)]
 
 
 @api.route('/clients')
