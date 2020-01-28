@@ -23,7 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import {
   BicyclingLayer,
   GoogleMap,
-  LoadScript,
+  LoadScriptNext,
   Polyline,
 } from '@react-google-maps/api';
 
@@ -107,7 +107,7 @@ class _ActivityMap extends Component {
 
   render() {
     return (
-      <LoadScript
+      <LoadScriptNext
         id="script-loader"
         googleMapsApiKey={firebase_config.apiKey}
         libraries={MAP_LIBRARIES}
@@ -129,7 +129,7 @@ class _ActivityMap extends Component {
           />
           <BicyclingLayer autoUpdate />
         </GoogleMap>
-      </LoadScript>
+      </LoadScriptNext>
     );
   }
 }
