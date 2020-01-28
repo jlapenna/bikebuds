@@ -208,6 +208,13 @@ class MainTest(unittest.TestCase):
         )
         self.assertTrue(block)
 
+    def test_activity_block_with_primary_photo(self):
+        activity = activity_entity_for_test(11111, with_photo=True)
+        block = slack._activity_block(
+            {'url': 'https://www.strava.com/activities/11111'}, activity
+        )
+        self.assertTrue(block)
+
 
 def route_for_test():
     route = Entity(ds_util.client.key('Route', 10285651))
@@ -230,7 +237,7 @@ def route_for_test():
     return route
 
 
-def activity_entity_for_test(activity_id):
+def activity_entity_for_test(activity_id, with_photo=False):
     activity = Entity(ds_util.client.key('Activity', activity_id))
     activity['name'] = 'Activity ' + str(activity_id)
     activity['id'] = activity_id
@@ -246,6 +253,17 @@ def activity_entity_for_test(activity_id):
     activity['athlete']['lastname'] = 'ActivityLastName'
     activity['map'] = Entity(ds_util.client.key('Map', 111))
     activity['map']['summary_polyline'] = SUMMARY_POLYLINE
+    if with_photo:
+        activity['photos'] = {
+            'primary': {
+                'id': 1234,
+                'unique_id': 'a807-23q4-23',
+                'urls': {
+                    '600': 'https://12341234.cloudfront.net/yw7_-ahaahahahahaha_E-576x768.jpg',
+                    '100': 'https://12341234.cloudfront.net/yw7_-ahashdhaahashahah_E-96x128.jpg',
+                },
+            }
+        }
     return activity
 
 

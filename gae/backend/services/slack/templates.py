@@ -26,22 +26,25 @@ ROUTE_BLOCK = r"""
                 "image_url": "%(map_image_url)s",
                 "alt_text": "route map"
             }
-        },
-        {
-            "type": "divider"
-        },
+        }
+    ]
+}
+"""
+
+ACTIVITY_BLOCK = r"""
+{
+    "blocks": [
         {
             "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": "*Distance:* %(distance)smi"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Elevation:* %(elevation_gain)sft"
-                }
-            ]
+            "text": {
+                "type": "mrkdwn",
+                "text": "<%(url)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>, %(timestamp)s\n%(description)s"
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": "%(map_image_url)s",
+                "alt_text": "route map"
+            }
         }
     ]
 }

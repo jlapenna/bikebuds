@@ -19,7 +19,7 @@ import urllib
 from babel.dates import format_date
 from measurement.measures import Distance
 
-from services.slack.templates import ROUTE_BLOCK
+from services.slack.templates import ACTIVITY_BLOCK, ROUTE_BLOCK
 from shared.services.strava.client import ClientWrapper
 from shared import responses
 from shared.config import config
@@ -97,8 +97,6 @@ def _route_block(url, route):
         'id': route['id'],
         'timestamp': format_date(route['timestamp'], format='medium'),
         'description': route['description'],
-        'distance': round(Distance(m=route['distance']).mi, 2),
-        'elevation_gain': round(Distance(m=route['elevation_gain']).ft),
         'name': route['name'],
         'athlete.id': route['athlete']['id'],
         'athlete.firstname': route['athlete']['firstname'],
@@ -106,16 +104,37 @@ def _route_block(url, route):
         'map_image_url': _generate_url(route),
         'url': url,
     }
-    return json.loads(ROUTE_BLOCK % route_sub)
+    unfurl = json.loads(ROUTE_BLOCK % route_sub)
+
+    fields = []
+    if route.get('distance', None):
+        fields.append(
+            {
+                "type": "mrkdwn",
+                "text": "*Distance:* %smi" % round(Distance(m=route['distance']).mi, 2),
+            }
+        )
+
+    if route.get('elevation_gain', None):
+        fields.append(
+            {
+                "type": "mrkdwn",
+                "text": "*Elevation:* %sft"
+                % round(Distance(m=route['elevation_gain']).ft, 0),
+            }
+        )
+
+    if fields:
+        unfurl['blocks'].append({"type": "divider"})
+        unfurl['blocks'].append({"type": "section", "fields": fields})
+    return unfurl
 
 
 def _activity_block(url, activity):
     activity_sub = {
         'id': activity['id'],
-        'timestamp': format_date(activity['start_date'], format='medium'),
+        'timestamp': format_date(activity['start_date'], format='long'),
         'description': activity['description'],
-        'distance': round(Distance(m=activity['distance']).mi, 2),
-        'elevation_gain': round(Distance(m=activity['total_elevation_gain']).ft),
         'name': activity['name'],
         'athlete.id': activity['athlete']['id'],
         'athlete.firstname': activity['athlete']['firstname'],
@@ -123,7 +142,40 @@ def _activity_block(url, activity):
         'map_image_url': _generate_url(activity),
         'url': url,
     }
-    return json.loads(ROUTE_BLOCK % activity_sub)
+    unfurl = json.loads(ACTIVITY_BLOCK % activity_sub)
+
+    fields = []
+    if activity.get('distance', None):
+        fields.append(
+            {
+                "type": "mrkdwn",
+                "text": "*Distance:* %smi"
+                % round(Distance(m=activity['distance']).mi, 2),
+            }
+        )
+
+    if activity.get('total_elevation_gain', None):
+        fields.append(
+            {
+                "type": "mrkdwn",
+                "text": "*Elevation:* %sft"
+                % round(Distance(m=activity['total_elevation_gain']).ft, 0),
+            }
+        )
+
+    if fields:
+        unfurl['blocks'].append({"type": "divider"})
+        unfurl['blocks'].append({"type": "section", "fields": fields})
+
+    try:
+        primary_image = activity['photos']['primary']['urls']['600']
+    except (KeyError, TypeError):
+        primary_image = None
+    if primary_image:
+        unfurl['blocks'].append(
+            {"type": "image", "image_url": primary_image, "alt_text": "Cover Photo"}
+        )
+    return unfurl
 
 
 def _generate_url(route):
