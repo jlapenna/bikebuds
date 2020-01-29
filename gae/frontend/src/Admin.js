@@ -25,6 +25,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 import makeCancelable from 'makecancelable';
 import JSONPretty from 'react-json-pretty';
@@ -78,13 +79,19 @@ class Admin extends Component {
       this.setState({ bot: null });
       this.props.adminApi
         .get_bot({ name: this.props.serviceName })
-        .then(response => this.setState({ bot: response.body }));
+        .then(response => this.setState({ bot: response }));
     }
     if (this.props.adminApi && this.state.clubs === undefined) {
       this.setState({ clubs: null });
       this.props.adminApi
         .get_clubs()
         .then(response => this.setState({ clubs: response }));
+    }
+    if (this.props.adminApi && this.state.users === undefined) {
+      this.setState({ users: null });
+      this.props.adminApi
+        .get_users()
+        .then(response => this.setState({ users: response }));
     }
   }
 
@@ -95,7 +102,6 @@ class Admin extends Component {
         this._cancelStravaAuth = makeCancelable(
           this.props.adminApi.get_strava_auth_url(),
           response => {
-            console.log(response);
             this.setState({
               actionPending: false,
               authUrl: response.body.auth_url,
@@ -109,6 +115,8 @@ class Admin extends Component {
       }
     });
   };
+
+  handleListItemClick = (index, user) => {};
 
   handleSyncClub = club_id => {
     this.setState({ actionPending: true });
@@ -144,10 +152,12 @@ class Admin extends Component {
     if (!this.props.firebaseUser.admin) {
       return null;
     }
+    console.log(this.state.users);
     return (
       <React.Fragment>
         <Grid container>
           <Grid item>
+            <Typography variant="h5">Bot</Typography>
             <Button
               color="primary"
               variant="contained"
@@ -156,7 +166,12 @@ class Admin extends Component {
             >
               Connect your strava bot account
             </Button>
-            <JSONPretty id="json-pretty" data={this.state.bot}></JSONPretty>
+            {this.state.bot && (
+              <JSONPretty
+                id="json-pretty"
+                data={this.state.bot.body}
+              ></JSONPretty>
+            )}
             <form noValidate autoComplete="off" onSubmit={this.handleTrackClub}>
               <TextField
                 id="track-club-id"
@@ -178,7 +193,10 @@ class Admin extends Component {
           </Grid>
           {this.state.clubs &&
             this.state.clubs.body.map((club, index) => (
-              <Grid key={index} item>
+              <Grid item key={index}>
+                <Typography variant="h5">
+                  Club: {club.properties.name}
+                </Typography>
                 <Button
                   color="primary"
                   variant="contained"
@@ -194,10 +212,25 @@ class Admin extends Component {
                 >
                   Untrack
                 </Button>
-                <JSONPretty id="json-pretty" data={club}></JSONPretty>
+                {club && <JSONPretty id="json-pretty" data={club}></JSONPretty>}
               </Grid>
             ))}
         </Grid>
+        {this.state.users &&
+          this.state.users.body.map((user, index) => {
+            return (
+              <Grid
+                item
+                key={index}
+                onClick={this.handleListItemClick.bind(this, index, user)}
+              >
+                <Typography variant="h5">
+                  User: {user.user.key.path[0].name}
+                </Typography>
+                <JSONPretty id="json-pretty" data={user}></JSONPretty>
+              </Grid>
+            );
+          })}
         <Dialog
           open={this.state.dialogOpen}
           onClose={() => this.setState({ dialogOpen: false })}

@@ -317,11 +317,7 @@ preferences_model = api.model(
 )
 
 user_model = api.model(
-    'User',
-    {
-        'admin': fields.Boolean(default=False),
-        'preferences': fields.Nested(preferences_model, skip_none=True),
-    },
+    'User', {'preferences': fields.Nested(preferences_model, skip_none=True),},
 )
 user_entity_model = EntityModel(user_model)
 

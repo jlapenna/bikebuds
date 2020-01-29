@@ -44,7 +44,6 @@ from models import (
     route_entity_model,
     series_entity_model,
     service_entity_model,
-    user_entity_model,
     WrapEntity,
 )
 
@@ -145,16 +144,6 @@ class ClubActivitiesResource(Resource):
         all_activities = [a for a in activities_query.fetch()]
 
         return [WrapEntity(a) for a in all_activities]
-
-
-@api.route('/user')
-class UserResource(Resource):
-    @api.doc('get_user')
-    @api.marshal_with(user_entity_model, skip_none=True)
-    def get(self):
-        claims = auth_util.verify(flask.request)
-        user = User.get(claims)
-        return WrapEntity(user)
 
 
 @api.route('/preferences')

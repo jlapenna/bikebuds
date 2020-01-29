@@ -33,7 +33,8 @@ from shared.services.withings.client import create_client as withings_create_cli
 
 from models import (
     club_entity_model,
-    service_entity_model,
+    service_model,
+    user_entity_model,
     WrapEntity,
 )
 
@@ -43,8 +44,16 @@ api = Namespace('admin', 'Bikebuds Admin API')
 auth_url_model = api.model('AuthUrl', {'auth_url': fields.String})
 
 
-bot_model = api.model(
-    'Bot', {'strava': fields.Nested(service_entity_model, skip_none=True)}
+bot_model = api.model('Bot', {'strava': fields.Nested(service_model, skip_none=True)})
+
+user_state_model = api.model(
+    'UserState',
+    {
+        'user': fields.Nested(user_entity_model, skip_none=True),
+        'strava': fields.Nested(service_model, skip_none=True),
+        'withings': fields.Nested(service_model, skip_none=True),
+        'fitbit': fields.Nested(service_model, skip_none=True),
+    },
 )
 
 
@@ -149,6 +158,28 @@ class GetClubsResource(Resource):
         club_query = ds_util.client.query(kind='Club', ancestor=service.key)
 
         return [WrapEntity(club) for club in club_query.fetch()]
+
+
+@api.route('/users')
+class GetUsersResource(Resource):
+    @api.doc('get_users')
+    @api.marshal_with(user_state_model, skip_none=True)
+    def get(self):
+        auth_util.verify_admin(flask.request)
+
+        users = []
+        user_entities = ds_util.client.query(kind='User').fetch()
+        for user_entity in user_entities:
+            users.append(
+                {
+                    'user': WrapEntity(user_entity),
+                    'strava': Service.get('strava', parent=user_entity.key),
+                    'withings': Service.get('withings', parent=user_entity.key),
+                    'fitbit': Service.get('fitbit', parent=user_entity.key),
+                }
+            )
+
+        return users
 
 
 @api.route('/sync/club/<club_id>')
