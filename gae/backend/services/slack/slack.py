@@ -178,13 +178,16 @@ def _activity_block(url, activity):
     return unfurl
 
 
-def _generate_url(route):
+def _generate_url(source):
     url = 'https://maps.googleapis.com/maps/api/staticmap?'
     params = {
         'key': config.firebase_web_creds['apiKey'],
         'size': '512x512',
         'maptype': 'roadmap',
-        'path': 'enc:' + route['map']['summary_polyline'],
         'format': 'jpg',
     }
+
+    summary_polyline = source.get('map', {}).get('summary_polyline')
+    if summary_polyline:
+        params['path'] = 'enc:%s' % (summary_polyline,)
     return url + urllib.parse.urlencode(params)
