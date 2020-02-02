@@ -9,7 +9,7 @@ requests-toolbelt==0.9.1
 
 # auth_util3.py
 firebase-admin==3.2.1
-google-auth==1.10.1
+google-auth==1.11.0
 google-auth-httplib2==0.0.3
 google-auth-oauthlib==0.4.1
 
