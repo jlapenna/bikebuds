@@ -106,11 +106,7 @@ export default class MainContent extends React.Component {
           exact
           render={props => <Signup />}
         />
-        <Route
-          path={`${this.props.match.path}`}
-          exact
-          render={props => <Redirect to="/activities" />}
-        />
+        <Route render={props => <Redirect to="/activities" />} />
       </Switch>
     );
   }
