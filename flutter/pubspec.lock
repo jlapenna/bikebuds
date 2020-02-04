@@ -22,13 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.0"
-  bezier_chart:
-    dependency: "direct main"
-    description:
-      name: bezier_chart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.16"
   bikebuds_api:
     dependency: "direct main"
     description:
@@ -162,13 +155,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.9"
-  fl_chart:
-    dependency: "direct main"
-    description:
-      name: fl_chart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.8.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -233,6 +219,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  jiffy:
+    dependency: "direct main"
+    description:
+      name: jiffy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
   js:
     dependency: transitive
     description:
@@ -282,20 +275,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.4"
-  path_drawing:
-    dependency: transitive
-    description:
-      name: path_drawing
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.1"
-  path_parsing:
-    dependency: transitive
-    description:
-      name: path_parsing
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.4"
   pedantic:
     dependency: transitive
     description:

@@ -70,11 +70,8 @@ dependencies:
   # https://pub.dev/packages/charts_flutter
   charts_flutter: ^0.8.1
 
-  # https://pub.dev/packages/bezier_chart
-  bezier_chart: ^1.0.16
-
-  # https://pub.dev/packages/fl_chart
-  fl_chart: ^0.8.0
+  # https://pub.dev/packages/jiffy
+  jiffy: ^2.2.0
 
 dev_dependencies:
   flutter_test:
