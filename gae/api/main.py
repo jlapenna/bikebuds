@@ -17,7 +17,7 @@ import logging
 
 from flask import Flask
 from flask_cors import CORS
-from flask_restplus import Api
+from flask_restx import Api
 
 from shared import logging_util
 from shared import responses

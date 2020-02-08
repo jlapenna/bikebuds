@@ -16,7 +16,7 @@ import logging
 
 import flask
 
-from flask_restplus import Resource, Namespace, fields
+from flask_restx import Resource, Namespace, fields
 
 import stravalib
 

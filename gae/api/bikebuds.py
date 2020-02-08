@@ -16,7 +16,7 @@
 import datetime
 
 import flask
-from flask_restplus import Namespace, Resource
+from flask_restx import Namespace, Resource
 
 
 from shared import auth_util

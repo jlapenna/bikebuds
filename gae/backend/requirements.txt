@@ -1,7 +1,8 @@
 # main.py
 Flask==1.1.1
 Flask-Cors==3.0.8
-flask-restplus==0.13.0
+Werkzeug==0.16.0 # https://github.com/python-restx/flask-restx/issues/34
+flask-restx==0.1.0
 
 # task_util.py
 requests==2.22.0
