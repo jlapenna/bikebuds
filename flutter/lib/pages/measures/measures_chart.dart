@@ -15,7 +15,7 @@
 import 'dart:math';
 
 import 'package:bikebuds/app.dart';
-import "package:bikebuds_api/api.dart";
+import "package:bikebuds_api/api.dart" hide UserState;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';

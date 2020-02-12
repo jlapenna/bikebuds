@@ -22,7 +22,7 @@ import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
-import 'package:bikebuds_api/api.dart';
+import 'package:bikebuds_api/api.dart' hide UserState;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

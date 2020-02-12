@@ -33,8 +33,8 @@ class Loading extends StatelessWidget {
             CircularProgressIndicator(),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  Text(message ?? "", style: Theme.of(context).textTheme.body1),
+              child: Text(message ?? "",
+                  style: Theme.of(context).textTheme.bodyText2),
             ),
           ],
         ),

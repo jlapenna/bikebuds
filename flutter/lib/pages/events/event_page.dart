@@ -189,9 +189,10 @@ class _EventPageState extends State<EventPage> {
               autocorrect: true,
               maxLines: 1,
               textCapitalization: TextCapitalization.sentences,
-              style: Theme.of(context).textTheme.headline,
+              style: Theme.of(context).textTheme.headline5,
               decoration: InputDecoration(
-                  labelText: 'Title', hasFloatingPlaceholder: false),
+                  labelText: 'Title',
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
             ),
             DateTimeField(
                 format: dateTimeFormat,
@@ -221,7 +222,7 @@ class _EventPageState extends State<EventPage> {
               autocorrect: true,
               maxLines: 4,
               textCapitalization: TextCapitalization.sentences,
-              style: Theme.of(context).textTheme.body1,
+              style: Theme.of(context).textTheme.bodyText2,
               decoration: InputDecoration(labelText: 'Description'),
             ),
           ],
