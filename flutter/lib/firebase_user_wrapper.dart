@@ -13,12 +13,22 @@
 // limitations under the License.
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mockito/mockito.dart';
 
-class FirebaseUserMock extends Mock implements FirebaseUser {}
+class FirebaseUserWrapper {
+  final FirebaseUser _firebaseUser;
 
-FirebaseUserMock newFirebaseUserMock() {
-  final FirebaseUserMock mockFirebaseUser = FirebaseUserMock();
-  when(mockFirebaseUser.displayName).thenReturn("Test Name");
-  return mockFirebaseUser;
+  FirebaseUserWrapper(this._firebaseUser) {
+    if (_firebaseUser is! FirebaseUser) throw new ArgumentError(_firebaseUser);
+  }
+
+  get uid => _firebaseUser?.uid;
+  get displayName => _firebaseUser?.displayName;
+  get email => _firebaseUser?.email;
+  get photoUrl => _firebaseUser?.photoUrl;
+
+  Future<String> getAccessToken({bool refresh: false}) {
+    return _firebaseUser
+        .getIdToken(refresh: refresh)
+        .then((IdTokenResult idToken) => idToken.token);
+  }
 }

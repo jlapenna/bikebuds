@@ -45,13 +45,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Drawer buildDrawer(List<Page> pages, UserState userState) {
-    var name = userState.firebaseUser == null
-        ? ""
-        : userState.firebaseUser?.displayName ?? userState.firebaseUser?.email;
-    var email =
-        userState.firebaseUser == null ? "" : userState.firebaseUser?.email;
-    var photoUrl = userState.profile?.athlete?.properties?.profileMedium ??
-        userState.firebaseUser?.photoUrl;
+    var name = userState.displayName;
+    var email = userState.email;
+    var photoUrl = userState.photoUrl;
     var profilePhoto = photoUrl == null
         ? MemoryImage(
             kTransparentImage,

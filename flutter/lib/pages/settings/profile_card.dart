@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import '../../client_state_entity_state.dart';
 import '../../user_state.dart';
@@ -22,27 +21,14 @@ import '../../user_state.dart';
 class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var clientState = Provider.of<ClientStateEntityState>(context);
     var userState = Provider.of<UserState>(context);
-    var photoUrl = userState.profile?.athlete?.properties?.profileMedium ??
-        userState.firebaseUser?.photoUrl;
-    var profilePhoto = photoUrl == null
-        ? MemoryImage(
-            kTransparentImage,
-          )
-        : NetworkImage(photoUrl);
-    var avatar = CircleAvatar(
-      backgroundImage: profilePhoto,
-      radius: 64,
-    );
-    var name = userState.firebaseUser == null
-        ? ""
-        : userState.firebaseUser?.displayName ?? userState.firebaseUser?.email;
+    var profilePhoto = userState.profilePhoto;
+    var avatar = CircleAvatar(backgroundImage: profilePhoto, radius: 64);
 
-    var city = userState.profile?.athlete?.properties?.city ?? "";
-
+    var clientState = Provider.of<BikebudsClientState>(context);
     var registered =
         clientState?.client?.properties?.token == null ? "" : "Registered";
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -50,8 +36,8 @@ class ProfileCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             avatar,
-            Text(name),
-            Text(city),
+            Text(userState.displayName),
+            Text(userState.city),
             Text(registered),
             RaisedButton(onPressed: () {}, child: Text("Connect Services")),
           ],

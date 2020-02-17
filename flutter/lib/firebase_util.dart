@@ -15,6 +15,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:bikebuds/config.dart';
+import 'package:bikebuds/fake_user_wrapper.dart';
+import 'package:bikebuds/firebase_user_wrapper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,6 +28,9 @@ import 'package:flutter/widgets.dart';
 class FirebaseSignInState with ChangeNotifier {}
 
 class FirebaseState with ChangeNotifier {
+  final Config _config;
+  final FirebaseOptions _firebaseOptions;
+
   bool _authInitialized = false;
   final FirebaseApp _app = FirebaseApp.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -38,12 +44,12 @@ class FirebaseState with ChangeNotifier {
   StreamSubscription<FirebaseUser> _subNext;
 
   Firestore firestore;
-  FirebaseUser user;
-  FirebaseUser userNext;
+  FirebaseUserWrapper user;
+  FirebaseUserWrapper userNext;
 
-  FirebaseState(BuildContext context) {
-    _loadFirebase(context);
-  }
+  FirebaseState(this._config, this._firebaseOptions);
+
+  String get apiKey => _firebaseOptions.apiKey;
 
   @override
   String toString() {
@@ -63,41 +69,29 @@ class FirebaseState with ChangeNotifier {
     super.dispose();
   }
 
-  _loadFirebase(BuildContext context) async {
-    var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
-        .loadString("android/app/google-services-next-android.json"));
-    FirebaseOptions options = _toFirebaseOptions(loadedJson);
-
-    var appNext = await _loadAppNext(options);
+  load() async {
+    var appNext = await _loadAppNext(_firebaseOptions);
     var authNext = FirebaseAuth.fromApp(appNext);
     var firestore = Firestore(app: appNext);
     // Only after we have all three components do we assign.
     this._appNext = appNext;
     this._authNext = authNext;
     this.firestore = firestore;
-    _auth.currentUser().then((firebaseUser) {
-      // Only after we're set up for firebase do we listen.
-      _sub = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
-      _subNext = _authNext.onAuthStateChanged.listen(_onAuthStateChangedNext);
-    });
+
+    if (_config.config['is_dev'] && _config.config.containsKey('fake_user')) {
+      this.user = FakeUserWrapper(displayName: "Fake User");
+      this.userNext = FakeUserWrapper(displayName: "Fake User");
+      this._authInitialized = true;
+    } else {
+      _auth.currentUser().then((firebaseUser) {
+        // Only after we're set up for firebase do we listen.
+        _sub = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+        _subNext = _authNext.onAuthStateChanged.listen(_onAuthStateChangedNext);
+      });
+    }
 
     notifyListeners();
-  }
-
-  FirebaseOptions _toFirebaseOptions(dynamic config) {
-    // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
-    return FirebaseOptions(
-        googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],
-        apiKey: config['client'][0]['api_key'][0]['current_key'], // iOS Key?
-        bundleID: "bikebuds.cc", // iOS Bundle ID
-        clientID: null, // iOS Client ID
-        trackingID: null, // Analytics Tracking ID
-        gcmSenderID: config['project_info']['project_number'],
-        projectID: config['project_info']['project_id'],
-        androidClientID: config['client'][0]['oauth_client'][0]['client_id'],
-        databaseURL: config['project_info']['firebase_url'],
-        deepLinkURLScheme: null, // Durable Deep Link service
-        storageBucket: config['project_info']['storage_bucket']);
+    return this;
   }
 
   Future<FirebaseApp> _loadAppNext(FirebaseOptions options) async {
@@ -109,7 +103,9 @@ class FirebaseState with ChangeNotifier {
   }
 
   _onAuthStateChanged(FirebaseUser firebaseUser) {
-    this.user = firebaseUser;
+    if (firebaseUser != null) {
+      this.user = FirebaseUserWrapper(firebaseUser);
+    }
 
     // We've processed at least one firebase auth event.
     this._authInitialized = true;
@@ -117,22 +113,13 @@ class FirebaseState with ChangeNotifier {
   }
 
   _onAuthStateChangedNext(FirebaseUser firebaseUser) {
-    this.userNext = firebaseUser;
-    print('$this: onAuthStateChangedNext: ${user?.uid}, ${userNext?.uid}');
+    if (firebaseUser != null) {
+      this.userNext = FirebaseUserWrapper(firebaseUser);
+    }
 
     // We've processed at least one firebase auth event.
     this._authInitializedNext = true;
     notifyListeners();
-  }
-
-  get options {
-    try {
-      return _app?.options;
-    } catch (err) {
-      // Its possible firebase failed to load (like with no net connectivity)
-      // and it doesn't protect itself from NPEs.
-      print('$this: Warning: Failed reading options: $err');
-    }
   }
 
   get authInitialized => _authInitialized && _authInitializedNext;
@@ -150,4 +137,26 @@ class FirebaseState with ChangeNotifier {
   signInWithCredentialNext(credential) {
     return _authNext.signInWithCredential(credential);
   }
+}
+
+Future<FirebaseOptions> loadFirebaseOptions(BuildContext context) async {
+  var loadedJson = await json.decode(await DefaultAssetBundle.of(context)
+      .loadString("android/app/google-services-next-android.json"));
+  return _toFirebaseOptions(loadedJson);
+}
+
+FirebaseOptions _toFirebaseOptions(dynamic config) {
+  // https://firebase.google.com/docs/reference/swift/firebasecore/api/reference/Classes/FirebaseOptions
+  return FirebaseOptions(
+      googleAppID: config['client'][0]['client_info']['mobilesdk_app_id'],
+      apiKey: config['client'][0]['api_key'][0]['current_key'], // iOS Key?
+      bundleID: "bikebuds.cc", // iOS Bundle ID
+      clientID: null, // iOS Client ID
+      trackingID: null, // Analytics Tracking ID
+      gcmSenderID: config['project_info']['project_number'],
+      projectID: config['project_info']['project_id'],
+      androidClientID: config['client'][0]['oauth_client'][0]['client_id'],
+      databaseURL: config['project_info']['firebase_url'],
+      deepLinkURLScheme: null, // Durable Deep Link service
+      storageBucket: config['project_info']['storage_bucket']);
 }

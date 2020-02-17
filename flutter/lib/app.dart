@@ -23,7 +23,7 @@ import 'package:bikebuds/sign_in_screen.dart';
 import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
 import 'package:bikebuds_api/api.dart' hide UserState;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,30 +39,36 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  var _loader;
+  Future<bool> _loader;
+  Config config;
+  FirebaseOptions firebaseOptions;
+  FirebaseState firebaseState;
 
   @override
   void initState() {
-    _loader = loadConfig(context);
+    _loader = _load();
     super.initState();
+  }
+
+  Future<bool> _load() async {
+    config = await loadConfig(context);
+    firebaseOptions = await loadFirebaseOptions(context);
+    firebaseState = FirebaseState(config, firebaseOptions);
+    await firebaseState.load();
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Config>(
+    return FutureBuilder<bool>(
         future: _loader,
-        builder: (context, AsyncSnapshot<Config> snapshot) {
+        builder: (context, AsyncSnapshot<bool> snapshot) {
           if (!snapshot.hasData) {
             return Container();
           }
           return MultiProvider(providers: [
-            Provider<Config>.value(value: snapshot.data),
-            ChangeNotifierProvider<FirebaseState>(
-                create: (_) => FirebaseState(context)),
-            ChangeNotifierProxyProvider<FirebaseState, UserState>(
-                create: (_) => UserState(),
-                update: (_, firebaseState, userState) =>
-                    userState..firebaseUser = firebaseState.user),
+            Provider<Config>.value(value: config),
+            ChangeNotifierProvider<FirebaseState>.value(value: firebaseState),
             ChangeNotifierProxyProvider2<Config, FirebaseState,
                     BikebudsApiState>(
                 create: (_) => BikebudsApiState(),
@@ -70,15 +76,14 @@ class _AppState extends State<App> {
                     bikebudsApiState
                       ..config = config
                       ..firebaseState = firebaseState),
-            ChangeNotifierProxyProvider<BikebudsApiState,
-                    ClientStateEntityState>(
-                create: (_) => ClientStateEntityState(),
+            ChangeNotifierProxyProvider<BikebudsApiState, BikebudsClientState>(
+                create: (_) => BikebudsClientState(),
                 update: (_, bikebudsApiState, clientStateEntityState) =>
                     clientStateEntityState.update()),
             ChangeNotifierProxyProvider<FirebaseState, UserState>(
                 create: (_) => UserState(),
                 update: (_, firebaseState, userState) =>
-                    userState..firebaseUser = firebaseState.user),
+                    userState..user = firebaseState.user),
           ], child: AppDelegate());
         });
   }
@@ -122,7 +127,6 @@ class SignedInApp extends StatefulWidget {
 
 class _SignedInAppState extends State<SignedInApp> {
   bool _bikebudsFetched = false;
-  StreamSubscription<FirebaseUser> _firebaseUserSubscription;
   StreamSubscription<String> _messagingListener;
 
   @override
@@ -138,8 +142,8 @@ class _SignedInAppState extends State<SignedInApp> {
       this._bikebudsFetched = true;
       bikebuds.profile.then((profile) {
         Provider.of<UserState>(context, listen: false)..profile = profile;
-      }).catchError((err) {
-        print('$this: Failed to fetch profile: $err');
+      }).catchError((err, stack) {
+        print('$this: Failed to fetch profile: $err, $stack');
       });
     }
 
@@ -148,7 +152,7 @@ class _SignedInAppState extends State<SignedInApp> {
       _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
         bikebuds.registerClient(token).then((ClientStateEntity response) {
           print('SignedInApp: bikebuds.registerClient: Complete');
-          Provider.of<ClientStateEntityState>(context, listen: false)
+          Provider.of<BikebudsClientState>(context, listen: false)
             ..client = response;
         }).catchError((err) {
           print('SignedInApp: bikebuds.registerClient: Failed: $err');
@@ -168,9 +172,6 @@ class _SignedInAppState extends State<SignedInApp> {
 
   @override
   void dispose() {
-    if (_firebaseUserSubscription != null) {
-      _firebaseUserSubscription.cancel();
-    }
     if (_messagingListener != null) {
       _messagingListener.cancel();
     }

@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "package:bikebuds_api/api.dart";
-import "package:flutter/widgets.dart";
+import 'package:bikebuds/firebase_user_wrapper.dart';
 
-class BikebudsClientState with ChangeNotifier {
-  ClientStateEntity _client;
+class FakeUserWrapper implements FirebaseUserWrapper {
+  var uid;
+  String displayName;
+  String email;
+  String photoUrl;
 
-  get client => _client;
+  FakeUserWrapper({
+    this.uid,
+    this.displayName,
+    this.email,
+    this.photoUrl,
+  });
 
-  set client(ClientStateEntity entity) {
-    client = entity;
-    notifyListeners();
-  }
-
-  BikebudsClientState update() {
-    return this;
+  @override
+  Future<String> getAccessToken({bool refresh = false}) {
+    return Future.value(null);
   }
 }

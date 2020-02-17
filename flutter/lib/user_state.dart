@@ -12,22 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds_api/api.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:bikebuds/firebase_user_wrapper.dart';
+import 'package:bikebuds_api/api.dart' hide User;
 import 'package:flutter/widgets.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class UserState with ChangeNotifier {
-  FirebaseUser _firebaseUser;
+  FirebaseUserWrapper _user;
   Profile _profile;
 
-  FirebaseUser get firebaseUser => _firebaseUser;
+  get displayName => _user?.displayName ?? _user?.email ?? "";
+  get email => _user?.email ?? "";
+  get photoUrl =>
+      _profile?.athlete?.properties?.profileMedium ?? _user?.photoUrl;
+  get profilePhoto => this.photoUrl == null
+      ? MemoryImage(kTransparentImage)
+      : NetworkImage(photoUrl);
+  get city => _profile?.athlete?.properties?.city ?? "";
 
-  set firebaseUser(FirebaseUser value) {
-    _firebaseUser = value;
+  set user(FirebaseUserWrapper value) {
+    _user = value;
     notifyListeners();
   }
-
-  Profile get profile => _profile;
 
   set profile(Profile value) {
     _profile = value;
