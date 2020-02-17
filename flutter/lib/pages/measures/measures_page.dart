@@ -13,7 +13,7 @@
 // limitations under the license.
 
 import 'package:bikebuds/bikebuds_api_state.dart';
-import 'package:bikebuds/pages/measures/measures_chart.dart';
+import 'package:bikebuds/pages/measures/measures_chart.dart' as measures_chart;
 import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,14 +41,16 @@ class _MeasuresPageState extends State<MeasuresPage> {
             Expanded(
               child: Container(
                 child: Card(
-                  child: MeasuresChart(),
+                  child: measures_chart.MeasuresChart(),
                 ),
               ),
             ),
             Expanded(
               child: Container(
                 child: Card(
-                  child: MeasuresChart(),
+                  child: measures_chart.MeasuresChart(
+                      intervalCount: 52,
+                      intervalUnit: measures_chart.Interval.WEEK),
                 ),
               ),
             ),

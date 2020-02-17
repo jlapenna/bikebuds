@@ -15,13 +15,12 @@
 import 'dart:math';
 
 import 'package:bikebuds/app.dart';
+import 'package:bikebuds/pages/measures/measures_state.dart';
 import "package:bikebuds_api/api.dart" hide UserState;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
-
-import 'measures_state.dart';
 
 enum Interval {
   DAY,
@@ -30,15 +29,21 @@ enum Interval {
 }
 
 class MeasuresChart extends StatefulWidget {
+  final int intervalCount;
+  final int intervalStep;
+  final Interval intervalUnit;
+
+  MeasuresChart({
+    this.intervalCount: 48,
+    this.intervalStep: 1,
+    this.intervalUnit: Interval.MONTH,
+  });
+
   @override
   _MeasuresChartState createState() => _MeasuresChartState();
 }
 
 class _MeasuresChartState extends State<MeasuresChart> {
-  int intervalCount = 12;
-  int intervalStep = 1;
-  Interval intervalUnit = Interval.MONTH;
-
   Series series;
   List<Map<dynamic, dynamic>> measures = [];
   bool showFatLine;
@@ -53,31 +58,10 @@ class _MeasuresChartState extends State<MeasuresChart> {
     }
   }
 
-  DateTime _preferredNextDate(DateTime preferredNextDate) {
-    switch (intervalUnit) {
-      case Interval.DAY:
-        Jiffy j = Jiffy(preferredNextDate)
-          ..subtract(days: intervalStep)
-          ..startOf('day');
-        return j.utc();
-      case Interval.WEEK:
-        Jiffy j = Jiffy(preferredNextDate)
-          ..subtract(weeks: intervalStep)
-          ..startOf('day');
-        return j.utc();
-      case Interval.MONTH:
-        Jiffy j = Jiffy(preferredNextDate)
-          ..subtract(months: intervalStep)
-          ..startOf('day');
-        return j.utc();
-    }
-    return null;
-  }
-
   handleMeasures(List<Measure> newMeasures) {
-    var preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf('day');
+    DateTime preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf('day');
     var earliestDate =
-        preferredNextDate.subtract(Duration(days: intervalCount * 1000));
+        _preferredNextDate(preferredNextDate, count: widget.intervalCount);
     List<Map<dynamic, dynamic>> measures = [];
     showFatLine = false;
     List<Measure> intervalMeasures = [];
@@ -122,23 +106,56 @@ class _MeasuresChartState extends State<MeasuresChart> {
       ],
       animate: false,
       dateTimeFactory: const charts.LocalDateTimeFactory(),
-      domainAxis: new charts.DateTimeAxisSpec(
-        tickFormatterSpec: new charts.AutoDateTimeTickFormatterSpec(
-          day: new charts.TimeFormatterSpec(
-              format: 'dd', transitionFormat: 'MM/dd/yyyy'),
+      domainAxis: charts.DateTimeAxisSpec(
+        tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
+          day: charts.TimeFormatterSpec(
+              format: timeFormat(), transitionFormat: timeTransitionFormat()),
         ),
       ),
     );
   }
 
-  static DateTime cloneDateTime(DateTime source) {
-    if (source.isUtc) {
-      return DateTime.utc(source.month, source.day, source.hour, source.minute,
-          source.second, source.millisecond, source.microsecond);
-    } else {
-      return DateTime(source.month, source.day, source.hour, source.minute,
-          source.second, source.millisecond, source.microsecond);
+  timeFormat() {
+    switch (widget.intervalUnit) {
+      case Interval.DAY:
+        return 'dd';
+      case Interval.WEEK:
+        return "dd'MM";
+      case Interval.MONTH:
+        return 'MM';
     }
+  }
+
+  timeTransitionFormat() {
+    switch (widget.intervalUnit) {
+      case Interval.DAY:
+        return 'dd';
+      case Interval.WEEK:
+        return "dd'MM";
+      case Interval.MONTH:
+        return 'MM/dd/yyyy';
+    }
+  }
+
+  _preferredNextDate(DateTime preferredNextDate, {int count: 1}) {
+    switch (widget.intervalUnit) {
+      case Interval.DAY:
+        Jiffy j = Jiffy(preferredNextDate)
+          ..subtract(days: widget.intervalStep * count)
+          ..startOf('day');
+        return j.utc();
+      case Interval.WEEK:
+        Jiffy j = Jiffy(preferredNextDate)
+          ..subtract(weeks: widget.intervalStep * count)
+          ..startOf('day');
+        return j.utc();
+      case Interval.MONTH:
+        Jiffy j = Jiffy(preferredNextDate)
+          ..subtract(months: widget.intervalStep * count)
+          ..startOf('day');
+        return j.utc();
+    }
+    return null;
   }
 
   static Map _processIntervalMeasures(
@@ -172,7 +189,6 @@ class _MeasuresChartState extends State<MeasuresChart> {
       if (fatCount > 0) {
         newMeasure['fatRatio'] = fatSum / fatCount;
       }
-      print('XXX: Calculated: $newMeasure');
       return newMeasure;
     }
     return null;
