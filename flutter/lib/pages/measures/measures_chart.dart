@@ -16,7 +16,7 @@ import 'dart:math';
 
 import 'package:bikebuds/app.dart';
 import 'package:bikebuds/pages/measures/measures_state.dart';
-import "package:bikebuds_api/api.dart" hide UserState;
+import 'package:bikebuds_api/api.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -45,7 +45,7 @@ class MeasuresChart extends StatefulWidget {
 
 class _MeasuresChartState extends State<MeasuresChart> {
   Series series;
-  List<Map<dynamic, dynamic>> measures = [];
+  List<Measure> measures = [];
   bool showFatLine;
 
   @override
@@ -62,7 +62,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
     DateTime preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf('day');
     var earliestDate =
         _preferredNextDate(preferredNextDate, count: widget.intervalCount);
-    List<Map<dynamic, dynamic>> measures = [];
+    List<Measure> measures = [];
     showFatLine = false;
     List<Measure> intervalMeasures = [];
     for (var i = newMeasures.length; i > 0; i--) {
@@ -73,10 +73,10 @@ class _MeasuresChartState extends State<MeasuresChart> {
       }
       if (measure.date.isBefore(preferredNextDate)) {
         // If the measure is a new interval, process the previous...
-        Map<dynamic, dynamic> newMeasure =
+        Measure newMeasure =
             _processIntervalMeasures(preferredNextDate, intervalMeasures);
         if (newMeasure != null) {
-          if (newMeasure.containsKey('fatRatio')) {
+          if (newMeasure.fatRatio != null) {
             showFatLine = true;
           }
           measures.insert(0, newMeasure);
@@ -95,12 +95,12 @@ class _MeasuresChartState extends State<MeasuresChart> {
   Widget build(BuildContext context) {
     return charts.TimeSeriesChart(
       [
-        charts.Series<Map<dynamic, dynamic>, DateTime>(
+        charts.Series<Measure, DateTime>(
           id: 'Measures',
           displayName: 'Measures',
           colorFn: (_, __) => charts.ColorUtil.fromDartColor(ACCENT_COLOR),
-          domainFn: (dynamic measure, _) => measure['date'],
-          measureFn: (dynamic measure, _) => measure['weightAvg'],
+          domainFn: (dynamic measure, _) => measure.date,
+          measureFn: (dynamic measure, _) => measure.weight,
           data: measures,
         ),
       ],
@@ -158,7 +158,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
     return null;
   }
 
-  static Map _processIntervalMeasures(
+  static Measure _processIntervalMeasures(
       DateTime preferredNextDate, List<Measure> intervalMeasures) {
     num weightSum = 0;
     num weightCount = 0;
@@ -167,12 +167,11 @@ class _MeasuresChartState extends State<MeasuresChart> {
     num fatSum = 0;
     num fatCount = 0;
     for (Measure intervalMeasure in intervalMeasures) {
-      num weight = intervalMeasure.weight;
-      if (weight != null) {
-        weightSum += weight;
+      if (intervalMeasure.weight != null) {
+        weightSum += intervalMeasure.weight;
         weightCount += 1;
-        weightMax = max(weight, weightMax);
-        weightMin = min(weight, weightMin);
+        weightMax = max(intervalMeasure.weight, weightMax);
+        weightMin = min(intervalMeasure.weight, weightMin);
       }
       if (intervalMeasure.fatRatio != null) {
         fatSum += intervalMeasure.fatRatio;
@@ -180,14 +179,13 @@ class _MeasuresChartState extends State<MeasuresChart> {
       }
     }
     if (weightCount > 0) {
-      var weightAvg = weightSum / weightCount;
-      Map<dynamic, dynamic> newMeasure = {
-        'date': preferredNextDate,
-        'weightAvg': weightAvg,
-        'weightError': [weightAvg - weightMin, weightMax - weightAvg],
-      };
+      var weight = weightSum / weightCount;
+      Measure newMeasure = Measure()
+        ..weight = weight
+        ..date = preferredNextDate
+        ..weightError = [weight - weightMin, weightMax - weight];
       if (fatCount > 0) {
-        newMeasure['fatRatio'] = fatSum / fatCount;
+        newMeasure.fatRatio = fatSum / fatCount;
       }
       return newMeasure;
     }

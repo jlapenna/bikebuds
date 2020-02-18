@@ -93,6 +93,7 @@ measure_model = api.model(
         # 'systolic_blood_pressure': fields.Integer,
         # 'temperature': fields.Float,
         'weight': fields.Float,
+        'weight_error': fields.List(fields.Float),
     },
 )
 
