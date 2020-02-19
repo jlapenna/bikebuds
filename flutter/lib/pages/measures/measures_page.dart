@@ -15,6 +15,7 @@
 import 'package:bikebuds/bikebuds_api_state.dart';
 import 'package:bikebuds/pages/measures/measures_chart.dart' as measures_chart;
 import 'package:bikebuds/pages/measures/measures_state.dart';
+import 'package:bikebuds/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,28 +31,27 @@ class _MeasuresPageState extends State<MeasuresPage> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProxyProvider<BikebudsApiState, MeasuresState>(
+        ChangeNotifierProxyProvider2<BikebudsApiState, UserState,
+                MeasuresState>(
             create: (_) => _measuresState,
-            update: (_, bikebudsApiState, measuresState) =>
-                measuresState..bikebudsApiState = bikebudsApiState)
+            update: (_, bikebudsApiState, userState, measuresState) =>
+                measuresState
+                  ..userState = userState
+                  ..bikebudsApiState = bikebudsApiState)
       ],
       child: MeasuresWrapper(
         child: Column(
           children: [
             Expanded(
-              child: Container(
-                child: Card(
-                  child: measures_chart.MeasuresChart(),
-                ),
+              child: Card(
+                child: measures_chart.MeasuresChart(),
               ),
             ),
             Expanded(
-              child: Container(
-                child: Card(
-                  child: measures_chart.MeasuresChart(
-                      intervalCount: 52,
-                      intervalUnit: measures_chart.Interval.WEEK),
-                ),
+              child: Card(
+                child: measures_chart.MeasuresChart(
+                    title: "Weekly",
+                    intervalUnit: measures_chart.Interval.WEEK),
               ),
             ),
           ],
@@ -77,7 +77,8 @@ class _MeasuresWrapperState extends State<MeasuresWrapper> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     print('$this: didChangeDependencies');
-    if (!_fetched) {
+    UserState userState = Provider.of<UserState>(context);
+    if (userState.preferences != null && !_fetched) {
       _fetched = true;
       print('$this: didChangeDependencies: refresh');
       Provider.of<MeasuresState>(context).refresh();

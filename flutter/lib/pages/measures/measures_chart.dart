@@ -29,11 +29,13 @@ enum Interval {
 }
 
 class MeasuresChart extends StatefulWidget {
+  final String title;
   final int intervalCount;
   final int intervalStep;
   final Interval intervalUnit;
 
   MeasuresChart({
+    this.title: "Monthly",
     this.intervalCount: 48,
     this.intervalStep: 1,
     this.intervalUnit: Interval.MONTH,
@@ -47,6 +49,9 @@ class _MeasuresChartState extends State<MeasuresChart> {
   Series series;
   List<Measure> measures = [];
   bool showFatLine;
+
+  DateTime _selectedDate;
+  var _selectedWeight;
 
   @override
   void didChangeDependencies() {
@@ -91,27 +96,115 @@ class _MeasuresChartState extends State<MeasuresChart> {
     this.measures = measures;
   }
 
+  _onSelectionChanged(charts.SelectionModel model) {
+    List<charts.SeriesDatum<DateTime>> selectedDatum = model.selectedDatum;
+
+    DateTime date;
+    var weight;
+
+    // We get the model that updated with a list of [SeriesDatum] which is
+    // simply a pair of series & datum.
+    //
+    // Walk the selection updating the measures map, storing off the sales and
+    // series name for each selection point.
+    if (selectedDatum.isNotEmpty) {
+      date = selectedDatum.first.datum.date;
+      weight = selectedDatum.first.datum.weight;
+      selectedDatum.forEach((charts.SeriesDatum<DateTime> datumPair) {
+//        print('XXX: ${datumPair.series}');
+//        measures[datumPair.series.displayName] = datumPair.datum.sales;
+      });
+    }
+
+    // Request a build.
+    setState(() {
+      _selectedDate = date;
+      _selectedWeight = weight;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return charts.TimeSeriesChart(
-      [
-        charts.Series<Measure, DateTime>(
-          id: 'Measures',
-          displayName: 'Measures',
-          colorFn: (_, __) => charts.ColorUtil.fromDartColor(ACCENT_COLOR),
-          domainFn: (dynamic measure, _) => measure.date,
-          measureFn: (dynamic measure, _) => measure.weight,
-          data: measures,
-        ),
+    if (measures.length == 0 || measures == null) {
+      return Container();
+    }
+    print('$this: Laying out chart with ${measures.length} measures');
+    final hasSelected = _selectedDate != null && _selectedWeight != null;
+    return Stack(
+      children: [
+        Positioned(
+            top: 10,
+            right: 0,
+            child: hasSelected
+                ? Text('${_selectedDate.toString()}: $_selectedWeight')
+                : Container()),
+        charts.TimeSeriesChart(
+          [
+            charts.Series<Measure, DateTime>(
+              id: 'Weight',
+              colorFn: (_, __) => charts.ColorUtil.fromDartColor(PRIMARY_COLOR),
+              domainFn: (Measure measure, _) => measure.date,
+              measureFn: (Measure measure, _) => measure.weight,
+              data: measures,
+            ),
+//            charts.Series<Measure, DateTime>(
+//              id: 'FatRatio',
+//              colorFn: (_, __) => charts.ColorUtil.fromDartColor(ACCENT_COLOR),
+//              domainFn: (Measure measure, _) => measure.date,
+//              measureFn: (Measure measure, _) => measure.fatRatio,
+//              data: measures,
+//            )..setAttribute(charts.rendererIdKey, 'FatRatio'),
+          ],
+          defaultInteractions: true,
+          defaultRenderer:
+              charts.LineRendererConfig(includePoints: true, includeLine: true),
+          customSeriesRenderers: [
+//            charts.LineRendererConfig(
+//                includePoints: true,
+//                includeLine: true,
+//                // ID used to link series to this renderer.
+//                customRendererId: 'FatRatio'),
+//            charts.PointRendererConfig(
+//                symbolRenderer: TooltipRenderer2(),
+//                // ID used to link series to this renderer.
+//                customRendererId: 'FatRatio'),
+          ],
+          // Custom renderer configuration for the point series.
+          // Optionally pass in a [DateTimeFactory] used by the chart. The factory
+          // should create the same type of [DateTime] as the data provided. If none
+          // specified, the default creates local date time.
+          dateTimeFactory: const charts.UTCDateTimeFactory(),
+          animate: false,
+          behaviors: [
+            charts.ChartTitle(widget.title,
+                behaviorPosition: charts.BehaviorPosition.top,
+                titleOutsideJustification: charts.OutsideJustification.start,
+                // Set a larger inner padding than the default (10) to avoid
+                // rendering the text too close to the top measure axis tick label.
+                // The top tick label may extend upwards into the top margin region
+                // if it is located at the top of the draw area.
+                innerPadding: 18),
+//            charts.LinePointHighlighter(),
+//            charts.PanAndZoomBehavior(),
+          ],
+          primaryMeasureAxis: charts.NumericAxisSpec(
+            tickProviderSpec:
+                charts.BasicNumericTickProviderSpec(dataIsInWholeNumbers: true),
+            viewport: charts.NumericExtents.fromValues(
+                measures.map((Measure m) => m.weight)),
+          ),
+          domainAxis: charts.DateTimeAxisSpec(
+            tickProviderSpec:
+                charts.AutoDateTimeTickProviderSpec(includeTime: false),
+            tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(),
+          ),
+          selectionModels: [
+            charts.SelectionModelConfig(
+              changedListener: _onSelectionChanged,
+            ),
+          ],
+        )
       ],
-      animate: false,
-      dateTimeFactory: const charts.LocalDateTimeFactory(),
-      domainAxis: charts.DateTimeAxisSpec(
-        tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
-          day: charts.TimeFormatterSpec(
-              format: timeFormat(), transitionFormat: timeTransitionFormat()),
-        ),
-      ),
     );
   }
 

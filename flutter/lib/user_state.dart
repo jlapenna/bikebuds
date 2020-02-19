@@ -29,6 +29,8 @@ class UserState with ChangeNotifier {
       ? MemoryImage(kTransparentImage)
       : NetworkImage(photoUrl);
   get city => _profile?.athlete?.properties?.city ?? "";
+  get user => _user;
+  Preferences get preferences => _profile?.user?.properties?.preferences;
 
   set user(FirebaseUserWrapper value) {
     _user = value;
