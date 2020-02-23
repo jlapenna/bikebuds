@@ -38,3 +38,4 @@ google-python-cloud-debugger==2.14
 
 # Slack
 slackclient
+bs4

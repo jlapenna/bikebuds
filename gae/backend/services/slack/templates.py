@@ -31,7 +31,7 @@ ROUTE_BLOCK = r"""
 }
 """
 
-ACTIVITY_BLOCK = r"""
+API_ACTIVITY_BLOCK = r"""
 {
     "blocks": [
         {
@@ -44,6 +44,25 @@ ACTIVITY_BLOCK = r"""
                 "type": "image",
                 "image_url": "%(map_image_url)s",
                 "alt_text": "route map"
+            }
+        }
+    ]
+}
+"""
+
+CRAWLED_ACTIVITY_BLOCK = r"""
+{
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "<%(url)s|*%(title)s*>\n%(description)s"
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": "%(image_url)s",
+                "alt_text": "activity image"
             }
         }
     ]

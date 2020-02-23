@@ -12,22 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
+import re
 import urllib
+import urllib.request
 
-from babel.dates import format_date
-from measurement.measures import Distance
+from slack.errors import SlackApiError
 
-from services.slack.templates import ACTIVITY_BLOCK, ROUTE_BLOCK
 from shared.services.strava.client import ClientWrapper
 from shared import responses
-from shared.config import config
 from shared.datastore.bot import Bot
-from shared.datastore.route import Route
 from shared.datastore.service import Service
-from shared import ds_util
 from shared.slack_util import slack_client
+
+from services.slack.unfurl_activity import unfurl_activity
+from services.slack.unfurl_route import unfurl_route
+
+
+_STRAVA_APP_LINK_REGEX = re.compile('(https://www.strava.com/([^/]+)/[0-9]+)')
 
 
 def process_slack_event(event):
@@ -47,17 +49,24 @@ def process_link_shared(event):
     client = ClientWrapper(service)
     unfurls = {}
     for link in event['event']['links']:
-        unfurl = _unfurl(client, link)
+        alt_url = _resolve_rewrite_link(link)
+        unfurl = _unfurl(client, link, alt_url)
         if unfurl:
             unfurls[link['url']] = unfurl
     if not unfurls:
         return responses.OK
+    logging.warn('process_link_shared: debug: unfurling: %s', unfurls)
 
-    response = slack_client.chat_unfurl(
-        channel=event['event']['channel'],
-        ts=event['event']['message_ts'],
-        unfurls=unfurls,
-    )
+    try:
+        response = slack_client.chat_unfurl(
+            channel=event['event']['channel'],
+            ts=event['event']['message_ts'],
+            unfurls=unfurls,
+        )
+    except SlackApiError as e:
+        logging.exception('process_link_shared: failed: unfurling: %s', unfurls)
+        logging.warn('dir: %s', dir(e))
+        return responses.INTERNAL_SERVER_ERROR
 
     if not response['ok']:
         logging.error('process_link_shared: failed: %s with %s', response, unfurls)
@@ -66,128 +75,30 @@ def process_link_shared(event):
     return responses.OK
 
 
-def _unfurl(client, link):
-    if '/routes/' in link['url']:
-        route_id = _get_id(link)
-        route = client.get_route(route_id)
-        route_entity = Route.to_entity(route)
-        return _route_block(link['url'], route_entity)
-    elif '/activities/' in link['url']:
-        activity_id = _get_id(link)
-        activities_query = ds_util.client.query(kind='Activity')
-        activities_query.add_filter('id', '=', activity_id)
-        all_activities = [a for a in activities_query.fetch()]
-
-        if all_activities:
-            activity_entity = all_activities[0]
-            if activity_entity.get('private'):
-                return None
-            return _activity_block(link['url'], activity_entity)
-        else:
-            return None
-
-
-def _get_id(link):
-    url = urllib.parse.urlparse(link['url'])
-    return int(url.path.split('/')[-1])
-
-
-def _route_block(url, route):
-    route_sub = {
-        'id': route['id'],
-        'timestamp': format_date(route['timestamp'], format='medium'),
-        'description': route['description'],
-        'name': route['name'],
-        'athlete.id': route['athlete']['id'],
-        'athlete.firstname': route['athlete']['firstname'],
-        'athlete.lastname': route['athlete']['lastname'],
-        'map_image_url': _generate_url(route),
-        'url': url,
-    }
-    unfurl = json.loads(ROUTE_BLOCK % route_sub)
-
-    fields = []
-    if route.get('distance', None):
-        fields.append(
-            {
-                "type": "mrkdwn",
-                "text": "*Distance:* %smi" % round(Distance(m=route['distance']).mi, 2),
-            }
-        )
-
-    if route.get('elevation_gain', None):
-        fields.append(
-            {
-                "type": "mrkdwn",
-                "text": "*Elevation:* %sft"
-                % round(Distance(m=route['elevation_gain']).ft, 0),
-            }
-        )
-
-    if fields:
-        unfurl['blocks'].append({"type": "divider"})
-        unfurl['blocks'].append({"type": "section", "fields": fields})
-    return unfurl
-
-
-def _activity_block(url, activity):
-    activity_sub = {
-        'id': activity['id'],
-        'timestamp': format_date(activity['start_date'], format='long'),
-        'description': activity['description'],
-        'name': activity['name'],
-        'athlete.id': activity['athlete']['id'],
-        'athlete.firstname': activity['athlete']['firstname'],
-        'athlete.lastname': activity['athlete']['lastname'],
-        'map_image_url': _generate_url(activity),
-        'url': url,
-    }
-    unfurl = json.loads(ACTIVITY_BLOCK % activity_sub)
-
-    fields = []
-    if activity.get('distance', None):
-        fields.append(
-            {
-                "type": "mrkdwn",
-                "text": "*Distance:* %smi"
-                % round(Distance(m=activity['distance']).mi, 2),
-            }
-        )
-
-    if activity.get('total_elevation_gain', None):
-        fields.append(
-            {
-                "type": "mrkdwn",
-                "text": "*Elevation:* %sft"
-                % round(Distance(m=activity['total_elevation_gain']).ft, 0),
-            }
-        )
-
-    if fields:
-        unfurl['blocks'].append({"type": "divider"})
-        unfurl['blocks'].append({"type": "section", "fields": fields})
-
+def _resolve_rewrite_link(link):
+    if 'strava.app.link' not in link['url']:
+        return
     try:
-        primary_image = activity['photos']['primary']['urls']['600']
-    except (KeyError, TypeError):
-        primary_image = None
-    if primary_image:
-        unfurl['blocks'].append(
-            {"type": "image", "image_url": primary_image, "alt_text": "Cover Photo"}
-        )
-    return unfurl
+        logging.info('_resolve_rewrite_link: fetching: %s', link['url'])
+        with urllib.request.urlopen(link['url']) as response:
+            contents = response.read()
+        logging.debug('_resolve_rewrite_link: fetched: %s', link['url'])
+    except urllib.request.HTTPError:
+        logging.exception('Could not fetch %s', link['url'])
+        return
+    match = _STRAVA_APP_LINK_REGEX.search(str(contents))
+    if match is None:
+        logging.warn('Could not resolve %s', link['url'])
+        return
+    resolved_url = match.group()
+    return resolved_url
 
 
-def _generate_url(source):
-    url = 'https://maps.googleapis.com/maps/api/staticmap?'
-    params = {
-        'key': config.firebase_web_creds['apiKey'],
-        'size': '512x512',
-        'maptype': 'roadmap',
-        'format': 'jpg',
-    }
-
-    summary_polyline = source.get('map', {}).get('summary_polyline')
-    if summary_polyline:
-        params['path'] = 'enc:%s' % (summary_polyline,)
-    return url + urllib.parse.urlencode(params)
+def _unfurl(client, link, alt_url=None):
+    url = alt_url if alt_url else link['url']
+    if '/routes/' in url:
+        return unfurl_route(client, url)
+    elif '/activities/' in url:
+        return unfurl_activity(client, url)
+    else:
+        return None
