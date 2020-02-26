@@ -40,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
         title: Text("Bikebuds"),
       ),
       drawer: buildDrawer(pages, userState),
-      body: MainContent(pages, _selectedDrawerItem),
+      body: MainContent(mainContentGlobalKey, pages, _selectedDrawerItem),
     );
   }
 

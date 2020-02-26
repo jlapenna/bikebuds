@@ -17,11 +17,14 @@ import 'package:bikebuds/widgets/mobile_embed.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+final mainContentGlobalKey = new GlobalKey();
+
 class MainContent extends StatelessWidget {
   final List<Page> pages;
   final int selectedDrawerItem;
 
-  const MainContent(this.pages, this.selectedDrawerItem);
+  const MainContent(Key key, this.pages, this.selectedDrawerItem)
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
