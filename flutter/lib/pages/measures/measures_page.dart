@@ -12,7 +12,6 @@
 // see the license for the specific language governing permissions and
 // limitations under the license.
 
-import 'package:bikebuds/bikebuds_api_state.dart';
 import 'package:bikebuds/pages/measures/measures_chart.dart' as measures_chart;
 import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:bikebuds/user_state.dart';
@@ -25,52 +24,6 @@ class MeasuresPage extends StatefulWidget {
 }
 
 class _MeasuresPageState extends State<MeasuresPage> {
-  MeasuresState _measuresState = MeasuresState(filter: "weight");
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProxyProvider2<BikebudsApiState, UserState,
-                MeasuresState>(
-            create: (_) => _measuresState,
-            update: (_, bikebudsApiState, userState, measuresState) =>
-                measuresState
-                  ..userState = userState
-                  ..bikebudsApiState = bikebudsApiState)
-      ],
-      child: MeasuresWrapper(
-        child: Column(
-          children: [
-            Expanded(
-              child: Card(
-                child: measures_chart.MeasuresChart(),
-              ),
-            ),
-            Expanded(
-              child: Card(
-                child: measures_chart.MeasuresChart(
-                    title: "Weekly",
-                    intervalUnit: measures_chart.Interval.WEEK),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MeasuresWrapper extends StatefulWidget {
-  final Widget child;
-
-  MeasuresWrapper({@required this.child});
-
-  @override
-  _MeasuresWrapperState createState() => _MeasuresWrapperState();
-}
-
-class _MeasuresWrapperState extends State<MeasuresWrapper> {
   bool _fetched = false;
 
   @override
@@ -87,6 +40,20 @@ class _MeasuresWrapperState extends State<MeasuresWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return Column(
+      children: [
+        Expanded(
+          child: Card(
+            child: measures_chart.MeasuresChart(),
+          ),
+        ),
+        Expanded(
+          child: Card(
+            child: measures_chart.MeasuresChart(
+                title: "Weekly", intervalUnit: measures_chart.Interval.WEEK),
+          ),
+        ),
+      ],
+    );
   }
 }

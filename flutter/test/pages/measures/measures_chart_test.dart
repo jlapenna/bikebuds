@@ -23,9 +23,10 @@ void main() {
   testWidgets('measures chart smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
 
-    var measuresState = MeasuresState(filter: 'weight');
-    measuresState.series = Series();
-    measuresState.series.measures = [
+    MeasuresState measuresState = MeasuresState(filter: 'weight');
+    measuresState.series = SeriesEntity();
+    measuresState.series.properties = Series();
+    measuresState.series.properties.measures = [
       Measure.fromJson({
         'date': DateTime(2017, 9, 19, 11, 22, 33).toIso8601String(),
         'weight': 10

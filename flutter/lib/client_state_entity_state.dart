@@ -21,7 +21,7 @@ class BikebudsClientState with ChangeNotifier {
   get client => _client;
 
   set client(ClientStateEntity entity) {
-    client = entity;
+    _client = entity;
     notifyListeners();
   }
 

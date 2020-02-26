@@ -19,7 +19,9 @@ import 'package:bikebuds/client_state_entity_state.dart';
 import 'package:bikebuds/config.dart';
 import 'package:bikebuds/firebase_util.dart';
 import 'package:bikebuds/main_screen.dart';
+import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:bikebuds/sign_in_screen.dart';
+import 'package:bikebuds/storage/storage.dart';
 import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
 import 'package:bikebuds_api/api.dart' hide UserState;
@@ -41,20 +43,32 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   Future<bool> _loader;
   Config config;
+  Storage storage;
+  MeasuresState _measuresState = MeasuresState(filter: "weight");
   FirebaseOptions firebaseOptions;
   FirebaseState firebaseState;
 
   @override
   void initState() {
-    _loader = _load();
+    _loader = _load().then((value) {
+      print('App: _load: $value');
+      return true;
+    }, onError: (err) => print('App: _load: failed: $err'));
+
     super.initState();
   }
 
   Future<bool> _load() async {
     config = await loadConfig(context);
+
+    storage = Storage();
+    var storageResult = await storage.load();
+    print('App: _load: storage: $storageResult');
+
     firebaseOptions = await loadFirebaseOptions(context);
     firebaseState = FirebaseState(config, firebaseOptions);
-    await firebaseState.load();
+    var firebaseResult = await firebaseState.load();
+    print('App: _load: firebase: $firebaseResult');
     return true;
   }
 
@@ -68,6 +82,7 @@ class _AppState extends State<App> {
           }
           return MultiProvider(providers: [
             Provider<Config>.value(value: config),
+            Provider<Storage>.value(value: storage),
             ChangeNotifierProvider<FirebaseState>.value(value: firebaseState),
             ChangeNotifierProxyProvider2<Config, FirebaseState,
                     BikebudsApiState>(
@@ -84,6 +99,15 @@ class _AppState extends State<App> {
                 create: (_) => UserState(),
                 update: (_, firebaseState, userState) =>
                     userState..user = firebaseState.user),
+            ChangeNotifierProxyProvider3<Storage, BikebudsApiState, UserState,
+                    MeasuresState>(
+                create: (_) => _measuresState,
+                update:
+                    (_, storage, bikebudsApiState, userState, measuresState) =>
+                        measuresState
+                          ..bikebudsApiState = bikebudsApiState
+                          ..storage = storage
+                          ..userState = userState)
           ], child: AppDelegate());
         });
   }
@@ -154,8 +178,8 @@ class _SignedInAppState extends State<SignedInApp> {
           print('SignedInApp: bikebuds.registerClient: Complete');
           Provider.of<BikebudsClientState>(context, listen: false)
             ..client = response;
-        }).catchError((err) {
-          print('SignedInApp: bikebuds.registerClient: Failed: $err');
+        }).catchError((err, stack) {
+          print('SignedInApp: bikebuds.registerClient: Failed: $err, $stack');
         });
       });
       firebase.messaging.requestNotificationPermissions();

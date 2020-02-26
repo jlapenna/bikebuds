@@ -73,6 +73,12 @@ dependencies:
   # https://pub.dev/packages/jiffy
   jiffy: ^2.2.0
 
+  # https://pub.dev/packages/sembast
+  sembast: ^2.2.0
+
+  # https://pub.dev/packages/path_provider
+  path_provider: ^1.6.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -46,7 +46,7 @@ class MeasuresChart extends StatefulWidget {
 }
 
 class _MeasuresChartState extends State<MeasuresChart> {
-  Series series;
+  SeriesEntity series;
   List<Measure> measures = [];
   bool showFatLine;
 
@@ -59,7 +59,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
     var measuresState = Provider.of<MeasuresState>(context);
     if (measuresState.series != series) {
       series = measuresState.series;
-      handleMeasures(measuresState.series?.measures ?? []);
+      handleMeasures(measuresState.series?.properties?.measures ?? []);
     }
   }
 
