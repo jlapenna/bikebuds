@@ -89,6 +89,7 @@ class WeightTrendWorker(object):
         def notif_fn(client=None):
             return messaging.Message(
                 notification=messaging.Notification(title=title, body=body),
+                data={'refresh': 'weight'},
                 android=messaging.AndroidConfig(
                     priority='high',  # Wake up the device to notify.
                     ttl=82800,  # 23 hours
