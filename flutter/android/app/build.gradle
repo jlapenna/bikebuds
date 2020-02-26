@@ -48,6 +48,7 @@ android {
         targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled true
@@ -88,6 +89,10 @@ dependencies {
 
 
     implementation 'androidx.multidex:multidex:2.0.1' // use latest version
+
+    // Per: https://github.com/FirebaseExtended/flutterfire/blob/d28d870a8c30a59f009ab825cf6798a17c5a9cc6/packages/firebase_messaging/README.md
+    // aka: https://github.com/FirebaseExtended/flutterfire/tree/master/packages/firebase_messaging
+    implementation 'com.google.firebase:firebase-messaging:20.1.0'
 }
 
 // Firebase: https://firebase.google.com/docs/flutter/setup

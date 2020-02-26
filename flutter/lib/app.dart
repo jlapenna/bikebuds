@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:bikebuds/bikebuds_api_state.dart';
 import 'package:bikebuds/client_state_entity_state.dart';
 import 'package:bikebuds/config.dart';
+import 'package:bikebuds/firebase_messaging.dart';
 import 'package:bikebuds/firebase_util.dart';
-import 'package:bikebuds/main_content.dart';
 import 'package:bikebuds/main_screen.dart';
 import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:bikebuds/sign_in_screen.dart';
@@ -27,12 +28,16 @@ import 'package:bikebuds/user_state.dart';
 import 'package:bikebuds/widgets/loading.dart';
 import 'package:bikebuds_api/api.dart' hide UserState;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 const Color PRIMARY_COLOR = Color(0xFF03dac6);
 const Color ACCENT_COLOR = Color(0xFFff4081);
+
+/// Used to get a reference to the context inside the multi-providers.
+final appDelegateGlobalKey = new GlobalKey();
 
 /// Used to get a reference to the context inside the material app.
 /// https://stackoverflow.com/a/54607515/3002848
@@ -50,6 +55,7 @@ class _AppState extends State<App> {
   MeasuresState _measuresState = MeasuresState(filter: "weight");
   FirebaseOptions firebaseOptions;
   FirebaseState firebaseState;
+  FirebaseMessaging firebaseMessaging = registerFirebaseMessaging();
 
   @override
   void initState() {
@@ -77,6 +83,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    print('App: build in Isolate#${shortHash(Isolate.current)}');
     return FutureBuilder<bool>(
         future: _loader,
         builder: (context, AsyncSnapshot<bool> snapshot) {
@@ -111,12 +118,14 @@ class _AppState extends State<App> {
                           ..bikebudsApiState = bikebudsApiState
                           ..storage = storage
                           ..userState = userState)
-          ], child: AppDelegate());
+          ], child: AppDelegate(appDelegateGlobalKey));
         });
   }
 }
 
 class AppDelegate extends StatelessWidget {
+  AppDelegate(GlobalKey key) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var firebaseState = Provider.of<FirebaseState>(context);
@@ -176,7 +185,7 @@ class _SignedInAppState extends State<SignedInApp> {
 
     // Register FCM.
     if (!kIsWeb && bikebuds.isReady && _messagingListener == null) {
-      registerFirebaseMessaging(firebase, bikebuds);
+      registerFirebaseMessagingClient(firebase, bikebuds);
     }
 
     // TODO: Check the profile here, look for signup_complete and block
@@ -184,26 +193,19 @@ class _SignedInAppState extends State<SignedInApp> {
     //User user = UserModel.of(context)?.bikebudsUser;
   }
 
-  void registerFirebaseMessaging(
+  void registerFirebaseMessagingClient(
       FirebaseState firebase, BikebudsApiState bikebuds) async {
+    print('App.FirebaseMessaging: registerFirebaseMessagingClient');
     _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
       bikebuds.registerClient(token).then((ClientStateEntity response) {
-        print('SignedInApp: bikebuds.registerClient: Complete');
+        print('App.FirebaseMessaging: bikebuds.registerClient: Complete');
         Provider.of<BikebudsClientState>(context, listen: false)
           ..client = response;
       }).catchError((err, stack) {
-        print('SignedInApp: bikebuds.registerClient: Failed: $err, $stack');
+        print(
+            'App.FirebaseMessaging: bikebuds.registerClient: Failed: $err, $stack');
       });
     });
-    try {
-      await firebase.messaging.requestNotificationPermissions();
-    } catch (err) {
-      print('App: Could not request notification permissions: $err');
-    }
-    firebase.messaging.configure(
-        onMessage: this.onMessage,
-        onResume: this.onResume,
-        onLaunch: this.onLaunch);
   }
 
   @override
@@ -212,49 +214,6 @@ class _SignedInAppState extends State<SignedInApp> {
       _messagingListener.cancel();
     }
     super.dispose();
-  }
-
-  // only called when the app is in the foreground.
-  Future<dynamic> onMessage(Map<String, dynamic> message) async {
-    print('Messaging.onMessage: $message');
-    if (message.containsKey('data') && message['data'].containsKey('refresh')) {
-      print('Messaging.onMessage: Refresh: ${message['data']['refresh']}');
-      switch (message['data']['refresh']) {
-        case 'weight':
-          try {
-            await Provider.of<MeasuresState>(context, listen: false)
-                .refresh(force: true);
-            print('Messaging.onMessage: Refreshed weight');
-          } catch (err, stack) {
-            print('Messaging.onMessage: Unable to refresh: $err, $stack');
-          }
-          break;
-        default:
-          print('Messaging.onMessage: Unrecognized refresh');
-      }
-    }
-    if (message.containsKey('notification') &&
-        message['notification'].containsKey('title') &&
-        (message['notification']['title'] as String).isNotEmpty &&
-        message['notification'].containsKey('body') &&
-        (message['notification']['body'] as String).isNotEmpty) {
-      Scaffold.of(mainContentGlobalKey.currentContext).showSnackBar(
-        SnackBar(
-          content: ListTile(
-            title: Text(message['notification']['title']),
-            subtitle: Text(message['notification']['body']),
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<dynamic> onResume(Map<String, dynamic> message) async {
-    print('Messaging.onResume: $message');
-  }
-
-  Future<dynamic> onLaunch(Map<String, dynamic> message) async {
-    print('Messaging.onLaunch: $message');
   }
 
   @override

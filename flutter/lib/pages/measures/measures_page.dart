@@ -32,9 +32,10 @@ class _MeasuresPageState extends State<MeasuresPage> {
     if (!_fetched) {
       _fetched = true;
       print('$this: didChangeDependencies: refresh');
-      Provider.of<MeasuresState>(context)
-          .refresh()
-          .catchError(((err) => _fetched = false));
+      Provider.of<MeasuresState>(context).refresh().catchError(((err) {
+        print('$this: didChangeDependencies: refresh failed: $err');
+        _fetched = false;
+      }));
     }
   }
 
