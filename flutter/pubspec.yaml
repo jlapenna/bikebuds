@@ -79,6 +79,9 @@ dependencies:
   # https://pub.dev/packages/path_provider
   path_provider: ^1.6.1
 
+  # https://pub.dev/packages/intl
+  intl: ^0.16.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

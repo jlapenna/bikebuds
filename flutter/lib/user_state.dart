@@ -30,7 +30,7 @@ class UserState with ChangeNotifier {
       : NetworkImage(photoUrl);
   get city => _profile?.athlete?.properties?.city ?? "";
   get user => _user;
-  Preferences get preferences => _profile?.user?.properties?.preferences;
+  String get units => _profile?.user?.properties?.preferences?.units;
 
   set user(FirebaseUserWrapper value) {
     _user = value;

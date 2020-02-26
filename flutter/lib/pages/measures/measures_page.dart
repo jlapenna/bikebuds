@@ -14,7 +14,6 @@
 
 import 'package:bikebuds/pages/measures/measures_chart.dart' as measures_chart;
 import 'package:bikebuds/pages/measures/measures_state.dart';
-import 'package:bikebuds/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,11 +29,12 @@ class _MeasuresPageState extends State<MeasuresPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     print('$this: didChangeDependencies');
-    UserState userState = Provider.of<UserState>(context);
-    if (userState.preferences != null && !_fetched) {
+    if (!_fetched) {
       _fetched = true;
       print('$this: didChangeDependencies: refresh');
-      Provider.of<MeasuresState>(context).refresh();
+      Provider.of<MeasuresState>(context)
+          .refresh()
+          .catchError(((err) => _fetched = false));
     }
   }
 
@@ -50,7 +50,9 @@ class _MeasuresPageState extends State<MeasuresPage> {
         Expanded(
           child: Card(
             child: measures_chart.MeasuresChart(
-                title: "Weekly", intervalUnit: measures_chart.Interval.WEEK),
+                title: "Daily",
+                intervalCount: 90,
+                intervalUnit: measures_chart.Interval.DAY),
           ),
         ),
       ],

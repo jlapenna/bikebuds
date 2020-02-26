@@ -19,8 +19,11 @@ import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:bikebuds_api/api.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
+
+DateFormat yMdFormat = new DateFormat.yMd();
 
 enum Interval {
   DAY,
@@ -51,7 +54,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
   bool showFatLine;
 
   DateTime _selectedDate;
-  var _selectedWeight;
+  num _selectedWeight;
 
   @override
   void didChangeDependencies() {
@@ -136,7 +139,8 @@ class _MeasuresChartState extends State<MeasuresChart> {
             top: 10,
             right: 0,
             child: hasSelected
-                ? Text('${_selectedDate.toString()}: $_selectedWeight')
+                ? Text(
+                    '${yMdFormat.format(_selectedDate)}: ${_selectedWeight.toStringAsFixed(1)}')
                 : Container()),
         charts.TimeSeriesChart(
           [

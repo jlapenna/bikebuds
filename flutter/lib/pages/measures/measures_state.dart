@@ -49,7 +49,7 @@ class MeasuresState with ChangeNotifier {
 
   Future<SeriesEntity> refresh({bool force: false}) async {
     if (_bikebudsApiState == null ||
-        _userState.preferences == null ||
+        _userState.units == null ||
         _storage == null) {
       print('MeasuresState: Not refreshing');
       return Future.error(Exception('Failed to refresh, not ready.'));
@@ -91,13 +91,12 @@ class MeasuresState with ChangeNotifier {
 
     // Rewrite our data into the user's preferred units.
     var properties = series.properties;
-    if (unit != _userState.preferences.units) {
-      var conversion =
-          _userState.preferences.units == 'METRIC' ? 0.453592 : 2.20462;
+    if (unit != _userState.units) {
+      var conversion = _userState.units == 'METRIC' ? 0.453592 : 2.20462;
       for (Measure m in properties.measures) {
         m.weight *= conversion;
       }
-      unit = _userState.preferences.units;
+      unit = _userState.units;
     }
   }
 }
