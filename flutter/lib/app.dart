@@ -31,8 +31,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(App());
-
 const Color PRIMARY_COLOR = Color(0xFF03dac6);
 const Color ACCENT_COLOR = Color(0xFFff4081);
 

@@ -95,7 +95,6 @@ function build_web() {
   echo ""
   echo "Building..."
   flutter build web \
-      -t lib/app.dart \
       --release \
       ;
 
