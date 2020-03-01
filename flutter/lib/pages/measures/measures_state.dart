@@ -26,25 +26,33 @@ class MeasuresState with ChangeNotifier {
   Storage _storage;
   UserState _userState;
 
+  String _unit = 'METRIC';
   SeriesEntity series;
-  String unit = 'METRIC';
 
   MeasuresState({@required filter}) : _filter = filter;
 
   set bikebudsApiState(BikebudsApiState value) {
     print('MeasuresState: Updated: $value');
     _bikebudsApiState = value;
-    notifyListeners();
+    maybeNotifyListeners();
   }
 
   set storage(Storage value) {
     _storage = value;
-    notifyListeners();
+    maybeNotifyListeners();
   }
 
   set userState(UserState value) {
     _userState = value;
-    notifyListeners();
+    maybeNotifyListeners();
+  }
+
+  maybeNotifyListeners() {
+    if (_bikebudsApiState != null &&
+        _userState.units != null &&
+        _storage != null) {
+      notifyListeners();
+    }
   }
 
   Future<SeriesEntity> refresh({bool force: false}) async {
@@ -63,8 +71,8 @@ class MeasuresState with ChangeNotifier {
     if (series == null) {
       series = await _fetchStoreSeries();
     }
-    this.series = series;
-    notifyListeners();
+    this.series = _convert(series);
+    maybeNotifyListeners();
     return series;
   }
 
@@ -74,7 +82,7 @@ class MeasuresState with ChangeNotifier {
         .getSeries(filter: _filter)
         .then((SeriesEntity seriesEntity) async {
       print('MeasuresState: Fetched: ${seriesEntity.key}');
-      _convert(seriesEntity);
+      _prepareForStorage(seriesEntity);
       await this._storage.seriesStore.put(seriesEntity);
       notifyListeners();
       return seriesEntity;
@@ -85,18 +93,20 @@ class MeasuresState with ChangeNotifier {
     });
   }
 
-  _convert(SeriesEntity series) {
+  _prepareForStorage(SeriesEntity series) {
     // Overwrite the entity key.
     series.key = EntityKey()..path = defaultKey.path;
+  }
 
+  _convert(SeriesEntity series) {
     // Rewrite our data into the user's preferred units.
     var properties = series.properties;
-    if (unit != _userState.units) {
+    if (_unit != _userState.units) {
       var conversion = _userState.units == 'METRIC' ? 0.453592 : 2.20462;
       for (Measure m in properties.measures) {
         m.weight *= conversion;
       }
-      unit = _userState.units;
+      _unit = _userState.units;
     }
   }
 }
