@@ -71,7 +71,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
     var earliestDate =
         _preferredNextDate(preferredNextDate, count: widget.intervalCount);
     List<Measure> measures = [];
-    showFatLine = false;
+    var showFatLine = false;
     List<Measure> intervalMeasures = [];
     for (var i = newMeasures.length; i > 0; i--) {
       var measure = newMeasures[i - 1];
@@ -96,7 +96,10 @@ class _MeasuresChartState extends State<MeasuresChart> {
       }
       intervalMeasures.insert(0, measure);
     }
-    this.measures = measures;
+    setState(() {
+      this.measures = measures;
+      this.showFatLine = showFatLine;
+    });
   }
 
   _onSelectionChanged(charts.SelectionModel model) {
