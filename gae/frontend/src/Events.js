@@ -20,9 +20,10 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 
+import ActivitiesListCard from './ActivitiesListCard';
 import BikebudsFetcher from './bikebuds_api';
 import RoutesListCard from './RoutesListCard';
-import ActivitiesListCard from './ActivitiesListCard';
+import SegmentsListCard from './SegmentsListCard';
 
 class Events extends Component {
   static styles = createStyles({
@@ -60,6 +61,23 @@ class Events extends Component {
             params={{}}
             render={wrapperState => (
               <RoutesListCard
+                profile={this.props.profile}
+                response={wrapperState.response}
+                showDate={true}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <BikebudsFetcher
+            fetcher={
+              !!this.props.bikebudsApi
+                ? this.props.bikebudsApi.get_segments
+                : undefined
+            }
+            params={{}}
+            render={wrapperState => (
+              <SegmentsListCard
                 profile={this.props.profile}
                 response={wrapperState.response}
                 showDate={true}

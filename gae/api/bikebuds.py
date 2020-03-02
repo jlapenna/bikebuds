@@ -42,6 +42,7 @@ from models import (
     preferences_model,
     profile_model,
     route_entity_model,
+    segment_entity_model,
     series_entity_model,
     service_entity_model,
     WrapEntity,
@@ -189,6 +190,21 @@ class RoutesResource(Resource):
         )
         routes = [WrapEntity(a) for a in routes_query.fetch()]
         return routes
+
+
+@api.route('/segments')
+class SegmentsResource(Resource):
+    @api.doc('get_segments')
+    @api.marshal_with(segment_entity_model, skip_none=True, as_list=True)
+    def get(self):
+        claims = auth_util.verify(flask.request)
+        user = User.get(claims)
+        service = Service.get('strava', parent=user.key)
+        segments_query = ds_util.client.query(
+            kind='Segment', ancestor=service.key, order=['-id']
+        )
+        segments = [WrapEntity(a) for a in segments_query.fetch()]
+        return segments
 
 
 @api.route('/series')

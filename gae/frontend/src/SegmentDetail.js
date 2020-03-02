@@ -32,7 +32,7 @@ import { readableDistance, readableElevation } from './convert';
 
 const MAP_LIBRARIES = ['geometry'];
 
-class _RouteMap extends Component {
+class _SegmentMap extends Component {
   static styles = createStyles({
     root: {
       height: '100%',
@@ -76,18 +76,18 @@ class _RouteMap extends Component {
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!this.state.mapMounted || !this.props.route) {
+    if (!this.state.mapMounted || !this.props.segment) {
       return;
     }
     if (
       this.state.mapMounted !== prevState.mapMounted ||
-      this.props.route !== prevProps.route
+      this.props.segment !== prevProps.segment
     ) {
       var decodedPolyline = [];
-      if (this.props.route.properties.map.summary_polyline) {
+      if (this.props.segment.properties.map.polyline) {
         // @ts-ignore
         decodedPolyline = window.google.maps.geometry.encoding.decodePath(
-          this.props.route.properties.map.summary_polyline
+          this.props.segment.properties.map.polyline
         );
       }
 
@@ -133,9 +133,9 @@ class _RouteMap extends Component {
     );
   }
 }
-const RouteMap = withStyles(_RouteMap.styles)(_RouteMap);
+const SegmentMap = withStyles(_SegmentMap.styles)(_SegmentMap);
 
-class RouteDetail extends Component {
+class SegmentDetail extends Component {
   static styles = createStyles({
     root: {
       height: '100%',
@@ -145,68 +145,68 @@ class RouteDetail extends Component {
       'flex-direction': 'column',
       'align-items': 'center',
     },
-    routeRow: {
+    segmentRow: {
       width: '100%',
     },
-    routeSummary: {
+    segmentSummary: {
       width: '100%',
       display: 'flex',
       'align-items': 'stretch',
     },
-    routeSummaryItem: {
+    segmentSummaryItem: {
       width: '100%',
     },
   });
 
   static propTypes = {
     profile: PropTypes.object,
-    route: PropTypes.object,
+    segment: PropTypes.object,
   };
 
   render() {
-    if (this.props.route === undefined) {
+    if (this.props.segment === undefined) {
       return (
         <div className={this.props.classes.root}>
-          <div className={this.props.classes.routeRow} />
-          <RouteMap route={this.props.route} />
+          <div className={this.props.classes.segmentRow} />
+          <SegmentMap segment={this.props.segment} />
         </div>
       );
     }
 
     const distance = readableDistance(
-      this.props.route.properties.distance,
+      this.props.segment.properties.distance,
       this.props.profile
     );
     const elevation_gain = readableElevation(
-      this.props.route.properties.elevation_gain,
+      this.props.segment.properties.total_elevation_gain,
       this.props.profile
     );
     return (
       <div className={this.props.classes.root}>
-        <div className={this.props.classes.routeRow}>
-          <div className={this.props.classes.routeSummary}>
-            <div className={this.props.classes.routeSummaryItem}>
+        <div className={this.props.classes.segmentRow}>
+          <div className={this.props.classes.segmentSummary}>
+            <div className={this.props.classes.segmentSummaryItem}>
               <Typography variant="subtitle1">Distance</Typography>
               <Typography variant="h4">{distance}</Typography>
             </div>
-            <div className={this.props.classes.routeSummaryItem}>
+            <div className={this.props.classes.segmentSummaryItem}>
               <Typography variant="subtitle1">Elevation</Typography>
               <Typography variant="h4">{elevation_gain}</Typography>
             </div>
             <Hidden mdDown>
-              <div className={this.props.classes.routeSummaryItem}>
+              <div className={this.props.classes.segmentSummaryItem}>
                 <Typography variant="subtitle1">Calories</Typography>
                 <Typography variant="h4">
-                  {this.props.route.properties.kilojoules}
+                  {this.props.segment.properties.kilojoules}
                 </Typography>
               </div>
             </Hidden>
           </div>
         </div>
-        <RouteMap route={this.props.route} />
+        <SegmentMap segment={this.props.segment} />
       </div>
     );
   }
 }
 
-export default withStyles(RouteDetail.styles)(RouteDetail);
+export default withStyles(SegmentDetail.styles)(SegmentDetail);

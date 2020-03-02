@@ -16,6 +16,7 @@ from shared import ds_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
 from shared.datastore.route import Route
+from shared.datastore.segment import Segment
 
 from shared.services.strava.client import ClientWrapper
 
@@ -29,6 +30,7 @@ class Worker(object):
         self.sync_athlete()
         self.sync_activities()
         self.sync_routes()
+        self.sync_segments()
 
     def sync_athlete(self):
         self.client.ensure_access()
@@ -55,6 +57,18 @@ class Worker(object):
 
         for route in self.client.get_routes():
             ds_util.client.put(Route.to_entity(route, parent=self.service.key))
+
+    def sync_segments(self):
+        self.client.ensure_access()
+
+        for segment in self.client.get_starred_segments():
+            # Track full segment info (detailed), not returned by the normal
+            # get_starred_segments (summary) request.
+            detailed_segment = self.client.get_segment(segment.id)
+            segment_entity = Segment.to_entity(
+                detailed_segment, parent=self.service.key
+            )
+            ds_util.client.put(segment_entity)
 
     def _sync_activity(self, activity_id):
         """Gets additional info: description, calories and embed_token."""

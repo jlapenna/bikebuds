@@ -115,7 +115,7 @@ map_model = api.model(
     'PolylineMap',
     {
         'id': fields.String,
-        # 'polyline': fields.String,
+        'polyline': fields.String,
         'summary_polyline': fields.String,
     },
 )
@@ -361,6 +361,46 @@ route_model = api.model(
     },
 )
 route_entity_model = EntityModel(route_model)
+
+segment_model = api.model(
+    'Segment',
+    {
+        'id': fields.Integer,
+        'name': fields.String,
+        'activity_type': fields.String,
+        'distance': fields.Float,
+        'average_grade': fields.Float,
+        'maximum_grade': fields.Float,
+        'elevation_high': fields.Float,
+        'elevation_low': fields.Float,
+        'start_latlng': fields.Nested(geo_point_model, skip_none=True),
+        'end_latlng': fields.Nested(geo_point_model, skip_none=True),
+        'start_latitude': fields.Float,
+        'end_latitude': fields.Float,
+        'start_longitude': fields.Float,
+        'end_longitude': fields.Float,
+        'climb_category': fields.Integer,
+        'city': fields.String,
+        'state': fields.String,
+        'country': fields.String,
+        'private': fields.Boolean,
+        'starred': fields.Boolean,
+        # 'athlete_segment_stats': EntityAttribute(AthleteSegmentStats, (DETAILED,)) #: Undocumented attrib holding stats for current athlete.
+        # detailed attribs
+        'created_at': fields.DateTime,
+        'updated_at': fields.DateTime,
+        'total_elevation_gain': fields.Float,
+        'map': fields.Nested(map_model, skip_none=True),
+        'effort_count': fields.Integer,
+        'athlete_count': fields.Integer,
+        'hazardous': fields.Boolean,
+        'star_count': fields.Integer,
+        'pr_time': fields.Integer,
+        'starred_date': fields.DateTime,
+        # 'athlete_pr_effort': EntityAttribute(AthletePrEffort, (DETAILED,))
+    },
+)
+segment_entity_model = EntityModel(segment_model)
 
 
 auth_model = api.model('Auth', {'token': fields.String})

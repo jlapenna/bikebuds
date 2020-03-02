@@ -478,9 +478,74 @@ class _RouteConverter(object):
         return entity
 
 
+class _SegmentConverter(object):
+    __ALL_FIELDS = SortedSet(['id'])
+    __INCLUDE_IN_INDEXES = SortedSet(['id'])
+    __STORED_FIELDS = SortedSet([])
+
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod
+    def to_entity(cls, segment, parent=None):
+        properties_dict = segment.to_dict()
+        properties_dict['id'] = segment.id
+
+        # Some values are always returned and always transformed.
+        properties_dict.update(
+            dict(
+                distance=segment.distance.num,
+                elevation_high=segment.elevation_high.num,
+                elevation_low=segment.elevation_low.num,
+                total_elevation_gain=segment.total_elevation_gain.num,
+            )
+        )
+
+        # Some values are optional but need to be transformed.
+
+        if segment.start_latlng is not None:
+            properties_dict['start_latlng'] = GeoPoint(
+                latitude=segment.start_latlng.lat, longitude=segment.start_latlng.lon
+            )
+
+        if segment.end_latlng is not None:
+            properties_dict['end_latlng'] = GeoPoint(
+                latitude=segment.end_latlng.lat, longitude=segment.end_latlng.lon
+            )
+
+        if segment.created_at is not None:
+            properties_dict['created_at'] = segment.created_at.astimezone(
+                pytz.UTC
+            ).replace(tzinfo=None)
+
+        if segment.updated_at is not None:
+            properties_dict['updated_at'] = segment.updated_at.astimezone(
+                pytz.UTC
+            ).replace(tzinfo=None)
+
+        if segment.map is not None:
+            properties_dict['map'] = _PolylineMapConverter.to_entity(segment.map)
+
+        if segment.starred_date is not None:
+            properties_dict['starred_date'] = segment.starred_date.astimezone(
+                pytz.UTC
+            ).replace(tzinfo=None)
+
+        entity = Entity(
+            ds_util.client.key(
+                'Segment',
+                segment.id,
+                parent=parent,
+                exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+            )
+        )
+        entity.update(properties_dict)
+        return entity
+
+
 class StravaConverters(object):
     Activity = _ActivityConverter
     Athlete = _AthleteConverter
     Club = _ClubConverter
     PolylineMap = _PolylineMapConverter
     Route = _RouteConverter
+    Segment = _SegmentConverter
