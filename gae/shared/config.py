@@ -27,6 +27,10 @@ class _Config(object):
             open(os.path.join(base_path, 'service_keys/firebase-web.json'))
         )
 
+        self.gcp_server_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/gcp-server.json'))
+        )
+
         self.fitbit_creds = json.load(
             open(os.path.join(base_path, 'service_keys/fitbit.json'))
         )
