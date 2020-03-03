@@ -29,6 +29,7 @@ import {
 
 import { firebase_config } from './config';
 import { readableDistance, readableElevation } from './convert';
+import ElevationChart from './ElevationChart';
 
 const MAP_LIBRARIES = ['geometry'];
 
@@ -43,7 +44,7 @@ class _SegmentMap extends Component {
       'align-items': 'center',
     },
     containerElement: {
-      'min-height': '200px',
+      'min-height': '100px',
       height: '100%',
       width: '100%',
       flex: '1',
@@ -204,6 +205,7 @@ class SegmentDetail extends Component {
           </div>
         </div>
         <SegmentMap segment={this.props.segment} />
+        <ElevationChart segment={this.props.segment} />
       </div>
     );
   }

@@ -21,6 +21,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import Admin from './Admin';
 import Club from './Club';
+import CompareSegments from './CompareSegments';
 import Events from './Events';
 import Health from './Health';
 import Settings from './Settings';
@@ -62,6 +63,16 @@ export default class MainContent extends React.Component {
           render={props => (
             <Events
               firebase={this.props.firebase}
+              bikebudsApi={this.props.bikebudsApi}
+            />
+          )}
+        />
+        <Route
+          path={`${this.props.match.path}compare_segments`}
+          exact
+          render={props => (
+            <CompareSegments
+              profile={this.props.profile}
               bikebudsApi={this.props.bikebudsApi}
             />
           )}
