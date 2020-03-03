@@ -108,7 +108,16 @@ series_model = api.model(
 series_entity_model = EntityModel(series_model)
 
 geo_point_model = api.model(
-    'GeoPoint', {'latitude': fields.String, 'longitude': fields.String}
+    'GeoPoint', {'latitude': fields.String, 'longitude': fields.String,}
+)
+
+elevation_point_model = api.model(
+    'ElevationPoint',
+    {
+        'location': fields.Nested(geo_point_model),
+        'elevation': fields.Float,
+        'resolution': fields.Float,
+    },
 )
 
 map_model = api.model(
@@ -398,6 +407,7 @@ segment_model = api.model(
         'pr_time': fields.Integer,
         'starred_date': fields.DateTime,
         # 'athlete_pr_effort': EntityAttribute(AthletePrEffort, (DETAILED,))
+        'elevations': fields.List(fields.Nested(elevation_point_model, skip_none=True)),
     },
 )
 segment_entity_model = EntityModel(segment_model)
@@ -409,14 +419,26 @@ auth_entity_model = EntityModel(auth_model)
 
 filter_parser = reqparse.RequestParser()
 filter_parser.add_argument(
-    'filter', help='A filter for measures in a series.', location='args'
+    'filter', location='args', help='A filter for measures in a series.'
 )
 
 
-def get_filter_arg():
+segments_parser = reqparse.RequestParser()
+segments_parser.add_argument(
+    'segments',
+    action='split',
+    type=int,
+    help='Sequence of segments to compare',
+    location='args',
+)
+
+
+def get_arg(name):
+    parser_name = name + '_parser'
+    arg_parser = globals()[parser_name]
     try:
-        args = filter_parser.parse_args()
-        return args['filter']
+        args = arg_parser.parse_args()
+        return args[name]
     except Exception:
-        logging.exception('Failed to parse filter, skipping filter.')
+        logging.exception('Failed to parse %s, skipping %s.' % (name, name))
         return None

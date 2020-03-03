@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from shared import ds_util
+from shared import googlemaps_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
 from shared.datastore.route import Route
@@ -65,10 +66,26 @@ class Worker(object):
             # Track full segment info (detailed), not returned by the normal
             # get_starred_segments (summary) request.
             detailed_segment = self.client.get_segment(segment.id)
+            elevations = self._fetch_segment_elevation(detailed_segment)
             segment_entity = Segment.to_entity(
-                detailed_segment, parent=self.service.key
+                detailed_segment, elevations=elevations, parent=self.service.key
             )
             ds_util.client.put(segment_entity)
+
+    def _fetch_segment_elevation(self, segment):
+        return [
+            {
+                'location': {
+                    'latitude': e['location']['lat'],
+                    'longitude': e['location']['lng'],
+                },
+                'elevation': e['elevation'],
+                'resolution': e['resolution'],
+            }
+            for e in googlemaps_util.client.elevation_along_path(
+                segment.map.polyline, samples=100
+            )
+        ]
 
     def _sync_activity(self, activity_id):
         """Gets additional info: description, calories and embed_token."""

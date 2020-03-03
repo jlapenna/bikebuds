@@ -38,11 +38,12 @@ from models import (
     client_state_model,
     club_entity_model,
     filter_parser,
-    get_filter_arg,
+    get_arg,
     preferences_model,
     profile_model,
     route_entity_model,
     segment_entity_model,
+    segments_parser,
     series_entity_model,
     service_entity_model,
     WrapEntity,
@@ -207,6 +208,25 @@ class SegmentsResource(Resource):
         return segments
 
 
+@api.route('/segments/compare')
+@api.expect(segments_parser)
+class SegmentsCompareResource(Resource):
+    @api.doc('compare_segments')
+    @api.marshal_with(segment_entity_model, skip_none=True, as_list=True)
+    def get(self):
+        claims = auth_util.verify(flask.request)
+        user = User.get(claims)
+        service = Service.get('strava', parent=user.key)
+        segments_arg = get_arg('segments')
+        segments = []
+        for segment_id in segments_arg:
+            entity = ds_util.client.get(
+                ds_util.client.key('Segment', segment_id, parent=service.key)
+            )
+            segments.append(WrapEntity(entity))
+        return segments
+
+
 @api.route('/series')
 @api.expect(filter_parser)
 class SeriesResource(Resource):
@@ -222,7 +242,7 @@ class SeriesResource(Resource):
         if series is None:
             return WrapEntity(None)
 
-        filter_arg = get_filter_arg()
+        filter_arg = get_arg('filter')
         if filter_arg:
             series['measures'] = [m for m in series['measures'] if filter_arg in m]
         return WrapEntity(series)

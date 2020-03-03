@@ -486,7 +486,7 @@ class _SegmentConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod
-    def to_entity(cls, segment, parent=None):
+    def to_entity(cls, segment, elevations=None, parent=None):
         properties_dict = segment.to_dict()
         properties_dict['id'] = segment.id
 
@@ -529,6 +529,9 @@ class _SegmentConverter(object):
             properties_dict['starred_date'] = segment.starred_date.astimezone(
                 pytz.UTC
             ).replace(tzinfo=None)
+
+        if elevations:
+            properties_dict['elevations'] = elevations
 
         entity = Entity(
             ds_util.client.key(
