@@ -36,3 +36,5 @@ else:
     configuration = None
     admin_api = None
     api = None
+
+del configuration

@@ -45,7 +45,7 @@ def load_configuration(flow_creds):
     configuration.host = config.api_url
 
     # Configure API key authorization: api_key
-    configuration.api_key['key'] = config.python_client_testing_api_key
+    configuration.api_key['key'] = config.gcp_server_creds['api_key']
 
     # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
     # configuration.api_key_prefix['key'] = 'Bearer'
@@ -57,7 +57,7 @@ def load_configuration(flow_creds):
 
 def run_flow():
     oauth_flow = InstalledAppFlow.from_client_secrets_file(
-        os.path.join(config.base_path, 'service_keys/python-client-testing-oauth.json'),
+        os.path.join(config.base_path, 'service_keys/server-oauth.json'),
         scopes=[
             'openid',
             'https://www.googleapis.com/auth/userinfo.email',

@@ -29,3 +29,6 @@ sortedcontainers==2.1.0
 
 # bikebuds API
 ./generated/python_bikebuds_api
+
+# Google Maps
+googlemaps
