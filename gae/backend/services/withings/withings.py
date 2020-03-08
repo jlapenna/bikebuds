@@ -133,8 +133,9 @@ class Worker(object):
 
 
 class EventsWorker(object):
-    def __init__(self, service):
+    def __init__(self, service, event):
         self.service = service
+        self.event = event
         self.client = create_client(service)
 
     def sync(self):
@@ -148,16 +149,19 @@ class EventsWorker(object):
             measures, self.service.key.name, parent=self.service.key
         )
         ds_util.client.put(series)
-
-        query = ds_util.client.query(
-            kind='SubscriptionEvent', ancestor=self.service.key
-        )
-        query.keys_only()
-        ds_util.client.delete_multi(e.key for e in query.fetch())
+        logging.debug('WithingsEvent: Updated series: %s', self.event.key)
 
         user = ds_util.client.get(self.service.key.parent)
         if user['preferences']['daily_weight_notif']:
-            logging.debug('EventsWorker: daily_weight_notif: queued: %s', user.key)
-            task_util.process_weight_trend(self.service)
+            logging.debug(
+                'WithingsEvent: daily_weight_notif: Queued: %s: %s',
+                user.key,
+                self.event.key,
+            )
+            task_util.process_weight_trend(self.event)
         else:
-            logging.debug('EventsWorker: daily_weight_notif: not enabled: %s', user.key)
+            logging.debug(
+                'WithingsEvent: daily_weight_notif: Disabled: %s: %s',
+                user.key,
+                self.event.key,
+            )

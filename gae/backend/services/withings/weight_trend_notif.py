@@ -28,15 +28,18 @@ from shared.services.withings.client import create_client
 
 
 class WeightTrendWorker(object):
-    def __init__(self, service):
+    def __init__(self, service, event):
         self.service = service
+        self.event = event
         self.client = create_client(service)
 
     def sync(self):
         user = ds_util.client.get(self.service.key.parent)
         if not user['preferences']['daily_weight_notif']:
             logging.debug(
-                'WeightTrendWorker: daily_weight_notif: not enabled: %s', user.key
+                'WeightTrendWorker: daily_weight_notif: not enabled: %s, %s',
+                user.key,
+                self.event.key,
             )
             return
         to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
@@ -48,13 +51,17 @@ class WeightTrendWorker(object):
         time_frame = self._get_best_time_frame(weight_trend)
         if time_frame is None:
             logging.debug(
-                'WeightTrendWorker: daily_weight_notif: no timeframe: %s', user.key
+                'WeightTrendWorker: daily_weight_notif: no timeframe: %s: %s',
+                user.key,
+                self.event.key,
             )
             return
 
         if 'latest' not in weight_trend:
             logging.debug(
-                'WeightTrendWorker: daily_weight_notif: no latest: %s', user.key
+                'WeightTrendWorker: daily_weight_notif: no latest: %s: %s',
+                user.key,
+                self.event.key,
             )
             return
 
@@ -83,9 +90,10 @@ class WeightTrendWorker(object):
             format_date(time_frame_date.date(), format='medium'),
         )
 
-        # Send notifications
+        # Find the best clients to send the message to.
         clients = fcm_util.best_clients(user.key)
 
+        # Send the messages
         def notif_fn(client=None):
             return messaging.Message(
                 notification=messaging.Notification(title=title, body=body),
@@ -98,7 +106,7 @@ class WeightTrendWorker(object):
                 token=client['token'],
             )
 
-        fcm_util.send(user.key, clients, notif_fn)
+        fcm_util.send(self.event.key, clients, notif_fn)
 
     def _weight_trend(self, series):
         """Find a series of weights across various time intervals.

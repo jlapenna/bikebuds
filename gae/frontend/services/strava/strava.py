@@ -23,7 +23,6 @@ from google.api_core.exceptions import AlreadyExists
 import stravalib
 
 from shared import auth_util
-from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.bot import Bot
@@ -89,13 +88,6 @@ def events_post():
             logging.warning('Received event for %s but missing Athlete', owner_id)
 
     if event_data is None or service_key is None:
-        logging.error(
-            'Unable to process Strava event: '
-            'url: %s, event_data: %s, service_key: %s',
-            flask.request.url,
-            event_data,
-            service_key,
-        )
         sub_event_failure = SubscriptionEvent.to_entity(
             {
                 'url': flask.request.url,
@@ -104,15 +96,14 @@ def events_post():
                 'date': datetime.datetime.utcnow(),
             }
         )
-        ds_util.client.put(sub_event_failure)
+        logging.error('StravaEvent: failure: %s', sub_event_failure)
     else:
         event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
-        ds_util.client.put(event_entity)
         try:
-            task_util.process_event(event_entity.key)
-            logging.debug('Queued Strava event: %s', event_entity.key)
+            task_util.process_event(event_entity)
+            logging.debug('StravaEvent: Queued: %s', event_entity.key)
         except AlreadyExists:
-            logging.debug('Duplicate Strava event: %s', event_entity.key)
+            logging.debug('StravaEvent: Duplicate: %s', event_entity.key)
     return responses.OK
 
 

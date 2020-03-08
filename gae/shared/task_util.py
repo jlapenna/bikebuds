@@ -222,10 +222,10 @@ def _maybe_transact(fn, *args, **kwargs):
             fn(*args, **kwargs)
 
 
-def process_event(event_key):
+def process_event(event):
     return _queue_task(
-        name=event_key.name,
-        entity=_params_entity(event_key=event_key),
+        name=event.key.name,
+        entity=_params_entity(event=event),
         relative_uri='/tasks/process_event',
         service='backend',
         parent=_events_parent,
@@ -243,9 +243,9 @@ def process_slack_event(event):
     )
 
 
-def process_weight_trend(service):
+def process_weight_trend(event):
     return _queue_task(
-        entity=_params_entity(service_key=service.key),
+        entity=_params_entity(event=event),
         relative_uri='/tasks/process_weight_trend',
         service='backend',
         parent=_notifications_parent,

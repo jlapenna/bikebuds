@@ -35,7 +35,7 @@ def best_clients(user_key):
     return [c for c in query.fetch(1)]
 
 
-def send(user_key, clients, notif_fn, *args, **kwargs):
+def send(parent, clients, notif_fn, *args, **kwargs):
     """Sends a notification.
 
     Args:
@@ -46,7 +46,7 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
     """
     with ds_util.client.transaction():
         fcm_send_event = FcmSendEvent.to_entity(
-            {'date': datetime.datetime.utcnow(), 'messages': []}, parent=user_key
+            {'date': datetime.datetime.utcnow(), 'messages': []}, parent=parent
         )
         logging.debug('Sending notification to %s clients', len(clients))
         for client_state in clients:
@@ -54,11 +54,11 @@ def send(user_key, clients, notif_fn, *args, **kwargs):
             try:
                 response = messaging.send(message)
                 logging.debug(
-                    'fcm_util.send: Success: %s, %s, %s', user_key, message, response
+                    'fcm_util.send: Success: %s, %s, %s', parent, message, response
                 )
                 _add_delivery(fcm_send_event, client_state, message, response)
             except Exception as e:
-                logging.exception('fcm_util.send: Failure: %s', user_key)
+                logging.exception('fcm_util.send: Failure: %s', parent)
                 _add_delivery(fcm_send_event, client_state, message, e)
         ds_util.client.put(fcm_send_event)
 

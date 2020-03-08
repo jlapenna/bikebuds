@@ -62,7 +62,7 @@ class StravaTest(unittest.TestCase):
 
         r = self.client.post(
             '/tasks/process_event',
-            data=task_util.task_body_for_test(event_key=event_entity.key),
+            data=task_util.task_body_for_test(event=event_entity),
         )
         self.assertEqual(r.status_code, responses.OK.code)
         strava_worker_mock.assert_called_once()
@@ -91,7 +91,7 @@ class WithingsTest(unittest.TestCase):
 
         r = self.client.post(
             '/tasks/process_event',
-            data=task_util.task_body_for_test(event_key=event_entity.key),
+            data=task_util.task_body_for_test(event=event_entity),
         )
         self.assertEqual(r.status_code, responses.OK.code)
         withings_worker_mock.assert_called_once()
@@ -112,7 +112,7 @@ class WithingsTest(unittest.TestCase):
 
         r = self.client.post(
             '/tasks/process_event',
-            data=task_util.task_body_for_test(event_key=event_entity.key),
+            data=task_util.task_body_for_test(event=event_entity),
         )
         self.assertEqual(r.status_code, responses.OK_NO_SERVICE.code)
         withings_worker_mock.assert_not_called()
@@ -134,7 +134,7 @@ class WithingsTest(unittest.TestCase):
 
         r = self.client.post(
             '/tasks/process_event',
-            data=task_util.task_body_for_test(event_key=event_entity.key),
+            data=task_util.task_body_for_test(event=event_entity),
         )
         self.assertEqual(r.status_code, responses.OK_NO_CREDENTIALS.code)
         withings_worker_mock.assert_not_called()

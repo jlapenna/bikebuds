@@ -39,43 +39,65 @@ class MainTest(unittest.TestCase):
 
     @mock.patch('services.strava.events_worker.ClientWrapper')
     @mock.patch('shared.ds_util.client.delete')
-    @mock.patch('shared.ds_util.client.delete_multi')
     @mock.patch('shared.ds_util.client.put')
-    @mock.patch('shared.ds_util.client.query')
     @mock.patch('shared.ds_util.client.transaction')
-    def test_events_worker(
-        self,
-        transaction_mock,
-        query_mock,
-        put_mock,
-        delete_multi_mock,
-        delete_mock,
-        ClientWrapperMock,
+    def test_events_worker_delete(
+        self, transaction_mock, put_mock, delete_mock, ClientWrapperMock,
     ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'XYZ_TOKEN'}
 
-        query_mock.side_effect = [MockQuery(_test_events()), MockQuery([])]
+        event = SubscriptionEvent.to_entity(
+            {
+                'aspect_type': 'delete',
+                'event_time': 1549151214,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {},
+            },
+            parent=service.key,
+        )
+        client_mock = mock.Mock()
+        ClientWrapperMock.return_value = client_mock
 
+        worker = EventsWorker(service, event)
+        worker.sync()
+
+        activity_key = ds_util.client.key('Activity', 2120517859, parent=service.key)
+        delete_mock.assert_called_once_with(activity_key)
+
+    @mock.patch('services.strava.events_worker.ClientWrapper')
+    @mock.patch('shared.ds_util.client.delete')
+    @mock.patch('shared.ds_util.client.put')
+    @mock.patch('shared.ds_util.client.transaction')
+    def test_events_worker_activity_update(
+        self, transaction_mock, put_mock, delete_mock, ClientWrapperMock,
+    ):
+        service = Entity(ds_util.client.key('Service', 'strava'))
+        service['credentials'] = {'access_token': 'XYZ_TOKEN'}
+        event = SubscriptionEvent.to_entity(
+            {
+                'aspect_type': 'create',
+                'event_time': 1549151211,
+                'object_id': 2120517859,
+                'object_type': 'activity',
+                'owner_id': 35056021,
+                'subscription_id': 133263,
+                'updates': {},
+            },
+            parent=service.key,
+        )
         client_mock = mock.Mock()
         client_mock.get_activity.side_effect = _activity_generator
         client_mock.get_athlete.return_value = Athlete()
         ClientWrapperMock.return_value = client_mock
 
-        worker = EventsWorker(service)
+        worker = EventsWorker(service, event)
         worker.sync()
 
-        # Ensure we delete the batch.
-        self.assertTrue(delete_multi_mock.called)
-
-        # Even though 2120517859 has multiple evens, one is a delete. So we
-        # delete it and never fetch it.
-        activity_key = ds_util.client.key('Activity', 2120517859, parent=service.key)
-        delete_mock.assert_called_once_with(activity_key)
-
-        # And even though 2120517766 has multiple events, we only fetch it
-        # once.
-        client_mock.get_activity.assert_called_once_with(2120517766)
+        client_mock.get_activity.assert_called_once_with(2120517859)
 
 
 def _activity_generator(activity_id):

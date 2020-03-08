@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import logging
 
 from shared import ds_util
@@ -23,61 +22,68 @@ from shared.services.strava.client import ClientWrapper
 
 
 class EventsWorker(object):
-    def __init__(self, service):
+    def __init__(self, service, event):
         self.service = service
+        self.event = event
         self.client = ClientWrapper(service)
 
     def sync(self):
         self.client.ensure_access()
 
-        query = ds_util.client.query(
-            kind='SubscriptionEvent', ancestor=self.service.key
-        )
-        events = query.fetch()
-        events = sorted(events, key=lambda x: x['event_time'])
-        batches = collections.defaultdict(list)
-        for event in events:
-            batches[(event['object_id'], event['object_type'])].append(event)
-
-        athlete = self.client.get_athlete()
-        for (object_id, object_type), batch in batches.items():
-            self._process_event_batch(athlete, object_id, object_type, batch)
-
-    def _process_event_batch(self, athlete, object_id, object_type, batch):
+        object_id = self.event.get('object_id')
+        object_type = self.event.get('object_type')
+        aspect_type = self.event.get('aspect_type')
         with ds_util.client.transaction():
             logging.debug(
-                'process_event_batch:  %s, %s, %s',
-                self.service.key,
-                object_id,
-                len(batch),
+                'StravaEvent: process_event_batch:  %s, %s', object_id, self.event.key,
             )
 
-            # We're no longer going to need these.
-            ds_util.client.delete_multi((event.key for event in batch))
-
             if object_type == 'activity':
-                operations = [event['aspect_type'] for event in batch]
-
-                if 'delete' in operations:
+                if aspect_type == 'delete':
                     activity_key = ds_util.client.key(
                         'Activity', object_id, parent=self.service.key
                     )
                     ds_util.client.delete(activity_key)
-                    logging.info('Deleted: Entity: %s', activity_key)
+                    logging.info(
+                        'StravaEvent: Deleted Activity: %s: %s',
+                        activity_key,
+                        self.event.key,
+                    )
                 else:
+                    athlete = self.client.get_athlete()
                     activity = self.client.get_activity(object_id)
                     activity_entity = Activity.to_entity(
                         activity, detailed_athlete=athlete, parent=self.service.key
                     )
                     ds_util.client.put(activity_entity)
-                    logging.info('Created: %s -> %s', activity.id, activity_entity.key)
+                    logging.info(
+                        'StravaEvent: Created: %s: %s',
+                        activity_entity.key,
+                        self.event.key,
+                    )
             elif object_type == 'athlete':
-                ds_util.client.put(Athlete.to_entity(athlete, parent=self.service.key))
+                athlete = self.client.get_athlete()
+                athlete_entity = Athlete.to_entity(athlete, parent=self.service.key)
+                ds_util.client.put(athlete_entity)
+                logging.info(
+                    'StravaEvent: Updated Athlete: %s: %s',
+                    athlete_entity.key,
+                    self.event.key,
+                )
                 activities_query = ds_util.client.query(
                     kind='Activity', ancestor=self.service.key
                 )
                 for activity in activities_query.fetch():
                     activity['athlete'] = athlete
                     ds_util.client.put(activity)
+                logging.info(
+                    'StravaEvent: Updated Activities: %s: %s',
+                    athlete_entity.key,
+                    self.event.key,
+                )
             else:
-                logging.warn('Update object_type not implemented: %s', object_type)
+                logging.warn(
+                    'StravaEvent: Update object_type %s not implemented: %s',
+                    object_type,
+                    self.event.key,
+                )

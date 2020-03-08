@@ -132,31 +132,30 @@ def sync_club(club_id):
 @app.route('/tasks/process_event', methods=['POST'])
 def process_event_task():
     params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('Event: %s', event.key)
 
-    event_key = params['event_key']
-    logging.info('Processing Event: Key: %s', event_key)
-
-    # First try to get the service using the event_key's service.
+    # First try to get the service using the event.key's service.
     # If this event is coming from an old subscription / secret url, which
     # embeds a service_key in it, then we might get these.
-    service_key = event_key.parent
+    service_key = event.key.parent
     service = ds_util.client.get(service_key)
 
     if service is None:
-        logging.warning('Cannot process event %s, no service', event_key)
+        logging.error('Event: No service: %s', event.key)
         return responses.OK_NO_SERVICE
 
     if not Service.has_credentials(service):
-        logging.warning('Cannot process event %s, no credentials', event_key)
+        logging.warning('Event: No credentials: %s', event.key)
         return responses.OK_NO_CREDENTIALS
 
     try:
         if service_key.name == 'withings':
-            _do(WithingsEventsWorker(service), work_key=service.key)
+            _do(WithingsEventsWorker(service, event), work_key=event.key)
         elif service_key.name == 'fitbit':
             pass
         elif service_key.name == 'strava':
-            _do(StravaEventsWorker(service), work_key=service.key)
+            _do(StravaEventsWorker(service, event), work_key=event.key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -164,34 +163,27 @@ def process_event_task():
 
 @app.route('/tasks/process_slack_event', methods=['POST'])
 def process_slack_event_task():
-    try:
-        params = task_util.get_payload(flask.request)
-    except Exception:
-        logging.exception('Failed to get payload: %s', flask.request.data)
-        return responses.INTERNAL_SERVER_ERROR
-
-    try:
-        event = params['event']
-        logging.info('Processing: Key: %s', event.key)
-        return slack.process_slack_event(event)
-    except Exception:
-        logging.exception('Failed to process event: %s', params)
-        return responses.INTERNAL_SERVER_ERROR
+    params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('SlackEvent: %s', event.key)
+    return slack.process_slack_event(event)
 
 
 @app.route('/tasks/process_weight_trend', methods=['POST'])
 def process_weight_trend_task():
     params = task_util.get_payload(flask.request)
-    service_key = params['service_key']
+    event = params['event']
+    logging.info('WeightTrendEvent: %s', event.key)
+    service_key = event.key.parent
     service = ds_util.client.get(service_key)
-    service_name = service.key.name
+
+    if service is None:
+        logging.error('WeightTrendEvent: No service: %s', event.key)
+        return responses.OK_NO_SERVICE
+
     try:
-        if service_name == 'withings':
-            _do(WeightTrendWorker(service), work_key=service_key)
-        elif service_name == 'fitbit':
-            pass
-        elif service_name == 'strava':
-            pass
+        if service.key.name == 'withings':
+            _do(WeightTrendWorker(service, event), work_key=event.key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK

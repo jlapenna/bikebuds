@@ -23,7 +23,6 @@ from google.api_core.exceptions import AlreadyExists
 from google.cloud.datastore.key import Key
 
 from shared import auth_util
-from shared import ds_util
 from shared import task_util
 from shared.config import config
 from shared.datastore.service import Service
@@ -46,7 +45,7 @@ def events_head():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
         logging.warn(
-            'Invalid sub_secret: Provided %s, expected %s'
+            'WithingsEvent: Invalid sub_secret: Provided %s, expected %s'
             % (sub_secret, config.withings_creds['sub_secret'])
         )
     return responses.OK
@@ -58,7 +57,7 @@ def events_post():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
         logging.warn(
-            'Invalid sub_secret: Provided %s, expected %s'
+            'WithingsEvent: Invalid sub_secret: Provided %s, expected %s'
             % (sub_secret, config.withings_creds['sub_secret'])
         )
 
@@ -91,64 +90,62 @@ def events_post():
     try:
         event_data = flask.request.form.to_dict()
     except Exception:
-        logging.exception(
-            'Failed processing Withings event_data: %s', flask.request.form
-        )
+        logging.error('WithingsEvent: Failed form data: %s', flask.request.form)
 
     service_key = None
     try:
         if 'service_key' in flask.request.args:
             service_key = Key.from_legacy_urlsafe(flask.request.args.get('service_key'))
         else:
-            logging.warning('Key missing in callbackurl %s', flask.request.url)
+            logging.debug(
+                'WithingsEvent: Key missing in callbackurl %s', flask.request.url
+            )
     except binascii.Error:
         # In older code we accidentally registered with poorly constructed
         # callbackurls, ingore these.
-        logging.debug(
-            'Received invalid event from bad callbackurl %s', flask.request.url
+        logging.exception(
+            'WithingsEvent: Invalid event from bad callbackurl %s', flask.request.url
         )
     except Exception:
         logging.exception(
-            'Failed processing Withings service_key: %s',
+            'WithingsEvent: Failed service_key: %s',
             flask.request.args.get('service_key'),
         )
 
     if event_data is None or service_key is None:
-        logging.error(
-            'Unable to process Withings event: '
-            'url: %s, event_data: %s, service_key: %s',
-            flask.request.url,
-            event_data,
-            service_key,
-        )
         sub_event_failure = SubscriptionEvent.to_entity(
             {
                 'url': flask.request.url,
                 'event_data': event_data,
                 'failure': True,
                 'date': datetime.datetime.utcnow(),
-            }
+            },
+            parent=service_key,
         )
-        ds_util.client.put(sub_event_failure)
+        logging.error('WithingsEvent: failure: %s', sub_event_failure)
         return responses.OK_SUB_EVENT_FAILED
 
     # We can proess this entity.
     event_entity = SubscriptionEvent.to_entity(
-        event_data,
+        {
+            'url': flask.request.url,
+            'event_data': event_data,
+            'failure': False,
+            'date': datetime.datetime.utcnow(),
+        },
         name=SubscriptionEvent.hash_name(*sorted(event_data.values())),
         parent=service_key,
     )
     logging.debug(
-        'Processing Withings event: %s from url: %s',
+        'WithingsEvent: Processing: %s from url: %s',
         event_entity.key,
         flask.request.url,
     )
-    ds_util.client.put(event_entity)
     try:
-        task_util.process_event(event_entity.key)
-        logging.info('Queued Withings event: %s', event_entity.key)
+        task_util.process_event(event_entity)
+        logging.info('WithingsEvent: Queued: %s', event_entity.key)
     except AlreadyExists:
-        logging.info('Duplicate Withings event: %s', event_entity.key)
+        logging.info('WithingsEvent: Duplicate: %s', event_entity.key)
     return responses.OK
 
 
