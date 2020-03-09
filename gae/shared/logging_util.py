@@ -34,6 +34,7 @@ LOGS_TO_SILENCE = [
     'stravalib.model.Activity',
     'stravalib.model.Athlete',
     'stravalib.model.Club',
+    'stravalib.attributes.EntityCollection',
     'google.auth.transport.requests',
     'google_auth_httplib2',
 ]
