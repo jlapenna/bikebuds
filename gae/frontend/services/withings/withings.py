@@ -102,8 +102,8 @@ def events_post():
             )
     except binascii.Error:
         # In older code we accidentally registered with poorly constructed
-        # callbackurls, ingore these.
-        logging.exception(
+        # callbackurls, ignore these.
+        logging.debug(
             'WithingsEvent: Invalid event from bad callbackurl %s', flask.request.url
         )
     except Exception:
