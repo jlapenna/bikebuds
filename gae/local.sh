@@ -23,6 +23,9 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
+  activate_virtualenv dev_appserver python2
+  pip install grpcio
+
   load_config;
 
   # We want our dev, not prod environment (generally a no-op).
@@ -62,6 +65,8 @@ function main() {
     gae/backend/app.yaml \
     ;
     # --dev_appserver_log_level=debug \
+
+  deactivate
 }
 
 main "$@"
