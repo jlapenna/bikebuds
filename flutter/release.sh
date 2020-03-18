@@ -132,7 +132,6 @@ function build_android() {
   echo ""
   echo "Building..."
   flutter build appbundle \
-      -t lib/app.dart \
       --target-platform android-arm,android-arm64 \
       --build-number="${version_code}" \
       --build-name="${version_code}" \
