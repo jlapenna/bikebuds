@@ -22,12 +22,6 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   echo ""
-  echo "Setting up virtual environments."
-  mkdir virtualenv/client >/dev/null 2>&1;
-  mkdir virtualenv/gae >/dev/null 2>&1;
-  mkdir virtualenv/gae3 >/dev/null 2>&1;
-
-  echo ""
   echo "Setting up config environments."
   pushd environments;
   if [[ ! -d "dev" ]]; then

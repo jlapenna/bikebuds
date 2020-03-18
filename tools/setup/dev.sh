@@ -22,27 +22,13 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   echo "Installing the correct packages with apt"
-  sudo apt install -y python python-dev python-pip
-  sudo apt install -y python3 python3-dev python3-pip
-  sudo apt install -y virtualenv
+  sudo apt install -y python3 python3-dev python3-pip python3-virtualenv virtualenv
   sudo apt install -y gradle
   sudo apt install -y google-cloud-sdk-app-engine-python \
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
   sudo apt install -y jq
 
   echo "Apt installed a few libraries."
-  echo "Or it didn't, you might need to install them yourself. Press enter."
-  read
-
-  #pip install grpcio
-
-  echo "Pip installed a few libraries."
-  echo "Or it didn't, you might need to install them yourself. Press enter."
-  read
-
-  pip3 install grpcio pre-commit pur
-
-  echo "Pip3 installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read
 
@@ -74,8 +60,15 @@ function main() {
   npm install
   popd
 
+  echo "Initializing shell requirements."
+  activate_virtualenv dev python3
+  pip3 install -r tools/setup/shell_requirements.txt
+
   echo "Initializing pre-commit."
   pre-commit install
+
+  deactivate
+  echo "Finished setting up shell requirements."
 }
 
 main "$@"

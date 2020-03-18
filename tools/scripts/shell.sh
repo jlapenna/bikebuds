@@ -24,6 +24,8 @@ export FCM_SERVER_KEY="$(jq -r '.["server_key"]' environments/env/service_keys/f
 export FCM_PROD_SERVER_KEY="$(jq -r '.["server_key"]' environments/prod/service_keys/firebase-messaging.json)"
 export FCM_DEV_SERVER_KEY="$(jq -r '.["server_key"]' environments/dev/service_keys/firebase-messaging.json)"
 
+activate_virtualenv dev python3
+
 function source_files() {
   find . \
     \( \
