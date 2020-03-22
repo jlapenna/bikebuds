@@ -42,6 +42,7 @@ class MainTest(unittest.TestCase):
 class StravaTest(unittest.TestCase):
     def setUp(self):
         main.app.testing = True
+        self.maxDiff = 100000000000
         self.client = main.app.test_client()
 
     @mock.patch('main.StravaEventsWorker', return_value=MockWorker())

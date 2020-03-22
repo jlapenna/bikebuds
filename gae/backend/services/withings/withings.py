@@ -24,13 +24,13 @@ from shared import task_util
 from shared.config import config
 from shared.datastore.series import Series
 from shared.datastore.subscription import Subscription
-from shared.services.withings.client import create_client
+from shared.services.withings import client
 
 
 class Worker(object):
     def __init__(self, service):
         self.service = service
-        self.client = create_client(service)
+        self.client = client.create_client(service)
 
     def sync(self):
         self.sync_measures()
@@ -136,9 +136,16 @@ class EventsWorker(object):
     def __init__(self, service, event):
         self.service = service
         self.event = event
-        self.client = create_client(service)
+        self.client = client.create_client(service)
 
     def sync(self):
+        # Withings likes to send us dupes. Lets ignore them if we've seen them.
+        if ds_util.client.get(self.event.key) is not None:
+            logging.info('Skipping duplicate Event: %s', self.event)
+            return
+        else:
+            ds_util.client.put(self.event)
+
         measures = sorted(
             self.client.measure_get_meas(
                 category=MeasureGetMeasGroupCategory.REAL, lastupdate=0
@@ -152,7 +159,7 @@ class EventsWorker(object):
         logging.debug('WithingsEvent: Updated series: %s', self.event.key)
 
         user = ds_util.client.get(self.service.key.parent)
-        if user['preferences']['daily_weight_notif']:
+        if user.get('preferences', {}).get('daily_weight_notif'):
             logging.debug(
                 'WithingsEvent: daily_weight_notif: Queued: %s: %s',
                 user.key,
