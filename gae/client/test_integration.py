@@ -62,8 +62,11 @@ class MainTest(unittest.TestCase):
         ids = [route.properties.id for route in routes]
         self.assertIn(22930717, ids)
 
-    def test_sync(self):
+    def test_sync_withings(self):
         self._ensure_service('withings')
+
+    def test_sync_strava(self):
+        self._ensure_service('strava')
 
     def _ensure_service(self, name):
         service = self.api.get_service(name=name)
