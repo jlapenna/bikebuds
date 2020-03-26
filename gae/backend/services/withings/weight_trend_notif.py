@@ -24,14 +24,18 @@ from shared import ds_util
 from shared import fcm_util
 from shared.datastore.series import Series
 from shared.datastore.user import Preferences
-from shared.services.withings.client import create_client
+from shared.services.withings import client as withings_client
+
+
+def get_now():
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class WeightTrendWorker(object):
     def __init__(self, service, event):
         self.service = service
         self.event = event
-        self.client = create_client(service)
+        self.client = withings_client.create_client(service)
 
     def sync(self):
         user = ds_util.client.get(self.service.key.parent)
@@ -113,15 +117,14 @@ class WeightTrendWorker(object):
 
         Returns: {'time_frame': [time_frame_date, measure]}
         """
-
-        today = datetime.datetime.now(datetime.timezone.utc)
+        today = get_now().date()
 
         trend = [
-            ('a year_ago', today - datetime.timedelta(days=365)),
+            ('a year ago', today - datetime.timedelta(days=365)),
             ('six months ago', today - datetime.timedelta(days=183)),
             ('a month ago', today - datetime.timedelta(days=30)),
             ('a week ago', today - datetime.timedelta(days=7)),
-            ('latest', datetime.datetime.now(datetime.timezone.utc)),
+            ('latest', today),
         ]
 
         trend_result = {}
@@ -129,11 +132,11 @@ class WeightTrendWorker(object):
         trend_index = 0
         time_frame, tick = trend[trend_index]
         for measure in series['measures']:
-            if measure['date'] > tick:
+            while measure['date'].date() > tick:
                 # we've come newer than the tick, we need a smaller tick.
                 trend_index += 1
                 time_frame, tick = trend[trend_index]
-            if measure['date'] <= tick:
+            if measure['date'].date() <= tick:
                 if 'weight' in measure:
                     trend_result[time_frame] = measure
         return trend_result
