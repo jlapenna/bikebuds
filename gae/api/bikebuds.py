@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import logging
 import datetime
 
 import flask
@@ -47,11 +48,13 @@ from models import (
     segments_parser,
     series_entity_model,
     service_entity_model,
+    sync_model,
     WrapEntity,
 )
 
 
 api = Namespace('bikebuds', 'Bikebuds API')
+logging.info('Loading Bikebuds API')
 
 
 @api.route('/activities')
@@ -289,7 +292,7 @@ class ConnectGarminResource(Resource):
 class ServiceDisconnect(Resource):
     @api.doc('disconnect')
     @api.marshal_with(service_entity_model, skip_none=True)
-    def get(self, name):
+    def post(self, name):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
         service = Service.get(name, parent=user.key)
@@ -300,15 +303,14 @@ class ServiceDisconnect(Resource):
 
 @api.route('/sync/<name>')
 class SyncResource(Resource):
-    @api.doc('sync_service')
+    @api.doc('sync_service', body=sync_model)
     @api.marshal_with(service_entity_model, skip_none=True)
-    def get(self, name):
+    def post(self, name):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
-
+        force = api.payload.get('force') if api.payload else False
         service = Service.get(name, parent=user.key)
-        task_util.sync_service(service)
-
+        task_util.sync_service(service, force=force)
         return WrapEntity(service)
 
 

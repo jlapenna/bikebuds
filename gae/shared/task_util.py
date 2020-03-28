@@ -136,11 +136,11 @@ def sync_club(club_id):
     )
 
 
-def sync_service(service):
-    sync_services([service])
+def sync_service(service, force=False):
+    sync_services([service], force=force)
 
 
-def sync_services(services):
+def sync_services(services, force=False):
     def do():
         state = Entity(
             ds_util.client.key(
@@ -152,7 +152,11 @@ def sync_services(services):
 
         tasks = []
         for service in services:
-            if not service['sync_state'].get('syncing'):
+            if service['sync_state'].get('syncing') and force:
+                logging.debug('Forcing sync finished: %s', service.key)
+                Service.set_sync_finished(service, error='Forced sync')
+
+            if service['sync_state'].get('syncing'):
                 logging.debug(
                     'Not enqueuing sync for %s; already started.', service.key
                 )

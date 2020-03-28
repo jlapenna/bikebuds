@@ -155,6 +155,7 @@ class GarminServiceCard extends Component {
     this._cancelSync = makeCancelable(
       this.props.bikebudsApi.sync_service({
         name: this.props.serviceName,
+        payload: {},
       }),
       response => {
         this.handleService(response);
