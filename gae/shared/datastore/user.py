@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from google.cloud.datastore.entity import Entity
+from google.cloud.datastore.key import Key
 
 from shared import ds_util
 
@@ -35,6 +36,7 @@ class Preferences(object):
             'units': Preferences.Units.IMPERIAL,
             'weight_service': Preferences.WeightService.WITHINGS,
             'daily_weight_notif': False,
+            'sync_weight': True,
         }
 
 
@@ -42,10 +44,16 @@ class User(object):
     """Its a user!"""
 
     @classmethod
-    def get(cls, claims):
-        key = ds_util.client.key('User', claims['sub'])
-        user = ds_util.client.get(key)
+    def get(cls, lookup):
+        if isinstance(lookup, Key):
+            key = lookup
+        else:
+            key = ds_util.client.key('User', lookup['sub'])
+        user = ds_util.client.get(lookup)
         if user:
+            prefs = Preferences.default()
+            prefs.update(user.get('preferences', {}))
+            user['preferences'] = prefs
             return user
 
         # Creating a new user.
