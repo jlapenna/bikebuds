@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
@@ -39,7 +41,9 @@ class _MeasureConverter(object):
             ds_util.client.key('Measure', measure_group.date.timestamp, parent=parent)
         )
         entity.update(attributes)
-        entity['date'] = measure_group.date.datetime.replace(tzinfo=None)
+        entity['date'] = measure_group.date.datetime.replace(
+            tzinfo=datetime.timezone.utc
+        )
         return entity
 
 
