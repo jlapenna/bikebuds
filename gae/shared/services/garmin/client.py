@@ -82,6 +82,7 @@ def require_session(client_function):
         try:
             return client_function(*args, **kwargs)
         except SessionExpiredError:
+            logging.debug('Retrying (once) after login.')
             client_object.login()
             return client_function(*args, **kwargs)
 
@@ -248,8 +249,16 @@ class Garmin(object):
             'Response code %s, and json %s', response.status_code, response.text,
         )
         logging.debug('Request: %s', curlify.to_curl(response.request))
-        response.raise_for_status()
 
+        if response.status_code == 403:
+            raise SessionExpiredError('Login expired')
+        elif response.status_code == 204:
+            return None
+        else:
+            response.raise_for_status()
+
+        # One last check: Its a weird behavior, this one...
+        # Kind of like a 403, only not.
         if response.json().get('privacyProtected'):
             raise SessionExpiredError('Login expired')
 
@@ -260,7 +269,12 @@ class Garmin(object):
         response = self._session.post(url, json=json)
         logging.info('Response code %s, and %s', response.status_code, response.text)
         logging.debug('Request: %s', curlify.to_curl(response.request))
-        response.raise_for_status()
 
-        if response.status_code == 200:
-            return response.json()
+        if response.status_code == 403:
+            raise SessionExpiredError('Login expired')
+        elif response.status_code == 204:
+            return None
+        else:
+            response.raise_for_status()
+
+        return None
