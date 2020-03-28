@@ -18,7 +18,7 @@ source tools/scripts/base.sh
 
 function main {
   curl -H "Content-Type: application/x-www-form-urlencoded" \
-      -X POST "http://localhost:8081/services/withings/events?sub_secret=XXXXXXXXXX&service_key=ahFkZXZ-YmlrZWJ1ZHMtdGVzdHIxCxIEVXNlciISamxhcGVubmFAZ21haWwuY29tDAsSB1NlcnZpY2UiCHdpdGhpbmdzDA" \
+      -X POST "http://localhost:8081/services/withings/events?sub_secret=XYZXYZ&service_key=ahFkZXZ-YmlrZWJ1ZHMtdGVzdHIxCxIEVXNlciISamxhcGVubmFAZ21haWwuY29tDAsSB1NlcnZpY2UiCHdpdGhpbmdzDA" \
       -d "userid=17012450&startdate=1532017199&enddate=1532017200&appli=1"
 }
 main
