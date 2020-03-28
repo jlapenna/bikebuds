@@ -19,7 +19,6 @@ import flask
 from google.cloud.datastore.entity import Entity
 
 from shared.config import config
-from shared import auth_util
 from shared import ds_util
 from shared import logging_util
 from shared import task_util
@@ -27,7 +26,6 @@ from shared import task_util
 from shared import responses
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
-from shared.datastore.user import User
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 
 from services.bbfitbit import bbfitbit
@@ -66,15 +64,6 @@ def cleanup_task():
     return responses.OK
 
 
-@app.route('/sync/<name>', methods=['POST'])
-def sync_trigger(name):
-    claims = auth_util.verify(flask.request)
-    user = User.get(claims)
-
-    task_util.sync_service(Service.get(name, parent=user.key))
-    return responses.OK
-
-
 @app.route('/tasks/sync', methods=['GET'])
 def sync_task():
     services_query = ds_util.client.query(kind='Service')
@@ -99,11 +88,13 @@ def sync_service_task(service_name):
         logging.warn('Invalid state_key. params: %s', params)
 
     service = ds_util.client.get(params['service_key'])
-    if service_name == 'garmin' and Service.has_credentials(
-        service, required_key='password'
+    if not (
+        (
+            service_name == 'garmin'
+            and Service.has_credentials(service, required_key='password')
+        )
+        or (Service.has_credentials(service))
     ):
-        pass
-    elif Service.has_credentials(service):
         logging.warn('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
         task_util.maybe_finish_sync_services(state_key)
