@@ -19,6 +19,10 @@ indexes:
   properties:
   - name: "modified"
     direction: desc
+- kind: "SubscriptionEvent"
+  ancestor: yes
+  properties:
+  - name: "date"
 - kind: "Route"
   ancestor: yes
   properties:

@@ -139,10 +139,16 @@ class EventsWorker(object):
         self.client = client.create_client(service)
 
     def sync(self):
-        # Withings likes to send us dupes. Lets ignore them if we've seen them.
-        # TODO: We need to eventually clear out stored events, otherwise we
-        # won't notify on a weight adjustment if its changed a second time.
-        # Also the dataset becomes unbounded.
+        # Clear out old subscription events.
+        query = ds_util.client.query(
+            kind='SubscriptionEvent', ancestor=self.service.key.parent
+        )
+        recent = datetime.datetime.utcnow() - datetime.timedelta(minutes=15)
+        query.add_filter('date', '<', recent)
+        query.keys_only()
+        ds_util.client.delete_multi([r.key for r in query.fetch()])
+
+        # Withings likes to send us dupes. Lets ignore them if we've seen them too recently.
         if ds_util.client.get(self.event.key) is not None:
             logging.info('Skipping duplicate Event: %s', self.event)
             return
