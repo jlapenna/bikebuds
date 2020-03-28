@@ -27,6 +27,7 @@ from shared import responses
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
+from shared.services.garmin import client as garmin_client
 
 from services.bbfitbit import bbfitbit
 from services.garmin import garmin
@@ -163,6 +164,27 @@ def process_slack_event_task():
     event = params['event']
     logging.info('SlackEvent: %s', event.key)
     return slack.process_slack_event(event)
+
+
+@app.route('/tasks/process_measure', methods=['POST'])
+def process_measure():
+    params = task_util.get_payload(flask.request)
+    user_key = params['user_key']
+    measure = params['measure']
+    logging.info('ProcessMeasure: %s', measure)
+
+    garmin_service = Service.get('garmin', parent=user_key)
+    if not Service.has_credentials(garmin_service, required_key='password'):
+        logging.debug('ProcessMeasure: Garmin not connected')
+        return responses.OK
+
+    try:
+        client = garmin_client.create(garmin_service)
+        client.set_weight(measure['weight'], measure['date'])
+    except Exception:
+        logging.exception('ProcessMeasure: Failed: %s', measure)
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 @app.route('/tasks/process_weight_trend', methods=['POST'])

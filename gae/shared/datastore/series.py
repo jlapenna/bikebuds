@@ -24,22 +24,29 @@ class Series(object):
     """Its a series!"""
 
     @classmethod
-    def get(cls, name, parent=None):
-        return ds_util.client.get(ds_util.client.key('Series', name, parent=parent))
+    def get(cls, parent):
+        return ds_util.client.get(
+            ds_util.client.key('Series', parent.name, parent=parent)
+        )
 
     @classmethod
-    def to_entity(cls, measures, name, parent=None):
-        series = Entity(ds_util.client.key('Series', name, parent=parent))
-        measures_entities = []
-
-        if name == 'withings':
-            to_entity = WithingsConverters.Measure.to_entity
-        elif name == 'fitbit':
-            to_entity = FitbitConverters.TimeseriesMeasure.to_entity
-        elif name == 'garmin':
-            to_entity = GarminConverters.Measure.to_entity
-
-        for measure in measures:
-            measures_entities.append(to_entity(measure))
-        series['measures'] = measures_entities
+    def to_entity(cls, measures, parent):
+        series = Entity(ds_util.client.key('Series', parent.name, parent=parent))
+        series['measures'] = [
+            Measure.to_entity(measure, parent) for measure in measures
+        ]
         return series
+
+
+class Measure(object):
+    """Its a measure!"""
+
+    @classmethod
+    def to_entity(cls, measure, parent):
+        if parent.name == 'withings':
+            to_entity = WithingsConverters.Measure.to_entity
+        elif parent.name == 'fitbit':
+            to_entity = FitbitConverters.TimeseriesMeasure.to_entity
+        elif parent.name == 'garmin':
+            to_entity = GarminConverters.Measure.to_entity
+        return to_entity(measure)

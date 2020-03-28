@@ -30,9 +30,7 @@ class Worker(object):
     def sync(self):
         measures = self.client.time_series('body/weight', period='max')
 
-        series = Series.to_entity(
-            measures['body-weight'], self.service.key.name, parent=self.service.key
-        )
+        series = Series.to_entity(measures['body-weight'], parent=self.service.key)
         ds_util.client.put(series)
 
 

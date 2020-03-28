@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import datetime
+import heapq
 import logging
 from urllib.parse import urlencode
 
@@ -22,7 +23,8 @@ from withings_api.common import InvalidParamsException
 from shared import ds_util
 from shared import task_util
 from shared.config import config
-from shared.datastore.series import Series
+from shared.datastore.user import User
+from shared.datastore.series import Measure, Series
 from shared.datastore.subscription import Subscription
 from shared.services.withings import client
 
@@ -43,9 +45,7 @@ class Worker(object):
             ).measuregrps,
             key=lambda x: x.date,
         )
-        series = Series.to_entity(
-            measures, self.service.key.name, parent=self.service.key
-        )
+        series = Series.to_entity(measures, parent=self.service.key)
         ds_util.client.put(series)
 
     def sync_subscription(self):
@@ -140,35 +140,71 @@ class EventsWorker(object):
 
     def sync(self):
         # Withings likes to send us dupes. Lets ignore them if we've seen them.
+        # TODO: We need to eventually clear out stored events, otherwise we
+        # won't notify on a weight adjustment if its changed a second time.
+        # Also the dataset becomes unbounded.
         if ds_util.client.get(self.event.key) is not None:
             logging.info('Skipping duplicate Event: %s', self.event)
             return
         else:
             ds_util.client.put(self.event)
 
-        measures = sorted(
-            self.client.measure_get_meas(
-                category=MeasureGetMeasGroupCategory.REAL, lastupdate=0
-            ).measuregrps,
-            key=lambda x: x.date,
-        )
-        series = Series.to_entity(
-            measures, self.service.key.name, parent=self.service.key
-        )
+        series = Series.get(self.service.key)
+        series['measures'] = series.get('measures', [])
+        logging.debug('Measures length before: %s', len(series['measures']))
+
+        new_measures = [
+            Measure.to_entity(m, self.service.key)
+            for m in self.client.measure_get_meas(
+                category=MeasureGetMeasGroupCategory.REAL,
+                startdate=datetime.datetime.utcfromtimestamp(
+                    int(self.event['event_data']['startdate'])
+                ),
+                enddate=datetime.datetime.utcfromtimestamp(
+                    int(self.event['event_data']['enddate'])
+                ),
+            ).measuregrps
+        ]
+        logging.debug('Found %s new measures', len(new_measures))
+
+        # Remove any measures with dates we just fetched.
+        series['measures'] = [
+            m
+            for m in filter(
+                lambda x: x['date'] not in (nm['date'] for nm in new_measures),
+                series['measures'],
+            )
+        ]
+
+        logging.debug('Measures length filtered: %s', len(series['measures']))
+
+        # Merge the two sorted lists.
+        series['measures'] = [
+            m
+            for m in heapq.merge(
+                series['measures'], new_measures, key=lambda x: x['date']
+            )
+        ]
+        logging.debug('Measures length after: %s', len(series['measures']))
+
+        # Store the updated measures.
         ds_util.client.put(series)
         logging.debug('WithingsEvent: Updated series: %s', self.event.key)
 
-        user = ds_util.client.get(self.service.key.parent)
-        if user.get('preferences', {}).get('daily_weight_notif'):
+        # Possibly fire off down-stream events.
+        user = User.get(self.service.key.parent)
+        if user['preferences']['daily_weight_notif']:
             logging.debug(
                 'WithingsEvent: daily_weight_notif: Queued: %s: %s',
                 user.key,
                 self.event.key,
             )
             task_util.process_weight_trend(self.event)
-        else:
+        if user['preferences']['sync_weight']:
             logging.debug(
-                'WithingsEvent: daily_weight_notif: Disabled: %s: %s',
+                'WithingsEvent: ProcessMeasure: Queued: %s: %s',
                 user.key,
                 self.event.key,
             )
+            for measure in new_measures:
+                task_util.process_measure(user.key, measure)

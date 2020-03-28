@@ -41,6 +41,7 @@ from models import (
     connect_garmin_model,
     filter_parser,
     get_arg,
+    measure_model,
     preferences_model,
     profile_model,
     route_entity_model,
@@ -241,7 +242,7 @@ class SeriesResource(Resource):
         user = User.get(claims)
         service_name = user['preferences']['weight_service'].lower()
         series = Series.get(
-            service_name, ds_util.client.key('Service', service_name, parent=user.key)
+            ds_util.client.key('Service', service_name, parent=user.key)
         )
         if series is None:
             return WrapEntity(None)
@@ -312,6 +313,22 @@ class SyncResource(Resource):
         service = Service.get(name, parent=user.key)
         task_util.sync_service(service, force=force)
         return WrapEntity(service)
+
+
+@api.route('/weight')
+class WeightResource(Resource):
+    @api.doc('weight', body=measure_model, validate=True)
+    @api.marshal_with(measure_model, skip_none=True)
+    def post(self):
+        claims = auth_util.verify(flask.request)
+        user = User.get(claims)
+        measure = api.payload
+        # In a world with useful documentation, i'd know why the date value
+        # isn't being converted to a date time, even though the model says it
+        # is. So, convert it.
+        measure['date'] = datetime.datetime.fromisoformat(measure['date'])
+        task_util.process_measure(user.key, measure)
+        return measure
 
 
 @api.route('/auth')

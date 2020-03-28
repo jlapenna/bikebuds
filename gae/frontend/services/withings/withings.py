@@ -98,7 +98,8 @@ def events_post():
             service_key = Key.from_legacy_urlsafe(flask.request.args.get('service_key'))
         else:
             logging.debug(
-                'WithingsEvent: Key missing in callbackurl %s', flask.request.url
+                'WithingsEvent: service_key missing in callbackurl %s',
+                flask.request.url,
             )
     except binascii.Error:
         # In older code we accidentally registered with poorly constructed

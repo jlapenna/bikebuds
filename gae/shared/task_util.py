@@ -256,6 +256,15 @@ def process_weight_trend(event):
     )
 
 
+def process_measure(user_key, measure):
+    return _queue_task(
+        entity=_params_entity(user_key=user_key, measure=measure),
+        relative_uri='/tasks/process_measure',
+        service='backend',
+        parent=_events_parent,
+    )
+
+
 def task_body_for_test(**kwargs):
     params_entity = _params_entity(**kwargs)
     return _serialize_entity(params_entity)

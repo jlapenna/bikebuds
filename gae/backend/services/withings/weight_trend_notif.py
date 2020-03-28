@@ -49,7 +49,7 @@ class WeightTrendWorker(object):
         to_imperial = user['preferences']['units'] == Preferences.Units.IMPERIAL
 
         # Calculate the trend.
-        series_entity = Series.get('withings', self.service.key)
+        series_entity = Series.get(self.service.key)
         weight_trend = self._weight_trend(series_entity)
 
         time_frame = self._get_best_time_frame(weight_trend)

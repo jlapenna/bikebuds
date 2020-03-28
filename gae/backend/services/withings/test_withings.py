@@ -48,6 +48,7 @@ class WithingsTest(unittest.TestCase):
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', 'Event', parent=service.key)
         )
+        event_entity.update({'event_data': {'startdate': '1', 'enddate': '1',}})
 
         # There are three gets we need to account for.
         def get_side_effect(key):

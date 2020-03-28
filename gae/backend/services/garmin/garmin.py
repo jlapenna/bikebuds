@@ -41,8 +41,6 @@ class Worker(object):
             start_date.isoformat(), end_date.isoformat()
         )
 
-        series = Series.to_entity(
-            body_comp['dateWeightList'], self.service.key.name, parent=self.service.key
-        )
+        series = Series.to_entity(body_comp['dateWeightList'], parent=self.service.key)
 
         ds_util.client.put(series)

@@ -49,7 +49,7 @@ class User(object):
             key = lookup
         else:
             key = ds_util.client.key('User', lookup['sub'])
-        user = ds_util.client.get(lookup)
+        user = ds_util.client.get(key)
         if user:
             prefs = Preferences.default()
             prefs.update(user.get('preferences', {}))
