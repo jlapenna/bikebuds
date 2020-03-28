@@ -4,9 +4,9 @@ Flask-Cors==3.0.8
 Werkzeug==0.16.0 # https://github.com/python-restx/flask-restx/issues/34
 flask-restx==0.1.0
 
-# task_util.py
 requests==2.22.0
 requests-toolbelt==0.9.1
+curlify==2.2.1
 
 # auth_util.py
 firebase-admin==3.2.1
@@ -42,3 +42,4 @@ bs4
 
 # Google Maps
 googlemaps
+

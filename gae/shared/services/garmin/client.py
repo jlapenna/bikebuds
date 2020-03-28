@@ -15,12 +15,12 @@
 """
 """
 
+from functools import wraps
 import json
 import logging
 import re
 
-from functools import wraps
-
+import curlify
 import requests
 
 from shared.datastore.service import Service
@@ -33,7 +33,7 @@ URL_MODERN = URL_BASE + '/modern'
 URL_ACTIVITIES = URL_MODERN + '/proxy/usersummary-service/usersummary/daily/'
 URL_HEARTRATES = URL_MODERN + '/proxy/wellness-service/wellness/dailyHeartRate/'
 URL_BODY_COMPOSITION = URL_MODERN + '/proxy/weight-service/weight/daterangesnapshot'
-URL_LEGACY_SESSION = URL_BASE + '/legacy/_session'
+URL_USER_WEIGHT = URL_BASE + '/proxy/weight-service/user-weight'
 
 HEADERS = {
     'User-Agent': (
@@ -42,6 +42,7 @@ HEADERS = {
         + 'Chrome/79.0.3945.88 Safari/537.36'
     ),
     'origin': 'https://sso.garmin.com',
+    'nk': 'NT',  # Needed for user-weight, for some reason.
 }
 
 
@@ -120,7 +121,7 @@ class Garmin(object):
         }
 
     def login(self):
-        logging.debug('Login...')
+        logging.debug('Garmin Login')
         self.set_session_state()
         try:
             self._authenticate()
@@ -156,7 +157,7 @@ class Garmin(object):
             # 'consumeServiceTicket': 'false',
             # 'initialFocus': 'true',
             # 'embedWidget': 'false',
-            # 'generateExtraServiceTicket': 'false',
+            # 'generateExtraServiceTicket': 'true',
         }
 
         data = {
@@ -168,16 +169,15 @@ class Garmin(object):
             # 'displayNameRequired': 'false',
         }
 
-        logging.debug("Login to Garmin Connect using POST url %s", URL_SSO_LOGIN)
         login_response = self._session.post(URL_SSO_LOGIN, params=params, data=data)
+        logging.debug('SSO Request: %s', curlify.to_curl(login_response.request))
         login_response.raise_for_status()
 
-        logging.debug("Extracting auth ticket url")
         auth_ticket_url = self._extract_auth_ticket_url(login_response.text)
         logging.debug("Extracted auth ticket url: %s", auth_ticket_url)
 
-        logging.info("claiming auth ticket ...")
         auth_response = self._session.get(auth_ticket_url)
+        logging.debug('Auth Request: %s', curlify.to_curl(auth_response.request))
         auth_response.raise_for_status()
 
         # There is auth info in here needed in order to fetch other services.
@@ -185,10 +185,6 @@ class Garmin(object):
             auth_response.text, 'VIEWER_USERPREFERENCES'
         )
         self.profile = self._extract_json(auth_response.text, 'SOCIAL_PROFILE')
-
-        # some form of legacy _session. otherwise certain downloads will fail.
-        self._session.get(URL_LEGACY_SESSION)
-        auth_response.raise_for_status()
 
     @staticmethod
     def _extract_json(html, key):
@@ -231,15 +227,40 @@ class Garmin(object):
         )
         return self._get(url)
 
-    def _get(self, url):
-        logging.debug("Fetching: %s", url)
-        response = self._session.get(url)
-        logging.debug(
-            "Response code %s, and json %s", response.status_code, response.json(),
+    @require_session
+    def set_weight(self, weight, weight_date):
+        url = URL_USER_WEIGHT
+        weight_date = weight_date.replace(tzinfo=None)
+        return self._post(
+            url,
+            json={
+                'value': weight,
+                'unitKey': 'kg',
+                'date': weight_date.date().isoformat(),
+                'gmtTimestamp': weight_date.isoformat() + '.00',
+            },
         )
+
+    def _get(self, url):
+        logging.debug('Fetching: %s', url)
+        response = self._session.get(url)
+        logging.info(
+            'Response code %s, and json %s', response.status_code, response.text,
+        )
+        logging.debug('Request: %s', curlify.to_curl(response.request))
         response.raise_for_status()
 
         if response.json().get('privacyProtected'):
             raise SessionExpiredError('Login expired')
 
         return response.json()
+
+    def _post(self, url, json=None):
+        logging.debug('Posting: %s', url)
+        response = self._session.post(url, json=json)
+        logging.info('Response code %s, and %s', response.status_code, response.text)
+        logging.debug('Request: %s', curlify.to_curl(response.request))
+        response.raise_for_status()
+
+        if response.status_code == 200:
+            return response.json()
