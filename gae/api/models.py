@@ -412,6 +412,9 @@ segment_model = api.model(
 )
 segment_entity_model = EntityModel(segment_model)
 
+connect_garmin_model = api.model(
+    'ConnectGarmin', {'username': fields.String, 'password': fields.String,},
+)
 
 auth_model = api.model('Auth', {'token': fields.String})
 auth_entity_model = EntityModel(auth_model)

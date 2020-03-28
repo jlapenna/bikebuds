@@ -152,7 +152,7 @@ def sync_services(services):
 
         tasks = []
         for service in services:
-            if service['sync_state'].get('syncing'):
+            if not service['sync_state'].get('syncing'):
                 logging.debug(
                     'Not enqueuing sync for %s; already started.', service.key
                 )

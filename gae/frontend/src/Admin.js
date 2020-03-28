@@ -54,7 +54,7 @@ class Admin extends Component {
       dialogOpen: false,
       bot: undefined,
       clubs: undefined,
-      track_club_id: '',
+      trackClubId: '',
     };
   }
 
@@ -137,14 +137,14 @@ class Admin extends Component {
   handleUntrackClub = club_id => {
     this._cancelUntrackClub = makeCancelable(
       this.props.adminApi.untrack_club({ club_id: club_id }),
-      response => this.setState({ track_club_id: '', clubs: undefined })
+      response => this.setState({ trackClubId: '', clubs: undefined })
     );
   };
 
   handleTrackClub = event => {
     this._cancelTrackClub = makeCancelable(
-      this.props.adminApi.track_club({ club_id: this.state.track_club_id }),
-      response => this.setState({ track_club_id: '', clubs: undefined })
+      this.props.adminApi.track_club({ club_id: this.state.trackClubId }),
+      response => this.setState({ trackClubId: '', clubs: undefined })
     );
   };
 
@@ -176,9 +176,9 @@ class Admin extends Component {
               <TextField
                 id="track-club-id"
                 label="Club ID"
-                value={this.state.track_club_id}
+                value={this.state.trackClubId}
                 onChange={event =>
-                  this.setState({ track_club_id: event.target.value })
+                  this.setState({ trackClubId: event.target.value })
                 }
               />
               <Button

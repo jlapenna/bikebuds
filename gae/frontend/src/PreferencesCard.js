@@ -173,6 +173,11 @@ class PreferencesCard extends Component {
                     control={<Radio />}
                     label="Withings"
                   />
+                  <FormControlLabel
+                    value="GARMIN"
+                    control={<Radio />}
+                    label="Garmin"
+                  />
                 </RadioGroup>
               </FormControl>
             </Grid>

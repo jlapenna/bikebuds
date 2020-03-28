@@ -37,6 +37,7 @@ from models import (
     client_state_entity_model,
     client_state_model,
     club_entity_model,
+    connect_garmin_model,
     filter_parser,
     get_arg,
     preferences_model,
@@ -268,6 +269,20 @@ class ServiceResource(Resource):
         existing_service.update(new_service)
         ds_util.client.put(existing_service)
         return WrapEntity(existing_service)
+
+
+@api.route('/connect_garmin')
+class ConnectGarminResource(Resource):
+    @api.doc('connect_garmin', body=connect_garmin_model)
+    @api.marshal_with(service_entity_model, skip_none=True)
+    def post(self):
+        claims = auth_util.verify(flask.request)
+        user = User.get(claims)
+        connect_garmin_model = api.payload
+        service = Service.get('garmin', parent=user.key)
+        Service.update_credentials(service, connect_garmin_model)
+        ds_util.client.put(service)
+        return WrapEntity(service)
 
 
 @api.route('/disconnect/<name>')

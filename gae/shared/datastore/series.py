@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-
 from google.cloud.datastore.entity import Entity
 
-import withings_api
-
 from shared import ds_util
-from shared.datastore.withings.converters import WithingsConverters
 from shared.datastore.bbfitbit.converters import FitbitConverters
+from shared.datastore.garmin.converters import GarminConverters
+from shared.datastore.withings.converters import WithingsConverters
 
 
 class Series(object):
@@ -39,43 +36,10 @@ class Series(object):
             to_entity = WithingsConverters.Measure.to_entity
         elif name == 'fitbit':
             to_entity = FitbitConverters.TimeseriesMeasure.to_entity
+        elif name == 'garmin':
+            to_entity = GarminConverters.Measure.to_entity
 
         for measure in measures:
             measures_entities.append(to_entity(measure))
         series['measures'] = measures_entities
         return series
-
-    @classmethod
-    def _measure_from_withings(cls, measure):
-        attributes = dict()
-        for key, type_int in withings_api.WithingsMeasureGroup.MEASURE_TYPES:
-            value = measure.get_measure(type_int)
-            if value is not None:
-                attributes[key] = value
-        entity = Entity(ds_util.client.key('Measure', measure.date.timestamp))
-        entity.update(attributes)
-        entity['date'] = measure.date.datetime.replace(tzinfo=None)
-        return entity
-
-    @classmethod
-    def _measure_from_fitbit_time_series(cls, measure):
-        date = datetime.datetime.strptime(measure['dateTime'], '%Y-%m-%d')
-        entity = Entity(ds_util.client.key('Measure', date.strftime('%s')))
-        entity.update(dict(date=date, weight=float(measure['value'])))
-        return entity
-
-    @classmethod
-    def _measure_from_fitbit_log(cls, measure):
-        date = datetime.datetime.strptime(
-            measure['date'] + ' ' + measure['time'], '%Y-%m-%d %H:%M:%S'
-        )
-        entity = Entity(ds_util.client.key('Measure', date.strftime('%s')))
-        entity.update(
-            dict(
-                id=measure['logId'],
-                date=date,
-                weight=measure['weight'],
-                fat_ratio=measure['fat'],
-            )
-        )
-        return entity

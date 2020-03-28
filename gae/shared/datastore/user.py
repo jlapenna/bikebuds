@@ -27,6 +27,7 @@ class Preferences(object):
         UNKNOWN = 'UNKNOWN'
         WITHINGS = 'WITHINGS'
         FITBIT = 'FITBIT'
+        GARMIN = 'GARMIN'
 
     @classmethod
     def default(cls):

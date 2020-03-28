@@ -31,6 +31,7 @@ from shared.datastore.user import User
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 
 from services.bbfitbit import bbfitbit
+from services.garmin import garmin
 from services.slack import slack
 from services.strava import strava
 from services.strava.events_worker import EventsWorker as StravaEventsWorker
@@ -98,7 +99,11 @@ def sync_service_task(service_name):
         logging.warn('Invalid state_key. params: %s', params)
 
     service = ds_util.client.get(params['service_key'])
-    if not Service.has_credentials(service):
+    if service_name == 'garmin' and Service.has_credentials(
+        service, required_key='password'
+    ):
+        pass
+    elif Service.has_credentials(service):
         logging.warn('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
         task_util.maybe_finish_sync_services(state_key)
@@ -112,6 +117,8 @@ def sync_service_task(service_name):
             _do(bbfitbit.Worker(service), work_key=service.key)
         elif service_name == 'strava':
             _do(strava.Worker(service), work_key=service.key)
+        elif service_name == 'garmin':
+            _do(garmin.Worker(service), work_key=service.key)
         Service.set_sync_finished(service)
         task_util.maybe_finish_sync_services(state_key)
         return responses.OK
@@ -152,8 +159,6 @@ def process_event_task():
     try:
         if service_key.name == 'withings':
             _do(WithingsEventsWorker(service, event), work_key=event.key)
-        elif service_key.name == 'fitbit':
-            pass
         elif service_key.name == 'strava':
             _do(StravaEventsWorker(service, event), work_key=event.key)
     except SyncException:

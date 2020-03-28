@@ -37,6 +37,7 @@ LOGS_TO_SILENCE = [
     'stravalib.attributes.EntityCollection',
     'google.auth.transport.requests',
     'google_auth_httplib2',
+    # 'garminconnect',
 ]
 
 PROD_ONLY_LOGS_TO_SILENCE = []
