@@ -84,10 +84,6 @@ def sync_service_task(service_name):
     logging.debug('Syncing: %s', service_name)
     params = task_util.get_payload(flask.request)
 
-    state_key = params['state_key']
-    if state_key is None:
-        logging.warn('Invalid state_key. params: %s', params)
-
     service = ds_util.client.get(params['service_key'])
     if not (
         (
@@ -98,7 +94,6 @@ def sync_service_task(service_name):
     ):
         logging.warn('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
-        task_util.maybe_finish_sync_services(state_key)
         return responses.OK_NO_CREDENTIALS
 
     try:
@@ -112,11 +107,9 @@ def sync_service_task(service_name):
         elif service_name == 'garmin':
             _do(garmin.Worker(service), work_key=service.key)
         Service.set_sync_finished(service)
-        task_util.maybe_finish_sync_services(state_key)
         return responses.OK
     except SyncException as e:
         Service.set_sync_finished(service, error=str(e))
-        task_util.maybe_finish_sync_services(state_key)
         return responses.OK_SYNC_EXCEPTION
 
 

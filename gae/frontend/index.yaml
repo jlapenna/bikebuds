@@ -23,12 +23,12 @@ indexes:
   ancestor: yes
   properties:
   - name: "date"
-- kind: "Route"
+- kind: "Segment"
   ancestor: yes
   properties:
   - name: "id"
     direction: desc
-- kind: "Segment"
+- kind: "Route"
   ancestor: yes
   properties:
   - name: "id"

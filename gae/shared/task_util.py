@@ -142,15 +142,6 @@ def sync_service(service, force=False):
 
 def sync_services(services, force=False):
     def do():
-        state = Entity(
-            ds_util.client.key(
-                'SyncState', datetime.datetime.now(datetime.timezone.utc).isoformat()
-            )
-        )
-        state['completed_tasks'] = 0
-        ds_util.client.put(state)
-
-        tasks = []
         for service in services:
             if service['sync_state'].get('syncing') and force:
                 logging.debug('Forcing sync finished: %s', service.key)
@@ -162,56 +153,19 @@ def sync_services(services, force=False):
                 )
                 continue
             Service.set_sync_enqueued(service)
-            tasks.append(
-                {
-                    'entity': _params_entity(
-                        state_key=state.key, service_key=service.key
-                    ),
-                    'relative_uri': '/tasks/sync/service/' + service.key.name,
-                    'service': 'backend',
-                }
-            )
-            logging.debug('Added: %s', tasks[-1])
-
-        # Write the number of tasks we're about to queue.
-        state['total_tasks'] = len(tasks)
-        ds_util.client.put(state)
-
-        # Queue all the tasks.
-        for task in tasks:
+            task = {
+                'entity': _params_entity(service_key=service.key),
+                'relative_uri': '/tasks/sync/service/' + service.key.name,
+                'service': 'backend',
+            }
             _queue_task(**task)
+            logging.debug('Added: %s', task)
 
     _maybe_transact(do)
 
 
 def get_payload(request):
     return _deserialize_entity(request.get_data())
-
-
-def maybe_finish_sync_services(state_key=None):
-    if not state_key:
-        logging.warn('No sync state key provided to finish.')
-        return
-
-    def do():
-        state = ds_util.client.get(state_key)
-        if state is None:
-            logging.debug('Cannot finish unknown sync: %s', state_key)
-            return
-
-        logging.debug('Incrementing completed tasks for %s', state_key)
-        state['completed_tasks'] += 1
-        ds_util.client.put(state)
-
-        if state['completed_tasks'] == state['total_tasks']:
-            logging.debug('Completed all pending tasks for %s', state.key)
-            # _queue_task(**{
-            #    'entity': _params_entity(state_key=state.key),
-            #    'relative_uri': '/tasks/process',
-            #    'service': 'backend',
-            #    })
-
-    _maybe_transact(do)
 
 
 def _maybe_transact(fn, *args, **kwargs):
