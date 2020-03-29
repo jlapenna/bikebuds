@@ -15,10 +15,14 @@
 import datetime
 import logging
 
+import firebase_admin
 from firebase_admin import messaging
 
 from shared import ds_util
+from shared.credentials import firebase_credentials
 from shared.datastore.fcm import FcmMessage, FcmSendEvent
+
+firebase_admin.initialize_app(firebase_credentials)
 
 
 def active_clients(user_key):

@@ -29,6 +29,7 @@ from shared.datastore.service import Service
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 from shared.services.garmin import client as garmin_client
 
+from backfill.backfill import BackfillWorker
 from services.bbfitbit import bbfitbit
 from services.garmin import garmin
 from services.slack import slack
@@ -199,6 +200,22 @@ def process_weight_trend_task():
     try:
         if service.key.name == 'withings':
             _do(WeightTrendWorker(service, event), work_key=event.key)
+    except SyncException:
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
+
+
+@app.route('/tasks/process_backfill', methods=['POST'])
+def process_backfill_task():
+    params = task_util.get_payload(flask.request)
+    source_key = params['source_key']
+    dest_key = params['dest_key']
+    start = params['start']
+    end = params['end']
+    logging.info('process_backfill: %s->%s', source_key, dest_key)
+
+    try:
+        _do(BackfillWorker(source_key, dest_key, start, end), work_key=source_key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK

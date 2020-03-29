@@ -22,6 +22,7 @@ import requests
 from google.cloud import tasks_v2
 from google.cloud.datastore import helpers
 from google.cloud.datastore.entity import Entity
+from google.cloud.datastore.key import Key
 from google.cloud.datastore_v1.proto import entity_pb2
 from google.protobuf.timestamp_pb2 import Timestamp
 
@@ -43,6 +44,9 @@ _slack_events_parent = _client.queue_path(
 )
 _notifications_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'notifications'
+)
+_backfill_parent = _client.queue_path(
+    config.project_id, config.tasks_location, 'backfill'
 )
 
 
@@ -216,6 +220,19 @@ def process_measure(user_key, measure):
         relative_uri='/tasks/process_measure',
         service='backend',
         parent=_events_parent,
+    )
+
+
+def process_backfill(
+    source_key: Key, dest_key: Key, start: datetime.datetime, end: datetime.datetime
+):
+    return _queue_task(
+        entity=_params_entity(
+            source_key=source_key, dest_key=dest_key, start=start, end=end
+        ),
+        relative_uri='/tasks/process_backfill',
+        service='backend',
+        parent=_backfill_parent,
     )
 
 

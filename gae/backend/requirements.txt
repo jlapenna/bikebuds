@@ -43,3 +43,4 @@ bs4
 # Google Maps
 googlemaps
 
+retrying==1.3.3

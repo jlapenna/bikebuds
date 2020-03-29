@@ -418,6 +418,16 @@ connect_garmin_model = api.model(
     'ConnectGarmin', {'username': fields.String, 'password': fields.String,},
 )
 
+backfill_model = api.model(
+    'Backfill',
+    {
+        'source': fields.String,
+        'dest': fields.String,
+        'start': fields.DateTime,
+        'end': fields.DateTime,
+    },
+)
+
 auth_model = api.model('Auth', {'token': fields.String})
 auth_entity_model = EntityModel(auth_model)
 

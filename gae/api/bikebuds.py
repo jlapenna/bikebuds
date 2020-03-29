@@ -35,6 +35,7 @@ from shared.datastore.series import Series
 from models import (
     activity_entity_model,
     auth_model,
+    backfill_model,
     client_state_entity_model,
     client_state_model,
     club_entity_model,
@@ -282,9 +283,9 @@ class ConnectGarminResource(Resource):
     def post(self):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
-        connect_garmin_model = api.payload
+        connect_garmin = api.payload
         service = Service.get('garmin', parent=user.key)
-        Service.update_credentials(service, connect_garmin_model)
+        Service.update_credentials(service, connect_garmin)
         ds_util.client.put(service)
         return WrapEntity(service)
 
@@ -309,7 +310,7 @@ class SyncResource(Resource):
     def post(self, name):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
-        force = api.payload.get('force') if api.payload else False
+        force = api.payload.get('force', False)
         service = Service.get(name, parent=user.key)
         task_util.sync_service(service, force=force)
         return WrapEntity(service)
@@ -329,6 +330,23 @@ class WeightResource(Resource):
         measure['date'] = datetime.datetime.fromisoformat(measure['date'])
         task_util.process_measure(user.key, measure)
         return measure
+
+
+@api.route('/backfill')
+class BackfillResource(Resource):
+    @api.doc('backfill', body=backfill_model)
+    @api.marshal_with(backfill_model, skip_none=True)
+    def post(self):
+        claims = auth_util.verify(flask.request)
+        user = User.get(claims)
+        backfill = api.payload
+        source = Service.get(backfill['source'], parent=user.key)
+        dest = Service.get(backfill['dest'], parent=user.key)
+        start = datetime.datetime.fromisoformat(backfill.get('start'))
+        end = datetime.datetime.fromisoformat(backfill.get('end'))
+        task_util.process_backfill(source.key, dest.key, start, end)
+        # TODO: pre-check there are credentials.
+        return backfill
 
 
 @api.route('/auth')
