@@ -39,6 +39,7 @@ class GarminServiceCard extends Component {
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
+      minHeight: 200,
     },
     progressIndicator: {
       position: 'absolute',

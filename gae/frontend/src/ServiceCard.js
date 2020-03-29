@@ -41,6 +41,7 @@ class ServiceCard extends Component {
     root: {
       /* Relative lets the progressIndicator position itself. */
       position: 'relative',
+      minHeight: 200,
     },
     progressIndicator: {
       position: 'absolute',
@@ -177,6 +178,18 @@ class ServiceCard extends Component {
       .then(this.handleService);
   };
 
+  render() {
+    return (
+      <Card className={this.props.classes.root}>
+        {(this.state.actionPending || this.state.service === undefined) && (
+          <LinearProgress className={this.props.classes.progressIndicator} />
+        )}
+        {this.renderCardContent()}
+        {this.renderCardActions()}
+      </Card>
+    );
+  }
+
   renderCardContent() {
     return (
       <CardContent className={this.props.classes.content}>
@@ -259,18 +272,6 @@ class ServiceCard extends Component {
           {connectText}
         </Button>
       </CardActions>
-    );
-  }
-
-  render() {
-    return (
-      <Card className={this.props.classes.root}>
-        {(this.state.actionPending || this.state.service === undefined) && (
-          <LinearProgress className={this.props.classes.progressIndicator} />
-        )}
-        {this.renderCardContent()}
-        {this.renderCardActions()}
-      </Card>
     );
   }
 }

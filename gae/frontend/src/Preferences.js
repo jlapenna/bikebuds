@@ -19,7 +19,6 @@ import React, { Component } from 'react';
 
 import { createStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -37,13 +36,11 @@ import DevicesFormControl from './DevicesFormControl';
 
 class PreferencesCard extends Component {
   static styles = createStyles({
-    root: {
+    card: {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-    },
-    contentGrid: {
-      flexGrow: 1,
+      minHeight: 200,
     },
   });
 
@@ -114,14 +111,10 @@ class PreferencesCard extends Component {
 
   render() {
     return (
-      <Card className={this.props.classes.root}>
-        <CardContent className={this.props.classes.content}>
-          <Grid
-            className={this.props.classes.contentGrid}
-            container
-            spacing={3}
-          >
-            <Grid item xs={12} sm={12}>
+      <React.Fragment>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={this.props.classes.card}>
+            <CardContent className={this.props.classes.content}>
               <FormControl
                 component="fieldset"
                 className={this.props.classes.formControl}
@@ -147,6 +140,12 @@ class PreferencesCard extends Component {
                   />
                 </RadioGroup>
               </FormControl>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={this.props.classes.card}>
+            <CardContent className={this.props.classes.content}>
               <FormControl
                 component="fieldset"
                 className={this.props.classes.formControl}
@@ -180,16 +179,21 @@ class PreferencesCard extends Component {
                   />
                 </RadioGroup>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={12}>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={this.props.classes.card}>
+            <CardContent className={this.props.classes.content}>
               <FormControl
                 component="fieldset"
                 className={this.props.classes.formControl}
                 disabled={this.state.updatingRemote}
               >
                 <Typography variant="h5">Notifications</Typography>
-                <FormGroup disabled={this.state.updatingRemote}>
+                <FormGroup>
                   <FormControlLabel
+                    disabled={this.state.updatingRemote}
                     control={
                       <Switch
                         checked={
@@ -203,14 +207,17 @@ class PreferencesCard extends Component {
                   />
                 </FormGroup>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={12}>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={this.props.classes.card}>
+            <CardContent className={this.props.classes.content}>
               <DevicesFormControl bikebudsApi={this.props.bikebudsApi} />
-            </Grid>
-          </Grid>
-        </CardContent>
-        <CardActions />
-      </Card>
+            </CardContent>
+          </Card>
+        </Grid>
+      </React.Fragment>
     );
   }
 }

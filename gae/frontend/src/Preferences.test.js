@@ -17,7 +17,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import PreferencesCard from './PreferencesCard';
+import Preferences from './Preferences';
 import { ProfileState } from './ProfileWrapper';
 
 it('renders without crashing', () => {
@@ -36,7 +36,7 @@ it('renders without crashing', () => {
 
   const div = document.createElement('div');
   ReactDOM.render(
-    <PreferencesCard
+    <Preferences
       bikebudsApi={bikebudsApi}
       firebaseUser={firebaseUser}
       profile={profile}

@@ -21,7 +21,7 @@ import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import GarminServiceCard from './GarminServiceCard';
-import PreferencesCard from './PreferencesCard';
+import Preferences from './Preferences';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
 
@@ -43,7 +43,7 @@ class Settings extends Component {
   render() {
     return (
       <Grid className={this.props.classes.root} container spacing={3}>
-        <Grid item xs={12} sm={12}>
+        <Grid item xs={12}>
           <ProfileCard
             firebase={this.props.firebase}
             firebaseUser={this.props.firebaseUser}
@@ -52,40 +52,38 @@ class Settings extends Component {
             profile={this.props.profile}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'fitbit'}
             bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'strava'}
             bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <ServiceCard
             firebase={this.props.firebase}
             serviceName={'withings'}
             bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <GarminServiceCard
             firebase={this.props.firebase}
             serviceName={'garmin'}
             bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
-        <Grid item xs={12}>
-          <PreferencesCard
-            bikebudsApi={this.props.bikebudsApi}
-            profile={this.props.profile}
-          />
-        </Grid>
+        <Preferences
+          bikebudsApi={this.props.bikebudsApi}
+          profile={this.props.profile}
+        />
       </Grid>
     );
   }
