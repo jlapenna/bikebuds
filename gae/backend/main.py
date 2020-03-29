@@ -171,6 +171,10 @@ def process_measure():
         logging.debug('ProcessMeasure: Garmin not connected')
         return responses.OK
 
+    if not measure.get('weight'):
+        logging.debug('ProcessMeasure: Skipping non-weight measure.')
+        return responses.OK
+
     try:
         client = garmin_client.create(garmin_service)
         client.set_weight(measure['weight'], measure['date'])
