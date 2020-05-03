@@ -127,7 +127,7 @@ function main() {
       # For the sake of gae, our frontend is actually the default service.
       service="default";
     fi
-    delete_old_versions $service 0;
+    delete_old_versions $service 10;
   done;
 }
 
