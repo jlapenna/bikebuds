@@ -78,7 +78,8 @@ function main() {
   git push --force production master
 
   # Generate source contexts for debugging.
-  echo "\nGenerating source contexts."
+  echo ""
+  echo "Generating source contexts."
   for service in $services; do
     gcloud --project=bikebuds-app debug source gen-repo-info-file \
         --output-directory=gae/$service \
@@ -87,7 +88,8 @@ function main() {
   done;
 
   # Deploy apps
-  echo "\nDeploying apps."
+  echo ""
+  echo "Deploying apps."
   yes|gcloud --project=bikebuds-app app deploy \
     gae/frontend/dispatch.yaml \
     gae/frontend/index.yaml \
@@ -95,11 +97,13 @@ function main() {
     ;
 
   # Update queues
-  echo "\nUpdating cloud queues."
+  echo ""
+  echo "Updating cloud queues."
   ./gae/queues.sh
 
   # Deploy firebase
-  echo "\nUpdating firebase."
+  echo ""
+  echo "Updating firebase."
   ./firebase/deploy.sh
 
   # And restore the dev environment config.
