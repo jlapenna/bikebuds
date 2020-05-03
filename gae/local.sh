@@ -62,7 +62,7 @@ function main() {
     --env_var=FLASK_ENV=development \
     gae/frontend/app-local.yaml \
     gae/api/app.yaml \
-    gae/backend/app.yaml \
+    gae/backend/app-local.yaml \
     ;
     # --dev_appserver_log_level=debug \
 
