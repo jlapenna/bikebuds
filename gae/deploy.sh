@@ -94,6 +94,10 @@ function main() {
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \
     ;
 
+  # Update queues
+  echo "\nUpdating cloud queues."
+  ./gae/queues.sh
+
   # Deploy firebase
   echo "\nUpdating firebase."
   ./firebase/deploy.sh
