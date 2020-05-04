@@ -55,6 +55,7 @@ class Admin extends Component {
       bot: undefined,
       clubs: undefined,
       trackClubId: '',
+      deleteUserSub: '',
     };
   }
 
@@ -71,6 +72,9 @@ class Admin extends Component {
     }
     if (this._cancelTrackClub) {
       this._cancelTrackClub();
+    }
+    if (this._cancelDeleteUser) {
+      this._cancelDeleteUser();
     }
   }
 
@@ -148,6 +152,13 @@ class Admin extends Component {
     );
   };
 
+  handleDeleteUser = event => {
+    this._cancelDeleteUser = makeCancelable(
+      this.props.adminApi.delete_user({ sub: this.state.deleteUserSub }),
+      response => this.setState({ deleteUserSub: '' })
+    );
+  };
+
   render() {
     if (!this.props.firebaseUser.admin) {
       return null;
@@ -216,6 +227,24 @@ class Admin extends Component {
               </Grid>
             ))}
         </Grid>
+        <form noValidate autoComplete="off" onSubmit={this.handleDeleteUser}>
+          <TextField
+            id="delete-user-key"
+            label="User Key"
+            value={this.state.deleteUserSub}
+            onChange={event =>
+              this.setState({ deleteUserSub: event.target.value })
+            }
+          />
+          <Button
+            color="primary"
+            variant="contained"
+            disabled={this.state.actionPending}
+            onClick={this.handleDeleteUser}
+          >
+            Delete User
+          </Button>
+        </form>
         {this.state.users &&
           this.state.users.body.map((user, index) => {
             return (

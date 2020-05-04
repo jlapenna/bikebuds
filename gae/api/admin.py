@@ -28,6 +28,7 @@ from shared.config import config
 from shared.datastore.bot import Bot
 from shared.datastore.club import Club
 from shared.datastore.service import Service
+from shared.datastore.user import User
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 from shared.services.withings.client import create_client as withings_create_client
 
@@ -180,6 +181,25 @@ class GetUsersResource(Resource):
             )
 
         return users
+
+
+@api.route('/user/delete/<sub>')
+class DeleteUserResource(Resource):
+    @api.doc('delete_user')
+    @api.marshal_with(user_entity_model, skip_none=True)
+    def get(self, sub):
+        auth_util.verify_admin(flask.request)
+
+        key = ds_util.client.key('User', sub)
+        user = User.get(key)
+
+        user_data_query = ds_util.client.query(ancestor=key)
+        user_data_query.keys_only()
+        ds_util.client.delete_multi(
+            user_data.key for user_data in user_data_query.fetch()
+        )
+
+        return WrapEntity(user)
 
 
 @api.route('/sync/club/<club_id>')

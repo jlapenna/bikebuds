@@ -17,15 +17,6 @@ indexes:
 - kind: "SubscriptionEvent"
   ancestor: yes
   properties:
-  - name: "date"
-- kind: "ClientState"
-  ancestor: yes
-  properties:
-  - name: "modified"
-    direction: desc
-- kind: "Segment"
-  ancestor: yes
-  properties:
   - name: "id"
     direction: desc
 - kind: "Route"
@@ -38,6 +29,24 @@ indexes:
   properties:
   - name: "start_date"
     direction: desc
+- kind: "ClientState"
+  ancestor: yes
+  properties:
+  - name: "modified"
+    direction: desc
+- kind: "Segment"
+  ancestor: yes
+  properties:
+  - name: "date"
+- kind: "ClientState"
+  ancestor: yes
+  properties:
+  - name: "id"
+    direction: desc
+- kind: "SubscriptionEvent"
+  ancestor: yes
+  properties:
+  - name: "date"
 - kind: "Activity"
   ancestor: yes
   properties:
