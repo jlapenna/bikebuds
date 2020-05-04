@@ -104,9 +104,10 @@ def _queue_task(
 
     if config.is_dev:
         logging.debug(
-            'locally executing: %s', task['app_engine_http_request']['relative_uri']
+            'Executing task for dev: %s',
+            task['app_engine_http_request']['relative_uri'],
         )
-        return _create_task_locally(task, service, relative_uri, converted_payload)
+        return _post_task_for_dev(task, service, relative_uri, converted_payload)
     else:
         logging.debug(
             'Queueing task: %s', task['app_engine_http_request']['relative_uri']
@@ -114,14 +115,14 @@ def _queue_task(
         return _client.create_task(parent, task)
 
 
-def _create_task_locally(task, service, relative_uri, converted_payload):
+def _post_task_for_dev(task, service, relative_uri, converted_payload):
     if service == 'default':
         # Override when running locally.
         service == 'frontend'
     url = getattr(config, service + '_url') + relative_uri
     response = requests.post(url, data=converted_payload)
     logging.info(
-        'Queued task: %s response: %s',
+        'Executed task: %s response: %s',
         task['app_engine_http_request']['relative_uri'],
         response,
     )

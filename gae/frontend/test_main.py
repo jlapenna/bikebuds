@@ -46,8 +46,8 @@ class WithingsTest(unittest.TestCase):
         main.app.testing = True
         self.client = main.app.test_client()
 
-    @mock.patch('shared.task_util._create_task_locally')
-    def test_withings_event_valid(self, _create_task_locally_mock):
+    @mock.patch('shared.task_util._post_task_for_dev')
+    def test_withings_event_valid(self, _post_task_for_dev_mock):
         query_string = urlencode(
             {
                 'sub_secret': config.withings_creds['sub_secret'],
@@ -59,10 +59,10 @@ class WithingsTest(unittest.TestCase):
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
         self.assertEqual(r.status_code, responses.OK.code)
-        _create_task_locally_mock.assert_called_once()
+        _post_task_for_dev_mock.assert_called_once()
 
-    @mock.patch('shared.task_util._create_task_locally')
-    def test_withings_event_bad_service_key(self, _create_task_locally_mock):
+    @mock.patch('shared.task_util._post_task_for_dev')
+    def test_withings_event_bad_service_key(self, _post_task_for_dev_mock):
         query_string = urlencode(
             {
                 'sub_secret': config.withings_creds['sub_secret'],
@@ -74,7 +74,7 @@ class WithingsTest(unittest.TestCase):
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
         self.assertEqual(r.status_code, responses.OK_SUB_EVENT_FAILED.code)
-        _create_task_locally_mock.assert_not_called()
+        _post_task_for_dev_mock.assert_not_called()
 
 
 class StravaTest(unittest.TestCase):
@@ -94,26 +94,24 @@ class StravaTest(unittest.TestCase):
         }
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id')
-    @mock.patch('shared.task_util._create_task_locally')
-    def test_strava_event_valid(
-        self, _create_task_locally_mock, athlete_get_by_id_mock
-    ):
+    @mock.patch('shared.task_util._post_task_for_dev')
+    def test_strava_event_valid(self, _post_task_for_dev_mock, athlete_get_by_id_mock):
         mock_athlete = Entity(ds_util.client.key('Service', 'strava', 'Athlete'))
         athlete_get_by_id_mock.return_value = mock_athlete
 
         r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
-        _create_task_locally_mock.assert_called_once()
+        _post_task_for_dev_mock.assert_called_once()
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id', return_value=None)
-    @mock.patch('shared.task_util._create_task_locally')
+    @mock.patch('shared.task_util._post_task_for_dev')
     def test_strava_event_unknown_athlete(
-        self, _create_task_locally_mock, athlete_get_by_id_mock
+        self, _post_task_for_dev_mock, athlete_get_by_id_mock
     ):
         r = self.client.post('/services/strava/events', json=self._create_event())
         self.assertEqual(r.status_code, responses.OK.code)
 
-        _create_task_locally_mock.assert_not_called()
+        _post_task_for_dev_mock.assert_not_called()
 
 
 class SlackTest(unittest.TestCase):
@@ -146,8 +144,8 @@ class SlackTest(unittest.TestCase):
         self.assertEqual(resp.data.decode('utf-8'), challenge)
 
     @mock.patch('services.slack.slack.slack_events_adapter.server.verify_signature')
-    @mock.patch('shared.task_util._create_task_locally')
-    def test_slack_event(self, _create_task_locally, verify_signature_mock):
+    @mock.patch('shared.task_util._post_task_for_dev')
+    def test_slack_event(self, _post_task_for_dev, verify_signature_mock):
         """Verifies we handle events correctly.
 
         https://api.slack.com/events/link_shared
@@ -184,4 +182,4 @@ class SlackTest(unittest.TestCase):
         """
             ),
         )
-        _create_task_locally.assert_called_once()
+        _post_task_for_dev.assert_called_once()
