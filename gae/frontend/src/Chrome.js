@@ -42,7 +42,9 @@ class _EmbedChrome extends Component {
     });
 
   static propTypes = {
+    firebaseUser: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
+    profile: PropTypes.object,
   };
 
   render() {
