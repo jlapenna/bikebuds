@@ -55,6 +55,8 @@ class _AppState extends State<App> {
   MeasuresState _measuresState = MeasuresState(filter: "weight");
   FirebaseOptions firebaseOptions;
   FirebaseState firebaseState;
+
+  // Gotta hold onto this, so that it is not dereferenced and we stop listening.
   FirebaseMessaging firebaseMessaging = registerFirebaseMessaging();
 
   @override
@@ -185,7 +187,7 @@ class _SignedInAppState extends State<SignedInApp> {
 
     // Register FCM.
     if (!kIsWeb && bikebuds.isReady && _messagingListener == null) {
-      registerFirebaseMessagingClient(firebase, bikebuds);
+      _registerFirebaseMessagingClient(firebase);
     }
 
     // TODO: Check the profile here, look for signup_complete and block
@@ -193,19 +195,26 @@ class _SignedInAppState extends State<SignedInApp> {
     //User user = UserModel.of(context)?.bikebudsUser;
   }
 
-  void registerFirebaseMessagingClient(
-      FirebaseState firebase, BikebudsApiState bikebuds) async {
+  void _registerFirebaseMessagingClient(FirebaseState firebase) async {
     print('App.FirebaseMessaging: registerFirebaseMessagingClient');
-    _messagingListener = firebase.messaging.onTokenRefresh.listen((token) {
-      bikebuds.registerClient(token).then((ClientStateEntity response) {
-        print('App.FirebaseMessaging: bikebuds.registerClient: Complete');
-        Provider.of<BikebudsClientState>(context, listen: false)
-          ..client = response;
-      }).catchError((err, stack) {
-        print(
-            'App.FirebaseMessaging: bikebuds.registerClient: Failed: $err, $stack');
-      });
-    });
+    _messagingListener = firebase.messaging.onTokenRefresh
+        .listen(_onFirebaseMessagingTokenChanged);
+    firebase.messaging
+        .getToken()
+        .then(_onFirebaseMessagingTokenChanged)
+        .catchError((err, stack) =>
+            print('App.FirebaseMessaging: getToken: Failed: $err, $stack'));
+  }
+
+  void _onFirebaseMessagingTokenChanged(token) {
+    print('App.FirebaseMessaging: _onFirebaseMessagingTokenChanged');
+    var bikebuds = Provider.of<BikebudsApiState>(context, listen: false);
+    bikebuds.registerClient(token).then((ClientStateEntity response) {
+      print('App.FirebaseMessaging: bikebuds.registerClient: Complete');
+      Provider.of<BikebudsClientState>(context, listen: false)
+        ..client = response;
+    }).catchError((err, stack) => print(
+        'App.FirebaseMessaging: bikebuds.registerClient: Failed: $err, $stack'));
   }
 
   @override

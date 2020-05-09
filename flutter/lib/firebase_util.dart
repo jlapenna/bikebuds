@@ -53,7 +53,7 @@ class FirebaseState with ChangeNotifier {
 
   @override
   String toString() {
-    return 'FirebaseState($_app, $_appNext)#${shortHash(this)}';
+    return 'FirebaseState($_app, $_appNext, user=$userNext, userNext=$userNext)#${shortHash(this)}';
   }
 
   @override
@@ -78,19 +78,29 @@ class FirebaseState with ChangeNotifier {
     this._authNext = authNext;
     this.firestore = firestore;
 
-    if (_config.config['is_dev'] && _config.config.containsKey('fake_user')) {
-      this.user = FakeUserWrapper(displayName: "Fake User");
-      this.userNext = FakeUserWrapper(displayName: "Fake User");
+    // Notify because of all the things above.
+    notifyListeners();
+
+    if (_config.config['is_dev'] &&
+        (_config.config['fake_user'] != null &&
+            _config.config['fake_user'].isNotEmpty)) {
+      this.user = FakeUserWrapper(displayName: _config.config['fake_user']);
+      this.userNext = FakeUserWrapper(displayName: _config.config['fake_user']);
       this._authInitialized = true;
+
+      // Notify because auth has changed (as would happen when
+      // auth.onAuthStateChanged.listen callbacks occur.
+      notifyListeners();
     } else {
+      // Only after we're set up for firebase do we listen.
       _auth.currentUser().then((firebaseUser) {
-        // Only after we're set up for firebase do we listen.
         _sub = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
+      });
+      _authNext.currentUser().then((firebaseUser) {
         _subNext = _authNext.onAuthStateChanged.listen(_onAuthStateChangedNext);
       });
     }
 
-    notifyListeners();
     return this;
   }
 
@@ -103,9 +113,7 @@ class FirebaseState with ChangeNotifier {
   }
 
   _onAuthStateChanged(FirebaseUser firebaseUser) {
-    if (firebaseUser != null) {
-      this.user = FirebaseUserWrapper(firebaseUser);
-    }
+    this.user = FirebaseUserWrapper(firebaseUser);
 
     // We've processed at least one firebase auth event.
     this._authInitialized = true;
@@ -113,9 +121,7 @@ class FirebaseState with ChangeNotifier {
   }
 
   _onAuthStateChangedNext(FirebaseUser firebaseUser) {
-    if (firebaseUser != null) {
-      this.userNext = FirebaseUserWrapper(firebaseUser);
-    }
+    this.userNext = FirebaseUserWrapper(firebaseUser);
 
     // We've processed at least one firebase auth event.
     this._authInitializedNext = true;

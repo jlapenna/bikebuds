@@ -29,6 +29,6 @@ class FakeUserWrapper implements FirebaseUserWrapper {
 
   @override
   Future<String> getAccessToken({bool refresh = false}) {
-    return Future.value(null);
+    return Future.value("XYZ_TOKEN");
   }
 }

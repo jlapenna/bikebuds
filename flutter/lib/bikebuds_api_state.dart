@@ -34,23 +34,19 @@ class BikebudsApiState with ChangeNotifier {
     return 'BikebudsApiState($isReady)';
   }
 
-  _listenFirebaseState() async {
-    print('$this: _listenFirebaseState');
+  _onFirebaseStateChanged() async {
+    print('$this: _onFirebaseStateChanged: $_firebaseState');
     ApiKeyAuth apiKeyAuth = _api.apiClient.getAuthentication("api_key");
     apiKeyAuth.apiKey = _firebaseState.apiKey;
 
     OAuth oAuth = _api.apiClient.getAuthentication("firebase");
-    if (_config.config['is_dev'] && _config.config.containsKey('fake_user')) {
-      print('$this: _listenFirebaseState: Using Fake User for token');
-      oAuth.accessToken = 'XYZ_TOKEN';
-      _addedAuth = true;
-    } else if (_firebaseState.user != null) {
+    if (_firebaseState.user != null) {
       try {
         var firebaseUser = _firebaseState.user;
         oAuth.accessToken = await firebaseUser.getAccessToken();
         _addedAuth = true;
       } catch (err, stack) {
-        print("$this: _listenFirebaseState failed: $err: $stack");
+        print("$this: _onFirebaseStateChanged failed: $err: $stack");
       }
     }
     notifyListeners();
@@ -79,7 +75,7 @@ class BikebudsApiState with ChangeNotifier {
     }
     print('$this: firebaseState changed: $_firebaseState -> $value');
     _firebaseState = value;
-    _listenFirebaseState();
+    _onFirebaseStateChanged();
   }
 
   bool get isReady {

@@ -17,7 +17,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 class FirebaseUserWrapper {
   final FirebaseUser _firebaseUser;
 
-  FirebaseUserWrapper(this._firebaseUser) {
+  factory FirebaseUserWrapper(FirebaseUser firebaseUser) {
+    if (firebaseUser == null) {
+      return null;
+    }
+    return FirebaseUserWrapper._internal(firebaseUser);
+  }
+
+  FirebaseUserWrapper._internal(this._firebaseUser) {
     if (_firebaseUser is! FirebaseUser) throw new ArgumentError(_firebaseUser);
   }
 
