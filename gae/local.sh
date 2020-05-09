@@ -23,6 +23,7 @@ source tools/scripts/base.sh
 function main() {
   local repo_path="$(get_repo_path)";
 
+  deactivate 2>/dev/null || echo ""
   activate_virtualenv dev_appserver python2
   pip install grpcio
 
