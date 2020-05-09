@@ -69,15 +69,37 @@ class MainScreen extends Component {
   };
 
   render() {
-    const mainContent = (
-      <MainContent
-        match={this.props.match}
-        firebase={this.props.firebase}
+    const mainContent =
+      !this.props.embed &&
+      !!this.state.profile &&
+      !this.state.profile.signup_complete ? (
+        <div />
+      ) : (
+        <MainContent
+          match={this.props.match}
+          firebase={this.props.firebase}
+          firebaseUser={this.props.firebaseUser}
+          adminApi={this.state.adminApi}
+          bikebudsApi={this.state.bikebudsApi}
+          profile={this.state.profile}
+        />
+      );
+
+    const chrome = this.props.embed ? (
+      <EmbedChrome
         firebaseUser={this.props.firebaseUser}
-        adminApi={this.state.adminApi}
-        bikebudsApi={this.state.bikebudsApi}
+        history={this.props.history}
         profile={this.state.profile}
-      />
+      >
+        {mainContent}
+      </EmbedChrome>
+    ) : (
+      <Chrome
+        firebaseUser={this.props.firebaseUser}
+        profile={this.state.profile}
+      >
+        {mainContent}
+      </Chrome>
     );
 
     return (
@@ -101,21 +123,7 @@ class MainScreen extends Component {
             onMessage={this.handleFcmMessage}
           />
         )}
-        {this.props.embed ? (
-          <EmbedChrome
-            firebaseUser={this.props.firebaseUser}
-            history={this.props.history}
-            profile={this.state.profile}
-          >
-            {mainContent}
-          </EmbedChrome>
-        ) : (
-          <Chrome
-            firebaseUser={this.props.firebaseUser}
-            profile={this.state.profile}
-          >
-            {mainContent}
-          </Chrome>
+        {chrome}
         )}
       </div>
     );

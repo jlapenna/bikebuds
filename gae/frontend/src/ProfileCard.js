@@ -28,7 +28,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-import { config } from './config';
 import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
@@ -61,10 +60,6 @@ class ProfileCard extends Component {
       connectActionPending: false,
     };
   }
-
-  handleConnectServices = () => {
-    window.location.replace(config.frontend_url + '/signup');
-  };
 
   handleSignOut = () => {
     this.props.firebase.signOut().then(() => {

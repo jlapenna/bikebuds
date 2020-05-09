@@ -25,7 +25,6 @@ import CompareSegments from './CompareSegments';
 import Events from './Events';
 import Health from './Health';
 import Settings from './Settings';
-import Signup from './Signup';
 import SpinnerScreen from './SpinnerScreen';
 
 export default class MainContent extends React.Component {
@@ -112,11 +111,6 @@ export default class MainContent extends React.Component {
             )}
           />
         )}
-        <Route
-          path={`${this.props.match.path}signup`}
-          exact
-          render={props => <Signup />}
-        />
         <Route render={props => <Redirect to="/activities" />} />
       </Switch>
     );
