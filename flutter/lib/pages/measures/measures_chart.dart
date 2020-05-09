@@ -67,7 +67,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
   }
 
   handleMeasures(List<Measure> newMeasures) {
-    DateTime preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf('day');
+    DateTime preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf(Units.DAY);
     var earliestDate =
         _preferredNextDate(preferredNextDate, count: widget.intervalCount);
     List<Measure> measures = [];
@@ -242,17 +242,17 @@ class _MeasuresChartState extends State<MeasuresChart> {
       case Interval.DAY:
         Jiffy j = Jiffy(preferredNextDate)
           ..subtract(days: widget.intervalStep * count)
-          ..startOf('day');
+          ..startOf(Units.DAY);
         return j.utc();
       case Interval.WEEK:
         Jiffy j = Jiffy(preferredNextDate)
           ..subtract(weeks: widget.intervalStep * count)
-          ..startOf('day');
+          ..startOf(Units.DAY);
         return j.utc();
       case Interval.MONTH:
         Jiffy j = Jiffy(preferredNextDate)
           ..subtract(months: widget.intervalStep * count)
-          ..startOf('day');
+          ..startOf(Units.DAY);
         return j.utc();
     }
     return null;

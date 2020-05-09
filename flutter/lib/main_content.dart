@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:bikebuds/pages/pages.dart';
+import 'package:bikebuds/pages/pages.dart' as p;
 import 'package:bikebuds/widgets/mobile_embed.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 final mainContentGlobalKey = new GlobalKey();
 
 class MainContent extends StatelessWidget {
-  final List<Page> pages;
+  final List<p.Page> pages;
   final int selectedDrawerItem;
 
   const MainContent(Key key, this.pages, this.selectedDrawerItem)
@@ -28,7 +28,7 @@ class MainContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Page page = pages[selectedDrawerItem];
+    p.Page page = pages[selectedDrawerItem];
     return (!kIsWeb && page.target != null)
         ? MobileEmbed(page.target)
         : page.widgetBuilder();

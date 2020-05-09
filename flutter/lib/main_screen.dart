@@ -20,7 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'pages/pages.dart';
+import 'pages/pages.dart' as p;
 
 class MainScreen extends StatefulWidget {
   @override
@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     var userState = Provider.of<UserState>(context);
     var frontendUrl = Provider.of<Config>(context)?.config["devserver_url"];
-    var pages = createPages(frontendUrl);
+    var pages = p.createPages(frontendUrl);
     return Scaffold(
       appBar: AppBar(
         title: Text("Bikebuds"),
@@ -44,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Drawer buildDrawer(List<Page> pages, UserState userState) {
+  Drawer buildDrawer(List<p.Page> pages, UserState userState) {
     var name = userState.displayName;
     var email = userState.email;
     var photoUrl = userState.photoUrl;

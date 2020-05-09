@@ -49,6 +49,7 @@ class MeasuresState with ChangeNotifier {
 
   maybeNotifyListeners() {
     if (_bikebudsApiState != null &&
+        _userState != null &&
         _userState.units != null &&
         _storage != null) {
       notifyListeners();
@@ -57,6 +58,7 @@ class MeasuresState with ChangeNotifier {
 
   Future<SeriesEntity> refresh({bool force: false}) async {
     if (_bikebudsApiState == null ||
+        _userState == null ||
         _userState.units == null ||
         _storage == null) {
       print('MeasuresState: Not refreshing');
