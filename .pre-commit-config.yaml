@@ -30,12 +30,12 @@ repos:
       - id: black
         language_version: python3.7
   - repo: https://github.com/prettier/prettier
-    rev: 1.19.1
+    rev: 2.0.5
     hooks:
       - id: prettier
         exclude: index\.yaml|\.(js|jsx|ts|tsx)$
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v6.8.0
+    rev: v7.0.0
     hooks:
       - id: eslint
         entry: ./gae/frontend/node_modules/.bin/eslint --fix
@@ -53,12 +53,12 @@ repos:
           - eslint-plugin-jsx-a11y
           - prettier
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.9
+    rev: 3.8.1
     hooks:
       - id: flake8
         args: ['--extend-ignore=E203,E231']
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v3.0.1
     hooks:
       - id: check-yaml
       - id: detect-private-key
