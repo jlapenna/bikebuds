@@ -67,7 +67,7 @@ class AuthWrapper extends Component {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
         admin: true,
-        displayName: 'Fake User',
+        displayName: config.fake_user,
         photoUrl: '/logo-round.svg',
       };
       this.setState({
@@ -94,7 +94,7 @@ class AuthWrapper extends Component {
   }
 
   _onAuthStateChangedFn = (firebaseUserKey, firebaseTokenKey) => {
-    return firebaseUser => {
+    return (firebaseUser) => {
       // If we've unmounted before this callback executes, we don't want to
       // update state.
       if (this.unregisterAuthObserver === null) {
@@ -107,7 +107,7 @@ class AuthWrapper extends Component {
           firebaseUser
         );
       if (!!firebaseUser) {
-        firebaseUser.getIdTokenResult().then(idTokenResult => {
+        firebaseUser.getIdTokenResult().then((idTokenResult) => {
           LOG &&
             console.log(
               'AuthWrapper.onAuthStateChanged:',
@@ -155,11 +155,11 @@ class AuthWrapper extends Component {
       console.log('AuthWrapper.handleCustomTokenLogin:', !!this.customToken);
     this.props.firebase.auth
       .signInWithCustomToken(this.customToken)
-      .then(result => {
+      .then((result) => {
         LOG &&
           console.log('AuthWrapper.handleCustomTokenLogin: result:', result);
       })
-      .catch(error => {
+      .catch((error) => {
         console.warn('AuthWrapper.handleCustomTokenLogin: error:', error);
       });
   };
