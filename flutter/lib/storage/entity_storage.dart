@@ -29,24 +29,26 @@ class EntityStorage<E extends dynamic> extends ChangeNotifier {
 
   EntityStorage(this._db, this._store, this._fromJsonFn);
 
+  @override
+  String toString() {
+    return 'EntityStorage[${_store.name}]';
+  }
+
   Future<E> get(EntityKey key) async {
-    print('EntityStorage: Getting $key');
     var result = await _store.record(key.path).get(_db);
-    print('EntityStorage: ' +
-        'Got ${result == null ? null : result['key']} ' +
-        'from ${result == null ? null : result['putAt']}');
+    print('$this: get: $key ' +
+        'putAt ${result == null ? null : result['putAt']}');
     return _convertStoredMap(result);
   }
 
   Future<E> put(E value) async {
-    print('EntityStorage: Putting: ${value.key.path}');
     Map<String, dynamic> valueMap = {
       'key': json.encode(value.key),
       'properties': json.encode(value.properties),
       'putAt': DateTime.now().toUtc().toIso8601String(),
     };
     var resultMap = await _store.record(value.key.path).put(_db, valueMap);
-    print('EntityStorage: Put ${resultMap['key']} from ${resultMap['putAt']}');
+    print('$this: put: ${value.key} putAt ${resultMap['putAt']}');
     notifyListeners();
     return _convertStoredMap(resultMap);
   }

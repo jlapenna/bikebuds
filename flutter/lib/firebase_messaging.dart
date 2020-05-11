@@ -91,7 +91,7 @@ Future handleData(Map<String, dynamic> message) async {
       case 'weight':
         try {
           await Provider.of<MeasuresState>(currentContext, listen: false)
-              .refresh(force: true);
+              .refresh();
           print('FirebaseMessaging.handleData: Refreshed weight');
         } catch (err, stack) {
           print('FirebaseMessaging.handleData: Refresh failed: $err, $stack');

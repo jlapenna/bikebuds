@@ -72,9 +72,8 @@ class _AppState extends State<App> {
   Future<bool> _load() async {
     config = await loadConfig(context);
 
-    storage = Storage();
-    var storageResult = await storage.load();
-    print('App: _load: storage: $storageResult');
+    storage = await Storage.load();
+    print('App: _load: storage: $storage');
 
     firebaseOptions = await loadFirebaseOptions(context);
     firebaseState = FirebaseState(config, firebaseOptions);

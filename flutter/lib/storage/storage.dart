@@ -22,34 +22,29 @@ import 'package:sembast/sembast_io.dart';
 
 /* Storage that notifies every listener when any data changes. */
 class Storage {
-  Database _db;
-  EntityStorage<ActivityEntity> activityStore;
-  EntityStorage<SeriesEntity> seriesStore;
-  EntityStorage<UserEntity> userStore;
+  final Database _db;
+  final EntityStorage<ActivityEntity> activityStore;
+  final EntityStorage<SeriesEntity> seriesStore;
+  final EntityStorage<UserEntity> userStore;
 
-  Future _loader;
+  Storage(Database db)
+      : _db = db,
+        activityStore = EntityStorage(
+            db,
+            stringMapStoreFactory.store('activity'),
+            (v) => ActivityEntity.fromJson(v)),
+        seriesStore = EntityStorage(db, stringMapStoreFactory.store('series'),
+            (v) => SeriesEntity.fromJson(v)),
+        userStore = EntityStorage(db, stringMapStoreFactory.store('user'),
+            (v) => UserEntity.fromJson(v));
 
-  Future<Storage> load() {
-    if (_loader == null) {
-      _loader = _load();
-    }
-    return _loader;
+  close() async {
+    return _db.close();
   }
 
-  Future<Storage> _load() async {
-    print('Storage: loading');
-
+  static Future<Storage> load() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String dbPath = appDocDir.path + '/storage.db';
-
-    DatabaseFactory dbFactory = databaseFactoryIo;
-    _db = await dbFactory.openDatabase(dbPath);
-    activityStore = EntityStorage(_db, stringMapStoreFactory.store('activity'),
-        (v) => ActivityEntity.fromJson(v));
-    seriesStore = EntityStorage(_db, stringMapStoreFactory.store('series'),
-        (v) => SeriesEntity.fromJson(v));
-    userStore = EntityStorage(_db, stringMapStoreFactory.store('user'),
-        (v) => UserEntity.fromJson(v));
-    return this;
+    return Storage(await databaseFactoryIo.openDatabase(dbPath));
   }
 }

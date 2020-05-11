@@ -26,89 +26,94 @@ class MeasuresState with ChangeNotifier {
   Storage _storage;
   UserState _userState;
 
-  String _unit = 'METRIC';
-  SeriesEntity series;
-
   MeasuresState({@required filter}) : _filter = filter;
 
+  @override
+  toString() {
+    return 'MeasuresState(filter=$_filter, isReady=$isReady)';
+  }
+
   set bikebudsApiState(BikebudsApiState value) {
-    print('MeasuresState: Updated: $value');
     _bikebudsApiState = value;
-    maybeNotifyListeners();
+    _maybeNotifyListeners();
   }
 
   set storage(Storage value) {
     _storage = value;
-    maybeNotifyListeners();
+    _maybeNotifyListeners();
   }
 
   set userState(UserState value) {
     _userState = value;
-    maybeNotifyListeners();
+    _maybeNotifyListeners();
   }
 
-  maybeNotifyListeners() {
-    if (_bikebudsApiState != null &&
-        _userState != null &&
-        _userState.units != null &&
-        _storage != null) {
+  get isReady =>
+      (_bikebudsApiState != null && _userState != null && _storage != null);
+
+  _maybeNotifyListeners() {
+    if (isReady) {
       notifyListeners();
     }
   }
 
-  Future<SeriesEntity> refresh({bool force: false}) async {
-    if (_bikebudsApiState == null ||
-        _userState == null ||
-        _userState.units == null ||
-        _storage == null) {
-      print('MeasuresState: Not refreshing');
-      return Future.error(Exception('Failed to refresh, not ready.'));
+  Future<SeriesEntity> get() async {
+    if (!isReady) {
+      throw Exception('Failed to load, not ready.');
     }
-    return await _getOrFetchSeries(force);
+    return await _get();
   }
 
-  Future<SeriesEntity> _getOrFetchSeries(bool force) async {
-    print('MeasuresState: _getOrFetchSeries');
-    var series = force ? null : await _storage.seriesStore.get(defaultKey);
+  Future<SeriesEntity> _get() async {
+    print('$this: _get');
+    var series = await _storage.seriesStore.get(defaultKey);
     if (series == null) {
-      series = await _fetchStoreSeries();
+      return null;
     }
-    this.series = _convert(series);
-    maybeNotifyListeners();
-    return series;
+    return _convert(series);
+  }
+
+  Future<SeriesEntity> refresh() async {
+    if (!isReady) {
+      throw Exception('Failed to refresh, not ready.');
+    }
+    return await _refresh();
+  }
+
+  Future<SeriesEntity> _refresh() async {
+    print('$this: _refresh');
+    var series = await _fetchStoreSeries();
+    if (series == null) {
+      return null;
+    }
+    return _convert(series);
   }
 
   Future<SeriesEntity> _fetchStoreSeries() async {
-    print('MeasuresState: _fetchStoreSeries');
+    print('$this: _fetchStoreSeries');
     return await _bikebudsApiState
         .getSeries(filter: _filter)
         .then((SeriesEntity seriesEntity) async {
-      print('MeasuresState: Fetched: ${seriesEntity.key}');
-      _prepareForStorage(seriesEntity);
+      print(
+          '$this: Fetched: ${seriesEntity.key} length: ${seriesEntity.properties?.measures?.length}');
+      // Overwrite the entity key.
+      seriesEntity.key = EntityKey()..path = defaultKey.path;
       await this._storage.seriesStore.put(seriesEntity);
-      notifyListeners();
+      _maybeNotifyListeners();
       return seriesEntity;
     }).catchError((err) {
-      print('MeasuresState: Failed to Fetch: $err');
-      notifyListeners();
+      print('$this: Failed to Fetch: $err');
+      _maybeNotifyListeners();
       return null;
     });
   }
 
-  _prepareForStorage(SeriesEntity series) {
-    // Overwrite the entity key.
-    series.key = EntityKey()..path = defaultKey.path;
-  }
-
-  _convert(SeriesEntity series) {
+  SeriesEntity _convert(SeriesEntity series) {
     // Rewrite our data into the user's preferred units.
-    var properties = series.properties;
-    if (_unit != _userState.units) {
-      var conversion = _userState.units == 'METRIC' ? 0.453592 : 2.20462;
-      for (Measure m in properties.measures) {
-        m.weight *= conversion;
-      }
-      _unit = _userState.units;
+    var conversion = _userState.units == 'METRIC' ? 0.453592 : 2.20462;
+    for (Measure m in series.properties.measures) {
+      m.weight *= conversion;
     }
+    return series;
   }
 }

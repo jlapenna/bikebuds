@@ -18,6 +18,7 @@ import 'package:bikebuds/app.dart';
 import 'package:bikebuds/pages/measures/measures_state.dart';
 import 'package:bikebuds_api/api.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
@@ -49,7 +50,6 @@ class MeasuresChart extends StatefulWidget {
 }
 
 class _MeasuresChartState extends State<MeasuresChart> {
-  SeriesEntity series;
   List<Measure> measures = [];
   bool showFatLine;
 
@@ -57,16 +57,27 @@ class _MeasuresChartState extends State<MeasuresChart> {
   num _selectedWeight;
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', widget.title));
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     var measuresState = Provider.of<MeasuresState>(context);
-    if (measuresState.series != series) {
-      series = measuresState.series;
-      handleMeasures(measuresState.series?.properties?.measures ?? []);
+    if (measuresState.isReady) {
+      print('$this: didDependenciesChange: $measuresState');
+      measuresState
+          .get()
+          .then((entitySeries) =>
+              handleMeasures(entitySeries?.properties?.measures ?? []))
+          .catchError((err) => print('$this: get Failed: $err'));
     }
   }
 
   handleMeasures(List<Measure> newMeasures) {
+    print('$this: handleMeasures: ${newMeasures.length}');
     DateTime preferredNextDate = Jiffy(DateTime.now().toUtc()).endOf(Units.DAY);
     var earliestDate =
         _preferredNextDate(preferredNextDate, count: widget.intervalCount);
@@ -100,6 +111,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
       this.measures = measures;
       this.showFatLine = showFatLine;
     });
+    print('$this: handleMeasures: done: ${this.measures?.length}');
   }
 
   _onSelectionChanged(charts.SelectionModel model) {
@@ -117,7 +129,7 @@ class _MeasuresChartState extends State<MeasuresChart> {
       date = selectedDatum.first.datum.date;
       weight = selectedDatum.first.datum.weight;
       selectedDatum.forEach((charts.SeriesDatum<DateTime> datumPair) {
-//        print('XXX: ${datumPair.series}');
+//        print('${datumPair.series}');
 //        measures[datumPair.series.displayName] = datumPair.datum.sales;
       });
     }
@@ -131,7 +143,8 @@ class _MeasuresChartState extends State<MeasuresChart> {
 
   @override
   Widget build(BuildContext context) {
-    if (measures.length == 0 || measures == null) {
+    print('$this: build: ${measures.length}');
+    if (measures.length == 0) {
       return Container();
     }
     print('$this: Laying out chart with ${measures.length} measures');

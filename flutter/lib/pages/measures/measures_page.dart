@@ -23,19 +23,20 @@ class MeasuresPage extends StatefulWidget {
 }
 
 class _MeasuresPageState extends State<MeasuresPage> {
-  bool _fetched = false;
+  Future _refresher;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     print('$this: didChangeDependencies');
-    if (!_fetched) {
-      _fetched = true;
-      print('$this: didChangeDependencies: refresh');
-      Provider.of<MeasuresState>(context).refresh().catchError(((err) {
-        print('$this: didChangeDependencies: refresh failed: $err');
-        _fetched = false;
-      }));
+    var measureState = Provider.of<MeasuresState>(context);
+    if (measureState.isReady && _refresher == null) {
+      _refresher = measureState
+          .refresh()
+          .then((seriesEntity) => print(
+              '$this: didChangeDependencies: refreshed: ${seriesEntity?.properties?.measures?.length}'))
+          .catchError((err) =>
+              print('$this: didChangeDependencies: refresh failed: $err'));
     }
   }
 
