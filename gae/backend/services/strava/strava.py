@@ -18,6 +18,7 @@ from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
 from shared.datastore.route import Route
 from shared.datastore.segment import Segment
+from shared.datastore.segment_effort import SegmentEffort
 
 from shared.services.strava.client import ClientWrapper
 
@@ -52,6 +53,13 @@ class Worker(object):
                 detailed_activity, detailed_athlete=athlete, parent=self.service.key
             )
             ds_util.client.put(activity_entity)
+
+            # But also add all the user's best efforts.
+            for segment_effort in detailed_activity.segment_efforts:
+                segment_effort_entity = SegmentEffort.to_entity(
+                    segment_effort, parent=self.service.key
+                )
+                ds_util.client.put(segment_effort_entity)
 
     def sync_routes(self):
         self.client.ensure_access()

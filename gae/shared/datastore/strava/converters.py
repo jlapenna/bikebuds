@@ -122,7 +122,7 @@ class _ActivityConverter(object):
 
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
-    @classmethod
+    @classmethod  # noqa: C901
     def to_entity(cls, activity, parent=None, detailed_athlete=None):
         properties_dict = activity.to_dict()
         properties_dict['id'] = activity.id
@@ -137,18 +137,17 @@ class _ActivityConverter(object):
                 activity.athlete, parent=parent
             )
 
-        # Some values are always returned and always transformed.
-        properties_dict.update(
-            dict(
-                distance=activity.distance.num,
-                moving_time=activity.moving_time.seconds,
-                elapsed_time=activity.elapsed_time.seconds,
-                total_elevation_gain=activity.total_elevation_gain.num,
-                timezone=str(activity.timezone),
-            )
-        )
+        if activity.distance is not None:
+            properties_dict['distance'] = activity.distance.num
+        if activity.moving_time is not None:
+            properties_dict['moving_time'] = activity.moving_time.seconds
+        if activity.elapsed_time is not None:
+            properties_dict['elapsed_time'] = activity.elapsed_time.seconds
+        if activity.total_elevation_gain is not None:
+            properties_dict['total_elevation_gain'] = activity.total_elevation_gain.num
+        if activity.timezone is not None:
+            properties_dict['timezone'] = str(activity.timezone)
 
-        # Some values are optional but need to be transformed.
         if activity.start_date is not None:
             properties_dict['start_date'] = activity.start_date.astimezone(
                 pytz.UTC
@@ -193,10 +192,18 @@ class _ActivityConverter(object):
         # ('type', 'Ride')
 
         hash_string = hash_name(
-            "{0:.0f}".format(activity.moving_time.seconds),
-            "{0:.0f}".format(activity.elapsed_time.seconds),
-            "{0:.0f}".format(activity.distance.num),
-            "{0:.0f}".format(activity.total_elevation_gain.num),
+            "{0:.0f}".format(
+                activity.moving_time.seconds if activity.moving_time else 0
+            ),
+            "{0:.0f}".format(
+                activity.elapsed_time.seconds if activity.elapsed_time else 0
+            ),
+            "{0:.0f}".format(activity.distance.num if activity.distance else 0),
+            "{0:.0f}".format(
+                activity.total_elevation_gain.num
+                if activity.total_elevation_gain
+                else 0
+            ),
         )
         properties_dict['activity_hash'] = hash_string
 
@@ -490,17 +497,14 @@ class _SegmentConverter(object):
         properties_dict = segment.to_dict()
         properties_dict['id'] = segment.id
 
-        # Some values are always returned and always transformed.
-        properties_dict.update(
-            dict(
-                distance=segment.distance.num,
-                elevation_high=segment.elevation_high.num,
-                elevation_low=segment.elevation_low.num,
-                total_elevation_gain=segment.total_elevation_gain.num,
-            )
-        )
-
-        # Some values are optional but need to be transformed.
+        if segment.distance is not None:
+            properties_dict['distance'] = segment.distance.num
+        if segment.elevation_high is not None:
+            properties_dict['elevation_high'] = segment.elevation_high.num
+        if segment.elevation_low is not None:
+            properties_dict['elevation_low'] = segment.elevation_low.num
+        if segment.total_elevation_gain is not None:
+            properties_dict['total_elevation_gain'] = segment.total_elevation_gain.num
 
         if segment.start_latlng is not None:
             properties_dict['start_latlng'] = GeoPoint(
@@ -545,6 +549,123 @@ class _SegmentConverter(object):
         return entity
 
 
+class _SegmentEffortConverter(object):
+    __ALL_FIELDS = SortedSet(
+        [
+            'id',
+            'elapsed_time',
+            'start_date',
+            'start_date_local',
+            'distance',
+            # 'is_kom',
+            'name',
+            'activity',
+            'athlete',
+            'moving_time',
+            'start_index',
+            'end_index',
+            'average_cadence',
+            'average_watts',
+            'device_watts',
+            'average_heartrate',
+            'max_heartrate',
+            'segment',
+            'kom_rank',
+            'pr_rank',
+            'hidden',
+        ]
+    )
+    __INCLUDE_IN_INDEXES = SortedSet(['id', 'segment_id', 'kom_rank'])
+    __STORED_FIELDS = SortedSet(__ALL_FIELDS)
+    EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
+
+    @classmethod  # noqa: C901
+    def to_entity(cls, segment_effort, parent=None):
+        properties_dict = segment_effort.to_dict()
+        properties_dict['id'] = segment_effort.id
+        properties_dict['segment_id'] = segment_effort.segment.id
+
+        entity = Entity(
+            ds_util.client.key('SegmentEffort', int(segment_effort.id), parent=parent),
+            exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+        )
+        if segment_effort.id is not None:
+            properties_dict['id'] = segment_effort.id
+
+        if segment_effort.elapsed_time is not None:
+            properties_dict['elapsed_time'] = segment_effort.elapsed_time.seconds
+
+        if segment_effort.start_date is not None:
+            properties_dict['start_date'] = segment_effort.start_date.astimezone(
+                pytz.UTC
+            ).replace(tzinfo=None)
+
+        if segment_effort.start_date_local is not None:
+            properties_dict[
+                'start_date_local'
+            ] = segment_effort.start_date_local.replace(tzinfo=None)
+
+        if segment_effort.distance is not None:
+            properties_dict['distance'] = segment_effort.distance.num
+
+        # if segment_effort.is_kom is not None:
+        #     properties_dict['is_kom'] = segment_effort.is_kom
+
+        if segment_effort.name is not None:
+            properties_dict['name'] = segment_effort.name
+
+        if segment_effort.activity is not None:
+            properties_dict['activity'] = _ActivityConverter.to_entity(
+                segment_effort.activity
+            )
+
+        if segment_effort.athlete is not None:
+            properties_dict['athlete'] = _AthleteConverter.to_entity(
+                segment_effort.athlete
+            )
+
+        if segment_effort.moving_time is not None:
+            properties_dict['moving_time'] = segment_effort.moving_time.seconds
+
+        if segment_effort.start_index is not None:
+            properties_dict['start_index'] = segment_effort.start_index
+
+        if segment_effort.end_index is not None:
+            properties_dict['end_index'] = segment_effort.end_index
+
+        if segment_effort.average_cadence is not None:
+            properties_dict['average_cadence'] = segment_effort.average_cadence
+
+        if segment_effort.average_watts is not None:
+            properties_dict['average_watts'] = segment_effort.average_watts
+
+        if segment_effort.device_watts is not None:
+            properties_dict['device_watts'] = segment_effort.device_watts
+
+        if segment_effort.average_heartrate is not None:
+            properties_dict['average_heartrate'] = segment_effort.average_heartrate
+
+        if segment_effort.max_heartrate is not None:
+            properties_dict['max_heartrate'] = segment_effort.max_heartrate
+
+        if segment_effort.segment is not None:
+            properties_dict['segment'] = _SegmentConverter.to_entity(
+                segment_effort.segment
+            )
+
+        if segment_effort.kom_rank is not None:
+            properties_dict['kom_rank'] = segment_effort.kom_rank
+
+        if segment_effort.pr_rank is not None:
+            properties_dict['pr_rank'] = segment_effort.pr_rank
+
+        if segment_effort.hidden is not None:
+            properties_dict['hidden'] = segment_effort.hidden
+
+        entity.update(properties_dict)
+        return entity
+
+
 class StravaConverters(object):
     Activity = _ActivityConverter
     Athlete = _AthleteConverter
@@ -552,3 +673,4 @@ class StravaConverters(object):
     PolylineMap = _PolylineMapConverter
     Route = _RouteConverter
     Segment = _SegmentConverter
+    SegmentEffort = _SegmentEffortConverter

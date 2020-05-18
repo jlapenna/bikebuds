@@ -412,6 +412,34 @@ segment_model = api.model(
 )
 segment_entity_model = EntityModel(segment_model)
 
+segment_effort_model = api.model(
+    'SegmentEffort',
+    {
+        'id': fields.Integer,
+        'elapsed_time': fields.Integer,
+        'start_date': fields.DateTime,
+        'start_date_local': fields.DateTime,
+        'distance': fields.Float,
+        # 'is_kom': fields.Boolean,
+        'name': fields.String,
+        # 'activity': fields.Nested(meta_activity_model, skip_none=True),
+        # 'athlete': fields.Nested(meta_athlete_model, skip_none=True),
+        'moving_time': fields.Integer,
+        'start_index': fields.Integer,
+        'end_index': fields.Integer,
+        'average_cadence': fields.Float,
+        'average_watts': fields.Float,
+        'device_watts': fields.Boolean,
+        'average_heartrate': fields.Float,
+        'max_heartrate': fields.Float,
+        # 'segment': fields.Nested(summary_segment_model, skip_none=True),
+        'kom_rank': fields.Integer,
+        'pr_rank': fields.Integer,
+        'hidden': fields.Boolean,
+    },
+)
+
+
 sync_model = api.model('Sync', {'force': fields.Boolean},)
 
 connect_garmin_model = api.model(
