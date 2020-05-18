@@ -31,12 +31,16 @@ class WithingsTest(unittest.TestCase):
 
     @mock.patch('shared.task_util.process_weight_trend')
     @mock.patch('shared.services.withings.client.create_client')
+    @mock.patch('shared.ds_util.client.delete_multi')
+    @mock.patch('shared.ds_util.client.query')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_no_duplicate(
         self,
         ds_util_client_get_mock,
         ds_util_client_put_mock,
+        ds_util_client_query_mock,
+        ds_util_client_delete_multi_mock,
         withings_create_client_mock,
         process_weight_trend_mock,
     ):
@@ -69,12 +73,16 @@ class WithingsTest(unittest.TestCase):
 
     @mock.patch('shared.task_util.process_weight_trend')
     @mock.patch('shared.services.withings.client.create_client')
+    @mock.patch('shared.ds_util.client.delete_multi')
+    @mock.patch('shared.ds_util.client.query')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_discard_duplicate(
         self,
         ds_util_client_get_mock,
         ds_util_client_put_mock,
+        ds_util_client_query_mock,
+        ds_util_client_delete_multi_mock,
         withings_create_client_mock,
         process_weight_trend_mock,
     ):
