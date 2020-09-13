@@ -34,8 +34,6 @@ class FirebaseUserWrapper {
   get photoUrl => _firebaseUser?.photoUrl;
 
   Future<String> getAccessToken({bool refresh: false}) {
-    return _firebaseUser
-        .getIdToken(refresh: refresh)
-        .then((IdTokenResult idToken) => idToken.token);
+    return _firebaseUser.getIdToken();
   }
 }

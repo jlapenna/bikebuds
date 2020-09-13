@@ -92,13 +92,8 @@ class FirebaseState with ChangeNotifier {
       // auth.onAuthStateChanged.listen callbacks occur.
       notifyListeners();
     } else {
-      // Only after we're set up for firebase do we listen.
-      _auth.currentUser().then((firebaseUser) {
-        _sub = _auth.onAuthStateChanged.listen(_onAuthStateChanged);
-      });
-      _authNext.currentUser().then((firebaseUser) {
-        _subNext = _authNext.onAuthStateChanged.listen(_onAuthStateChangedNext);
-      });
+      _sub = _auth.authStateChanges().listen(_onAuthStateChanged);
+      _subNext = _authNext.authStateChanges().listen(_onAuthStateChangedNext);
     }
 
     return this;
@@ -161,7 +156,7 @@ FirebaseOptions _toFirebaseOptions(dynamic config) {
       trackingID: null, // Analytics Tracking ID
       gcmSenderID: config['project_info']['project_number'],
       projectID: config['project_info']['project_id'],
-      androidClientID: config['client'][0]['oauth_client'][0]['client_id'],
+      androidClientId: config['client'][0]['oauth_client'][0]['client_id'],
       databaseURL: config['project_info']['firebase_url'],
       deepLinkURLScheme: null, // Durable Deep Link service
       storageBucket: config['project_info']['storage_bucket']);
