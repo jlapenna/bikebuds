@@ -55,12 +55,13 @@ class _EventPageState extends State<EventPage> {
 
     titleFocusNode = FocusNode();
     titleFocusNode.addListener(titleFocusListener);
-    titleController = new TextEditingController(text: widget.event['title']);
+    titleController =
+        new TextEditingController(text: widget.event.data()['title']);
 
     descriptionFocusNode = FocusNode();
     descriptionFocusNode.addListener(descriptionFocusListener);
     descriptionController =
-        new TextEditingController(text: widget.event['description']);
+        new TextEditingController(text: widget.event.data()['description']);
 
     eventStream = widget.event.reference.snapshots();
     eventStreamSubscription = eventStream.listen(eventStreamListener);
@@ -175,7 +176,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Widget buildEvent(AsyncSnapshot<DocumentSnapshot> snapshot) {
-    DateTime startDate = widget.event['start_date']?.toDate();
+    DateTime startDate = widget.event.data()['start_date']?.toDate();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

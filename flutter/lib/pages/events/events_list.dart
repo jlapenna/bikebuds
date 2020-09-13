@@ -55,11 +55,11 @@ class _EventsListState extends State<EventsList> {
   }
 
   Widget buildItem(DocumentSnapshot event) {
-    var startDate = event['start_date'] == null
+    var startDate = event.data()['start_date'] == null
         ? ""
-        : dateTimeFormat.format(event['start_date'].toDate());
+        : dateTimeFormat.format(event.data()['start_date'].toDate());
     return ListTile(
-      title: Text(event['title']),
+      title: Text(event.data()['title']),
       subtitle: Text(startDate),
       onTap: () {
         Navigator.push(
