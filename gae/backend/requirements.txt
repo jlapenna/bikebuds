@@ -1,40 +1,40 @@
 # main.py
 Flask==1.1.2
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 Werkzeug==1.0.1 # https://github.com/python-restx/flask-restx/issues/34
 flask-restx==0.2.0
 
-requests==2.23.0
+requests==2.24.0
 requests-toolbelt==0.9.1
 curlify==2.2.1
 
 # auth_util.py
-firebase-admin==4.2.0
-google-auth==1.14.2
-google-auth-httplib2==0.0.3
+firebase-admin==4.4.0
+google-auth==1.22.1
+google-auth-httplib2==0.0.4
 google-auth-oauthlib==0.4.1
 
 # ds_helper.py
-google-cloud-datastore==1.12.0
+google-cloud-datastore==1.15.3
 
 # /services/
 fitbit==0.3.1
 stravalib==0.10.2
-withings-api==2.1.6
+withings-api==2.1.8
 measurement==3.2.0
 
 # task_util.py
-google-cloud-tasks==1.5.0
+google-cloud-tasks==2.0.0
 
 # For natural language dates and such
 Babel==2.8.0
 
 # Utility
-sortedcontainers==2.1.0
+sortedcontainers==2.2.2
 
 # Stackdriver
-google-cloud-profiler==1.0.9
-google-python-cloud-debugger==2.14
+google-cloud-profiler==2.0.4
+google-python-cloud-debugger==2.15
 
 # Slack
 slackclient
