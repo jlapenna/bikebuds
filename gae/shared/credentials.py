@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 
 from firebase_admin.credentials import Certificate
 from google.oauth2.service_account import Credentials
@@ -21,6 +22,8 @@ from shared.config import config
 
 if os.getenv('GAE_ENV', '').startswith('standard'):
     # Production
+    credentials = None
+elif 'unittest' in sys.modules.keys():
     credentials = None
 else:
     # Local

@@ -112,7 +112,7 @@ def _queue_task(
         logging.debug(
             'Queueing task: %s', task['app_engine_http_request']['relative_uri']
         )
-        return _client.create_task(parent, task)
+        return _client.create_task(request={'parent': parent, 'task': task})
 
 
 def _post_task_for_dev(task, service, relative_uri, converted_payload):
