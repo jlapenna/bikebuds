@@ -100,7 +100,7 @@ class GarminServiceCard extends Component {
     }
   }
 
-  handleConnect = event => {
+  handleConnect = (event) => {
     this.setState({ actionPending: true });
     if (
       this.state.service.properties.credentials !== undefined &&
@@ -110,7 +110,7 @@ class GarminServiceCard extends Component {
         this.props.bikebudsApi.disconnect({
           name: this.props.serviceName,
         }),
-        response => {
+        (response) => {
           this.handleService(response);
           this.setState({ actionPending: false });
         },
@@ -124,7 +124,7 @@ class GarminServiceCard extends Component {
             password: this.state.password,
           },
         }),
-        response => {
+        (response) => {
           this.handleService(response);
           this.setState({ actionPending: false });
         },
@@ -133,7 +133,7 @@ class GarminServiceCard extends Component {
     }
   };
 
-  handleService = response => {
+  handleService = (response) => {
     response.body.properties.sync_date =
       response.body.properties.sync_successful &&
       !!response.body.properties.sync_date
@@ -157,7 +157,7 @@ class GarminServiceCard extends Component {
         name: this.props.serviceName,
         payload: {},
       }),
-      response => {
+      (response) => {
         this.handleService(response);
         this.setState({ actionPending: false });
       },
@@ -165,7 +165,7 @@ class GarminServiceCard extends Component {
     );
   };
 
-  handleSyncSwitchChange = event => {
+  handleSyncSwitchChange = (event) => {
     if (!this.state.service) {
       return;
     }
@@ -206,29 +206,31 @@ class GarminServiceCard extends Component {
               <i>&#8203;</i>
             )}
           </Grid>
-          {this.state.service === undefined ||
-            (!this.state.service.properties.credentials && (
-              <form noValidate autoComplete="off">
-                <TextField
-                  id="username"
-                  label="Username"
-                  value={this.state.username}
-                  onChange={event =>
-                    this.setState({ username: event.target.value })
-                  }
-                />
-                <br />
-                <TextField
-                  id="password"
-                  label="Password"
-                  type="password"
-                  value={this.state.password}
-                  onChange={event =>
-                    this.setState({ password: event.target.value })
-                  }
-                />
-              </form>
-            ))}
+          <React.Fragment>
+            {this.state.service === undefined ||
+              (!this.state.service.properties.credentials && (
+                <form noValidate autoComplete="off">
+                  <TextField
+                    id="username"
+                    label="Username"
+                    value={this.state.username}
+                    onChange={(event) =>
+                      this.setState({ username: event.target.value })
+                    }
+                  />
+                  <br />
+                  <TextField
+                    id="password"
+                    label="Password"
+                    type="password"
+                    value={this.state.password}
+                    onChange={(event) =>
+                      this.setState({ password: event.target.value })
+                    }
+                  />
+                </form>
+              ))}
+          </React.Fragment>
           <Grid className={this.props.classes.cardContentItem} item>
             <FormControlLabel
               control={
