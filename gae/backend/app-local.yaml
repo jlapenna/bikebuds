@@ -23,4 +23,4 @@ handlers:
 
 env_variables:
   # Firebase
-  FIREBASE_PROJECT_ID: 'bikebuds-app'
+  FIREBASE_PROJECT_ID: 'bikebuds-test'

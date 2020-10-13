@@ -47,6 +47,8 @@ function main() {
       fi
     fi
 
+    export GOOGLE_APPLICATION_CREDENTIALS=environments/env/service_keys/appengine.json
+
     python -m unittest
     result=$?;
     echo '================================================================================'

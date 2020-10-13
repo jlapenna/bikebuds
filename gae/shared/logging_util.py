@@ -28,15 +28,15 @@ LOG_QUERY = False
 LOG_RESPONSES = False
 
 LOGS_TO_SILENCE = [
-    'urllib3.connectionpool',
-    'oauth2client.contrib.multistore_file',
-    'requests_oauthlib.oauth2_session',
+    # 'urllib3.connectionpool',
+    # 'oauth2client.contrib.multistore_file',
+    # 'requests_oauthlib.oauth2_session',
     'stravalib.model.Activity',
     'stravalib.model.Athlete',
     'stravalib.model.Club',
     'stravalib.attributes.EntityCollection',
-    'google.auth.transport.requests',
-    'google_auth_httplib2',
+    # 'google.auth.transport.requests',
+    # 'google_auth_httplib2',
     # 'garminconnect',
 ]
 

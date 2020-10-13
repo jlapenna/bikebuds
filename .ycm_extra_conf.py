@@ -16,4 +16,4 @@ from os.path import expanduser
 
 
 def Settings(**kwargs):
-    return {'interpreter_path': expanduser("./virtualenv/gae3/bin/python")}
+    return {'interpreter_path': expanduser("./virtualenv/gae/bin/python")}

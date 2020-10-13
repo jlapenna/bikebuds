@@ -22,7 +22,8 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   echo "Installing the correct packages with apt"
-  sudo apt install -y python3 python3-dev python3-pip python3-virtualenv virtualenv
+  sudo apt install -y python3 python3-dev python3-pip python3-virtualenv python3-venv
+  sudo apt install -y virtualenv
   sudo apt install -y gradle
   sudo apt install -y google-cloud-sdk-app-engine-python \
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator

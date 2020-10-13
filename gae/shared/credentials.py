@@ -13,23 +13,13 @@
 # limitations under the License.
 
 import os
-import sys
 
 from firebase_admin.credentials import Certificate
-from google.oauth2.service_account import Credentials
 
 from shared.config import config
 
-if os.getenv('GAE_ENV', '').startswith('standard'):
-    # Production
-    credentials = None
-elif 'unittest' in sys.modules.keys():
-    credentials = None
-else:
-    # Local
-    credentials = Credentials.from_service_account_file(
-        os.path.join(config.base_path, 'service_keys/python-client-testing.json')
-    )
+if not os.getenv('GAE_ENV', '').startswith('standard'):
+    # Local - Not yet supported by python cloud apis.
     if getattr(config, 'datastore_emulator_host', None):
         os.environ['DATASTORE_EMULATOR_HOST'] = config.datastore_emulator_host
 

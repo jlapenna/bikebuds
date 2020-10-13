@@ -15,8 +15,7 @@
 from google.cloud.datastore import Client
 
 from shared.config import config
-from shared.credentials import credentials
 
 
 # Datastore Client
-client = Client(project=config.project_id, credentials=credentials)
+client = Client(project=config.project_id)
