@@ -28,12 +28,11 @@ from google.protobuf.timestamp_pb2 import Timestamp
 
 from shared import ds_util
 from shared.config import config
-from shared.credentials import credentials
 from shared.datastore.service import Service
 
 
 # Create a client.
-_client = tasks_v2.CloudTasksClient(credentials=credentials)
+_client = tasks_v2.CloudTasksClient()
 
 _default_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'default'

@@ -24,7 +24,7 @@ function main() {
   local repo_path="$(get_repo_path)";
 
   deactivate 2>/dev/null || echo ""
-  activate_virtualenv dev_appserver python2
+  activate_virtualenv dev_appserver python3
   pip install grpcio
 
   load_config;
@@ -35,15 +35,18 @@ function main() {
   # Ensure all client libs point to our local datastore.
   # Clients need this to know where to connect, but when specififed,
   # dev_appserver won't launch its own emulator...
-  # export DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}";
-  # Instead we're setting this within ds_util.py
 
-  # The rest are okay as is.
   export DATASTORE_PROJECT_ID="${CONFIG_project_id}";
   export DATASTORE_DATASET="${CONFIG_project_id}";
-  export DATASTORE_EMULATOR_HOST_PATH=${CONFIG_datastore_emulator_host}/datastore
-  export DATASTORE_HOST=${CONFIG_datastore_emulator_host}
+  export DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}"
+  export DATASTORE_EMULATOR_HOST_PATH="${CONFIG_datastore_emulator_host}/datastore"
+  export DATASTORE_HOST="${CONFIG_datastore_emulator_host}"
   export DATASTORE_PORT="$(echo ${CONFIG_datastore_emulator_host} | cut -d':' -f2)"
+  #export GOOGLE_APPLICATION_CREDENTIALS="environments/env/service_keys/python-client-testing.json"
+
+  #gcloud beta emulators datastore start \
+  #  --host-port="${CONFIG_datastore_emulator_host}" \
+  #  ;
 
   # https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app
   # Suggests not using dev_appserver.py -- it remains to be seen how to do task
@@ -65,6 +68,8 @@ function main() {
     gae/api/app.yaml \
     gae/backend/app-local.yaml \
     ;
+    #--appidentity_email_address="" \
+    #--appidentity_private_key_path="" \
     # --dev_appserver_log_level=debug \
 
   deactivate
