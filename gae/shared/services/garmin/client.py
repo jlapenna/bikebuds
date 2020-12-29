@@ -58,7 +58,7 @@ def create(service):
     if not Service.has_credentials(service, required_key='password'):
         raise Exception('Cannot create Garmin client without creds: %s' % (service,))
     creds = service.get('credentials', {})
-    session_state = creds.get('session_state')
+    session_state = creds.get('session_state', {})
 
     def refresh_callback(session_state):
         logging.debug('Garmin creds refresh for: %s', service.key)
@@ -67,8 +67,11 @@ def create(service):
     garmin = Garmin(
         creds['username'], creds['password'], refresh_callback=refresh_callback
     )
-    if session_state:
+    try:
         garmin.set_session_state(**session_state)
+    except ValueError:
+        logging.exception('Invalid session_state, ignoring')
+        del creds['session_state']
     return garmin
 
 
