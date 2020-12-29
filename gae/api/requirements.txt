@@ -5,26 +5,26 @@ Werkzeug==1.0.1 # https://github.com/python-restx/flask-restx/issues/34
 flask-restx==0.2.0
 
 # auth_util3.py
-firebase-admin==4.4.0
-google-auth==1.22.1
+firebase-admin==4.5.0
+google-auth==1.24.0
 google-auth-httplib2==0.0.4
-google-auth-oauthlib==0.4.1
+google-auth-oauthlib==0.4.2
 
 # ds_helper.py
-google-cloud-datastore==1.15.3
+google-cloud-datastore==2.1.0
 
 # task_util.py
-google-cloud-tasks==2.0.0
+google-cloud-tasks==2.1.0
 
 # /services/
 stravalib==0.10.2
-withings-api==2.1.8
+withings-api==2.2.0
 
 # For natural language dates and such
-Babel==2.8.0
+Babel==2.9.0
 
 # Utility
-sortedcontainers==2.2.2
+sortedcontainers==2.3.0
 
 # Stackdriver
 google-cloud-profiler==2.0.4

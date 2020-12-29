@@ -173,8 +173,8 @@ def redirect(claims):
 
     auth = create_auth(callback_uri=get_callback_uri(dest))
 
-    creds = auth.get_credentials(code)._asdict()
-    Service.update_credentials(service, creds)
+    creds_dict = auth.get_credentials(code).dict(exclude={'created'})
+    Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
 

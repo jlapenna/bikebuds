@@ -15,7 +15,7 @@
 import logging
 
 import withings_api
-from withings_api.common import Credentials
+from withings_api.common import Credentials2
 
 from shared.config import config
 from shared.datastore.service import Service
@@ -31,7 +31,7 @@ def create_client(service):
     if not Service.has_credentials(service):
         raise Exception('Cannot create Withings client without creds: %s' % (service,))
     service_creds = service['credentials']
-    creds = Credentials(**service_creds)
+    creds = Credentials2(**service_creds)
 
     def refresh_callback(new_credentials):
         """Updates credentials.
@@ -40,7 +40,8 @@ def create_client(service):
             new_credentials: withings_api.Credentials
         """
         logging.debug('Withings creds refresh for: %s', service.key)
-        Service.update_credentials(service, new_credentials._asdict())
+        creds_dict = new_credentials.dict(exclude={'created'})
+        Service.update_credentials(service, creds_dict)
 
     return withings_api.WithingsApi(creds, refresh_cb=refresh_callback)
 

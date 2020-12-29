@@ -29,6 +29,9 @@ function main() {
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
   sudo apt install -y jq
 
+  echo "Installing the firebase CLI"
+  curl -sL https://firebase.tools | bash
+
   echo "Apt installed a few libraries."
   echo "Or it didn't, you might need to install them yourself. Press enter."
   read

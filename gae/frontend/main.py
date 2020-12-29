@@ -20,7 +20,7 @@ from flask_cors import CORS
 from flask_cors import cross_origin
 from flask_talisman import Talisman
 
-from firebase_admin import auth
+from firebase_admin import auth, exceptions
 
 from shared import auth_util
 from shared import logging_util
@@ -66,7 +66,8 @@ def create_session(claims):
         expires = datetime.datetime.now(datetime.timezone.utc) + expires_in
         response.set_cookie('session', session_cookie, expires=expires, httponly=True)
         return response
-    except auth.AuthError:
+    except exceptions.FirebaseError:
+        logging.exception('Failed to create a session cookie.')
         flask.abort(401, 'Failed to create a session cookie')
 
 

@@ -22,8 +22,6 @@ from shared import ds_util
 from shared.credentials import firebase_credentials
 from shared.datastore.fcm import FcmMessage, FcmSendEvent
 
-firebase_admin.initialize_app(firebase_credentials)
-
 
 def active_clients(user_key):
     query = ds_util.client.query(kind='ClientState', ancestor=user_key)

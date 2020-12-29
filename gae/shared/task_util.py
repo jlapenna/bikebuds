@@ -23,7 +23,9 @@ from google.cloud import tasks_v2
 from google.cloud.datastore import helpers
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
-from google.cloud.datastore_v1.proto import entity_pb2
+from google.cloud.datastore_v1.types import entity as entity_pb2
+# from google.cloud.datastore_v1.proto import entity_pb2
+# from google.cloud.proto.datastore.v1 import entity_pb2
 from google.protobuf.timestamp_pb2 import Timestamp
 
 from shared import ds_util
@@ -53,7 +55,7 @@ def _serialize_entity(entity):
     """Converts an Entity object to a serialized proto string."""
     if entity is None:
         return None
-    return helpers.entity_to_protobuf(entity).SerializeToString()
+    return helpers.entity_to_protobuf(entity)._pb.SerializeToString()
 
 
 def _deserialize_entity(pb_bytes):
@@ -61,8 +63,8 @@ def _deserialize_entity(pb_bytes):
     if pb_bytes is None:
         return None
     entity = entity_pb2.Entity()
-    entity.ParseFromString(pb_bytes)
-    return helpers.entity_from_protobuf(entity)
+    entity._pb.ParseFromString(pb_bytes)
+    return helpers.entity_from_protobuf(entity._pb)
 
 
 def _queue_task(

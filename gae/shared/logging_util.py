@@ -28,7 +28,7 @@ LOG_QUERY = False
 LOG_RESPONSES = False
 
 LOGS_TO_SILENCE = [
-    # 'urllib3.connectionpool',
+    'urllib3.connectionpool',
     # 'oauth2client.contrib.multistore_file',
     # 'requests_oauthlib.oauth2_session',
     'stravalib.model.Activity',

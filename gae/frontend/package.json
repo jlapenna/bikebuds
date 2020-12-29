@@ -4,29 +4,28 @@
   "private": true,
   "homepage": "https://bikebuds.cc/",
   "dependencies": {
-    "@material-ui/codemod": "^4.5.0",
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/styles": "^4.10.0",
-    "@react-google-maps/api": "^1.13.0",
-    "@types/googlemaps": "^3.40.1",
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/styles": "^4.11.2",
+    "@react-google-maps/api": "^2.0.2",
+    "@types/googlemaps": "^3.43.0",
     "@types/markerclustererplus": "^2.1.33",
-    "ajv": "^6.12.6",
+    "ajv": "^7.0.2",
     "convert-units": "^2.3.4",
-    "firebase": "^7.24.0",
+    "firebase": "^8.2.1",
     "lodash.clonedeepwith": "^4.5.0",
     "makecancelable": "^1.1.1",
     "moment": "^2.29.1",
-    "moment-timezone": "^0.5.31",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "moment-timezone": "^0.5.32",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-firebaseui": "^4.1.0",
     "react-json-pretty": "^2.2.0",
-    "react-moment": "^1.0.0",
+    "react-moment": "^1.1.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3",
+    "react-scripts": "4.0.1",
     "recharts": "^1.8.5",
-    "swagger-client": "^3.11.1",
+    "swagger-client": "^3.12.1",
     "typeface-roboto": "^1.1.13"
   },
   "repository": "github:jlapenna/bikebuds",
@@ -39,8 +38,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "plugin:prettier/recommended"
+      "react-app"
     ],
     "globals": {
       "createFirebaseState": true,
@@ -48,7 +46,7 @@
     },
     "settings": {
       "react": {
-        "version": "16.9.0"
+        "version": "17.0.1"
       }
     }
   },
@@ -59,13 +57,13 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "eslint-config-prettier": "^6.14.0",
-    "eslint-plugin-prettier": "^3.1.4",
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.6.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.0",
     "firebase-mock": "^2.3.2",
     "jest-extended": "^0.11.5",
-    "prettier": "^2.1.2"
+    "prettier": "^2.2.1"
   }
 }
