@@ -182,6 +182,36 @@ class GarminServiceCard extends Component {
       .then(this.handleService);
   };
 
+  renderSyncStatus = () => {
+    if (this.state.service === undefined) {
+      return (<React.Fragment />);
+    }
+
+    if (this.state.service.properties.sync_state.syncing) {
+      return (<i>Syncing as of{' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+    if (this.state.service.properties.sync_state.successful) {
+      return (<i>Sync completed {' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+    if (this.state.service.properties.sync_state.error) {
+      return (<i>Sync failed at{' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+
+    return (<i></i>);
+  }
+
   renderCardContent() {
     return (
       <CardContent className={this.props.classes.content}>
@@ -194,19 +224,11 @@ class GarminServiceCard extends Component {
         >
           <Grid item>
             <Typography variant="h5">Garmin</Typography>
-            {this.state.service &&
-            this.state.service.properties.sync_date != null ? (
-              <i>
-                Last sync:{' '}
-                <Moment fromNow>
-                  {this.state.service.properties.sync_date}
-                </Moment>
-              </i>
-            ) : (
-              <i>&#8203;</i>
-            )}
           </Grid>
-          <React.Fragment>
+          <Grid>
+            {this.renderSyncStatus()}
+          </Grid>
+          <Grid item>
             {this.state.service === undefined ||
               (!this.state.service.properties.credentials && (
                 <form noValidate autoComplete="off">
@@ -230,8 +252,8 @@ class GarminServiceCard extends Component {
                   />
                 </form>
               ))}
-          </React.Fragment>
-          <Grid className={this.props.classes.cardContentItem} item>
+          </Grid>
+          <Grid item>
             <FormControlLabel
               control={
                 <Switch
@@ -263,7 +285,7 @@ class GarminServiceCard extends Component {
     } else if (this.state.service.properties.credentials) {
       connectText = 'Disconnect';
     } else if (this.state.service) {
-      connectText = 'Save';
+      connectText = 'Connect';
     }
     return (
       <CardActions>

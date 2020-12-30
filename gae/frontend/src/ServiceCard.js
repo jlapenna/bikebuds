@@ -191,6 +191,36 @@ class ServiceCard extends Component {
     );
   }
 
+  renderSyncStatus = () => {
+    if (this.state.service === undefined) {
+      return (<React.Fragment />);
+    }
+
+    if (this.state.service.properties.sync_state.syncing) {
+      return (<i>Syncing as of {' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+    if (this.state.service.properties.sync_state.successful) {
+      return (<i>Sync completed {' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+    if (this.state.service.properties.sync_state.error) {
+      return (<i>Sync failed {' '}
+          <Moment fromNow>
+            {this.state.service.properties.sync_state.updated_at}
+          </Moment>
+          </i>);
+    }
+
+    return (<i></i>);
+  }
+
   renderCardContent() {
     return (
       <CardContent className={this.props.classes.content}>
@@ -203,19 +233,11 @@ class ServiceCard extends Component {
         >
           <Grid item>
             <Typography variant="h5">{this.props.serviceName}</Typography>
-            {this.state.service &&
-            this.state.service.properties.sync_date != null ? (
-              <i>
-                Last sync:{' '}
-                <Moment fromNow>
-                  {this.state.service.properties.sync_date}
-                </Moment>
-              </i>
-            ) : (
-              <i>&#8203;</i>
-            )}
           </Grid>
-          <Grid className={this.props.classes.cardContentItem} item>
+          <Grid>
+            {this.renderSyncStatus()}
+          </Grid>
+          <Grid item>
             <FormControlLabel
               control={
                 <Switch
@@ -257,6 +279,7 @@ class ServiceCard extends Component {
           disabled={
             this.state.actionPending ||
             this.state.service === undefined ||
+            this.state.service.properties.sync_state.syncing ||
             !this.state.service.properties.credentials
           }
           onClick={this.handleSync}
