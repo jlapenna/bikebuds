@@ -455,3 +455,8 @@ https://ngrok.com/
 http://localhost:4040
 
 generated/bin/ngrok http --host-header=localhost 8081
+
+## Make admin
+
+pip install firebase-admin
+BIKEBUDS_ENV=environments/prod ./tools/scripts/make_admin.py user@gmail.com

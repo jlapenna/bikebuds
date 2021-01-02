@@ -64,7 +64,7 @@ def run_flow():
             'https://www.googleapis.com/auth/userinfo.profile',
         ],
     )
-    return oauth_flow.run_local_server(host='localhost', port=8095, open_browser=True)
+    return oauth_flow.run_local_server(host='localhost', port=0, open_browser=True)
 
 
 def fetch_credentials():
