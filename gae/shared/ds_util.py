@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
+
 from google.cloud.datastore import Client
 
 from shared.config import config
@@ -19,3 +21,13 @@ from shared.config import config
 
 # Datastore Client
 client = Client(project=config.project_id)
+
+
+def key_from_path(path):
+    if not path:
+        return None
+    return client.key(
+        *itertools.chain(
+            *[(pair.get('kind'), pair.get('id', pair.get('name'))) for pair in path]
+        )
+    )

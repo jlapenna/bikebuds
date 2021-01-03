@@ -28,12 +28,12 @@ from shared.config import config
 from shared.datastore.bot import Bot
 from shared.datastore.club import Club
 from shared.datastore.service import Service
-from shared.datastore.user import User
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 from shared.services.withings.client import create_client as withings_create_client
 
 from models import (
     club_entity_model,
+    key_model,
     service_model,
     user_entity_model,
     WrapEntity,
@@ -183,23 +183,25 @@ class GetUsersResource(Resource):
         return users
 
 
-@api.route('/user/delete/<sub>')
-class DeleteUserResource(Resource):
-    @api.doc('delete_user')
-    @api.marshal_with(user_entity_model, skip_none=True)
-    def get(self, sub):
+@api.route('/delete')
+class DeleteResource(Resource):
+    @api.doc('delete', body=key_model)
+    @api.marshal_with(key_model, skip_none=True)
+    def post(self):
         auth_util.verify_admin(flask.request)
 
-        key = ds_util.client.key('User', sub)
-        user = User.get(key)
+        key = ds_util.key_from_path(api.payload.get('path'))
+        if key is None or ds_util.client.get(key) is None:
+            logging.debug('No entity with key: %s', key)
+            return key
+        children_query = ds_util.client.query(ancestor=key)
+        children_query.keys_only()
+        [logging.debug('XXX: %s', child) for child in children_query.fetch()]
+        # ds_util.client.delete_multi(
+        #     child.key for child in children_query.fetch()
+        # )
 
-        user_data_query = ds_util.client.query(ancestor=key)
-        user_data_query.keys_only()
-        ds_util.client.delete_multi(
-            user_data.key for user_data in user_data_query.fetch()
-        )
-
-        return WrapEntity(user)
+        return key
 
 
 @api.route('/sync/club/<club_id>')
