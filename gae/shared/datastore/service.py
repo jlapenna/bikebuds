@@ -77,6 +77,8 @@ class Service(object):
     @classmethod
     def set_sync_enqueued(cls, service):
         now = datetime.datetime.now(datetime.timezone.utc)
+        if 'sync_state' not in service:
+            service['sync_state'] = {}
         service['sync_state']['updated_at'] = now
         service['sync_state']['syncing'] = True
         service['sync_state']['enqueued_at'] = now
@@ -90,6 +92,8 @@ class Service(object):
     @classmethod
     def set_sync_started(cls, service):
         now = datetime.datetime.now(datetime.timezone.utc)
+        if 'sync_state' not in service:
+            service['sync_state'] = {}
         service['sync_state']['updated_at'] = now
         service['sync_state']['started_at'] = now
         service['sync_state']['syncing'] = True
@@ -97,6 +101,8 @@ class Service(object):
 
     @classmethod
     def set_sync_finished(cls, service, error=None):
+        if 'sync_state' not in service:
+            service['sync_state'] = {}
         service['sync_state']['updated_at'] = datetime.datetime.now(
             datetime.timezone.utc
         )
