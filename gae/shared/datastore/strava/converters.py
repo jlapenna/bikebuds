@@ -404,7 +404,8 @@ class _PhotosSummaryConverter(object):
 
         entity = Entity(
             ds_util.client.key(
-                'PhotosSummary', exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+                'PhotosSummary',
+                exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
             )
         )
         entity.update(properties_dict)
@@ -425,7 +426,8 @@ class _PhotosPrimaryConverter(object):
 
         entity = Entity(
             ds_util.client.key(
-                'PhotosPrimary', exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
+                'PhotosPrimary',
+                exclude_from_indexes=cls.EXCLUDE_FROM_INDEXES,
             )
         )
         entity.update(properties_dict)

@@ -108,7 +108,11 @@ series_model = api.model(
 series_entity_model = EntityModel(series_model)
 
 geo_point_model = api.model(
-    'GeoPoint', {'latitude': fields.String, 'longitude': fields.String,}
+    'GeoPoint',
+    {
+        'latitude': fields.String,
+        'longitude': fields.String,
+    },
 )
 
 elevation_point_model = api.model(
@@ -327,7 +331,10 @@ preferences_model = api.model(
 )
 
 user_model = api.model(
-    'User', {'preferences': fields.Nested(preferences_model, skip_none=True),},
+    'User',
+    {
+        'preferences': fields.Nested(preferences_model, skip_none=True),
+    },
 )
 user_entity_model = EntityModel(user_model)
 
@@ -440,10 +447,17 @@ segment_effort_model = api.model(
 )
 
 
-sync_model = api.model('Sync', {'force': fields.Boolean},)
+sync_model = api.model(
+    'Sync',
+    {'force': fields.Boolean},
+)
 
 connect_garmin_model = api.model(
-    'ConnectGarmin', {'username': fields.String, 'password': fields.String,},
+    'ConnectGarmin',
+    {
+        'username': fields.String,
+        'password': fields.String,
+    },
 )
 
 backfill_model = api.model(

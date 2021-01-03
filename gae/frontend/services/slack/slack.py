@@ -45,7 +45,8 @@ def link_shared(event_data):
 def _handle_event(event_data):
     logging.debug('Handling Event: %s', event_data)
     event_entity = SubscriptionEvent.to_entity(
-        event_data, name='slack-%s' % event_data['event_id'],
+        event_data,
+        name='slack-%s' % event_data['event_id'],
     )
     try:
         task_util.process_slack_event(event_entity)

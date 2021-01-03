@@ -134,7 +134,9 @@ class AppDelegate extends StatelessWidget {
         'signedIn: ${firebaseState.signedIn}');
     return firebaseState.signedIn
         ? SignedInApp()
-        : firebaseState.authInitialized ? SignedOutApp() : Container();
+        : firebaseState.authInitialized
+            ? SignedOutApp()
+            : Container();
   }
 }
 

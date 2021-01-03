@@ -26,9 +26,11 @@ Code Style:
 
 Cloud Repositories
 
-- curl https://sdk.cloud.google.com | bash
-- exec -l \$SHELL
-- gcloud init
+```
+curl https://sdk.cloud.google.com | bash
+exec -l \$SHELL
+gcloud init
+```
 
 """
 Before I asked why GAE can't find TensorFlow lib here https://stackoverflow.com/questions/40241846/why-googleappengine-gives-me-importerror-no-module-named-tensorflow
@@ -107,8 +109,10 @@ requires installing gradle. apt install gradle.
 
 # examples
 
+```
 curl 'http://localhost:8080/_ah/api/discovery/v1/apis/bikebuds/v1/rest'
 google-chrome --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8081 'http://localhost:8081/_ah/api/explorer'
+```
 
 # Cookies & Sessions
 
@@ -148,7 +152,9 @@ looks like its got an abuse problem and temporarily disabled.
 
 # Copyrights
 
-for i in $fileswithoutheaders; do echo $i; cat apache_header.py > $i.copy; cat $i >> $i.copy; mv $i.copy \$i; done;
+```
+for i in $fileswithoutheaders; do echo $i; cat apache_header.py > $i.copy; cat $i >> $i.copy; mv $i.copy $i; done;
+```
 
 # dev setup problems:
 
@@ -176,7 +182,7 @@ get_measures returns NokiaMeasureGroup.
 
 To create a cert and validate we own its domain:
 
-```shell
+```
 ./certbot-auto --manual certonly -d '*.bikebuds.cc';
 rm -rf bikebuds.cc-cert/;
 sudo cp -Lr /etc/letsencrypt/live/bikebuds.cc bikebuds.cc-cert;
@@ -188,7 +194,7 @@ openssl rsa \
 
 To update the cert on gcp:
 
-```shell
+```
 gcloud app ssl-certificates update 12362252 \
     --display-name star-dot-bikebuds.cc \
     --certificate bikebuds.cc-cert/fullchain.pem \
@@ -197,13 +203,14 @@ gcloud app ssl-certificates update 12362252 \
 
 To create a new cert and associated mapping:
 
-```shell
-#gcloud app ssl-certificates create \
-#    --display-name star-dot-bikebuds.cc \
-#    --certificate bikebuds.cc-cert/fullchain.pem \
-#    --private-key bikebuds.cc-cert/privkey_rsa.pem;
-#gcloud app domain-mappings update '*.bikebuds.cc' \
-#    --certificate-id 12362252;
+```
+gcloud app ssl-certificates create \
+    --display-name star-dot-bikebuds.cc \
+    --certificate bikebuds.cc-cert/fullchain.pem \
+    --private-key bikebuds.cc-cert/privkey_rsa.pem;
+
+gcloud app domain-mappings update '*.bikebuds.cc' \
+    --certificate-id 12362252;
 ```
 
 ## Proper configuration:
@@ -297,16 +304,21 @@ It was third party cookies. so I set up a firebase custom domain:
 4. Find the POST request `token?key=...`\_and `copy as cuRL.`
 5. Execute the curl command to get an auth token:
 
-   AUTH_TOKEN=\$(curl 'https://securetoken.googleapis.com/v1/token?key=XXXXXXX' -H 'Referer: http://localhost:8080/' -H 'Origin: http://localhost:8080' -H 'X-Client-Version: Chrome/JsCore/5.5.9/FirebaseCore-web' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 ^Cfari/537.36' -H 'Content-Type: application/x-www-form-urlencoded' --data 'grant_type=refresh_token&refresh_token=thiswillbeaverylongstringthatyoullgetanduseits' --compressed|python -c 'import sys; import json; print json.load(sys.stdin)["access_token"];')
+   ```
+   AUTH_TOKEN=$(curl 'https://securetoken.googleapis.com/v1/token?key=XXXXXXX' -H 'Referer: http://localhost:8080/' -H 'Origin: http://localhost:8080' -H 'X-Client-Version: Chrome/JsCore/5.5.9/FirebaseCore-web' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 ^Cfari/537.36' -H 'Content-Type: application/x-www-form-urlencoded' --data 'grant_type=refresh_token&refresh_token=thiswillbeaverylongstringthatyoullgetanduseits' --compressed|python -c 'import sys; import json; print json.load(sys.stdin)["access_token"];')
+   ```
 
 6. Execute your API request:
 
-   curl 'http://localhost:8082/_ah/api/bikebuds/v1/series?key=XXXXXXXX' -X POST -H "Authorization: Bearer \$AUTH_TOKEN"
+   ```
+   curl 'http://localhost:8082/_ah/api/bikebuds/v1/series?key=XXXXXXXX' -X POST -H "Authorization: Bearer $AUTH_TOKEN"
+   ```
 
 # Strava web push.
 
 # Subscribing
 
+```
 curl -G https://api.strava.com/api/v3/push_subscriptions -d client_id=XXX -d client_secret=YYY
 
 curl -X POST https://api.strava.com/api/v3/push_subscriptions \
@@ -314,12 +326,17 @@ curl -X POST https://api.strava.com/api/v3/push_subscriptions \
  -F client_secret=YYY \
  -F 'callback_url=https://bikebuds.cc/services/strava/events' \
  -F 'verify_token=ZZZ'
+```
 
 responds with:
+
+```
 {"id":333333,"resource_state":2,"application_id":77777,"callback_url":"https://bikebuds.cc/services/strava/events","created_at":"2019-02-02T17:55:59.510256816Z","updated_at":"2019-02-02T17:55:59.510255963Z"}
+```
 
 ## pushing a test event
 
+```
 curl -H 'Content-Type: application/json' -X POST 'http://localhost:8081/services/strava/events' -d '{
 "aspect_type": "create",
 "event_time": 1549151211,
@@ -329,6 +346,7 @@ curl -H 'Content-Type: application/json' -X POST 'http://localhost:8081/services
 "subscription_id": 133263,
 "updates": {}
 }'
+```
 
 # Withings web push.
 
@@ -431,14 +449,14 @@ My API stores expires_in.
 
 # Manual compile:
 
-```shell
+```
 cd flutter/android;
 /home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 assembleDebug && /home/jlapenna/code/bikebuds/flutter/android/gradlew --no-rebuild --build-cache --continue --offline -Pverbose=true -Ptarget=/home/jlapenna/code/bikebuds/flutter/lib/app.dart -Ptrack-widget-creation=true -Pfilesystem-scheme=org-dartlang-root -Ptarget-platform=android-arm64 installDebug && adb shell am start-activity cc.bikebuds/.MainActivity
 ```
 
 # Update python packages
 
-```shell
+```
 for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pushd; done;
 ```
 

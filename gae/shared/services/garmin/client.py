@@ -249,7 +249,9 @@ class Garmin(object):
         logging.debug('Fetching: %s', url)
         response = self._session.get(url)
         logging.info(
-            'Response code %s, and json %s', response.status_code, response.text,
+            'Response code %s, and json %s',
+            response.status_code,
+            response.text,
         )
         logging.debug('Request: %s', curlify.to_curl(response.request))
 

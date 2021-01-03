@@ -42,7 +42,11 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.transaction')
     def test_events_worker_delete(
-        self, transaction_mock, put_mock, delete_mock, ClientWrapperMock,
+        self,
+        transaction_mock,
+        put_mock,
+        delete_mock,
+        ClientWrapperMock,
     ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'XYZ_TOKEN'}
@@ -73,7 +77,11 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.transaction')
     def test_events_worker_activity_update(
-        self, transaction_mock, put_mock, delete_mock, ClientWrapperMock,
+        self,
+        transaction_mock,
+        put_mock,
+        delete_mock,
+        ClientWrapperMock,
     ):
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'access_token': 'XYZ_TOKEN'}

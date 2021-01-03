@@ -85,7 +85,10 @@ class MainTest(unittest.TestCase):
     @mock.patch('shared.ds_util.client.query')
     @mock.patch('shared.ds_util.client.get')
     def disabled_test_datastore_activity_link(
-        self, ds_util_client_get_mock, ds_util_client_query_mock, chat_unfurl_mock,
+        self,
+        ds_util_client_get_mock,
+        ds_util_client_query_mock,
+        chat_unfurl_mock,
     ):
         """Disabled: We currently dont fetch activities from the datastore."""
         service = Entity(ds_util.client.key('Service', 'strava'))

@@ -159,7 +159,10 @@ def _crawled_activity_block(url, activity):
             [Distance],
         )
         fields.append(
-            {"type": "mrkdwn", "text": "*Distance:* %smi" % round(distance.mi, 2),}
+            {
+                "type": "mrkdwn",
+                "text": "*Distance:* %smi" % round(distance.mi, 2),
+            }
         )
 
     if 'fitness:speed:value' in activity:
@@ -169,7 +172,10 @@ def _crawled_activity_block(url, activity):
             [Speed],
         )
         fields.append(
-            {"type": "mrkdwn", "text": "*Speed:* %smph" % round(average_speed.mph, 0),}
+            {
+                "type": "mrkdwn",
+                "text": "*Speed:* %smph" % round(average_speed.mph, 0),
+            }
         )
 
     if fields:

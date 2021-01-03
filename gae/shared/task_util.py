@@ -24,6 +24,7 @@ from google.cloud.datastore import helpers
 from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
 from google.cloud.datastore_v1.types import entity as entity_pb2
+
 # from google.cloud.datastore_v1.proto import entity_pb2
 # from google.cloud.proto.datastore.v1 import entity_pb2
 from google.protobuf.timestamp_pb2 import Timestamp

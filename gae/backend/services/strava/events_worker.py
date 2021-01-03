@@ -35,7 +35,9 @@ class EventsWorker(object):
         aspect_type = self.event.get('aspect_type')
         with ds_util.client.transaction():
             logging.debug(
-                'StravaEvent: process_event_batch:  %s, %s', object_id, self.event.key,
+                'StravaEvent: process_event_batch:  %s, %s',
+                object_id,
+                self.event.key,
             )
 
             if object_type == 'activity':
