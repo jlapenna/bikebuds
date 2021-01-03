@@ -19,6 +19,7 @@ import { config } from './config';
 export function createSession(firebase, responseCallback) {
   if (config.is_dev && config.fake_user) {
     responseCallback({ status: 200 });
+    return;
   }
   firebase.auth.currentUser.getIdTokenResult().then(idTokenResult => {
     fetch(config.frontend_url + '/services/session', {

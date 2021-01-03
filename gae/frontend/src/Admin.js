@@ -18,30 +18,17 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { createStyles, withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
 
-import makeCancelable from 'makecancelable';
-import JSONPretty from 'react-json-pretty';
-
-import { createSession } from './session_util';
+import AdminUsers from 'AdminUsers';
+import AdminStravaAuth from 'AdminStravaAuth';
+import AdminStravaClubs from 'AdminStravaClubs';
 
 class Admin extends Component {
-  static styles = createStyles({
-    root: {
-      flexGrow: 1,
-    },
-  });
+  static styles = createStyles({});
 
   static propTypes = {
     adminApi: PropTypes.object.isRequired,
-    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
   };
@@ -49,13 +36,6 @@ class Admin extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      actionPending: false,
-      authUrl: null,
-      dialogOpen: false,
-      bot: undefined,
-      clubs: undefined,
-      trackClubId: '',
-      deleteUserSub: '',
     };
   }
 
@@ -63,34 +43,7 @@ class Admin extends Component {
     this.setState({});
   }
 
-  componentWillUnmount() {
-    if (this._cancelStravaAuth) {
-      this._cancelStravaAuth();
-    }
-    if (this._cancelSyncClub) {
-      this._cancelSyncClub();
-    }
-    if (this._cancelTrackClub) {
-      this._cancelTrackClub();
-    }
-    if (this._cancelDeleteUser) {
-      this._cancelDeleteUser();
-    }
-  }
-
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.adminApi && this.state.bot === undefined) {
-      this.setState({ bot: null });
-      this.props.adminApi
-        .get_bot({ name: this.props.serviceName })
-        .then(response => this.setState({ bot: response }));
-    }
-    if (this.props.adminApi && this.state.clubs === undefined) {
-      this.setState({ clubs: null });
-      this.props.adminApi
-        .get_clubs()
-        .then(response => this.setState({ clubs: response }));
-    }
     if (this.props.adminApi && this.state.users === undefined) {
       this.setState({ users: null });
       this.props.adminApi
@@ -99,187 +52,29 @@ class Admin extends Component {
     }
   }
 
-  handleConnect = () => {
-    this.setState({ actionPending: true });
-    createSession(this.props.firebase, response => {
-      if (response.status === 200) {
-        this._cancelStravaAuth = makeCancelable(
-          this.props.adminApi.get_strava_auth_url(),
-          response => {
-            this.setState({
-              actionPending: false,
-              authUrl: response.body.auth_url,
-              dialogOpen: true,
-            });
-          }
-        );
-      } else {
-        console.warn('Unable to create a session.', response);
-        this.setState({ actionPending: false });
-      }
-    });
-  };
-
-  handleListItemClick = (index, user) => {};
-
-  handleSyncClub = club_id => {
-    this.setState({ actionPending: true });
-    this._cancelSyncClub = makeCancelable(
-      this.props.adminApi.sync_club({ club_id: club_id }),
-      response =>
-        this.setState((state, props) => {
-          for (var i = 0; i < state.clubs.body.length; i++) {
-            if (state.clubs.body[i].id === club_id) {
-              state.clubs.body[i] = response.body;
-            }
-          }
-          return { clubs: state.clubs, actionPending: false };
-        })
-    );
-  };
-
-  handleUntrackClub = club_id => {
-    this._cancelUntrackClub = makeCancelable(
-      this.props.adminApi.untrack_club({ club_id: club_id }),
-      response => this.setState({ trackClubId: '', clubs: undefined })
-    );
-  };
-
-  handleTrackClub = event => {
-    this._cancelTrackClub = makeCancelable(
-      this.props.adminApi.track_club({ club_id: this.state.trackClubId }),
-      response => this.setState({ trackClubId: '', clubs: undefined })
-    );
-  };
-
-  handleDeleteUser = event => {
-    this._cancelDeleteUser = makeCancelable(
-      this.props.adminApi.delete_user({ sub: this.state.deleteUserSub }),
-      response => this.setState({ deleteUserSub: '' })
-    );
-  };
-
   render() {
     if (!this.props.firebaseUser.admin) {
       return null;
     }
-    console.log(this.state.users);
     return (
-      <React.Fragment>
-        <Grid container>
-          <Grid item>
-            <Typography variant="h5">Bot</Typography>
-            <Button
-              color="primary"
-              variant="contained"
-              disabled={this.state.actionPending}
-              onClick={this.handleConnect}
-            >
-              Connect your strava bot account
-            </Button>
-            {this.state.bot && (
-              <JSONPretty
-                id="json-pretty"
-                data={this.state.bot.body}
-              ></JSONPretty>
-            )}
-            <form noValidate autoComplete="off" onSubmit={this.handleTrackClub}>
-              <TextField
-                id="track-club-id"
-                label="Club ID"
-                value={this.state.trackClubId}
-                onChange={event =>
-                  this.setState({ trackClubId: event.target.value })
-                }
-              />
-              <Button
-                color="primary"
-                variant="contained"
-                disabled={this.state.actionPending}
-                onClick={this.handleTrackClub}
-              >
-                Track Club
-              </Button>
-            </form>
-          </Grid>
-          {this.state.clubs &&
-            this.state.clubs.body.map((club, index) => (
-              <Grid item key={index}>
-                <Typography variant="h5">
-                  Club: {club.properties.name}
-                </Typography>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  disabled={this.state.actionPending}
-                  onClick={() => this.handleSyncClub(club.properties.id)}
-                >
-                  Sync club
-                </Button>
-                <Button
-                  color="primary"
-                  disabled={this.state.actionPending}
-                  onClick={() => this.handleUntrackClub(club.properties.id)}
-                >
-                  Untrack
-                </Button>
-                {club && <JSONPretty id="json-pretty" data={club}></JSONPretty>}
-              </Grid>
-            ))}
+      <Grid container spacing={3}>
+        <Grid item>
+        <AdminStravaAuth
+          adminApi={this.props.adminApi}
+          firebase={this.props.firebase}
+        />
         </Grid>
-        <form noValidate autoComplete="off" onSubmit={this.handleDeleteUser}>
-          <TextField
-            id="delete-user-key"
-            label="User Key"
-            value={this.state.deleteUserSub}
-            onChange={event =>
-              this.setState({ deleteUserSub: event.target.value })
-            }
-          />
-          <Button
-            color="primary"
-            variant="contained"
-            disabled={this.state.actionPending}
-            onClick={this.handleDeleteUser}
-          >
-            Delete User
-          </Button>
-        </form>
-        {this.state.users &&
-          this.state.users.body.map((user, index) => {
-            return (
-              <Grid
-                item
-                key={index}
-                onClick={this.handleListItemClick.bind(this, index, user)}
-              >
-                <Typography variant="h5">
-                  User: {user.user.key.path[0].name}
-                </Typography>
-                <JSONPretty id="json-pretty" data={user}></JSONPretty>
-              </Grid>
-            );
-          })}
-        <Dialog
-          open={this.state.dialogOpen}
-          onClose={() => this.setState({ dialogOpen: false })}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {'Authorization Url for Strava'}
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              <div>
-                Please visit in a browser window signed into the bot account you
-                wish to use:
-              </div>
-              <div>{this.state.authUrl}</div>
-            </DialogContentText>
-          </DialogContent>
-        </Dialog>
-      </React.Fragment>
+        <Grid item>
+        <AdminStravaClubs
+          adminApi={this.props.adminApi}
+        />
+        </Grid>
+        <Grid item>
+        <AdminUsers
+          adminApi={this.props.adminApi}
+        />
+        </Grid>
+      </Grid>
     );
   }
 }
