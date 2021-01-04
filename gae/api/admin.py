@@ -196,10 +196,7 @@ class DeleteResource(Resource):
             return key
         children_query = ds_util.client.query(ancestor=key)
         children_query.keys_only()
-        [logging.debug('XXX: %s', child) for child in children_query.fetch()]
-        # ds_util.client.delete_multi(
-        #     child.key for child in children_query.fetch()
-        # )
+        ds_util.client.delete_multi(child.key for child in children_query.fetch())
 
         return key
 
