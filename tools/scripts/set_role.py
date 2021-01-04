@@ -22,25 +22,26 @@ from firebase_admin import auth
 from firebase_admin.credentials import Certificate
 
 
-def main(email):
-    user = auth.get_user_by_email(email)
-    if user.email_verified:
-        auth.set_custom_user_claims(user.uid, {'admin': True})
-        print('Added admin claim to %s' % email)
-    else:
-        print('User not verified: ', email)
+def main(email, role):
+    try:
+        user = auth.get_user_by_email(email)
+    except auth.UserNotFoundError:
+        user = auth.create_user(email=email, email_verified=True)
+    auth.set_custom_user_claims(user.uid, {'role': role})
+    print('Added %s role to %s' % (role, email))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('email')
+    parser.add_argument('role')
     args = parser.parse_args()
 
     creds_path = os.path.join(
-        os.environ.get('BIKEBUDS_ENV', 'environments/env'),
+        os.environ.get('BIKEBUDS_ENV'),
         'service_keys/firebase-adminsdk.json',
     )
     creds = Certificate(creds_path)
     firebase_admin.initialize_app(creds)
 
-    main(args.email)
+    main(args.email, args.role)

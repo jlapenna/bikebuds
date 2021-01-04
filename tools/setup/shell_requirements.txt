@@ -5,3 +5,7 @@ pur
 # flutter/release.sh
 oauth2client
 httplib2
+
+# set_role.py
+firebase_admin
+google-cloud-datastore
