@@ -66,9 +66,11 @@ class AuthWrapper extends Component {
     if (config.is_dev && config.fake_user) {
       console.warn('AuthWrapper: Using Fake User.');
       const firebaseUser = {
-        admin: true,
         displayName: config.fake_user,
         photoUrl: '/logo-round.svg',
+        roleAdmin: true,
+        roleUser: true,
+        roleBot: true,
       };
       this.setState({
         firebaseUser: firebaseUser,
@@ -115,7 +117,9 @@ class AuthWrapper extends Component {
               'idTokenResult:',
               idTokenResult
             );
-          firebaseUser.admin = !!idTokenResult.claims['admin'];
+          firebaseUser.roleAdmin = idTokenResult.claims['roleAdmin'];
+          firebaseUser.roleBot = idTokenResult.claims['roleBot'];
+          firebaseUser.roleUser = idTokenResult.claims['roleUser'];
 
           var stateUpdate = {};
           stateUpdate[firebaseUserKey] = firebaseUser;

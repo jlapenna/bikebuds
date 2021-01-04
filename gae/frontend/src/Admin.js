@@ -53,9 +53,6 @@ class Admin extends Component {
   }
 
   render() {
-    if (!this.props.firebaseUser.admin) {
-      return null;
-    }
     return (
       <Grid container spacing={3}>
         <Grid item>

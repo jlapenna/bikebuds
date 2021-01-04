@@ -46,6 +46,7 @@ export default class MainContent extends React.Component {
     }
     return (
       <Switch>
+        {this.props.firebaseUser.roleUser && (
         <Route
           path={`${this.props.match.path}club/:club_id`}
           render={props => (
@@ -55,7 +56,8 @@ export default class MainContent extends React.Component {
               profile={this.props.profile}
             />
           )}
-        />
+        />)}
+        {this.props.firebaseUser.roleUser && (
         <Route
           path={`${this.props.match.path}activities`}
           exact
@@ -65,7 +67,8 @@ export default class MainContent extends React.Component {
               bikebudsApi={this.props.bikebudsApi}
             />
           )}
-        />
+        />)}
+        {this.props.firebaseUser.roleUser && (
         <Route
           path={`${this.props.match.path}compare_segments`}
           exact
@@ -75,7 +78,8 @@ export default class MainContent extends React.Component {
               bikebudsApi={this.props.bikebudsApi}
             />
           )}
-        />
+        />)}
+        {this.props.firebaseUser.roleUser && (
         <Route
           path={`${this.props.match.path}settings`}
           render={props => (
@@ -87,7 +91,8 @@ export default class MainContent extends React.Component {
               profile={this.props.profile}
             />
           )}
-        />
+        />)}
+        {this.props.firebaseUser.roleUser && (
         <Route
           path={`${this.props.match.path}health`}
           exact
@@ -97,8 +102,8 @@ export default class MainContent extends React.Component {
               profile={this.props.profile}
             />
           )}
-        />
-        {this.props.firebaseUser.admin && (
+        />)}
+        {this.props.firebaseUser.roleAdmin && (
           <Route
             path={`${this.props.match.path}admin`}
             render={props => (

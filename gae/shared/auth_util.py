@@ -41,7 +41,12 @@ def create_custom_token(claims):
 def fake_claims():
     if config.is_dev and config.fake_user:
         logging.warn('Using Fake User')
-        return {'sub': config.fake_user, 'admin': True}
+        return {
+            'sub': config.fake_user,
+            'roleAdmin': True,
+            'roleBot': True,
+            'roleUser': True,
+        }
     else:
         return None
 
@@ -62,13 +67,17 @@ def verify(request):
     if config.is_dev and config.fake_user:
         return fake_claims()
 
+    # Check that there is a real user by this identity.
     claims = _verify_claims_from_headers(request)
-    if claims:
-        return claims
-    claims = _verify_claims_from_cookie(request)
-    if claims:
-        return claims
-    flask.abort(401, 'Unable to authenticate.')
+    if not claims:
+        claims = _verify_claims_from_cookie(request)
+    if not claims:
+        flask.abort(401, 'Unable to authenticate.')
+
+    # Ensure we've given them access to the service.
+    if not (claims.get('roleAdmin') or claims.get('roleBot') or claims.get('roleUser')):
+        flask.abort(408, 'No role assigned.')
+    return claims
 
 
 def _verify_claims_from_headers(request, impersonate=None):
@@ -93,7 +102,13 @@ def _verify_claims_from_headers(request, impersonate=None):
             # find the firebase user.
             if claims['iss'] == 'https://accounts.google.com':
                 firebase_user = auth.get_user_by_email(claims['email'])
-                claims = {'sub': firebase_user.uid, 'email': claims['email']}
+                claims = {
+                    'sub': firebase_user.uid,
+                    'email': claims['email'],
+                    'roleAdmin': claims.get('roleAdmin', False),
+                    'roleBot': claims.get('roleBot', False),
+                    'roleUser': claims.get('roleUser', False),
+                }
         except ValueError:
             logging.exception('Unable to verify claims')
 
@@ -117,6 +132,6 @@ def _verify_claims_from_cookie(request):
 
 def verify_admin(request):
     claims = verify(flask.request)
-    if not claims.get('admin'):
-        flask.abort(403, 'User is not an admin')
+    if not claims.get('roleAdmin'):
+        flask.abort(401, 'User is not an admin')
     return claims

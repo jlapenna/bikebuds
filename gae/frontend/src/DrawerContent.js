@@ -68,6 +68,8 @@ class DrawerContent extends React.Component {
           className={this.props.classes.list}
           onClick={() => this.props.onClick()}
         >
+        {this.props.firebaseUser.roleUser && (
+        <React.Fragment>
           <ListItem
             button
             key="Activities"
@@ -92,7 +94,9 @@ class DrawerContent extends React.Component {
           >
             <ListItemText>Settings</ListItemText>
           </ListItem>
-          {this.props.firebaseUser.admin && (
+          </React.Fragment>
+          )}
+          {this.props.firebaseUser.roleAdmin && (
             <ListItem
               button
               key="Admin"

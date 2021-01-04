@@ -22,19 +22,24 @@ from firebase_admin import auth
 from firebase_admin.credentials import Certificate
 
 
-def main(email, role):
+def main(email, role, enabled):
     try:
         user = auth.get_user_by_email(email)
     except auth.UserNotFoundError:
         user = auth.create_user(email=email, email_verified=True)
-    auth.set_custom_user_claims(user.uid, {'role': role})
-    print('Added %s role to %s' % (role, email))
+    role_key = 'role' + role[0].upper() + role[1:]
+    custom_claims = user.custom_claims
+    custom_claims.update({role_key: True})
+    # Despite docs, set_custom_user_claims overrides all existing custom claims.
+    auth.set_custom_user_claims(user.uid, custom_claims)
+    print('Set custom claims for %s: %s' % (email, custom_claims))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('email')
     parser.add_argument('role')
+    parser.add_argument('--disable', action='store_true')
     args = parser.parse_args()
 
     creds_path = os.path.join(
@@ -44,4 +49,4 @@ if __name__ == '__main__':
     creds = Certificate(creds_path)
     firebase_admin.initialize_app(creds)
 
-    main(args.email, args.role)
+    main(args.email, args.role, not args.disable)

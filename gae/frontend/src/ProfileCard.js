@@ -109,7 +109,7 @@ class ProfileCard extends Component {
             <Grid item>
               <Typography variant="h5">
                 {this.props.firebaseUser.displayName}{' '}
-                {this.props.firebaseUser.admin && <span>(Admin)</span>}
+                {this.props.firebaseUser.roleAdmin && <span>(Admin)</span>}
               </Typography>
             </Grid>
             <Grid item>
