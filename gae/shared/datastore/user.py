@@ -44,20 +44,26 @@ class User(object):
     """Its a user!"""
 
     @classmethod
-    def get(cls, lookup):
-        if isinstance(lookup, Key):
-            key = lookup
-        else:
-            key = ds_util.client.key('User', lookup['sub'])
-        user = ds_util.client.get(key)
-        if user:
-            prefs = Preferences.default()
-            prefs.update(user.get('preferences', {}))
-            user['preferences'] = prefs
-            return user
+    def _set_defaults(cls, user):
+        # Get the default prefs.
+        prefs = Preferences.default()
+        # Replace the defaults with a uer's saved prefs.
+        prefs.update(user.get('preferences', {}))
+        # Store the unioned prefs as the user's prefs.
+        user['preferences'] = prefs
 
-        # Creating a new user.
-        user = Entity(key)
-        user['preferences'] = Preferences.default()
-        ds_util.client.put(user)
+    @classmethod
+    def get(cls, key_or_claims):
+        if isinstance(key_or_claims, Key):
+            return User.from_uid(key_or_claims.name)
+        else:
+            return User.from_uid(key_or_claims['sub'])
+
+    @classmethod
+    def from_uid(cls, uid):
+        key = ds_util.client.key('User', uid)
+        user = ds_util.client.get(key)
+        if not user:
+            user = Entity(key)
+        User._set_defaults(user)
         return user

@@ -16,6 +16,7 @@ import datetime
 import logging
 
 from google.cloud.datastore.entity import Entity
+from google.cloud.datastore.key import Key
 
 from shared import ds_util
 
@@ -24,17 +25,21 @@ class Service(object):
     """Its a service!"""
 
     @classmethod
-    def get(cls, name, parent=None):
+    def _set_defaults(cls, service):
+        service['sync_state'] = service.get('sync_state', {})
+        service['sync_enabled'] = service.get('sync_enabled', True)
+
+    @classmethod
+    def get(cls, name: str, parent: Key = None):
         key = ds_util.client.key('Service', name, parent=parent)
+        return Service.from_key(key)
+
+    @classmethod
+    def from_key(cls, key: Key):
         service = ds_util.client.get(key)
-        if service:
-            if 'sync_state' not in service:
-                service['sync_state'] = {}
-            return service
-        service = Entity(key)
-        service['sync_enabled'] = True
-        service['sync_state'] = {}
-        ds_util.client.put(service)
+        if not service:
+            service = Entity(key)
+        Service._set_defaults(service)
         return service
 
     @classmethod
@@ -43,23 +48,16 @@ class Service(object):
 
     @classmethod
     def update_credentials(cls, service, new_credentials):
-        updated = False
-        if new_credentials is None or not new_credentials:
+        if not new_credentials:
             logging.info('Clearing credentials: %s', service.key)
-            if 'credentials' in service:
-                del service['credentials']
+            service.pop('credentials', None)
             ds_util.client.put(service)
             return None
 
         logging.debug('Updating credentials: %s', service.key)
-        if 'credentials' not in service or service['credentials'] is None:
-            # If we don't have credentials in the service at all, add it,
-            # the rest assume the key exists.
-            service['credentials'] = {}
+        service['credentials'] = service.get('credentials', {})
         if service['credentials'] != new_credentials:
             service['credentials'].update(new_credentials)
-            updated = True
-        if updated:
             logging.info('Updated service credentials: %s', service.key)
             ds_util.client.put(service)
         else:
@@ -77,39 +75,33 @@ class Service(object):
     @classmethod
     def set_sync_enqueued(cls, service):
         now = datetime.datetime.now(datetime.timezone.utc)
-        if 'sync_state' not in service:
-            service['sync_state'] = {}
-        service['sync_state']['updated_at'] = now
-        service['sync_state']['syncing'] = True
-        service['sync_state']['enqueued_at'] = now
-        service['sync_state']['started_at'] = None
-        if 'successful' in service['sync_state']:
-            del service['sync_state']['successful']
-        if 'error' in service['sync_state']:
-            del service['sync_state']['error']
+        service['sync_state'] = {
+            'updated_at': now,
+            'syncing': True,
+            'enqueued_at': now,
+            'started_at': None,
+            'successful': None,
+            'error': None,
+        }
         ds_util.client.put(service)
 
     @classmethod
     def set_sync_started(cls, service):
         now = datetime.datetime.now(datetime.timezone.utc)
-        if 'sync_state' not in service:
-            service['sync_state'] = {}
-        service['sync_state']['updated_at'] = now
-        service['sync_state']['started_at'] = now
-        service['sync_state']['syncing'] = True
+        service['sync_state'].update(
+            {'updated_at': now, 'syncing': True, 'started_at': now}
+        )
         ds_util.client.put(service)
 
     @classmethod
     def set_sync_finished(cls, service, error=None):
-        if 'sync_state' not in service:
-            service['sync_state'] = {}
-        service['sync_state']['updated_at'] = datetime.datetime.now(
-            datetime.timezone.utc
+        now = datetime.datetime.now(datetime.timezone.utc)
+        service['sync_state'].update(
+            {
+                'updated_at': now,
+                'syncing': False,
+                'successful': not error,
+                'error': error,
+            }
         )
-        service['sync_state']['syncing'] = False
-        if error is None:
-            service['sync_state']['successful'] = True
-        else:
-            service['sync_state']['successful'] = False
-            service['sync_state']['error'] = error
         ds_util.client.put(service)

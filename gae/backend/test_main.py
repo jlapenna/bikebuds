@@ -17,6 +17,7 @@ import unittest
 
 from google.cloud.datastore.entity import Entity
 
+from shared.datastore.service import Service
 from shared import ds_util
 from shared import responses
 from shared import task_util
@@ -53,6 +54,7 @@ class StravaTest(unittest.TestCase):
     ):
 
         service = Entity(ds_util.client.key('Service', 'strava'))
+        Service._set_defaults(service)
         service['credentials'] = {'refresh_token': 'validrefreshtoken'}
         _setup_service_get_put(
             service, ds_util_client_get_mock, ds_util_client_put_mock
@@ -83,6 +85,7 @@ class WithingsTest(unittest.TestCase):
     ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
+        Service._set_defaults(service)
         service['credentials'] = {'refresh_token': 'validrefreshtoken'}
         _setup_service_get_put(
             service, ds_util_client_get_mock, ds_util_client_put_mock

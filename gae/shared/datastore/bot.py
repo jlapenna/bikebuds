@@ -23,14 +23,14 @@ class Bot(object):
     @classmethod
     def get(cls):
         key = ds_util.client.key('Bot', 'default')
-        user = ds_util.client.get(key)
-        if user:
-            return user
+        bot = ds_util.client.get(key)
+        if bot:
+            return bot
 
         # Creating a new bot.
-        user = Entity(key)
-        ds_util.client.put(user)
-        return user
+        bot = Entity(key)
+        ds_util.client.put(bot)
+        return bot
 
     @classmethod
     def key(cls):
