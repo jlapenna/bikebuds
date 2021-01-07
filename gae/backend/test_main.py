@@ -46,20 +46,21 @@ class StravaTest(unittest.TestCase):
         self.client = main.app.test_client()
 
     @mock.patch('main.StravaEventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_valid_strava(
-        self, ds_util_client_get_mock, strava_worker_mock
+        self, ds_util_client_get_mock, ds_util_client_put_mock, strava_worker_mock
     ):
 
         service = Entity(ds_util.client.key('Service', 'strava'))
         service['credentials'] = {'refresh_token': 'validrefreshtoken'}
+        _setup_service_get_put(
+            service, ds_util_client_get_mock, ds_util_client_put_mock
+        )
 
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', parent=service.key)
         )
-
-        # We pretend a service exists in the event we create.
-        ds_util_client_get_mock.return_value = service
 
         r = self.client.post(
             '/tasks/process_event',
@@ -75,20 +76,21 @@ class WithingsTest(unittest.TestCase):
         self.client = main.app.test_client()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_valid_withings(
-        self, ds_util_client_get_mock, withings_worker_mock
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
     ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
         service['credentials'] = {'refresh_token': 'validrefreshtoken'}
+        _setup_service_get_put(
+            service, ds_util_client_get_mock, ds_util_client_put_mock
+        )
 
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', parent=service.key)
         )
-
-        # We pretend a service exists in the event we create.
-        ds_util_client_get_mock.return_value = service
 
         r = self.client.post(
             '/tasks/process_event',
@@ -98,18 +100,14 @@ class WithingsTest(unittest.TestCase):
         withings_worker_mock.assert_called_once()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_no_service(
-        self, ds_util_client_get_mock, withings_worker_mock
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
     ):
-
-        service = Entity(ds_util.client.key('Service', 'withings'))
-        service['credentials'] = {'refresh_token': 'validrefreshtoken'}
+        _setup_service_get_put(None, ds_util_client_get_mock, ds_util_client_put_mock)
 
         event_entity = Entity(ds_util.client.key('SubscriptionEvent'))
-
-        # No service!
-        ds_util_client_get_mock.return_value = None
 
         r = self.client.post(
             '/tasks/process_event',
@@ -119,19 +117,21 @@ class WithingsTest(unittest.TestCase):
         withings_worker_mock.assert_not_called()
 
     @mock.patch('main.WithingsEventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
     @mock.patch('shared.ds_util.client.get')
     def test_process_event_task_no_credentials(
-        self, ds_util_client_get_mock, withings_worker_mock
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
     ):
 
         service = Entity(ds_util.client.key('Service', 'withings'))
+        Service._set_defaults(service)
+        _setup_service_get_put(
+            service, ds_util_client_get_mock, ds_util_client_put_mock
+        )
 
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', parent=service.key)
         )
-
-        # We pretend a service exists in the event we create.
-        ds_util_client_get_mock.return_value = service
 
         r = self.client.post(
             '/tasks/process_event',
@@ -159,3 +159,13 @@ class SlackTest(unittest.TestCase):
         )
         slack_process_slack_event_mock.assert_called_once()
         self.assertEqual(r.status_code, responses.OK.code)
+
+
+def _setup_service_get_put(service, ds_util_client_get_mock, ds_util_client_put_mock):
+    # We pretend a service exists in the event we create.
+    ds_util_client_get_mock.return_value = service
+
+    def mock_put_service(entity):
+        ds_util_client_get_mock.return_value = service
+
+    ds_util_client_put_mock.side_effect = mock_put_service
