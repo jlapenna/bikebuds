@@ -19,6 +19,7 @@ import flask
 from google.cloud.datastore.entity import Entity
 
 from shared.config import config
+from shared.exceptions import SyncException
 from shared import ds_util
 from shared import logging_util
 from shared import task_util
@@ -44,10 +45,6 @@ app = flask.Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
 logging_util.silence_logs()
-
-
-class SyncException(Exception):
-    pass
 
 
 @app.route('/tasks/cleanup', methods=['GET'])
