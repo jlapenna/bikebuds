@@ -28,7 +28,7 @@ from shared.config import config
 from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
 from shared.datastore.user import User
-from shared.services.withings.client import create_auth
+from shared.services.withings.client import create_auth, create_creds_dict
 from shared import responses
 
 
@@ -173,7 +173,7 @@ def redirect(claims):
 
     auth = create_auth(callback_uri=get_callback_uri(dest))
 
-    creds_dict = auth.get_credentials(code).dict(exclude={'created'})
+    creds_dict = create_creds_dict(auth.get_credentials(code))
     Service.update_credentials(service, creds_dict)
 
     task_util.sync_service(service)
