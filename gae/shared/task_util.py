@@ -37,6 +37,8 @@ from shared.datastore.service import Service
 # Create a client.
 _client = tasks_v2.CloudTasksClient()
 
+
+# REMINDER: Don't forget to update queues.sh!
 _default_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'default'
 )

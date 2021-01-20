@@ -3,7 +3,13 @@
 source tools/scripts/base.sh
 load_config
 
-QUEUES="default events notifications slack"
+QUEUES=("
+  default
+  events
+  slack
+  notifications
+  backfill
+")
 
 function main() {
   for queue in ${QUEUES}; do 
@@ -14,11 +20,6 @@ function main() {
         ;
 
   done
-  gcloud --project=bikebuds-app tasks queues update "backfill" \
-      --max-dispatches-per-second=1 \
-      --max-attempts=1 \
-      --min-backoff=60s \
-      ;
 }
 
 main "$@"
