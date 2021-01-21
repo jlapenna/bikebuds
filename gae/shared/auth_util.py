@@ -135,3 +135,10 @@ def verify_admin(request):
     if not claims.get('roleAdmin'):
         flask.abort(401, 'User is not an admin')
     return claims
+
+
+def get_uid_by_email(email):
+    if config.is_dev and config.fake_user:
+        return config.fake_user
+    else:
+        return auth.get_user_by_email(email).uid
