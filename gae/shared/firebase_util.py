@@ -12,17 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 import os
 
+from firebase_admin import initialize_app
 from firebase_admin.credentials import Certificate
 
 from shared.config import config
 
-if not os.getenv('GAE_ENV', '').startswith('standard'):
-    # Local - Not yet supported by python cloud apis.
-    if getattr(config, 'datastore_emulator_host', None):
-        os.environ['DATASTORE_EMULATOR_HOST'] = config.datastore_emulator_host
 
-firebase_credentials = Certificate(
-    os.path.join(config.base_path, 'service_keys/firebase-adminsdk.json')
-)
+@functools.lru_cache(maxsize=None, typed=False)
+def _get_firebase_credentials():
+    return Certificate(
+        os.path.join(config.base_path, 'service_keys/firebase-adminsdk.json')
+    )
+
+
+@functools.lru_cache(maxsize=None, typed=False)
+def get_app():
+    return initialize_app(_get_firebase_credentials())

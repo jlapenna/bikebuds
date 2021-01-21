@@ -45,11 +45,10 @@ class _Config(object):
         )
 
 
-def _devOrProd(dev, prod):
-    if os.getenv('GAE_ENV', '').startswith('standard'):
-        return prod
-    else:
-        return dev
-
-
 config = _Config(os.environ.get('BIKEBUDS_ENV', 'environments/env'))
+
+
+if not os.getenv('GAE_ENV', '').startswith('standard'):
+    # Local - Not yet supported by python cloud apis.
+    if getattr(config, 'datastore_emulator_host', None):
+        os.environ['DATASTORE_EMULATOR_HOST'] = config.datastore_emulator_host

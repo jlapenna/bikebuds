@@ -15,11 +15,10 @@
 import datetime
 import logging
 
-import firebase_admin
 from firebase_admin import messaging
 
 from shared import ds_util
-from shared.credentials import firebase_credentials
+from shared import firebase_util
 from shared.datastore.fcm import FcmMessage, FcmSendEvent
 
 
@@ -54,7 +53,7 @@ def send(parent, clients, notif_fn, *args, **kwargs):
         for client_state in clients:
             message = notif_fn(*args, client=client_state, **kwargs)
             try:
-                response = messaging.send(message)
+                response = messaging.send(message, app=firebase_util.get_app())
                 logging.debug(
                     'fcm_util.send: Success: %s, %s, %s', parent, message, response
                 )

@@ -22,20 +22,20 @@ import logging
 import google.oauth2.id_token
 import google.auth.transport
 
-import firebase_admin
 from firebase_admin import auth
 
+from shared import firebase_util
 from shared.config import config
-from shared.credentials import firebase_credentials
 
-firebase_admin.initialize_app(firebase_credentials)
+
+app = firebase_util.get_app()
 
 
 def create_custom_token(claims):
     if config.is_dev and config.fake_user:
         logging.warn('Create Custom Token: Using Fake User')
         return b'FAKE TOKEN'
-    return auth.create_custom_token(claims['sub'])
+    return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
 
 def fake_claims():
