@@ -109,6 +109,7 @@ export default class MainContent extends React.Component {
             render={props => (
               <Admin
                 adminApi={this.props.adminApi}
+                bikebudsApi={this.props.bikebudsApi}
                 firebase={this.props.firebase}
                 firebaseUser={this.props.firebaseUser}
               />
