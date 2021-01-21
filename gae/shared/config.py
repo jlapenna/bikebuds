@@ -30,6 +30,12 @@ class _Config(object):
         self.gcp_server_creds = json.load(
             open(os.path.join(base_path, 'service_keys/gcp-server.json'))
         )
+        self.gcp_server_oauth_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/gcp-server-oauth.json'))
+        )
+        self.gcp_web_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/gcp-web.json'))
+        )
 
         self.fitbit_creds = json.load(
             open(os.path.join(base_path, 'service_keys/fitbit.json'))
@@ -42,6 +48,12 @@ class _Config(object):
         )
         self.slack_creds = json.load(
             open(os.path.join(base_path, 'service_keys/slack.json'))
+        )
+        self.pubsub_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/pubsub.json'))
+        )
+        self.flask_secret_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/flask-secret.json'))
         )
 
 

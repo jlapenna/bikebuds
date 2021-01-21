@@ -466,6 +466,12 @@ for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pus
 2.  Go to https://api.slack.com/apps/AKU8ZGJG1/event-subscriptions and update the url.
 3.
 
+# GCP Pubsub
+
+```
+gcloud --project=bikebuds-test pubsub subscriptions create rides --topic rides --ack-deadline 10 --push-endpoint https://806811c6f16a.ngrok.io/services/google/pubsub/rides?token=XYZ_PUBSUB_TOKEN
+```
+
 ## ngrok
 
 https://ngrok.com/
@@ -478,3 +484,30 @@ generated/bin/ngrok http --host-header=localhost 8081
 
 pip install firebase-admin
 BIKEBUDS_ENV=environments/prod ./tools/scripts/make_admin.py user@gmail.com
+
+## Gmail push example
+
+```
+python -c "import base64; print(base64.b64encode('{\"emailAddress\": \"jlapenna.test.1@gmail.com\", \"historyId\": 142581}'.encode('utf-8')).decode('ascii'))"  # eyJ...DF9
+curl -X POST -H 'Content-Type: application/json' 'http://localhost:8083/services/google/pubsub/rides?token=XYZ_PUBSUB_TOKEN' -d '{"message": {"data": "eyJlbWFpbEFkZHJlc3MiOiAiamxhcGVubmEudGVzdC4xQGdtYWlsLmNvbSIsICJoaXN0b3J5SWQiOiAxNDI1ODF9"}}'
+```
+
+# DateTime and Python
+
+DataStore only handles naive datetimes, and the values stored are UTC.
+
+When interacting with the datastore do things like:
+
+```
+datetime.datetime.now()
+arrow.now()
+dt.replace(tzinfo=None)
+dateutil.parser.parse(..., ignoretz=True)
+```
+
+Otherwise, consider being cognizant of timezones:
+
+```
+datetime.datetime.now(datetime.timezone.utc)
+arrow.now(datetime.timezone.utc)
+```

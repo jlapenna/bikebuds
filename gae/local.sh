@@ -57,6 +57,7 @@ function main() {
     --specified_service_ports=default:8081,api:8082,backend:8083 \
     --addn_host="*.ngrok.io" \
     --env_var=FLASK_ENV=development \
+    --env_var=OAUTHLIB_INSECURE_TRANSPORT=1 \
     --env_var=GOOGLE_APPLICATION_CREDENTIALS=environments/env/service_keys/appengine.json \
     --env_var=DATASTORE_DATASET="${CONFIG_project_id}" \
     --env_var=DATASTORE_EMULATOR_HOST="${CONFIG_datastore_emulator_host}" \

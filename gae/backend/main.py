@@ -31,6 +31,7 @@ from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 
 from backfill.backfill import BackfillWorker
 from services.bbfitbit import bbfitbit
+from services.google import google
 from services.garmin import garmin
 from services.slack import slack
 from services.strava import strava
@@ -42,6 +43,7 @@ from services.withings.weight_trend_notif import WeightTrendWorker
 import sync_helper
 
 app = flask.Flask(__name__)
+app.register_blueprint(google.module, url_prefix='/services/google')
 
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()
@@ -105,6 +107,8 @@ def sync_service_task(service_name):
             sync_helper.do(strava.Worker(service), work_key=service.key)
         elif service_name == 'garmin':
             sync_helper.do(garmin.Worker(service), work_key=service.key)
+        elif service_name == 'google':
+            sync_helper.do(google.Worker(service), work_key=service.key)
         Service.set_sync_finished(service)
         return responses.OK
     except SyncException as e:

@@ -9,6 +9,7 @@ QUEUES=("
   slack
   notifications
   backfill
+  gmail_pubsub
 ")
 
 function main() {
