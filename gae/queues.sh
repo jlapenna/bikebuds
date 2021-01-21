@@ -10,6 +10,7 @@ QUEUES=("
   notifications
   backfill
   gmail_pubsub
+  livetrack
 ")
 
 function main() {

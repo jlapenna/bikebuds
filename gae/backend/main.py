@@ -44,6 +44,7 @@ import sync_helper
 
 app = flask.Flask(__name__)
 app.register_blueprint(google.module, url_prefix='/services/google')
+app.register_blueprint(garmin.module, url_prefix='/services/garmin')
 
 app.logger.setLevel(logging.DEBUG)
 logging_util.debug_logging()

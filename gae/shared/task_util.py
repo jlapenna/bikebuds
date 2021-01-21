@@ -55,6 +55,9 @@ _backfill_parent = _client.queue_path(
 _gmail_pubsub_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'gmail_pubsub'
 )
+_livetrack_parent = _client.queue_path(
+    config.project_id, config.tasks_location, 'livetrack'
+)
 
 
 def _serialize_entity(entity):
@@ -250,6 +253,15 @@ def process_pubsub_rides(user, payload):
         relative_uri='/services/google/process/rides',
         service='backend',
         parent=_gmail_pubsub_parent,
+    )
+
+
+def process_garmin_livetrack(url):
+    return _queue_task(
+        entity=_params_entity(url=url),
+        relative_uri='/services/garmin/process/livetrack',
+        service='backend',
+        parent=_livetrack_parent,
     )
 
 
