@@ -18,17 +18,16 @@ import flask
 
 from google.cloud.datastore.entity import Entity
 
-from shared.config import config
-from shared.exceptions import SyncException
 from shared import ds_util
 from shared import logging_util
-from shared import task_util
-
 from shared import responses
+from shared import task_util
+from shared.config import config
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
-from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
+from shared.exceptions import SyncException
 from shared.services.garmin import client as garmin_client
+from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 
 from backfill.backfill import BackfillWorker
 from services.bbfitbit import bbfitbit
@@ -39,6 +38,8 @@ from services.strava.events_worker import EventsWorker as StravaEventsWorker
 from services.withings import withings
 from services.withings.withings import EventsWorker as WithingsEventsWorker
 from services.withings.weight_trend_notif import WeightTrendWorker
+
+import sync_helper
 
 app = flask.Flask(__name__)
 
@@ -97,13 +98,13 @@ def sync_service_task(service_name):
     try:
         Service.set_sync_started(service)
         if service_name == 'withings':
-            _do(withings.Worker(service), work_key=service.key)
+            sync_helper.do(withings.Worker(service), work_key=service.key)
         elif service_name == 'fitbit':
-            _do(bbfitbit.Worker(service), work_key=service.key)
+            sync_helper.do(bbfitbit.Worker(service), work_key=service.key)
         elif service_name == 'strava':
-            _do(strava.Worker(service), work_key=service.key)
+            sync_helper.do(strava.Worker(service), work_key=service.key)
         elif service_name == 'garmin':
-            _do(garmin.Worker(service), work_key=service.key)
+            sync_helper.do(garmin.Worker(service), work_key=service.key)
         Service.set_sync_finished(service)
         return responses.OK
     except SyncException as e:
@@ -115,7 +116,7 @@ def sync_service_task(service_name):
 def sync_club(club_id):
     logging.debug('Syncing: %s', club_id)
     service = Service.get('strava', parent=Bot.key())
-    _do(StravaClubWorker(club_id, service), work_key=service.key)
+    sync_helper.do(StravaClubWorker(club_id, service), work_key=service.key)
     return responses.OK
 
 
@@ -141,9 +142,9 @@ def process_event_task():
 
     try:
         if service_key.name == 'withings':
-            _do(WithingsEventsWorker(service, event), work_key=event.key)
+            sync_helper.do(WithingsEventsWorker(service, event), work_key=event.key)
         elif service_key.name == 'strava':
-            _do(StravaEventsWorker(service, event), work_key=event.key)
+            sync_helper.do(StravaEventsWorker(service, event), work_key=event.key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -196,7 +197,7 @@ def process_weight_trend_task():
 
     try:
         if service.key.name == 'withings':
-            _do(WeightTrendWorker(service, event), work_key=event.key)
+            sync_helper.do(WeightTrendWorker(service, event), work_key=event.key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -212,21 +213,12 @@ def process_backfill_task():
     logging.info('process_backfill: %s->%s', source_key, dest_key)
 
     try:
-        _do(BackfillWorker(source_key, dest_key, start, end), work_key=source_key)
+        sync_helper.do(
+            BackfillWorker(source_key, dest_key, start, end), work_key=source_key
+        )
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
-
-
-def _do(worker, work_key=None, method='sync'):
-    work_name = worker.__class__.__name__
-    try:
-        logging.debug('Worker starting: %s/%s', work_name, work_key)
-        getattr(worker, method)()  # Dynamically run the provided method.
-        logging.info('Worker completed: %s/%s', work_name, work_key)
-    except Exception as e:
-        logging.exception('Worker failed: %s/%s', work_name, work_key)
-        raise SyncException('Worker failed: %s/%s' % (work_name, work_key)) from e
 
 
 def _do_cleanup(version, datastore_state, cleanup_fn):
