@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python37
+runtime: python38
 
 # When running in local mode, we defer to the npm runner to serve the frontend
 # UI. Only serve frontend endpoints, here.
