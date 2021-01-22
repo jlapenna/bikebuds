@@ -15,19 +15,30 @@
 import mock
 import unittest
 
+import flask
+
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
+from shared import responses
+from shared import task_util
+from shared.datastore.service import Service
 
+from services.withings import withings
 from services.withings.withings import EventsWorker
 
-import main
+
+class MockWorker(object):
+    def sync(self):
+        pass
 
 
 class WithingsTest(unittest.TestCase):
     def setUp(self):
-        main.app.testing = True
-        self.client = main.app.test_client()
+        self.app = flask.Flask(__name__)
+        self.app.register_blueprint(withings.module)
+        self.app.testing = True
+        self.client = self.app.test_client()
 
     @mock.patch('shared.task_util.process_weight_trend')
     @mock.patch('shared.services.withings.client.create_client')
@@ -118,3 +129,79 @@ class WithingsTest(unittest.TestCase):
 
         ds_util_client_put_mock.assert_not_called()
         process_weight_trend_mock.assert_not_called()
+
+    @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
+    @mock.patch('shared.ds_util.client.get')
+    def test_process_event_task_valid_withings(
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
+    ):
+
+        service = Entity(ds_util.client.key('Service', 'withings'))
+        Service._set_defaults(service)
+        service['credentials'] = {'refresh_token': 'validrefreshtoken'}
+        _setup_service_get_put(
+            service, ds_util_client_get_mock, ds_util_client_put_mock
+        )
+
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', parent=service.key)
+        )
+
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+        self.assertEqual(r.status_code, responses.OK.code)
+        withings_worker_mock.assert_called_once()
+
+    @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
+    @mock.patch('shared.ds_util.client.get')
+    def test_process_event_task_no_service(
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
+    ):
+        _setup_service_get_put(None, ds_util_client_get_mock, ds_util_client_put_mock)
+
+        event_entity = Entity(ds_util.client.key('SubscriptionEvent'))
+
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+        self.assertEqual(r.status_code, responses.OK_NO_SERVICE.code)
+        withings_worker_mock.assert_not_called()
+
+    @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
+    @mock.patch('shared.ds_util.client.put')
+    @mock.patch('shared.ds_util.client.get')
+    def test_process_event_task_no_credentials(
+        self, ds_util_client_get_mock, ds_util_client_put_mock, withings_worker_mock
+    ):
+
+        service = Entity(ds_util.client.key('Service', 'withings'))
+        Service._set_defaults(service)
+        _setup_service_get_put(
+            service, ds_util_client_get_mock, ds_util_client_put_mock
+        )
+
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', parent=service.key)
+        )
+
+        r = self.client.post(
+            '/tasks/process_event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+        self.assertEqual(r.status_code, responses.OK_NO_CREDENTIALS.code)
+        withings_worker_mock.assert_not_called()
+
+
+def _setup_service_get_put(service, ds_util_client_get_mock, ds_util_client_put_mock):
+    # We pretend a service exists in the event we create.
+    ds_util_client_get_mock.return_value = service
+
+    def mock_put_service(entity):
+        ds_util_client_get_mock.return_value = service
+
+    ds_util_client_put_mock.side_effect = mock_put_service

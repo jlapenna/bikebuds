@@ -15,11 +15,41 @@
 import logging
 
 import fitbit
+import flask
 
 from shared import ds_util
+from shared import responses
+from shared import task_util
 from shared.config import config
 from shared.datastore.series import Series
 from shared.datastore.service import Service
+from shared.exceptions import SyncException
+
+import sync_helper
+
+
+module = flask.Blueprint('fitbit', __name__)
+
+
+@module.route('/tasks/sync', methods=['POST'])
+def sync():
+    logging.debug('Syncing: bbfitbit')
+    params = task_util.get_payload(flask.request)
+
+    service = ds_util.client.get(params['service_key'])
+    if not Service.has_credentials(service):
+        logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        Service.set_sync_started(service)
+        sync_helper.do(Worker(service), work_key=service.key)
+        Service.set_sync_finished(service)
+        return responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        return responses.OK_SYNC_EXCEPTION
 
 
 class Worker(object):

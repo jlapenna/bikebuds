@@ -12,15 +12,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
+import flask
+
 from shared import ds_util
 from shared import googlemaps_util
+from shared import responses
+from shared import task_util
 from shared.datastore.activity import Activity
 from shared.datastore.athlete import Athlete
+from shared.datastore.bot import Bot
 from shared.datastore.route import Route
 from shared.datastore.segment import Segment
 from shared.datastore.segment_effort import SegmentEffort
-
+from shared.datastore.service import Service
+from shared.exceptions import SyncException
 from shared.services.strava.client import ClientWrapper
+from shared.services.strava.club_worker import ClubWorker
+
+from services.strava.events_worker import EventsWorker
+
+import sync_helper
+
+
+module = flask.Blueprint('strava', __name__)
+
+
+@module.route('/tasks/sync', methods=['POST'])
+def sync():
+    logging.debug('Syncing: strava')
+    params = task_util.get_payload(flask.request)
+
+    service = ds_util.client.get(params['service_key'])
+    if not Service.has_credentials(service):
+        logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        Service.set_sync_started(service)
+        sync_helper.do(Worker(service), work_key=service.key)
+        Service.set_sync_finished(service)
+        return responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        return responses.OK_SYNC_EXCEPTION
+
+
+@module.route('/tasks/sync/club/<club_id>', methods=['GET', 'POST'])
+def sync_club(club_id):
+    logging.debug('Syncing: %s', club_id)
+    service = Service.get('strava', parent=Bot.key())
+    sync_helper.do(ClubWorker(club_id, service), work_key=service.key)
+    return responses.OK
+
+
+@module.route('/tasks/process_event', methods=['POST'])
+def process_event_task():
+    params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('Event: %s', event.key)
+
+    # First try to get the service using the event.key's service.
+    # If this event is coming from an old subscription / secret url, which
+    # embeds a service_key in it, then we might get these.
+    service_key = event.key.parent
+    service = ds_util.client.get(service_key)
+
+    if service is None:
+        logging.error('Event: No service: %s', event.key)
+        return responses.OK_NO_SERVICE
+
+    if not Service.has_credentials(service):
+        logging.warning('Event: No credentials: %s', event.key)
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        sync_helper.do(EventsWorker(service, event), work_key=event.key)
+    except SyncException:
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 class Worker(object):

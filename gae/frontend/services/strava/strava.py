@@ -100,7 +100,7 @@ def events_post():
     else:
         event_entity = SubscriptionEvent.to_entity(event_data, parent=service_key)
         try:
-            task_util.process_event(event_entity)
+            task_util.process_event(service_key, event_entity)
             logging.debug('StravaEvent: Queued: %s', event_entity.key)
         except AlreadyExists:
             logging.debug('StravaEvent: Duplicate: %s', event_entity.key)

@@ -17,19 +17,32 @@ import re
 import urllib
 import urllib.request
 
+import flask
+
 from slack.errors import SlackApiError
 
-from shared.services.strava.client import ClientWrapper
 from shared import responses
+from shared import task_util
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
+from shared.services.strava.client import ClientWrapper
 from shared.slack_util import slack_client
 
 from services.slack.unfurl_activity import unfurl_activity
 from services.slack.unfurl_route import unfurl_route
 
-
 _STRAVA_APP_LINK_REGEX = re.compile('(https://www.strava.com/([^/]+)/[0-9]+)')
+
+
+module = flask.Blueprint('slack', __name__)
+
+
+@module.route('/tasks/event', methods=['POST'])
+def event():
+    params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('SlackEvent: %s', event.key)
+    return process_slack_event(event)
 
 
 def process_slack_event(event):

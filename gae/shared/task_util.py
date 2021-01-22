@@ -147,7 +147,10 @@ def _params_entity(**kwargs):
 
 def sync_club(club_id):
     return _queue_task(
-        **{'relative_uri': '/tasks/sync/club/%s' % club_id, 'service': 'backend'}
+        **{
+            'relative_uri': '/services/strava/tasks/sync/club/%s' % club_id,
+            'service': 'backend',
+        }
     )
 
 
@@ -170,7 +173,7 @@ def sync_services(services, force=False):
             Service.set_sync_enqueued(service)
             task = {
                 'entity': _params_entity(service_key=service.key),
-                'relative_uri': '/tasks/sync/service/' + service.key.name,
+                'relative_uri': '/services/%s/tasks/sync' % (service.key.name,),
                 'service': 'backend',
             }
             _queue_task(**task)
@@ -195,11 +198,11 @@ def _maybe_transact(fn, *args, **kwargs):
             fn(*args, **kwargs)
 
 
-def process_event(event):
+def process_event(service_key: Key, event):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
-        relative_uri='/tasks/process_event',
+        relative_uri='/services/%s/tasks/process_event' % (service_key.name,),
         service='backend',
         parent=_events_parent,
         delay_timedelta=datetime.timedelta(seconds=5),
@@ -210,7 +213,7 @@ def process_slack_event(event):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
-        relative_uri='/tasks/process_slack_event',
+        relative_uri='/services/slack/tasks/process_event',
         service='backend',
         parent=_slack_events_parent,
     )
@@ -228,7 +231,7 @@ def process_weight_trend(event):
 def process_measure(user_key, measure):
     return _queue_task(
         entity=_params_entity(user_key=user_key, measure=measure),
-        relative_uri='/tasks/process_measure',
+        relative_uri='/xsync/tasks/process_measure',
         service='backend',
         parent=_events_parent,
     )
@@ -241,7 +244,7 @@ def process_backfill(
         entity=_params_entity(
             source_key=source_key, dest_key=dest_key, start=start, end=end
         ),
-        relative_uri='/tasks/process_backfill',
+        relative_uri='/xsync/tasks/process_backfill',
         service='backend',
         parent=_backfill_parent,
     )

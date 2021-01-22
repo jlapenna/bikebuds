@@ -22,6 +22,7 @@ import flask
 from bs4 import BeautifulSoup
 
 from shared import auth_util
+from shared import ds_util
 from shared import responses
 from shared import task_util
 from shared.config import config
@@ -36,6 +37,27 @@ import sync_helper
 module = flask.Blueprint('google', __name__)
 
 SUBJECT_REGEX = re.compile(r"Watch (?P<name>.*)'s live activity now!")
+
+
+@module.route('/tasks/sync', methods=['POST'])
+def sync():
+    logging.debug('Syncing: google')
+    params = task_util.get_payload(flask.request)
+
+    service = ds_util.client.get(params['service_key'])
+    if not Service.has_credentials(service, required_key='password'):
+        logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        Service.set_sync_started(service)
+        sync_helper.do(Worker(service), work_key=service.key)
+        Service.set_sync_finished(service)
+        return responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        return responses.OK_SYNC_EXCEPTION
 
 
 @module.route('/pubsub/rides', methods=['POST'])

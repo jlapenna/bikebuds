@@ -1,4 +1,4 @@
-# Copyright 2020 Google Inc. All Rights Reserved.
+# Copyright 2019 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,191 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import mock
 import unittest
+
+import flask
 
 from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 from shared import responses
+from shared import task_util
 
 from services.slack import slack
-from services.slack.testutil import (
-    activity_entity_for_test,
-    route_generator,
-    set_mockurlopen,
-)
 
 
-class MainTest(unittest.TestCase):
+class SlackTest(unittest.TestCase):
     def setUp(self):
-        self.maxDiff = None
+        self.app = flask.Flask(__name__)
+        self.app.register_blueprint(slack.module)
+        self.app.testing = True
+        self.client = self.app.test_client()
 
-    @mock.patch('shared.slack_util.slack_client.chat_unfurl')
-    @mock.patch('services.slack.slack.ClientWrapper')
-    @mock.patch('shared.ds_util.client.get')
-    def test_route_link(
-        self, ds_util_client_get_mock, ClientWrapperMock, chat_unfurl_mock
-    ):
-        service = Entity(ds_util.client.key('Service', 'strava'))
-        service['credentials'] = {'access_token': 'validrefreshtoken'}
-        ds_util_client_get_mock.return_value = service
-
-        client_mock = mock.Mock()
-        client_mock.get_route.side_effect = route_generator
-        ClientWrapperMock.return_value = client_mock
-
-        chat_unfurl_mock.return_value = {'ok': True}
-
-        event = json.loads(
-            """
-            {
-               "event_id" : "EvSFJZPZGA",
-               "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
-               "authed_users" : [
-                  "USR4L7ZGW"
-               ],
-               "event_time" : 1579378856,
-               "type" : "event_callback",
-               "event" : {
-                  "channel" : "CL2QA9X1C",
-                  "links" : [
-                     {
-                        "domain" : "strava.com",
-                        "url" : "https://www.strava.com/routes/10285651"
-                     }
-                  ],
-                  "user" : "UL2NGJARL",
-                  "message_ts" : "1579378855.001300",
-                  "type" : "link_shared"
-               },
-               "team_id" : "TL2DVHG3H",
-               "api_app_id" : "AKU8ZGJG1"
-            }
-        """
+    @mock.patch('main.slack.process_slack_event', return_value=responses.OK)
+    def test_process_slack_event_task_valid(self, slack_process_slack_event_mock):
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', 'slack-E232eq2ee')
         )
-        result = slack.process_slack_event(event)
+        event_entity.update({'event_id': 'EVENT_ID'})
 
-        chat_unfurl_mock.assert_called_once()
-        self.assertEqual(result, responses.OK)
-
-    @mock.patch('shared.slack_util.slack_client.chat_unfurl')
-    @mock.patch('shared.ds_util.client.query')
-    @mock.patch('shared.ds_util.client.get')
-    def disabled_test_datastore_activity_link(
-        self,
-        ds_util_client_get_mock,
-        ds_util_client_query_mock,
-        chat_unfurl_mock,
-    ):
-        """Disabled: We currently dont fetch activities from the datastore."""
-        service = Entity(ds_util.client.key('Service', 'strava'))
-        service['credentials'] = {'access_token': 'validrefreshtoken'}
-        ds_util_client_get_mock.return_value = service
-
-        query_mock = mock.Mock()
-        query_mock.add_filter.return_value = None
-        query_mock.fetch.return_value = [activity_entity_for_test(3046711547)]
-        ds_util_client_query_mock.return_value = query_mock
-
-        chat_unfurl_mock.return_value = {'ok': True}
-
-        event = json.loads(
-            """
-            {
-               "event_id" : "EvSFJZPZGA",
-               "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
-               "authed_users" : [
-                  "USR4L7ZGW"
-               ],
-               "event_time" : 1579378856,
-               "type" : "event_callback",
-               "event" : {
-                  "channel" : "CL2QA9X1C",
-                  "links" : [
-                     {
-                        "domain" : "strava.com",
-                        "url" : "https://www.strava.com/activities/3046711547"
-                     }
-                  ],
-                  "user" : "UL2NGJARL",
-                  "message_ts" : "1579378855.001300",
-                  "type" : "link_shared"
-               },
-               "team_id" : "TL2DVHG3H",
-               "api_app_id" : "AKU8ZGJG1"
-            }
-        """
+        r = self.client.post(
+            '/tasks/event',
+            data=task_util.task_body_for_test(event=event_entity),
         )
-        result = slack.process_slack_event(event)
-
-        chat_unfurl_mock.assert_called_once()
-        self.assertEqual(result, responses.OK)
-
-    @mock.patch('shared.slack_util.slack_client.chat_unfurl')
-    @mock.patch('urllib.request.urlopen')
-    @mock.patch('shared.services.strava.client.ClientWrapper')
-    @mock.patch('shared.ds_util.client.query')
-    @mock.patch('shared.ds_util.client.get')
-    def test_crawled_activity_link(
-        self,
-        ds_util_client_get_mock,
-        ds_util_client_query_mock,
-        ClientWrapperMock,
-        mock_urlopen,
-        chat_unfurl_mock,
-    ):
-        """Tests that we crawl the url if we don't have it in the DB."""
-        service = Entity(ds_util.client.key('Service', 'strava'))
-        service['credentials'] = {'access_token': 'validrefreshtoken'}
-        ds_util_client_get_mock.return_value = service
-
-        query_mock = mock.Mock()
-        query_mock.add_filter.return_value = None
-        query_mock.fetch.return_value = []
-        ds_util_client_query_mock.return_value = query_mock
-
-        set_mockurlopen(mock_urlopen)
-
-        chat_unfurl_mock.return_value = {'ok': True}
-
-        event = json.loads(
-            """
-            {
-               "event_id" : "EvSFJZPZGA",
-               "token" : "unYFPYx2dZIR4Eb2MwfabpoI",
-               "authed_users" : [
-                  "USR4L7ZGW"
-               ],
-               "event_time" : 1579378856,
-               "type" : "event_callback",
-               "event" : {
-                  "channel" : "CL2QA9X1C",
-                  "links" : [
-                     {
-                        "domain" : "strava.com",
-                        "url" : "https://www.strava.com/activities/3046711547"
-                     }
-                  ],
-                  "user" : "UL2NGJARL",
-                  "message_ts" : "1579378855.001300",
-                  "type" : "link_shared"
-               },
-               "team_id" : "TL2DVHG3H",
-               "api_app_id" : "AKU8ZGJG1"
-            }
-        """
-        )
-        result = slack.process_slack_event(event)
-
-        chat_unfurl_mock.called_once()
-        self.assertEqual(result, responses.OK)
-
-    @mock.patch('urllib.request.urlopen')
-    def test_resolve_rewrite_link_url(self, mock_urlopen):
-        set_mockurlopen(mock_urlopen)
-
-        link = {'domain': 'strava.app.link', 'url': 'https://strava.app.link/234141243'}
-        url = slack._resolve_rewrite_link(link)
-        self.assertEqual(url, 'https://www.strava.com/activities/3123195350')
+        slack_process_slack_event_mock.assert_called_once()
+        self.assertEqual(r.status_code, responses.OK.code)

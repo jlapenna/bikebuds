@@ -143,7 +143,7 @@ def events_post():
         flask.request.url,
     )
     try:
-        task_util.process_event(event_entity)
+        task_util.process_event(service_key, event_entity)
         logging.info('WithingsEvent: Queued: %s', event_entity.key)
     except AlreadyExists:
         logging.info('WithingsEvent: Duplicate: %s', event_entity.key)

@@ -1,4 +1,4 @@
-# Copyright 2019 Google Inc. All Rights Reserved.
+# Copyright 2021 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
 
 import unittest
 
-from shared import responses
+import flask
 
-import main
+from xsync import xsync
 
 
-class MainTest(unittest.TestCase):
+class XsyncTest(unittest.TestCase):
     def setUp(self):
-        main.app.testing = True
-        self.client = main.app.test_client()
+        self.app = flask.Flask(__name__)
+        self.app.register_blueprint(xsync.module)
+        self.app.testing = True
+        self.client = self.app.test_client()
 
-    def test_base(self):
-        r = self.client.post('/unittest')
-        self.assertEqual(r.status_code, responses.OK.code)
+    def test(self):
+        pass

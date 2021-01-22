@@ -61,6 +61,10 @@ function main() {
     fi
   done
 
+  if [[ ${final_result} != 0 ]]; then
+    echo ""
+    echo "SOME TESTS FAILED, SEE ABOVE!";
+  fi
   exit ${final_result};
 }
 

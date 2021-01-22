@@ -25,14 +25,16 @@ from shared import auth_util
 from shared import ds_util
 from shared import responses
 from shared import task_util
-from shared.services.garmin import client as garmin_client
-from shared.exceptions import SyncException
 from shared.datastore.series import Series
+from shared.datastore.service import Service
+from shared.exceptions import SyncException
+from shared.services.garmin import client as garmin_client
 
 import sync_helper
 
 
 module = flask.Blueprint('garmin', __name__)
+
 
 LIVETRACK_INFO_URL = 'https://livetrack.garmin.com/services/session/%(session)s/sessionToken/%(token)s?requestTime=%(requestTime)s'
 LIVETRACK_TRACKPOINTS_FIRST_URL = 'https://livetrack.garmin.com/services/session/%(session)s/trackpoints?requestTime=%(requestTime)s'
@@ -51,6 +53,27 @@ def process_livetrack():
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
+
+
+@module.route('/tasks/sync', methods=['POST'])
+def sync():
+    logging.debug('Syncing: garmin')
+    params = task_util.get_payload(flask.request)
+
+    service = ds_util.client.get(params['service_key'])
+    if not Service.has_credentials(service, required_key='password'):
+        logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        Service.set_sync_started(service)
+        sync_helper.do(Worker(service), work_key=service.key)
+        Service.set_sync_finished(service)
+        return responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        return responses.OK_SYNC_EXCEPTION
 
 
 class Worker(object):

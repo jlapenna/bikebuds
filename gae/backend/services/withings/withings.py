@@ -17,16 +17,74 @@ import heapq
 import logging
 from urllib.parse import urlencode
 
+import flask
+
 from withings_api.common import MeasureGetMeasGroupCategory
 from withings_api.common import InvalidParamsException
 
 from shared import ds_util
+from shared import responses
 from shared import task_util
 from shared.config import config
-from shared.datastore.user import User
 from shared.datastore.series import Measure, Series
+from shared.datastore.service import Service
 from shared.datastore.subscription import Subscription
+from shared.datastore.user import User
+from shared.exceptions import SyncException
 from shared.services.withings import client
+
+import sync_helper
+
+
+module = flask.Blueprint('withings', __name__)
+
+
+@module.route('/tasks/sync', methods=['POST'])
+def sync():
+    logging.debug('Syncing: withings')
+    params = task_util.get_payload(flask.request)
+
+    service = ds_util.client.get(params['service_key'])
+    if not Service.has_credentials(service):
+        logging.warn('No creds: %s', service.key)
+        Service.set_sync_finished(service, error='No credentials')
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        Service.set_sync_started(service)
+        sync_helper.do(Worker(service), work_key=service.key)
+        Service.set_sync_finished(service)
+        return responses.OK
+    except SyncException as e:
+        Service.set_sync_finished(service, error=str(e))
+        return responses.OK_SYNC_EXCEPTION
+
+
+@module.route('/tasks/process_event', methods=['POST'])
+def process_event_task():
+    params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('Event: %s', event.key)
+
+    # First try to get the service using the event.key's service.
+    # If this event is coming from an old subscription / secret url, which
+    # embeds a service_key in it, then we might get these.
+    service_key = event.key.parent
+    service = ds_util.client.get(service_key)
+
+    if service is None:
+        logging.error('Event: No service: %s', event.key)
+        return responses.OK_NO_SERVICE
+
+    if not Service.has_credentials(service):
+        logging.warning('Event: No credentials: %s', event.key)
+        return responses.OK_NO_CREDENTIALS
+
+    try:
+        sync_helper.do(EventsWorker(service, event), work_key=event.key)
+    except SyncException:
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 class Worker(object):

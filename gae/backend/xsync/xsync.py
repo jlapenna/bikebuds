@@ -17,15 +17,67 @@ import logging
 import random
 import time
 
+import flask
+
 from retrying import retry
 
 from google.cloud.datastore.key import Key
 
 from shared import ds_util
-
+from shared import task_util
+from shared import responses
 from shared.datastore.series import Series
 from shared.datastore.service import Service
+from shared.exceptions import SyncException
 from shared.services.garmin import client as garmin_client
+
+import sync_helper
+
+
+module = flask.Blueprint('xsync', __name__)
+
+
+@module.route('/tasks/process_measure', methods=['POST'])
+def process_measure():
+    params = task_util.get_payload(flask.request)
+    user_key = params['user_key']
+    measure = params['measure']
+    logging.info('ProcessMeasure: %s', measure)
+
+    garmin_service = Service.get('garmin', parent=user_key)
+    if not Service.has_credentials(garmin_service, required_key='password'):
+        logging.debug('ProcessMeasure: Garmin not connected')
+        return responses.OK
+
+    if not measure.get('weight'):
+        logging.debug('ProcessMeasure: Skipping non-weight measure.')
+        return responses.OK
+
+    try:
+        client = garmin_client.create(garmin_service)
+        client.set_weight(measure['weight'], measure['date'])
+    except Exception:
+        logging.exception('ProcessMeasure: Failed: %s', measure)
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
+
+
+@module.route('/tasks/process_backfill', methods=['POST'])
+def tasks_process_backfill():
+    params = task_util.get_payload(flask.request)
+    source_key = params['source_key']
+    dest_key = params['dest_key']
+    start = params['start']
+    end = params['end']
+    logging.info('process_backfill: %s->%s', source_key, dest_key)
+
+    try:
+        sync_helper.do(
+            BackfillWorker(source_key, dest_key, start, end), work_key=source_key
+        )
+    except SyncException:
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
 
 
 class BackfillWorker(object):
