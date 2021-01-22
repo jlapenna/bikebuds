@@ -74,13 +74,6 @@ class Settings extends Component {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <ServiceCard
-            firebase={this.props.firebase}
-            serviceName={'google'}
-            bikebudsApi={this.props.bikebudsApi}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
           <GarminServiceCard
             firebase={this.props.firebase}
             serviceName={'garmin'}
