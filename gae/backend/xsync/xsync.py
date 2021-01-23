@@ -30,6 +30,9 @@ from shared.datastore.series import Series
 from shared.datastore.service import Service
 from shared.exceptions import SyncException
 from shared.services.garmin import client as garmin_client
+from shared.services.trainerroad.client import (
+    create_client as trainerroad_create_client,
+)
 
 import sync_helper
 
@@ -42,7 +45,18 @@ def process_measure():
     params = task_util.get_payload(flask.request)
     user_key = params['user_key']
     measure = params['measure']
-    logging.info('ProcessMeasure: %s', measure)
+    logging.info('ProcessMeasure: %s %s', user_key, measure)
+
+    _withings_garmin(flask.request, user_key, measure)
+    _withings_trainerroad(flask.request, user_key, measure)
+    return responses.OK
+
+
+def _withings_garmin(request, user_key, measure):
+    params = task_util.get_payload(request)
+    user_key = params['user_key']
+    measure = params['measure']
+    logging.info('ProcessMeasure: withings_garmin: %s %s', user_key, measure)
 
     garmin_service = Service.get('garmin', parent=user_key)
     if not Service.has_credentials(garmin_service, required_key='password'):
@@ -56,6 +70,31 @@ def process_measure():
     try:
         client = garmin_client.create(garmin_service)
         client.set_weight(measure['weight'], measure['date'])
+    except Exception:
+        logging.exception('ProcessMeasure: Failed: %s', measure)
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
+
+
+def _withings_trainerroad(request, user_key, measure):
+    params = task_util.get_payload(request)
+    user_key = params['user_key']
+    measure = params['measure']
+    logging.info('ProcessMeasure: withings_trainerroad: %s %s', user_key, measure)
+
+    trainerroad_service = Service.get('trainerroad', parent=user_key)
+    if not Service.has_credentials(trainerroad_service, required_key='password'):
+        logging.debug('ProcessMeasure: Trainerroad not connected')
+        return responses.OK
+
+    if not measure.get('weight'):
+        logging.debug('ProcessMeasure: Skipping non-weight measure.')
+        return responses.OK
+
+    try:
+        client = trainerroad_create_client(trainerroad_service)
+        with client:
+            client.weight = measure['weight']
     except Exception:
         logging.exception('ProcessMeasure: Failed: %s', measure)
         return responses.OK_SYNC_EXCEPTION
