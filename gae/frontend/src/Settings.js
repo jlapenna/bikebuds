@@ -80,6 +80,13 @@ class Settings extends Component {
             bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <UserPassServiceCard
+            firebase={this.props.firebase}
+            serviceName={'trainerroad'}
+            bikebudsApi={this.props.bikebudsApi}
+          />
+        </Grid>
         <Preferences
           bikebudsApi={this.props.bikebudsApi}
           profile={this.props.profile}

@@ -39,7 +39,7 @@ from models import (
     client_state_entity_model,
     client_state_model,
     club_entity_model,
-    connect_garmin_model,
+    connect_userpass_model,
     filter_parser,
     get_arg,
     measure_model,
@@ -276,16 +276,16 @@ class ServiceResource(Resource):
         return WrapEntity(existing_service)
 
 
-@api.route('/connect_garmin')
-class ConnectGarminResource(Resource):
-    @api.doc('connect_garmin', body=connect_garmin_model)
+@api.route('/connect_userpass/<name>')
+class ConnectUserPassResource(Resource):
+    @api.doc('connect_userpass', body=connect_userpass_model)
     @api.marshal_with(service_entity_model, skip_none=True)
-    def post(self):
+    def post(self, name):
         claims = auth_util.verify(flask.request)
         user = User.get(claims)
-        connect_garmin = api.payload
-        service = Service.get('garmin', parent=user.key)
-        Service.update_credentials(service, connect_garmin)
+        connect_userpass = api.payload
+        service = Service.get(name, parent=user.key)
+        Service.update_credentials(service, connect_userpass)
         ds_util.client.put(service)
         return WrapEntity(service)
 

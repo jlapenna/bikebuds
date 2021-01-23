@@ -452,8 +452,8 @@ sync_model = api.model(
     {'force': fields.Boolean},
 )
 
-connect_garmin_model = api.model(
-    'ConnectGarmin',
+connect_userpass_model = api.model(
+    'ConnectUserPass',
     {
         'username': fields.String,
         'password': fields.String,

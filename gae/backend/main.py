@@ -31,6 +31,7 @@ from services.garmin import garmin
 from services.google import google
 from services.slack import slack
 from services.strava import strava
+from services.trainerroad import trainerroad
 from services.withings import withings
 from services.withings.weight_trend_notif import WeightTrendWorker
 from xsync import xsync
@@ -43,6 +44,7 @@ app.register_blueprint(bbfitbit.module, url_prefix='/services/fitbit')
 app.register_blueprint(garmin.module, url_prefix='/services/garmin')
 app.register_blueprint(google.module, url_prefix='/services/google')
 app.register_blueprint(strava.module, url_prefix='/services/strava')
+app.register_blueprint(trainerroad.module, url_prefix='/services/trainerroad')
 app.register_blueprint(withings.module, url_prefix='/services/withings')
 app.register_blueprint(slack.module, url_prefix='/services/slack')
 
