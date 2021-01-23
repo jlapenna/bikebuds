@@ -34,12 +34,10 @@ from shared import responses
 
 SERVICE_NAME = 'withings'
 
-module = flask.Blueprint(
-    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
-)
+module = flask.Blueprint(SERVICE_NAME, __name__)
 
 
-@module.route('/services/withings/events', methods=['HEAD'])
+@module.route('/events', methods=['HEAD'])
 @cross_origin(origins=['https://www.withings.com'])
 def events_head():
     sub_secret = flask.request.args.get('sub_secret', None)
@@ -51,7 +49,7 @@ def events_head():
     return responses.OK
 
 
-@module.route('/services/withings/events', methods=['POST'])
+@module.route('/events', methods=['POST'])
 @cross_origin(origins=['https://www.withings.com'])
 def events_post():
     sub_secret = flask.request.args.get('sub_secret', None)
@@ -150,7 +148,7 @@ def events_post():
     return responses.OK
 
 
-@module.route('/services/withings/init', methods=['GET', 'POST'])
+@module.route('/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
     # Creates the service if it doesn't exist.
@@ -161,7 +159,7 @@ def init(claims):
     return get_auth_url_response(dest)
 
 
-@module.route('/services/withings/redirect', methods=['GET'])
+@module.route('/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.withings.com'])
 @auth_util.claims_required
 def redirect(claims):

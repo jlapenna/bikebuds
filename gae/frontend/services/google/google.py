@@ -36,7 +36,7 @@ SCOPES = [
 ]
 
 
-@module.route('/services/google/init', methods=['GET', 'POST'])
+@module.route('/init', methods=['GET', 'POST'])
 @auth_util.claims_required
 def init(claims):
     """Step 1. Starts the service connection by redirecting to the service."""
@@ -59,7 +59,7 @@ def init(claims):
         return flask.redirect(auth_url)
 
 
-@module.route('/services/google/redirect', methods=['GET'])
+@module.route('/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.google.com'])
 @auth_util.claims_required
 def redirect(claims):

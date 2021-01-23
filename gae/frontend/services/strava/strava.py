@@ -35,12 +35,10 @@ from shared import responses
 
 SERVICE_NAME = 'strava'
 
-module = flask.Blueprint(
-    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
-)
+module = flask.Blueprint(SERVICE_NAME, __name__)
 
 
-@module.route('/services/strava/events', methods=['GET'])
+@module.route('/events', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
 def events_get():
     challenge = flask.request.args.get('hub.challenge')
@@ -52,7 +50,7 @@ def events_get():
     return flask.jsonify({'hub.challenge': challenge})
 
 
-@module.route('/services/strava/events', methods=['POST'])
+@module.route('/events', methods=['POST'])
 @cross_origin(origins=['https://www.strava.com'])
 def events_post():
     # I guess someone could DOS us with events, I guess they're not
@@ -107,7 +105,7 @@ def events_post():
     return responses.OK
 
 
-@module.route('/services/strava/init', methods=['GET', 'POST'])
+@module.route('/init', methods=['GET', 'POST'])
 # @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def init(claims):
@@ -120,14 +118,14 @@ def init(claims):
     return get_auth_url_response(dest)
 
 
-@module.route('/services/strava/echo', methods=['GET'])
+@module.route('/echo', methods=['GET'])
 def echo():
     """Step 2. Echos an authentication url that can be used to store credentials."""
     url = flask.request.url.replace('echo', 'admin')
     return ECHO_RESPONSE % (url,)
 
 
-@module.route('/services/strava/admin', methods=['GET'])
+@module.route('/admin', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def admin(claims):
@@ -137,7 +135,7 @@ def admin(claims):
     return store_auth(bot)
 
 
-@module.route('/services/strava/redirect', methods=['GET'])
+@module.route('/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
 @auth_util.claims_required
 def redirect(claims):

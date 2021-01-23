@@ -35,11 +35,11 @@ from services.withings import withings
 
 app = flask.Flask(__name__)
 app.secret_key = config.flask_secret_creds['secret']
-app.register_blueprint(bbfitbit.module)
-app.register_blueprint(google.module)
-app.register_blueprint(slack.module)
-app.register_blueprint(strava.module)
-app.register_blueprint(withings.module)
+app.register_blueprint(bbfitbit.module, url_prefix='/services/fitbit')
+app.register_blueprint(google.module, url_prefix='/services/google')
+app.register_blueprint(slack.module, url_prefix='/services/slack')
+app.register_blueprint(strava.module, url_prefix='/services/strava')
+app.register_blueprint(withings.module, url_prefix='/services/withings')
 CORS(app, origins=config.cors_origins)
 Talisman(app, force_https_permanent=True)
 

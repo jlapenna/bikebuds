@@ -26,13 +26,11 @@ from shared.datastore.subscription import SubscriptionEvent
 
 SERVICE_NAME = 'slack'
 
-module = flask.Blueprint(
-    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
-)
+module = flask.Blueprint(SERVICE_NAME, __name__)
 
 slack_events_adapter = SlackEventAdapter(
     config.slack_creds['signing_secret'],
-    endpoint="/services/slack/events",
+    endpoint="/events",
     server=module,
 )
 

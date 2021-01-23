@@ -27,9 +27,7 @@ from shared.datastore.user import User
 
 SERVICE_NAME = 'fitbit'
 
-module = flask.Blueprint(
-    SERVICE_NAME, __name__, template_folder='templates', static_folder='static'
-)
+module = flask.Blueprint(SERVICE_NAME, __name__)
 
 
 @module.route('/services/fitbit/init', methods=['GET', 'POST'])
