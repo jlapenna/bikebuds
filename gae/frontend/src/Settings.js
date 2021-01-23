@@ -20,10 +20,10 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 
-import GarminServiceCard from './GarminServiceCard';
 import Preferences from './Preferences';
 import ProfileCard from './ProfileCard';
 import ServiceCard from './ServiceCard';
+import UserPassServiceCard from './UserPassServiceCard';
 
 class Settings extends Component {
   static styles = createStyles({
@@ -74,7 +74,7 @@ class Settings extends Component {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <GarminServiceCard
+          <UserPassServiceCard
             firebase={this.props.firebase}
             serviceName={'garmin'}
             bikebudsApi={this.props.bikebudsApi}

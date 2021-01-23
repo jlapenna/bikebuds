@@ -17,11 +17,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import GarminServiceCard from './GarminServiceCard';
+import UserPassServiceCard from './UserPassServiceCard';
 
 it('renders without crashing', () => {
   const firebase = createFirebaseState();
   const div = document.createElement('div');
-  ReactDOM.render(<GarminServiceCard firebase={firebase} />, div);
+  ReactDOM.render(<UserPassServiceCard firebase={firebase} serviceName='example' />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

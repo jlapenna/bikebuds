@@ -34,7 +34,7 @@ import moment from 'moment';
 import cloneDeepWith from 'lodash/cloneDeepWith';
 import makeCancelable from 'makecancelable';
 
-class GarminServiceCard extends Component {
+class UserPassServiceCard extends Component {
   static styles = createStyles({
     root: {
       /* Relative lets the progressIndicator position itself. */
@@ -89,8 +89,8 @@ class GarminServiceCard extends Component {
   }
 
   componentWillUnmount() {
-    if (this._cancelConnectGarmin) {
-      this._cancelConnectGarmin();
+    if (this._cancelConnectUserPass) {
+      this._cancelConnectUserPass();
     }
     if (this._cancelDisconnect) {
       this._cancelDisconnect();
@@ -117,8 +117,9 @@ class GarminServiceCard extends Component {
         console.error
       );
     } else {
-      this._cancelConnectGarmin = makeCancelable(
-        this.props.bikebudsApi.connect_garmin({
+      this._cancelConnectUserPass = makeCancelable(
+        this.props.bikebudsApi.connect_userpass({
+          name: this.props.serviceName,
           payload: {
             username: this.state.username,
             password: this.state.password,
@@ -223,7 +224,7 @@ class GarminServiceCard extends Component {
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="h5">Garmin</Typography>
+            <Typography variant="h5">{this.props.serviceName}</Typography>
           </Grid>
           <Grid>
             {this.renderSyncStatus()}
@@ -326,4 +327,4 @@ class GarminServiceCard extends Component {
     );
   }
 }
-export default withStyles(GarminServiceCard.styles)(GarminServiceCard);
+export default withStyles(UserPassServiceCard.styles)(UserPassServiceCard);
