@@ -30,6 +30,5 @@ def create_client(service):
         raise Exception(
             'Cannot create Trainerroad client without creds: %s' % (service,)
         )
-    creds = service.get('credentials', {})
-
-    return TrainerRoad(creds['username'], creds['password'])
+    creds = service['credentials']
+    return TrainerRoad(creds['username'], Service.get_credentials_password(creds))

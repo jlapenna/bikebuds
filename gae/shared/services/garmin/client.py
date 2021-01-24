@@ -65,7 +65,9 @@ def create(service):
         Service.update_credentials(service, {'session_state': session_state})
 
     garmin = Garmin(
-        creds['username'], creds['password'], refresh_callback=refresh_callback
+        creds['username'],
+        Service.get_credentials_password(creds),
+        refresh_callback=refresh_callback,
     )
     try:
         garmin.set_session_state(**session_state)

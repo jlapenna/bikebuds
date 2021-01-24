@@ -285,7 +285,7 @@ class ConnectUserPassResource(Resource):
         user = User.get(claims)
         connect_userpass = api.payload
         service = Service.get(name, parent=user.key)
-        Service.update_credentials(service, connect_userpass)
+        Service.update_credentials_userpass(service, connect_userpass)
         ds_util.client.put(service)
         return WrapEntity(service)
 

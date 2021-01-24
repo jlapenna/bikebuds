@@ -19,6 +19,7 @@ from google.cloud.datastore.entity import Entity
 from google.cloud.datastore.key import Key
 
 from shared import ds_util
+from shared import fernet_util
 
 
 class Service(object):
@@ -65,12 +66,27 @@ class Service(object):
         return service['credentials']
 
     @classmethod
+    def update_credentials_userpass(cls, service, new_credentials: dict) -> dict:
+        if new_credentials is not None and 'password' in new_credentials:
+            # We will only attempt to encrypt a password field if there is a
+            # password field. (This method might be un-setting a password, or
+            # updating another creds attribute)
+            new_credentials['password'] = fernet_util.fernet.encrypt(
+                bytes(new_credentials['password'], 'utf-8')
+            )
+        return Service.update_credentials(service, new_credentials)
+
+    @classmethod
     def has_credentials(cls, service, required_key='refresh_token'):
         return bool(
             service is not None
             and service.get('credentials')
             and (required_key is None or service['credentials'].get(required_key))
         )
+
+    @classmethod
+    def get_credentials_password(cls, creds):
+        return fernet_util.fernet.decrypt(creds['password'])
 
     @classmethod
     def set_sync_enqueued(cls, service):

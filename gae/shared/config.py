@@ -55,6 +55,9 @@ class _Config(object):
         self.flask_secret_creds = json.load(
             open(os.path.join(base_path, 'service_keys/flask-secret.json'))
         )
+        self.passkey_secret_creds = json.load(
+            open(os.path.join(base_path, 'service_keys/passkey.json'))
+        )
 
 
 config = _Config(os.environ.get('BIKEBUDS_ENV', 'environments/env'))
