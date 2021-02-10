@@ -42,4 +42,4 @@ google-python-cloud-debugger==2.15
 git+git://github.com/jlapenna/python-slack-events-api@master
 
 # pass_util.py
-cryptography==3.3.1
+cryptography==3.3.2
