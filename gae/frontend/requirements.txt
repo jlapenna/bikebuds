@@ -9,16 +9,16 @@ requests==2.25.1
 requests-toolbelt==0.9.1
 
 # auth_util3.py
-firebase-admin==4.5.1
-google-auth==1.24.0
-google-auth-httplib2==0.0.4
-google-auth-oauthlib==0.4.2
+firebase-admin==4.5.2
+google-auth==1.27.1
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.4.3
 
 # ds_helper.py
 google-cloud-datastore==2.1.0
 
 # task_util.py
-google-cloud-tasks==2.1.0
+google-cloud-tasks==2.2.0
 
 # /services/
 fitbit==0.3.1
@@ -35,11 +35,11 @@ Babel==2.9.0
 sortedcontainers==2.3.0
 
 # Stackdriver
-google-cloud-profiler==2.0.4
+google-cloud-profiler==2.0.6
 google-python-cloud-debugger==2.15
 
 # Slack
 git+git://github.com/jlapenna/python-slack-events-api@master
 
 # pass_util.py
-cryptography==3.3.2
+cryptography==3.4.6
