@@ -31,4 +31,4 @@ google-cloud-profiler==2.0.4
 google-python-cloud-debugger==2.15
 
 # pass_util.py
-cryptography==3.3.1
+cryptography==3.3.2
