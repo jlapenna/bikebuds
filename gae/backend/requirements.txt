@@ -35,10 +35,6 @@ Babel==2.9.0
 # Utility
 sortedcontainers==2.3.0
 
-# Stackdriver
-google-cloud-profiler==2.0.6
-google-python-cloud-debugger==2.15
-
 # Slack
 slackclient
 bs4
