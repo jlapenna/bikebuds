@@ -36,6 +36,7 @@ function source_files() {
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/build)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/package-lock.json)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
     \) -prune -o \
     \( \
@@ -49,6 +50,33 @@ function source_files() {
     \) -type f -print \
     ;
 
+}
+
+function config_files() {
+  find . \
+    \( \
+    -path "./$(realpath --relative-to=. $REPO_PATH/virtualenv)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/.dart_tool)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/client/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/build)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
+    -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
+    \) -prune -o \
+    \( \
+        -name '*.yaml' -o \
+        -name '*requirements*txt' -o \
+        -name '*.json' \
+    \) -type f -print \
+    ;
+
+}
+
+function cgrep() {
+  egrep "$@" $(config_files)
 }
 
 function sgrep() {
