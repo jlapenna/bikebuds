@@ -46,7 +46,7 @@ def sync():
 
     service = ds_util.client.get(params['service_key'])
     if not Service.has_credentials(service, required_key='password'):
-        logging.warn('No creds: %s', service.key)
+        logging.warning('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
         return responses.OK_NO_CREDENTIALS
 
