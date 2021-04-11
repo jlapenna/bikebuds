@@ -84,7 +84,7 @@ class EventsWorker(object):
                     self.event.key,
                 )
             else:
-                logging.warn(
+                logging.warning(
                     'StravaEvent: Update object_type %s not implemented: %s',
                     object_type,
                     self.event.key,

@@ -42,7 +42,7 @@ module = flask.Blueprint(SERVICE_NAME, __name__)
 def events_head():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
-        logging.warn(
+        logging.warning(
             'WithingsEvent: Invalid sub_secret: Provided %s, expected %s'
             % (sub_secret, config.withings_creds['sub_secret'])
         )
@@ -54,7 +54,7 @@ def events_head():
 def events_post():
     sub_secret = flask.request.args.get('sub_secret', None)
     if sub_secret != config.withings_creds['sub_secret']:
-        logging.warn(
+        logging.warning(
             'WithingsEvent: Invalid sub_secret: Provided %s, expected %s'
             % (sub_secret, config.withings_creds['sub_secret'])
         )

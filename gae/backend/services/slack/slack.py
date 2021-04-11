@@ -68,7 +68,7 @@ def process_link_shared(event):
             unfurls[link['url']] = unfurl
     if not unfurls:
         return responses.OK
-    logging.warn('process_link_shared: debug: unfurling: %s', unfurls)
+    logging.warning('process_link_shared: debug: unfurling: %s', unfurls)
 
     try:
         response = slack_client.chat_unfurl(
@@ -78,7 +78,7 @@ def process_link_shared(event):
         )
     except SlackApiError as e:
         logging.exception('process_link_shared: failed: unfurling: %s', unfurls)
-        logging.warn('dir: %s', dir(e))
+        logging.warning('dir: %s', dir(e))
         return responses.INTERNAL_SERVER_ERROR
 
     if not response['ok']:
@@ -101,7 +101,7 @@ def _resolve_rewrite_link(link):
         return
     match = _STRAVA_APP_LINK_REGEX.search(str(contents))
     if match is None:
-        logging.warn('Could not resolve %s', link['url'])
+        logging.warning('Could not resolve %s', link['url'])
         return
     resolved_url = match.group()
     return resolved_url

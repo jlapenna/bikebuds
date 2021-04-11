@@ -33,14 +33,14 @@ app = firebase_util.get_app()
 
 def create_custom_token(claims):
     if config.is_dev and config.fake_user:
-        logging.warn('Create Custom Token: Using Fake User')
+        logging.warning('Create Custom Token: Using Fake User')
         return b'FAKE TOKEN'
     return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
 
 def fake_claims():
     if config.is_dev and config.fake_user:
-        logging.warn('Using Fake User')
+        logging.warning('Using Fake User')
         return {
             'sub': config.fake_user,
             'roleAdmin': True,

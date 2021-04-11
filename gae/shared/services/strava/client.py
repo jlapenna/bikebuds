@@ -58,7 +58,7 @@ class ClientWrapper(object):
 
     def _refresh_access_token(self):
         if self._service['credentials'].get('refresh_token') is None:
-            logging.warn(
+            logging.warning(
                 'Cannot refresh_access_token for %s, no refresh_token',
                 self._service.key,
             )
