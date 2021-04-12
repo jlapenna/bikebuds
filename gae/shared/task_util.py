@@ -250,9 +250,9 @@ def process_backfill(
     )
 
 
-def process_pubsub_rides(user, payload):
+def process_pubsub_rides(user: Entity, data: dict):
     return _queue_task(
-        entity=_params_entity(user=user, payload=payload),
+        entity=_params_entity(user=user, data=data),
         relative_uri='/services/google/process/rides',
         service='backend',
         parent=_gmail_pubsub_parent,

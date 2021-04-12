@@ -16,10 +16,10 @@ import datetime
 import logging
 import re
 
+from google.cloud.datastore.entity import Entity
+import dateutil.parser
 import flask
 import requests
-
-import dateutil.parser
 
 from shared import auth_util
 from shared import ds_util
@@ -27,6 +27,7 @@ from shared import responses
 from shared import task_util
 from shared.datastore.series import Series
 from shared.datastore.service import Service
+from shared.datastore.track import Track
 from shared.exceptions import SyncException
 from shared.services.garmin import client as garmin_client
 
@@ -49,7 +50,7 @@ def process_livetrack():
     logging.info('process/livetrack: %s', url)
 
     try:
-        sync_helper.do(LivetrackWorker(url=url), work_key=url)
+        sync_helper.do(TrackWorker(url=url), work_key=url)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -62,7 +63,7 @@ def sync():
 
     service = ds_util.client.get(params['service_key'])
     if not Service.has_credentials(service, required_key='password'):
-        logging.warn('No creds: %s', service.key)
+        logging.warning('No creds: %s', service.key)
         Service.set_sync_finished(service, error='No credentials')
         return responses.OK_NO_CREDENTIALS
 
@@ -102,8 +103,8 @@ class Worker(object):
         ds_util.client.put(series)
 
 
-class LivetrackWorker(object):
-    def __init__(self, url):
+class TrackWorker(object):
+    def __init__(self, url: str):
         self.url = url
 
     def sync(self):
@@ -116,59 +117,85 @@ class LivetrackWorker(object):
                 str(url_info.keys()),
             )
             return responses.OK_INVALID_LIVETRACK
-        self._process_livetrack(url_info)
+
+        track_entity = _process_livetrack(self.url, url_info)
+        ds_util.client.put(track_entity)
+        if track_entity.get('status', Track.STATUS_UNKNOWN) <= 0:
+            logging.warning('Sync failed: %s', track_entity)
+            return responses.OK_INVALID_LIVETRACK
         return responses.OK
 
-    def _process_livetrack(self, url_info):
-        """Now we know enough to fetch livetrack info."""
-        session = requests.Session()
-        now = datetime.datetime.now(datetime.timezone.utc)
-        now_millis = int(now.timestamp() * 1000)
 
-        # Gets info about the session, such as a user's name.
-        response = session.get(
-            LIVETRACK_INFO_URL % dict(**url_info, **{'requestTime': now_millis})
-        )
-        if response.status_code != 200:
-            logging.debug('Invalid LiveTrack: %s (No session info)', self.url)
-            return
-        livetrack_info = response.json()
+def _process_livetrack(url: str, url_info: dict) -> Entity:
+    """Now we know enough to fetch livetrack info."""
+    track = {'url': url, 'url_info': url_info}
 
-        # livetrack_start = livetrack_info['session']['start']
+    session = requests.Session()
+
+    # Gets info about the session, such as a user's name.
+    now = datetime.datetime.now(datetime.timezone.utc)
+    request_time_millis = int(now.timestamp() * 1000)
+    response = session.get(
+        LIVETRACK_INFO_URL % dict(**url_info, **{'requestTime': request_time_millis})
+    )
+    if response.status_code != 200:
+        logging.debug('Invalid Track: http request failed: %s', response.status_code)
+        track['status'] = Track.STATUS_FAILED
+        return Track.to_entity(track)
+
+    response_json = response.json()
+    if response_json.get('statusCode', 200) != 200:
+        logging.debug('Invalid Track: %s (No session info)', url)
+        track['status'] = Track.STATUS_FAILED
+        return Track.to_entity(track)
+    track['info'] = response_json
+    track['status'] = Track.STATUS_INFO
+    logging.debug('Track: %s', track)
+
+    if 'start' in track['info']['session']:
+        track['status'] = Track.STATUS_STARTED
         # livetrack_start_millis = int(
-        #     dateutil.parser.parse(livetrack_info['session']['start']).timestamp() * 1000
+        #     dateutil.parser.parse(track['session_data']['session']['start']).timestamp()
+        #     * 1000
         # )
-        ended_ago = now - dateutil.parser.parse(livetrack_info['session']['end'])
+    if 'end' in track['info']['session']:
+        ended_ago = now - dateutil.parser.parse(track['info']['session']['end'])
         if ended_ago:
             logging.debug(
-                'Invalid LiveTrack: %s (Already finished %s ago)', self.url, ended_ago
+                'Invalid LiveTrack: %s (Already finished %s ago)', url, ended_ago
             )
+        track['status'] = Track.STATUS_FINISHED
+        return Track.to_entity(track)
 
-        # Gets some coures info, like perhaps, where they currently are.
-        response = session.get(
-            LIVETRACK_TRACKPOINTS_FIRST_URL
-            % dict(**livetrack_info, **{'requestTime': now_millis})
-        )
-        if response.status_code != 200:
-            logging.debug('Invalid LiveTrack: %s (Failed fetching points)', self.url)
-            return
-        track_points = response.json().get('trackPoints', [])
-        if not track_points:
-            logging.debug('Invalid LiveTrack: %s (0 points)', self.url)
-            return
-        logging.debug(
-            'Found livetrack points: %s: %s %s',
-            self.url,
-            response.url,
-            len(track_points),
-        )
-        recent_millis = (
-            dateutil.parser.parse(track_points[-1]['dateTime']).timestamp() * 1000
-        )
-        # I can use recent_millis to get only the latest points from livetracks, if i wanted.
-        logging.debug(
-            'Found most recent livetrack points: %s: %s %s',
-            self.url,
-            response.url,
-            recent_millis,
-        )
+    # Gets some coures info, like perhaps, where they currently are.
+    response = session.get(
+        LIVETRACK_TRACKPOINTS_FIRST_URL
+        % dict(**track['url_info'], **{'requestTime': request_time_millis})
+    )
+    if response.status_code != 200:
+        logging.debug('Invalid LiveTrack: %s (Failed fetching points)', url)
+        track['status'] = Track.STATUS_FAILED
+        return Track.to_entity(track)
+
+    track['trackpoints'] = response.json()
+    track['status'] = Track.STATUS_TRACKPOINTS
+
+    if not 'trackPoints' not in track:
+        logging.debug('Invalid LiveTrack: %s (0 points)', url)
+    logging.debug(
+        'Found livetrack points: %s -> %s',
+        url,
+        len(track['trackPoints']),
+    )
+    most_recent_millis = (
+        dateutil.parser.parse(track['trackPoints'][-1]['dateTime']).timestamp() * 1000
+    )
+    # I can use most_recent_millis to get only the latest points from livetracks, if i wanted.
+    logging.debug(
+        'Found most recent livetrack points: %s: %s %s',
+        url,
+        response.url,
+        most_recent_millis,
+    )
+    track['status'] = Track.SUCCESS
+    return Track.to_entity(track)
