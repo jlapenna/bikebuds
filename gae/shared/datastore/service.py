@@ -29,6 +29,7 @@ class Service(object):
     def _set_defaults(cls, service):
         service['sync_state'] = service.get('sync_state', {})
         service['sync_enabled'] = service.get('sync_enabled', True)
+        service['settings'] = service.get('settings', {})
 
     @classmethod
     def get(cls, name: str, parent: Key = None):

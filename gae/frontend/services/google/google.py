@@ -21,6 +21,7 @@ import google_auth_oauthlib
 
 from shared import auth_util
 from shared import task_util
+from shared import responses
 from shared.config import config
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
@@ -31,13 +32,18 @@ SERVICE_NAME = 'google'
 module = flask.Blueprint(SERVICE_NAME, __name__)
 
 SCOPES = [
-    'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/userinfo.profile',
 ]
 
 
+@module.route('/ok', methods=['GET', 'POST'])
+def ok():
+    return responses.OK
+
+
 @module.route('/init', methods=['GET', 'POST'])
-@auth_util.claims_required
+@auth_util.admin_claims_required
 def init(claims):
     """Step 1. Starts the service connection by redirecting to the service."""
     bot = Bot.get()
@@ -50,7 +56,7 @@ def init(claims):
     )
     flow.redirect_uri = get_redirect_uri(dest)
     auth_url, flask.session['state'] = flow.authorization_url(
-        access_type='offline', include_granted_scopes='true', prompt='consent'
+        access_type='offline', prompt='consent'
     )
     logging.debug('Auth state: %s', flask.session['state'])
     if flask.request.method == 'POST':
@@ -64,7 +70,6 @@ def init(claims):
 @auth_util.admin_claims_required
 def admin(claims):
     """Step 2. Stores a bot's credentials."""
-    auth_util.verify_admin(flask.request)
     bot = Bot.get()
     redirect = store_auth(bot)
     task_util.sync_service(Service.get(SERVICE_NAME, parent=bot.key))
