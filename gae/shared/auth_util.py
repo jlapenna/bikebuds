@@ -51,6 +51,18 @@ def fake_claims():
         return None
 
 
+def admin_claims_required(func):
+    @functools.wraps(func)
+    def wrapper():
+        try:
+            claims = verify_admin(flask.request)
+        except Exception as e:
+            return 'Unauthorized', e.code
+        return func(claims)
+
+    return wrapper
+
+
 def claims_required(func):
     @functools.wraps(func)
     def wrapper():

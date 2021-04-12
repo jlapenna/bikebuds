@@ -34,7 +34,9 @@ from shared.services.withings.client import create_client as withings_create_cli
 from models import (
     club_entity_model,
     key_model,
+    service_entity_model,
     service_model,
+    sync_model,
     user_entity_model,
     WrapEntity,
 )
@@ -240,3 +242,29 @@ class ClubUntrackResource(Resource):
             ds_util.client.delete(club.key)
 
         return None
+
+
+@api.route('/service/<name>')
+class ServiceResource(Resource):
+    @api.doc('get_admin_service')
+    @api.marshal_with(service_entity_model, skip_none=True)
+    def get(self, name):
+        auth_util.verify_admin(flask.request)
+        bot_key = Bot.key()
+
+        service = Service.get(name, parent=bot_key)
+        return WrapEntity(service)
+
+
+@api.route('/sync/<name>')
+class SyncResource(Resource):
+    @api.doc('sync_admin_service', body=sync_model)
+    @api.marshal_with(service_entity_model, skip_none=True)
+    def post(self, name):
+        auth_util.verify_admin(flask.request)
+        bot_key = Bot.key()
+
+        force = api.payload.get('force', False)
+        service = Service.get(name, parent=bot_key)
+        task_util.sync_service(service, force=force)
+        return WrapEntity(service)
