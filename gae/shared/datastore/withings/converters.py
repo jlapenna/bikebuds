@@ -37,13 +37,10 @@ class _MeasureConverter(object):
         for m in measure_group.measures:
             if m.value is not None:
                 attributes[m.type.name.lower()] = m.value * (10 ** m.unit)
-        entity = Entity(
-            ds_util.client.key('Measure', measure_group.date.timestamp, parent=parent)
-        )
+        date = measure_group.date.datetime.replace(tzinfo=datetime.timezone.utc)
+        entity = Entity(ds_util.client.key('Measure', date.timestamp(), parent=parent))
         entity.update(attributes)
-        entity['date'] = measure_group.date.datetime.replace(
-            tzinfo=datetime.timezone.utc
-        )
+        entity['date'] = date
         return entity
 
 
