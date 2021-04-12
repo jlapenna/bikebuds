@@ -26,7 +26,7 @@ stravalib==0.10.2
 withings-api==2.3.0
 
 # trainerroad
-lxml==4.6.2
+lxml==4.6.3
 
 # For natural language dates and such
 Babel==2.9.0
