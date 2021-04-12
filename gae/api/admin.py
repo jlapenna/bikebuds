@@ -53,6 +53,7 @@ user_state_model = api.model(
     'UserState',
     {
         'user': fields.Nested(user_entity_model, skip_none=True),
+        'google': fields.Nested(service_model, skip_none=True),
         'strava': fields.Nested(service_model, skip_none=True),
         'withings': fields.Nested(service_model, skip_none=True),
         'fitbit': fields.Nested(service_model, skip_none=True),
@@ -68,7 +69,8 @@ class BotResource(Resource):
         auth_util.verify_admin(flask.request)
         user = Bot.get()
         strava = Service.get('strava', parent=user.key)
-        return {'strava': WrapEntity(strava)}
+        google = Service.get('google', parent=user.key)
+        return {'strava': WrapEntity(strava), 'google': WrapEntity(google)}
 
 
 @api.route('/strava_auth_url')
@@ -170,12 +172,14 @@ class GetUsersResource(Resource):
     def get(self):
         auth_util.verify_admin(flask.request)
 
+        user_entities = [Bot.get()]
+        user_entities += ds_util.client.query(kind='User').fetch()
         users = []
-        user_entities = ds_util.client.query(kind='User').fetch()
         for user_entity in user_entities:
             users.append(
                 {
                     'user': WrapEntity(user_entity),
+                    'google': Service.get('google', parent=user_entity.key),
                     'strava': Service.get('strava', parent=user_entity.key),
                     'withings': Service.get('withings', parent=user_entity.key),
                     'fitbit': Service.get('fitbit', parent=user_entity.key),

@@ -69,6 +69,7 @@ service_model = api.model(
         'credentials': CredentialsField(default=False),
         'sync_enabled': fields.Boolean(default=False),
         'sync_state': fields.Nested(sync_state_model),
+        'settings': fields.Wildcard(fields.String),
     },
 )
 service_entity_model = EntityModel(service_model)
