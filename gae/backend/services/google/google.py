@@ -45,8 +45,7 @@ def sync():
     params = task_util.get_payload(flask.request)
 
     service = ds_util.client.get(params['service_key'])
-    if not Service.has_credentials(service, required_key='password'):
-        logging.warning('No creds: %s', service.key)
+    if not Service.has_credentials(service):
         Service.set_sync_finished(service, error='No credentials')
         return responses.OK_NO_CREDENTIALS
 

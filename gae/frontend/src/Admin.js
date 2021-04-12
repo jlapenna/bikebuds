@@ -65,6 +65,7 @@ class Admin extends Component {
         </Grid>
         <Grid item>
           <ServiceCard
+            adminApi={this.props.adminApi}
             firebase={this.props.firebase}
             serviceName={'google'}
             bikebudsApi={this.props.bikebudsApi}

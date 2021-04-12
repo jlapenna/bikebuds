@@ -17,6 +17,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { withRouter } from 'react-router';
+
 import { createStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -63,6 +65,7 @@ class ServiceCard extends Component {
   });
 
   static propTypes = {
+    adminApi: PropTypes.object,
     bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     serviceName: PropTypes.string.isRequired,
@@ -74,6 +77,8 @@ class ServiceCard extends Component {
       service: undefined,
       actionPending: false,
     };
+    this.get_service = this.props.adminApi ? this.props.adminApi.get_admin_service : this.props.bikebudsApi.get_service;
+    this.sync_service = this.props.adminApi ? this.props.adminApi.sync_admin_service : this.props.bikebudsApi.sync_service;
   }
 
   componentDidMount() {
@@ -81,9 +86,17 @@ class ServiceCard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.bikebudsApi && this.state.service === undefined) {
-      this.props.bikebudsApi
-        .get_service({ name: this.props.serviceName })
+    if (this.state.service) {
+      return;
+    }
+    if (this.props.adminApi) {
+      // This is so ugly, but I'm not sure what the pattern I want to use here,
+      // is. Probably an HOC.
+      this.props.adminApi
+        .get_admin_service({ name: this.props.serviceName })
+        .then(this.handleService);
+    } else if (this.props.bikebudsApi) {
+      this.get_service({ name: this.props.serviceName })
         .then(this.handleService);
     }
   }
@@ -120,7 +133,7 @@ class ServiceCard extends Component {
             config.frontend_url +
               '/services/' +
               this.props.serviceName +
-              '/init?dest=/settings'
+              '/init?dest=' + this.props.location.pathname
           );
         } else {
           console.warn('Unable to create a session.', response);
@@ -131,6 +144,7 @@ class ServiceCard extends Component {
   };
 
   handleService = response => {
+    console.log(response);
     response.body.properties.sync_date =
       response.body.properties.sync_successful &&
       !!response.body.properties.sync_date
@@ -150,7 +164,7 @@ class ServiceCard extends Component {
   handleSync = () => {
     this.setState({ actionPending: true });
     this._cancelSync = makeCancelable(
-      this.props.bikebudsApi.sync_service({
+      this.sync_service({
         name: this.props.serviceName,
         payload: {},
       }),
@@ -299,4 +313,4 @@ class ServiceCard extends Component {
     );
   }
 }
-export default withStyles(ServiceCard.styles)(ServiceCard);
+export default withRouter(withStyles(ServiceCard.styles)(ServiceCard));

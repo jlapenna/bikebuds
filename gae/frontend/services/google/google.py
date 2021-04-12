@@ -22,8 +22,8 @@ import google_auth_oauthlib
 from shared import auth_util
 from shared import task_util
 from shared.config import config
+from shared.datastore.bot import Bot
 from shared.datastore.service import Service
-from shared.datastore.user import User
 
 
 SERVICE_NAME = 'google'
@@ -40,8 +40,8 @@ SCOPES = [
 @auth_util.claims_required
 def init(claims):
     """Step 1. Starts the service connection by redirecting to the service."""
-    user = User.get(claims)
-    Service.get(SERVICE_NAME, parent=user.key)
+    bot = Bot.get()
+    Service.get(SERVICE_NAME, parent=bot.key)
 
     dest = flask.request.args.get('dest', '')
 
@@ -59,13 +59,36 @@ def init(claims):
         return flask.redirect(auth_url)
 
 
-@module.route('/redirect', methods=['GET'])
+@module.route('/admin', methods=['GET'])
 @cross_origin(origins=['https://www.google.com'])
-@auth_util.claims_required
-def redirect(claims):
-    """Step 2. Stores information coming from the service in the appropriate local store."""
-    user = User.get(claims)
-    service = Service.get(SERVICE_NAME, parent=user.key)
+@auth_util.admin_claims_required
+def admin(claims):
+    """Step 2. Stores a bot's credentials."""
+    auth_util.verify_admin(flask.request)
+    bot = Bot.get()
+    redirect = store_auth(bot)
+    task_util.sync_service(Service.get(SERVICE_NAME, parent=bot.key))
+    return redirect
+
+
+def get_redirect_uri(dest):
+    """Returns a fully qualified URL for the service to redirect back to."""
+    return config.frontend_url + '/services/google/admin?dest=' + dest
+
+
+def credentials_to_dict(credentials):
+    return {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes,
+    }
+
+
+def store_auth(bot):
+    service = Service.get(SERVICE_NAME, parent=bot.key)
 
     dest = flask.request.args.get('dest', '')
 
@@ -83,22 +106,4 @@ def redirect(claims):
 
     Service.update_credentials(service, creds)
 
-    task_util.sync_service(service)
-
     return flask.redirect('/services/redirect?dest=' + dest)
-
-
-def get_redirect_uri(dest):
-    """Returns a fully qualified URL for the service to redirect back to."""
-    return config.frontend_url + '/services/google/redirect?dest=' + dest
-
-
-def credentials_to_dict(credentials):
-    return {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes,
-    }
