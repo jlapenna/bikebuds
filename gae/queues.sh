@@ -9,7 +9,7 @@ QUEUES=("
   slack
   notifications
   backfill
-  gmail_pubsub
+  gmail
   livetrack
 ")
 

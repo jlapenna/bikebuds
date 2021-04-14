@@ -52,9 +52,7 @@ _notifications_parent = _client.queue_path(
 _backfill_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'backfill'
 )
-_gmail_pubsub_parent = _client.queue_path(
-    config.project_id, config.tasks_location, 'gmail_pubsub'
-)
+_gmail_parent = _client.queue_path(config.project_id, config.tasks_location, 'gmail')
 _livetrack_parent = _client.queue_path(
     config.project_id, config.tasks_location, 'livetrack'
 )
@@ -255,7 +253,7 @@ def process_pubsub_rides(user, payload):
         entity=_params_entity(user=user, payload=payload),
         relative_uri='/services/google/process/rides',
         service='backend',
-        parent=_gmail_pubsub_parent,
+        parent=_gmail_parent,
     )
 
 
