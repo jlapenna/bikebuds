@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python38
+runtime: python39
 
 # Despite the documentation, at least for dev_appserver, handlers aren't
 # handled in order; instead the final /.* seems to catch things specified before
