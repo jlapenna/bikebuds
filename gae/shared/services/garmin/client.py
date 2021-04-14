@@ -107,8 +107,13 @@ class Garmin(object):
 
     def set_session_state(self, cookies=None, profile=None, preferences=None):
         if cookies or profile or preferences:
-            if not (cookies and profile and preferences):
-                raise ValueError('Must pass all or nothing.')
+            if None in (cookies and profile and preferences):
+                raise ValueError(
+                    'Must pass all or nothing. cookies: %s, profile: %s, preferences: %s',
+                    cookies,
+                    profile,
+                    preferences,
+                )
         self._session = requests.Session()
         self._session.headers.update(HEADERS)
         if cookies:
