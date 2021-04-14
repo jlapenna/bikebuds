@@ -25,4 +25,6 @@ def do(worker, work_key=None, method='sync'):
         logging.info('Worker completed: %s/%s', work_name, work_key)
     except Exception as e:
         logging.exception('Worker failed: %s/%s', work_name, work_key)
-        raise SyncException('Worker failed: %s/%s' % (work_name, work_key)) from e
+        raise SyncException(
+            'Worker failed: %s/%s: %s' % (work_name, work_key, e)
+        ) from e
