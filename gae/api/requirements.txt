@@ -2,13 +2,13 @@
 Flask==1.1.2
 Flask-Cors==3.0.10
 Werkzeug==1.0.1 # https://github.com/python-restx/flask-restx/issues/34
-flask-restx==0.2.0
+flask-restx==0.3.0
 
 # auth_util3.py
-firebase-admin==4.5.2
-google-auth==1.27.1
+firebase-admin==4.5.3
+google-auth==1.28.1
 google-auth-httplib2==0.1.0
-google-auth-oauthlib==0.4.3
+google-auth-oauthlib==0.4.4
 
 # ds_helper.py
 google-cloud-datastore==2.1.0
@@ -18,7 +18,7 @@ google-cloud-tasks==2.2.0
 
 # /services/
 stravalib==0.10.2
-withings-api==2.3.0
+withings-api==2.3.2
 
 # For natural language dates and such
 Babel==2.9.0
@@ -27,4 +27,4 @@ Babel==2.9.0
 sortedcontainers==2.3.0
 
 # pass_util.py
-cryptography==3.4.6
+cryptography==3.4.7

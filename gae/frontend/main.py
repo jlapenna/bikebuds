@@ -79,14 +79,14 @@ def unittest():
     return responses.OK
 
 
-@app.before_request
-def before():
-    logging_util.before()
-
-
-@app.after_request
-def after(response):
-    return logging_util.after(response)
+# @app.before_request
+# def before():
+#     logging_util.before()
+#
+#
+# @app.after_request
+# def after(response):
+#     return logging_util.after(response)
 
 
 if __name__ == '__main__':
