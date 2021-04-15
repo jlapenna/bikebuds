@@ -17,16 +17,6 @@ import collections
 import flask
 
 
-class ResponseException(Exception):
-    def __init__(self, response):
-        self.code = response.code
-        self.description = response.message
-
-
-def abort(response):
-    flask.abort(response.code, response.message)
-
-
 Response = collections.namedtuple('Response', ('message', 'code'))
 
 OK = Response('OK', 200)
@@ -42,7 +32,14 @@ OK_INVALID_LIVETRACK = Response('INVALID LIVETRACK', 250)
 OK_UNKNOWN_EXCEPTION = Response('UNKNOWN EXCEPTION', 299)
 
 BAD_REQUEST = Response('BAD REQUEST', 400)
-NO_AUTH_HEADER = Response('BAD REQUEST: Unable to find bearer in headers', 400)
 INVALID_TOKEN = Response('INVALID VERIFY_TOKEN', 401)
+INVALID_COOKIE = Response('INVALID COOKIE', 401)
+INVALID_CLAIMS = Response('INVALID CLAIMS', 401)
+FORBIDDEN = Response('FORBIDDEN', 403)
+FORBIDDEN_NO_ROLE = Response('FORBIDDEN_NO_ROLE', 403)
 
 INTERNAL_SERVER_ERROR = Response('INTERNAL SERVER ERROR', 500)
+
+
+def abort(response: Response):
+    flask.abort(response.code, response.message)

@@ -23,8 +23,10 @@ import google.oauth2.id_token
 import google.auth.transport
 
 from firebase_admin import auth
+from firebase_admin.exceptions import FirebaseError
 
 from shared import firebase_util
+from shared import responses
 from shared.config import config
 
 
@@ -38,27 +40,10 @@ def create_custom_token(claims):
     return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
 
-def fake_claims():
-    if config.is_dev and config.fake_user:
-        logging.warning('Using Fake User')
-        return {
-            'sub': config.fake_user,
-            'roleAdmin': True,
-            'roleBot': True,
-            'roleUser': True,
-        }
-    else:
-        return None
-
-
 def admin_claims_required(func):
     @functools.wraps(func)
     def wrapper():
-        try:
-            claims = verify_admin(flask.request)
-        except Exception as e:
-            return 'Unauthorized', e.code
-        return func(claims)
+        return func(verify_admin(flask.request))
 
     return wrapper
 
@@ -66,30 +51,40 @@ def admin_claims_required(func):
 def claims_required(func):
     @functools.wraps(func)
     def wrapper():
-        try:
-            claims = verify(flask.request)
-        except Exception as e:
-            return 'Unauthorized', e.code
-        return func(claims)
+        return func(verify(flask.request))
 
     return wrapper
 
 
-def verify(request):
+def verify(request: flask.Request):
     if config.is_dev and config.fake_user:
-        return fake_claims()
+        return _fake_claims()
 
     # Check that there is a real user by this identity.
     claims = _verify_claims_from_headers(request)
     if not claims:
         claims = _verify_claims_from_cookie(request)
     if not claims:
-        flask.abort(401, 'Unable to authenticate.')
+        responses.abort(responses.INVALID_CLAIMS)
 
     # Ensure we've given them access to the service.
     if not (claims.get('roleAdmin') or claims.get('roleBot') or claims.get('roleUser')):
-        flask.abort(408, 'No role assigned.')
+        responses.abort(responses.FORBIDDEN_NO_ROLE)
     return claims
+
+
+def verify_admin(request: flask.Request):
+    claims = verify(request)
+    if not (claims and claims.get('roleAdmin')):
+        responses.abort(responses.FORBIDDEN)
+    return claims
+
+
+def get_uid_by_email(email: str):
+    if config.is_dev and config.fake_user:
+        return config.fake_user
+    else:
+        return auth.get_user_by_email(email).uid
 
 
 def _verify_claims_from_headers(request, impersonate=None):
@@ -97,37 +92,17 @@ def _verify_claims_from_headers(request, impersonate=None):
     if 'Authorization' not in request.headers:
         return None
     id_token = request.headers['Authorization'].split(' ').pop()
-
-    claims = None
-    firebase_user = None
     try:
-        claims = google.oauth2.id_token.verify_firebase_token(
+        return google.oauth2.id_token.verify_firebase_token(
             id_token, google.auth.transport.requests.Request()
         )
-        firebase_user = auth.get_user(claims['sub'])
-    except ValueError:
-        try:
-            claims = google.oauth2.id_token.verify_oauth2_token(
-                id_token, google.auth.transport.requests.Request()
-            )
-            # The claims have an email address that we have verified. Use that to
-            # find the firebase user.
-            if claims['iss'] == 'https://accounts.google.com':
-                firebase_user = auth.get_user_by_email(claims['email'])
-                claims = {
-                    'sub': firebase_user.uid,
-                    'email': claims['email'],
-                    'roleAdmin': claims.get('roleAdmin', False),
-                    'roleBot': claims.get('roleBot', False),
-                    'roleUser': claims.get('roleUser', False),
-                }
-        except ValueError:
-            logging.exception('Unable to verify claims')
-
-    if not claims or not firebase_user:
-        flask.abort(401, 'Unable to validate id_token')
-
-    return claims
+    except auth.RevokedIdTokenError:
+        logging.exception('firebase token has been revoked')
+    except auth.ExpiredIdTokenError:
+        logging.exception('firebase token is expired')
+    except auth.InvalidIdTokenError:
+        logging.exception('firebase token is invalid')
+    return None
 
 
 def _verify_claims_from_cookie(request):
@@ -138,19 +113,20 @@ def _verify_claims_from_cookie(request):
     # etc.
     try:
         return auth.verify_session_cookie(session_cookie, check_revoked=True)
+    except FirebaseError:
+        logging.exception('Session cookie was invalid')
     except ValueError:
-        flask.abort(401, 'Unable to validate cookie')
+        logging.exception('Session cookie was invalid')
 
 
-def verify_admin(request):
-    claims = verify(flask.request)
-    if not claims.get('roleAdmin'):
-        flask.abort(401, 'User is not an admin')
-    return claims
-
-
-def get_uid_by_email(email):
+def _fake_claims():
     if config.is_dev and config.fake_user:
-        return config.fake_user
+        logging.warning('Using Fake User')
+        return {
+            'sub': config.fake_user,
+            'roleAdmin': True,
+            'roleBot': True,
+            'roleUser': True,
+        }
     else:
-        return auth.get_user_by_email(email).uid
+        return None
