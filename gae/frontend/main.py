@@ -48,6 +48,11 @@ logging_util.debug_logging()
 logging_util.silence_logs()
 
 
+@app.route('/ok', methods=['GET', 'POST'])
+def ok():
+    return responses.OK
+
+
 @app.route('/services/redirect', methods=['GET'])
 @cross_origin(supports_credentials=True, origins=config.cors_origins)
 def redirect():
