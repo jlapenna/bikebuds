@@ -132,7 +132,7 @@ def _verify_claims_from_headers(request, impersonate=None):
 
 def _verify_claims_from_cookie(request):
     """Return valid claims or throw an Exception."""
-    session_cookie = request.cookies.get('session')
+    session_cookie = request.cookies.get('__Secure-oauthsession')
     # Verify the session cookie. In this case an additional check is added to
     # detect if the user's Firebase session was revoked, user deleted/disabled,
     # etc.

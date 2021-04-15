@@ -72,7 +72,13 @@ def create_session(claims):
 
         response = flask.make_response(flask.jsonify({'status': 'success'}))
         expires = datetime.datetime.now(datetime.timezone.utc) + expires_in
-        response.set_cookie('session', session_cookie, expires=expires, httponly=True)
+        response.set_cookie(
+            '__Secure-oauthsession',
+            session_cookie,
+            expires=expires,
+            httponly=True,
+            secure=True,
+        )
         return response
     except exceptions.FirebaseError:
         logging.exception('Failed to create a session cookie.')
