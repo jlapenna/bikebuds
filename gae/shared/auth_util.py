@@ -30,12 +30,14 @@ from shared import responses
 from shared.config import config
 
 
+logger = logging.getLogger('auth')
+
 app = firebase_util.get_app()
 
 
 def create_custom_token(claims):
     if config.is_dev and config.fake_user:
-        logging.warning('Create Custom Token: Using Fake User')
+        logger.warning('Create Custom Token: Using Fake User')
         return b'FAKE TOKEN'
     return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
@@ -97,11 +99,11 @@ def _verify_claims_from_headers(request, impersonate=None):
             id_token, google.auth.transport.requests.Request()
         )
     except auth.RevokedIdTokenError:
-        logging.exception('firebase token has been revoked')
+        logger.exception('firebase token has been revoked')
     except auth.ExpiredIdTokenError:
-        logging.exception('firebase token is expired')
+        logger.exception('firebase token is expired')
     except auth.InvalidIdTokenError:
-        logging.exception('firebase token is invalid')
+        logger.exception('firebase token is invalid')
     return None
 
 
@@ -114,14 +116,14 @@ def _verify_claims_from_cookie(request):
     try:
         return auth.verify_session_cookie(session_cookie, check_revoked=True)
     except FirebaseError:
-        logging.exception('Session cookie was invalid')
+        logger.exception('Session cookie was invalid')
     except ValueError:
-        logging.exception('Session cookie was invalid')
+        logger.exception('Session cookie was invalid')
 
 
 def _fake_claims():
     if config.is_dev and config.fake_user:
-        logging.warning('Using Fake User')
+        logger.warning('Using Fake User')
         return {
             'sub': config.fake_user,
             'roleAdmin': True,

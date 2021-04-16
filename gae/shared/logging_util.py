@@ -21,11 +21,11 @@ from shared.config import config
 
 
 # Alias our logger for later hacks.
-bb_logger = logging.getLogger()
+logger = logging.getLogger('bblog')
 
-LOG_HEADERS = False
-LOG_QUERY = False
-LOG_RESPONSES = False
+LOG_HEADERS = True
+LOG_QUERY = True
+LOG_RESPONSES = True
 
 LOGS_TO_SILENCE = [
     'urllib3.connectionpool',
@@ -40,7 +40,9 @@ LOGS_TO_SILENCE = [
     # 'garminconnect',
 ]
 
-PROD_ONLY_LOGS_TO_SILENCE = []
+PROD_ONLY_LOGS_TO_SILENCE = [
+    'bblog',
+]
 
 
 def all_logging():
@@ -54,7 +56,7 @@ def debug_logging():
     all_logging()
 
     # dev_appserver doesn't seem to properly set up logging.
-    bb_logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
     # From:
     #     https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
@@ -81,7 +83,7 @@ def before():
         headers += ', '.join(
             ['%s=%s' % (k, v) for k, v in flask.request.headers.items()]
         )
-    bb_logger.debug(
+    logger.debug(
         '%s %s: %s; %s', flask.request.method, flask.request.path, query, headers
     )
 
@@ -95,7 +97,7 @@ def after(response):
     else:
         body = response.data.decode('utf-8')
     try:
-        bb_logger.debug(
+        logger.debug(
             '%s %s: response: %s, %s',
             flask.request.method,
             flask.request.path,
@@ -103,7 +105,7 @@ def after(response):
             body,
         )
     except Exception:
-        bb_logger.debug(
+        logger.debug(
             '%s %s: response: could not parse', flask.request.method, flask.request.path
         )
     return response
