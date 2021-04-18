@@ -27,6 +27,7 @@ from shared import ds_util
 from shared import responses
 from shared import task_util
 from shared.config import config
+from shared.datastore.bot import Bot
 from shared.datastore.service import Service
 from shared.datastore.user import User
 from shared.exceptions import SyncException
@@ -52,7 +53,8 @@ def sync():
 
     try:
         Service.set_sync_started(service)
-        sync_helper.do(Worker(service), work_key=service.key)
+        client = create_gmail_client(service)
+        sync_helper.do(Worker(service, client), work_key=service.key)
         Service.set_sync_finished(service)
         return responses.OK
     except SyncException as e:
@@ -62,7 +64,7 @@ def sync():
 
 @module.route('/pubsub/rides', methods=['POST'])
 def pubsub_rides():
-    auth_util.verify(flask.request)
+    auth_util.verify_claims(flask.request)
     if flask.request.args.get('token', '') != config.pubsub_creds['token']:
         return responses.INVALID_TOKEN
 
@@ -79,17 +81,18 @@ def pubsub_rides():
 
 
 @module.route('/process/rides', methods=['POST'])
-def pubsub_process_rides():
-    auth_util.verify(flask.request)
+def process_rides():
+    auth_util.verify_claims(flask.request)
     payload = task_util.get_payload(flask.request)
 
-    service = Service.get('google', payload['user'].key)
+    service = Service.get('google', Bot.key())
     data = payload['data']
     logging.info('process_pubsub_rides: %s', data.get('historyId'))
 
     try:
+        client = create_gmail_client(service)
         sync_helper.do(
-            PubsubWorker(service, data),
+            PubsubWorker(service, data, client),
             work_key='%s/%s' % (service.key.parent.name, data['historyId']),
         )
     except SyncException:
@@ -98,9 +101,9 @@ def pubsub_process_rides():
 
 
 class Worker(object):
-    def __init__(self, service):
+    def __init__(self, service, client):
         self.service = service
-        self.client = create_gmail_client(service)
+        self.client = client
 
     def sync(self):
         request = {
@@ -170,12 +173,14 @@ class Worker(object):
 
 
 class PubsubWorker(object):
-    def __init__(self, service: Entity, data: dict):
+    def __init__(self, service: Entity, data: dict, client):
         self.service = service
         self.data = data
-        self.client = create_gmail_client(service)
+        self.client = client
 
     def sync(self):
+        logging.info('PubsubWorker: sync')
+
         def process_message(request_id, response, exception):
             message_history_id = int(response['historyId'])
             synced_history_id = self.service['settings'].get('synced_history_id', 0)
@@ -186,7 +191,6 @@ class PubsubWorker(object):
             if garmin_url is not None:
                 task_util.process_garmin_livetrack(garmin_url)
 
-        logging.debug('Fetching history')
         request = (
             self.client.users()
             .history()

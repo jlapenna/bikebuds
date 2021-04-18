@@ -66,7 +66,7 @@ class ServiceCard extends Component {
 
   static propTypes = {
     adminApi: PropTypes.object,
-    bikebudsApi: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object,
     firebase: PropTypes.object.isRequired,
     serviceName: PropTypes.string.isRequired,
   };
@@ -77,8 +77,23 @@ class ServiceCard extends Component {
       service: undefined,
       actionPending: false,
     };
+    if (!this.props.adminApi && !this.props.bikebudsApi) {
+      throw new Error('Must specify adminApi or bikebudsApi');
+    }
     this.get_service = this.props.adminApi ? this.props.adminApi.get_admin_service : this.props.bikebudsApi.get_service;
     this.sync_service = this.props.adminApi ? this.props.adminApi.sync_admin_service : this.props.bikebudsApi.sync_service;
+    this.disconnect = this.props.adminApi ? this.props.adminApi.admin_disconnect: this.props.bikebudsApi.disconnect;
+    if (this.props.adminApi) {
+      this.redirect_uri = config.frontend_url +
+                '/services/' +
+                this.props.serviceName +
+                '/admin/init?dest=' + this.props.location.pathname
+    } else {
+      this.redirect_uri = config.frontend_url +
+                '/services/' +
+                this.props.serviceName +
+                '/init?dest=' + this.props.location.pathname
+    }
   }
 
   componentDidMount() {
@@ -89,16 +104,7 @@ class ServiceCard extends Component {
     if (this.state.service) {
       return;
     }
-    if (this.props.adminApi) {
-      // This is so ugly, but I'm not sure what the pattern I want to use here,
-      // is. Probably an HOC.
-      this.props.adminApi
-        .get_admin_service({ name: this.props.serviceName })
-        .then(this.handleService);
-    } else if (this.props.bikebudsApi) {
-      this.get_service({ name: this.props.serviceName })
-        .then(this.handleService);
-    }
+    this.get_service({ name: this.props.serviceName }).then(this.handleService);
   }
 
   componentWillUnmount() {
@@ -117,7 +123,7 @@ class ServiceCard extends Component {
       this.state.service.properties.credentials
     ) {
       this._cancelDisconnect = makeCancelable(
-        this.props.bikebudsApi.disconnect({
+        this.disconnect({
           name: this.props.serviceName,
         }),
         response => {
@@ -129,12 +135,7 @@ class ServiceCard extends Component {
     } else {
       createSession(this.props.firebase, response => {
         if (response.status === 200) {
-          window.location.replace(
-            config.frontend_url +
-              '/services/' +
-              this.props.serviceName +
-              '/init?dest=' + this.props.location.pathname
-          );
+          window.location.replace(this.redirect_uri);
         } else {
           console.warn('Unable to create a session.', response);
           this.setState({ actionPending: false });
@@ -207,7 +208,7 @@ class ServiceCard extends Component {
 
   renderSyncStatus = () => {
     if (this.state.service === undefined) {
-      return (<React.Fragment />);
+      return (<i>{'\u00a0'}</i>);
     }
 
     if (this.state.service.properties.sync_state.syncing) {
@@ -232,7 +233,7 @@ class ServiceCard extends Component {
           </i>);
     }
 
-    return (<i></i>);
+    return (<i>{'\u00a0'}</i>);
   }
 
   renderCardContent() {

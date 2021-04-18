@@ -21,7 +21,6 @@ import { createStyles, withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
 import AdminUsers from 'AdminUsers';
-import AdminStravaAuth from 'AdminStravaAuth';
 import AdminStravaClubs from 'AdminStravaClubs';
 import ServiceCard from './ServiceCard';
 
@@ -30,7 +29,6 @@ class Admin extends Component {
 
   static propTypes = {
     adminApi: PropTypes.object.isRequired,
-    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
   };
@@ -58,9 +56,10 @@ class Admin extends Component {
     return (
       <Grid container spacing={3}>
         <Grid item>
-        <AdminStravaAuth
+        <ServiceCard
           adminApi={this.props.adminApi}
           firebase={this.props.firebase}
+          serviceName={'strava'}
         />
         </Grid>
         <Grid item>
@@ -68,7 +67,6 @@ class Admin extends Component {
             adminApi={this.props.adminApi}
             firebase={this.props.firebase}
             serviceName={'google'}
-            bikebudsApi={this.props.bikebudsApi}
           />
         </Grid>
         <Grid item>

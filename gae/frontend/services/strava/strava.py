@@ -19,6 +19,7 @@ import flask
 from flask_cors import cross_origin
 
 from google.api_core.exceptions import AlreadyExists
+from google.cloud.datastore.entity import Entity
 
 import stravalib
 
@@ -29,7 +30,6 @@ from shared.datastore.bot import Bot
 from shared.datastore.athlete import Athlete
 from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
-from shared.datastore.user import User
 from shared import responses
 
 
@@ -105,94 +105,63 @@ def events_post():
     return responses.OK
 
 
-@module.route('/init', methods=['GET', 'POST'])
-# @cross_origin(origins=['https://www.strava.com'])
-@auth_util.claims_required
-def init(claims):
+@module.route('/admin/init', methods=['GET', 'POST'])
+@auth_util.bot_required
+def admin_init(bot):
     """Step 1. Starts the service connection by redirecting to the service."""
-    # Creates the service if it doesn't exist.
-    user = User.get(claims)
-    Service.get(SERVICE_NAME, parent=user.key)
-
     dest = flask.request.args.get('dest', '')
-    return get_auth_url_response(dest)
+    redirect_uri = config.frontend_url + '/services/strava/admin/oauth?dest=' + dest
+    return _init(redirect_uri)
 
 
-@module.route('/echo', methods=['GET'])
-def echo():
-    """Step 2. Echos an authentication url that can be used to store credentials."""
-    url = flask.request.url.replace('echo', 'admin')
-    return ECHO_RESPONSE % (url,)
-
-
-@module.route('/admin', methods=['GET'])
+@module.route('/admin/oauth', methods=['GET'])
 @cross_origin(origins=['https://www.strava.com'])
-@auth_util.claims_required
-def admin(claims):
+@auth_util.bot_required
+def admin_oauth(bot):
     """Step 2. Stores a bot's credentials."""
-    auth_util.verify_admin(flask.request)
-    bot = Bot.get()
-    return store_auth(bot)
-
-
-@module.route('/redirect', methods=['GET'])
-@cross_origin(origins=['https://www.strava.com'])
-@auth_util.claims_required
-def redirect(claims):
-    """Step 2. Stores information coming from the service in the appropriate local store."""
-    user = User.get(claims)
-    return store_auth(user)
-
-
-def store_auth(user):
-    service = Service.get(SERVICE_NAME, parent=user.key)
-
-    code = flask.request.args.get('code')
     dest = flask.request.args.get('dest', '')
+    return _oauth(flask.request, Bot.get(), dest)
 
+
+@module.route('/init', methods=['GET', 'POST'])
+@auth_util.user_required
+def init(user):
+    """Step 1. Starts the service connection by redirecting to the service."""
+    dest = flask.request.args.get('dest', '')
+    redirect_uri = config.frontend_url + '/services/strava/oauth?dest=' + dest
+    return _init(redirect_uri)
+
+
+@module.route('/oauth', methods=['GET'])
+@cross_origin(origins=['https://www.strava.com'])
+@auth_util.user_required
+def oauth(user):
+    """Step 2. Stores information coming from the service in the appropriate local store."""
+    dest = flask.request.args.get('dest', '')
+    return _oauth(flask.request, user, dest)
+
+
+def _init(redirect_uri: str):
+    """Gets a service URL to send the user to connect."""
+    client = stravalib.client.Client()
+    url = client.authorization_url(
+        client_id=config.strava_creds['client_id'],
+        redirect_uri=redirect_uri,
+        approval_prompt='force',
+        scope=['activity:read_all', 'profile:read_all'],
+    )
+    return flask.redirect(url)
+
+
+def _oauth(request: flask.Request, user: Entity, dest: str):
+    code = request.args.get('code')
+    service = Service.get(SERVICE_NAME, parent=user.key)
     client = stravalib.client.Client()
     creds = client.exchange_code_for_token(
         client_id=config.strava_creds['client_id'],
         client_secret=config.strava_creds['client_secret'],
         code=code,
     )
-    creds_dict = dict(creds)
-
-    Service.update_credentials(service, creds_dict)
-
+    Service.update_credentials(service, dict(creds))
     task_util.sync_service(service)
-
     return flask.redirect('/services/redirect?dest=' + dest)
-
-
-def get_redirect_uri(dest):
-    """Returns a fully qualified URL for the service to redirect back to."""
-    return config.frontend_url + '/services/strava/redirect?dest=' + dest
-
-
-def get_auth_url_response(dest):
-    """Gets a service URL to send the user to connect."""
-    client = stravalib.client.Client()
-    url = client.authorization_url(
-        client_id=config.strava_creds['client_id'],
-        redirect_uri=get_redirect_uri(dest),
-        approval_prompt='force',
-        scope=['activity:read_all', 'profile:read_all'],
-    )
-
-    if flask.request.method == 'POST':
-        return flask.jsonify({'redirect_url': url})
-    else:
-        return flask.redirect(url)
-
-
-ECHO_RESPONSE = """
-<html>
-    <body>
-        Please visit the following url from a browser logged in as a bikebuds admin:
-        <br />
-        <br />
-        <div><strong>%s</strong></div>
-    </body>
-</html>
-"""

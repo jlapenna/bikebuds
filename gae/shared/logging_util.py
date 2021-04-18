@@ -20,8 +20,8 @@ import logging
 from shared.config import config
 
 
-# Alias our logger for later hacks.
-logger = logging.getLogger('bblog')
+# Alias our bblogger for later hacks.
+bblogger = logging.getLogger('bblog')
 
 LOG_HEADERS = True
 LOG_QUERY = True
@@ -31,9 +31,14 @@ LOGS_TO_SILENCE = [
     'urllib3.connectionpool',
     # 'oauth2client.contrib.multistore_file',
     # 'requests_oauthlib.oauth2_session',
+    'stravalib.model',
     'stravalib.model.Activity',
     'stravalib.model.Athlete',
     'stravalib.model.Club',
+    'stravalib.model.BaseEntity',
+    'stravalib.model.Entity',
+    'stravalib.attributes.Attribute',
+    'stravalib.attributes.EntityAttribute',
     'stravalib.attributes.EntityCollection',
     'google.auth.transport.requests',
     # 'google_auth_httplib2',
@@ -56,14 +61,14 @@ def debug_logging():
     all_logging()
 
     # dev_appserver doesn't seem to properly set up logging.
-    logger.setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.DEBUG)
 
     # From:
     #     https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
-    # gunicorn_logger = logging.getLogger('gunicorn.error')
-    # gunicorn_logger.setLevel(logging.DEBUG)
-    # werkzeug_logger = logging.getLogger('werkzeug')
-    # werkzeug_logger.setLevel(logging.DEBUG)
+    # gunicorn_bblogger = logging.getLogger('gunicorn.error')
+    # gunicorn_bblogger.setLevel(logging.DEBUG)
+    # werkzeug_bblogger = logging.getLogger('werkzeug')
+    # werkzeug_bblogger.setLevel(logging.DEBUG)
 
 
 # From: https://stackoverflow.com/a/39734260
@@ -83,7 +88,7 @@ def before():
         headers += ', '.join(
             ['%s=%s' % (k, v) for k, v in flask.request.headers.items()]
         )
-    logger.debug(
+    bblogger.debug(
         '%s %s: %s; %s', flask.request.method, flask.request.path, query, headers
     )
 
@@ -97,7 +102,7 @@ def after(response):
     else:
         body = response.data.decode('utf-8')
     try:
-        logger.debug(
+        bblogger.debug(
             '%s %s: response: %s, %s',
             flask.request.method,
             flask.request.path,
@@ -105,7 +110,7 @@ def after(response):
             body,
         )
     except Exception:
-        logger.debug(
+        bblogger.debug(
             '%s %s: response: could not parse', flask.request.method, flask.request.path
         )
     return response

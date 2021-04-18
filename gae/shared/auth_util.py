@@ -28,6 +28,8 @@ from firebase_admin.exceptions import FirebaseError
 from shared import firebase_util
 from shared import responses
 from shared.config import config
+from shared.datastore.bot import Bot
+from shared.datastore.user import User
 
 
 logger = logging.getLogger('auth')
@@ -42,31 +44,34 @@ def create_custom_token(claims):
     return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
 
-def admin_claims_required(func):
+def bot_required(func):
     @functools.wraps(func)
     def wrapper():
-        return func(verify_admin(flask.request))
+        return func(get_bot(flask.request))
 
     return wrapper
 
 
-def claims_required(func):
+def user_required(func):
     @functools.wraps(func)
     def wrapper():
-        return func(verify(flask.request))
+        return func(get_user(flask.request))
 
     return wrapper
 
 
-def verify(request: flask.Request):
+def verify_claims(request: flask.Request):
     if config.is_dev and config.fake_user:
         return _fake_claims()
 
     # Check that there is a real user by this identity.
     claims = _verify_claims_from_headers(request)
     if not claims:
+        # If we couldn't find it in headers, find it in cookies.
         claims = _verify_claims_from_cookie(request)
+
     if not claims:
+        # If we can't find it, we're done.
         responses.abort(responses.INVALID_CLAIMS)
 
     # Ensure we've given them access to the service.
@@ -75,11 +80,22 @@ def verify(request: flask.Request):
     return claims
 
 
-def verify_admin(request: flask.Request):
-    claims = verify(request)
-    if not (claims and claims.get('roleAdmin')):
+def get_user(request: flask.Request):
+    return User.get(verify_claims(request))
+
+
+def get_admin(request: flask.Request):
+    claims = verify_claims(request)
+    if 'roleAdmin' not in claims:
         responses.abort(responses.FORBIDDEN)
-    return claims
+    return User.get(claims)
+
+
+def get_bot(request: flask.Request):
+    claims = verify_claims(request)
+    if 'roleAdmin' not in claims:
+        responses.abort(responses.FORBIDDEN)
+    return Bot.get()
 
 
 def get_uid_by_email(email: str):

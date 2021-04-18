@@ -25,7 +25,6 @@ from shared import ds_util
 from shared import responses
 from shared import task_util
 from shared.config import config
-from shared.datastore.bot import Bot
 from shared.datastore.club import Club
 from shared.datastore.service import Service
 from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
@@ -46,9 +45,6 @@ api = Namespace('admin', 'Bikebuds Admin API')
 
 auth_url_model = api.model('AuthUrl', {'auth_url': fields.String})
 
-
-bot_model = api.model('Bot', {'strava': fields.Nested(service_model, skip_none=True)})
-
 user_state_model = api.model(
     'UserState',
     {
@@ -61,24 +57,12 @@ user_state_model = api.model(
 )
 
 
-@api.route('/bot')
-class BotResource(Resource):
-    @api.doc('get_bot')
-    @api.marshal_with(bot_model, skip_none=True)
-    def get(self):
-        auth_util.verify_admin(flask.request)
-        user = Bot.get()
-        strava = Service.get('strava', parent=user.key)
-        google = Service.get('google', parent=user.key)
-        return {'strava': WrapEntity(strava), 'google': WrapEntity(google)}
-
-
 @api.route('/strava_auth_url')
 class StravaAuthUrl(Resource):
     @api.doc('get_strava_auth_url')
     @api.marshal_with(auth_url_model, skip_none=True)
     def get(self):
-        auth_util.verify_admin(flask.request)
+        auth_util.get_bot(flask.request)
         redirect_uri = config.frontend_url + '/services/strava/echo'
 
         client = stravalib.client.Client()
@@ -94,7 +78,7 @@ class StravaAuthUrl(Resource):
 @api.route('/process_events')
 class ProcessEventsResource(Resource):
     def get(self):
-        auth_util.verify_admin(flask.request)
+        auth_util.get_bot(flask.request)
 
         sub_events_query = ds_util.client.query(kind='SubscriptionEvent')
         for sub_event in sub_events_query.fetch():
@@ -106,7 +90,7 @@ class ProcessEventsResource(Resource):
 class RemoveSubscriptionResource(Resource):
     @api.doc('remove_subscription')
     def post(self):
-        auth_util.verify_admin(flask.request)
+        auth_util.get_bot(flask.request)
 
         callbackurl = flask.request.form.get('callbackurl', None)
         logging.info('Unsubscribing: %s', callbackurl)
@@ -157,9 +141,9 @@ class GetClubsResource(Resource):
     @api.doc('get_clubs')
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self):
-        auth_util.verify_admin(flask.request)
+        bot = auth_util.get_bot(flask.request)
 
-        service = Service.get('strava', parent=Bot.key())
+        service = Service.get('strava', parent=bot.key)
         club_query = ds_util.client.query(kind='Club', ancestor=service.key)
 
         return [WrapEntity(club) for club in club_query.fetch()]
@@ -170,9 +154,9 @@ class GetUsersResource(Resource):
     @api.doc('get_users')
     @api.marshal_with(user_state_model, skip_none=True)
     def get(self):
-        auth_util.verify_admin(flask.request)
+        bot = auth_util.get_bot(flask.request)
 
-        user_entities = [Bot.get()]
+        user_entities = [bot]
         user_entities += ds_util.client.query(kind='User').fetch()
         users = []
         for user_entity in user_entities:
@@ -194,7 +178,7 @@ class DeleteResource(Resource):
     @api.doc('delete', body=key_model)
     @api.marshal_with(key_model, skip_none=True)
     def post(self):
-        auth_util.verify_admin(flask.request)
+        auth_util.get_bot(flask.request)
 
         key = ds_util.key_from_path(api.payload.get('path'))
         if key is None or ds_util.client.get(key) is None:
@@ -212,9 +196,9 @@ class SyncClubResource(Resource):
     @api.doc('sync_club')
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
-        auth_util.verify_admin(flask.request)
+        bot = auth_util.get_bot(flask.request)
 
-        service = Service.get('strava', parent=Bot.key())
+        service = Service.get('strava', parent=bot.key)
         club = StravaClubWorker(club_id, service).sync()
 
         return WrapEntity(club)
@@ -225,9 +209,9 @@ class ClubTrackResource(Resource):
     @api.doc('track_club')
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
-        auth_util.verify_admin(flask.request)
+        bot = auth_util.get_bot(flask.request)
 
-        service = Service.get('strava', parent=Bot.key())
+        service = Service.get('strava', parent=bot.key)
         club = StravaClubWorker(club_id, service).sync_club()
 
         return WrapEntity(club)
@@ -238,9 +222,9 @@ class ClubUntrackResource(Resource):
     @api.doc('untrack_club')
     @api.marshal_with(club_entity_model, skip_none=True)
     def get(self, club_id):
-        auth_util.verify_admin(flask.request)
+        bot = auth_util.get_bot(flask.request)
 
-        service = Service.get('strava', parent=Bot.key())
+        service = Service.get('strava', parent=bot.key)
         club = Club.get(club_id, parent=service.key)
         if club is not None:
             ds_util.client.delete(club.key)
@@ -253,10 +237,9 @@ class ServiceResource(Resource):
     @api.doc('get_admin_service')
     @api.marshal_with(service_entity_model, skip_none=True)
     def get(self, name):
-        auth_util.verify_admin(flask.request)
-        bot_key = Bot.key()
+        bot = auth_util.get_bot(flask.request)
 
-        service = Service.get(name, parent=bot_key)
+        service = Service.get(name, parent=bot.key)
         return WrapEntity(service)
 
 
@@ -265,10 +248,22 @@ class SyncResource(Resource):
     @api.doc('sync_admin_service', body=sync_model)
     @api.marshal_with(service_entity_model, skip_none=True)
     def post(self, name):
-        auth_util.verify_admin(flask.request)
-        bot_key = Bot.key()
+        bot = auth_util.get_bot(flask.request)
 
         force = api.payload.get('force', False)
-        service = Service.get(name, parent=bot_key)
+        service = Service.get(name, parent=bot.key)
         task_util.sync_service(service, force=force)
+        return WrapEntity(service)
+
+
+@api.route('/admin_disconnect/<name>')
+class ServiceDisconnect(Resource):
+    @api.doc('admin_disconnect')
+    @api.marshal_with(service_entity_model, skip_none=True)
+    def post(self, name):
+        bot = auth_util.get_bot(flask.request)
+
+        service = Service.get(name, parent=bot.key)
+        Service.clear_credentials(service)
+        ds_util.client.put(service)
         return WrapEntity(service)

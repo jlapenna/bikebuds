@@ -62,8 +62,8 @@ def redirect():
 
 @app.route('/services/session', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True, origins=config.cors_origins)
-@auth_util.claims_required
-def create_session(claims):
+@auth_util.user_required
+def create_session(user):
     """From https://firebase.google.com/docs/auth/admin/manage-cookies"""
     try:
         id_token = flask.request.headers['Authorization'].split(' ').pop()

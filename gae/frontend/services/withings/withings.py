@@ -27,7 +27,6 @@ from shared import task_util
 from shared.config import config
 from shared.datastore.service import Service
 from shared.datastore.subscription import SubscriptionEvent
-from shared.datastore.user import User
 from shared.services.withings.client import create_auth, create_creds_dict
 from shared import responses
 
@@ -149,10 +148,9 @@ def events_post():
 
 
 @module.route('/init', methods=['GET', 'POST'])
-@auth_util.claims_required
-def init(claims):
+@auth_util.user_required
+def init(user):
     # Creates the service if it doesn't exist.
-    user = User.get(claims)
     Service.get(SERVICE_NAME, parent=user.key)
 
     dest = flask.request.args.get('dest', '')
@@ -161,9 +159,8 @@ def init(claims):
 
 @module.route('/redirect', methods=['GET'])
 @cross_origin(origins=['https://www.withings.com'])
-@auth_util.claims_required
-def redirect(claims):
-    user = User.get(claims)
+@auth_util.user_required
+def redirect(user):
     service = Service.get(SERVICE_NAME, parent=user.key)
 
     code = flask.request.args.get('code')

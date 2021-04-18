@@ -17,13 +17,13 @@ import logging
 import flask
 from flask_cors import cross_origin
 
+from google.cloud.datastore.entity import Entity
 import google_auth_oauthlib
 
 from shared import auth_util
-from shared import task_util
 from shared import responses
+from shared import task_util
 from shared.config import config
-from shared.datastore.bot import Bot
 from shared.datastore.service import Service
 
 
@@ -42,19 +42,50 @@ def ok():
     return responses.OK
 
 
-@module.route('/init', methods=['GET', 'POST'])
-@auth_util.admin_claims_required
-def init(claims):
+@module.route('/admin/init', methods=['GET', 'POST'])
+@auth_util.bot_required
+def admin_init(bot):
     """Step 1. Starts the service connection by redirecting to the service."""
-    bot = Bot.get()
-    Service.get(SERVICE_NAME, parent=bot.key)
-
     dest = flask.request.args.get('dest', '')
+    redirect_uri = config.frontend_url + '/services/google/admin/oauth?dest=' + dest
+    return _init(bot, redirect_uri)
+
+
+@module.route('/admin/oauth', methods=['GET'])
+@cross_origin(origins=['https://www.google.com'])
+@auth_util.bot_required
+def admin_oauth(bot):
+    dest = flask.request.args.get('dest', '')
+    redirect_uri = config.frontend_url + '/services/google/admin/oauth?dest=' + dest
+    return _oauth(bot, dest, redirect_uri)
+
+
+@module.route('/init', methods=['GET', 'POST'])
+@auth_util.user_required
+def init(user):
+    dest = flask.request.args.get('dest', '')
+    redirect_uri = config.frontend_url + '/services/google/oauth?dest=' + dest
+    return _init(user, redirect_uri)
+
+
+@module.route('/oauth', methods=['GET'])
+@cross_origin(origins=['https://www.google.com'])
+@auth_util.user_required
+def oauth(user):
+    dest = flask.request.args.get('dest', '')
+    redirect_uri = config.frontend_url + '/services/google/oauth?dest=' + dest
+    return _oauth(user, dest, redirect_uri)
+
+
+def _init(user: Entity, redirect_uri: str):
+    """Step 1. Starts the service connection by redirecting to the service."""
+    Service.get(SERVICE_NAME, parent=user.key)
 
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
         config.gcp_web_creds, scopes=SCOPES
     )
-    flow.redirect_uri = get_redirect_uri(dest)
+    flow.redirect_uri = redirect_uri
+
     auth_url, flask.session['state'] = flow.authorization_url(
         access_type='offline', prompt='consent'
     )
@@ -65,23 +96,29 @@ def init(claims):
         return flask.redirect(auth_url)
 
 
-@module.route('/admin', methods=['GET'])
-@cross_origin(origins=['https://www.google.com'])
-@auth_util.admin_claims_required
-def admin(claims):
-    """Step 2. Stores a bot's credentials."""
-    bot = Bot.get()
-    redirect = store_auth(bot)
-    task_util.sync_service(Service.get(SERVICE_NAME, parent=bot.key))
-    return redirect
+def _oauth(user: Entity, dest: str, redirect_uri: str):
+    """Step 2. Stores credentials."""
+    service = Service.get(SERVICE_NAME, parent=user.key)
+
+    state = flask.session['state']
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        config.gcp_web_creds, scopes=SCOPES, state=state
+    )
+    flow.redirect_uri = redirect_uri
+
+    authorization_response = flask.request.url
+    logging.debug('auth_response: %s', authorization_response)
+    flow.fetch_token(authorization_response=authorization_response)
+    creds = _credentials_to_dict(flow.credentials)
+    logging.debug('creds: %s', creds)
+
+    Service.update_credentials(service, creds)
+
+    task_util.sync_service(Service.get(SERVICE_NAME, parent=user.key))
+    return flask.redirect('/services/redirect?dest=' + dest)
 
 
-def get_redirect_uri(dest):
-    """Returns a fully qualified URL for the service to redirect back to."""
-    return config.frontend_url + '/services/google/admin?dest=' + dest
-
-
-def credentials_to_dict(credentials):
+def _credentials_to_dict(credentials) -> dict:
     return {
         'token': credentials.token,
         'refresh_token': credentials.refresh_token,
@@ -90,25 +127,3 @@ def credentials_to_dict(credentials):
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes,
     }
-
-
-def store_auth(bot):
-    service = Service.get(SERVICE_NAME, parent=bot.key)
-
-    dest = flask.request.args.get('dest', '')
-
-    state = flask.session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        config.gcp_web_creds, scopes=SCOPES, state=state
-    )
-    flow.redirect_uri = get_redirect_uri(dest)
-
-    authorization_response = flask.request.url
-    logging.debug('auth_response: %s', authorization_response)
-    flow.fetch_token(authorization_response=authorization_response)
-    creds = credentials_to_dict(flow.credentials)
-    logging.debug('creds: %s', creds)
-
-    Service.update_credentials(service, creds)
-
-    return flask.redirect('/services/redirect?dest=' + dest)

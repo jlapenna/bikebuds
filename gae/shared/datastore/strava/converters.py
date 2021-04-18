@@ -123,7 +123,7 @@ class _ActivityConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod  # noqa: C901
-    def to_entity(cls, activity, parent=None, detailed_athlete=None):
+    def to_entity(cls, activity, parent=None, detailed_athlete=None):  # noqa: C901
         properties_dict = activity.to_dict()
         properties_dict['id'] = activity.id
 
@@ -582,7 +582,7 @@ class _SegmentEffortConverter(object):
     EXCLUDE_FROM_INDEXES = list(__ALL_FIELDS - __INCLUDE_IN_INDEXES)
 
     @classmethod  # noqa: C901
-    def to_entity(cls, segment_effort, parent=None):
+    def to_entity(cls, segment_effort, parent=None):  # noqa: C901
         properties_dict = segment_effort.to_dict()
         properties_dict['id'] = segment_effort.id
         properties_dict['segment_id'] = segment_effort.segment.id
