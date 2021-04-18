@@ -23,6 +23,7 @@ function main() {
   local client_path="${repo_path}/gae/client"
 
   activate_virtualenv integration python3
+  pip -q install -r ${client_path}/requirements.txt
   pip -q install -r ${client_path}/requirements_test_integration.txt
 
   load_config
