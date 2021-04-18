@@ -99,7 +99,10 @@ class Worker(object):
     def sync_measures(self):
         measures = sorted(
             self.client.measure_get_meas(
-                category=MeasureGetMeasGroupCategory.REAL, lastupdate=0
+                category=MeasureGetMeasGroupCategory.REAL,
+                startdate=None,
+                enddate=None,
+                lastupdate=0,
             ).measuregrps,
             key=lambda x: x.date,
         )
