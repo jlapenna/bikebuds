@@ -17,11 +17,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { BrowserRouter as Router } from 'react-router-dom';
+
 import ServiceCard from './ServiceCard';
 
 it('renders without crashing', () => {
   const firebase = createFirebaseState();
+  const bikebudsApi = {
+    get_service: () => Promise.resolve({ body: {properties: {sync_successful: true}} }),
+  };
   const div = document.createElement('div');
-  ReactDOM.render(<ServiceCard firebase={firebase} />, div);
+  ReactDOM.render(
+    <Router>
+      <ServiceCard firebase={firebase} serviceName="strava" bikebudsApi={bikebudsApi} />
+        </Router>,
+    div);
   ReactDOM.unmountComponentAtNode(div);
 });
