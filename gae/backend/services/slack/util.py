@@ -29,7 +29,7 @@ def get_id(url):
 def generate_url(source):
     url = 'https://maps.googleapis.com/maps/api/staticmap?'
     params = {
-        'key': config.firebase_web_creds['apiKey'],
+        'key': config.firebase_app_config['apiKey'],
         'size': '512x512',
         'maptype': 'roadmap',
         'format': 'jpg',
