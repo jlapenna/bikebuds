@@ -18,6 +18,7 @@ PROD_API_HOSTNAME='api.bikebuds.cc'
 LOCAL_API_HOSTNAME='localhost:8082'
 
 function load_config() {
+  get_repo_path
   local env=${BIKEBUDS_ENV}
   if [[ "${env}" == "" ]]; then
     env="environments/env"
@@ -39,9 +40,9 @@ function verify_deps() {
 }
 
 function get_repo_path() {
-  local repo_path=$(readlink -m "$PWD")
-  echo "${repo_path}";
-  if [[ "$(basename ${repo_path})" != "bikebuds" ]]; then
+  export BIKEBUDS_REPO="$(readlink -m "$PWD")"
+  echo "${BIKEBUDS_REPO}";
+  if [[ "$(basename ${BIKEBUDS_REPO})" != "bikebuds" ]]; then
     echo "Must be in the bikebuds code repo!" >&2
     return 1;
   fi

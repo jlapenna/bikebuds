@@ -69,7 +69,8 @@ function config_files() {
     \( \
         -name '*.yaml' -o \
         -name '*requirements*txt' -o \
-        -name '*.json' \
+        -name '*.json' -o \
+        -name '*.txt' \
     \) -type f -print \
     ;
 

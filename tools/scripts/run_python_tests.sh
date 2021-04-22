@@ -19,7 +19,7 @@ load_config;
 
 function main() {
   if [[ -z "$@" ]]; then
-    local services="frontend api backend";
+    local services="shared frontend api backend";
   else
     local services="$@";
   fi
@@ -48,8 +48,9 @@ function main() {
     fi
 
     export GOOGLE_APPLICATION_CREDENTIALS=environments/env/service_keys/appengine.json
+    export PYTHONPATH="$PYTHONPATH:$BIKEBUDS_REPO/gae"
 
-    python -m unittest
+    python -m unittest discover
     result=$?;
     echo '================================================================================'
     popd
