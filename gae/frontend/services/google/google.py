@@ -79,8 +79,6 @@ def oauth(user):
 
 def _init(user: Entity, redirect_uri: str):
     """Step 1. Starts the service connection by redirecting to the service."""
-    Service.get(SERVICE_NAME, parent=user.key)
-
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
         config.gcp_web_creds, scopes=SCOPES
     )
@@ -115,7 +113,7 @@ def _oauth(user: Entity, dest: str, redirect_uri: str):
     Service.update_credentials(service, creds)
 
     task_util.sync_service(Service.get(SERVICE_NAME, parent=user.key))
-    return flask.redirect('/services/redirect?dest=' + dest)
+    return flask.redirect(config.devserver_url + dest)
 
 
 def _credentials_to_dict(credentials) -> dict:

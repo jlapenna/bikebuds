@@ -53,13 +53,6 @@ def ok():
     return responses.OK
 
 
-@app.route('/services/redirect', methods=['GET'])
-@cross_origin(supports_credentials=True, origins=config.cors_origins)
-def redirect():
-    dest = flask.request.args.get('dest', '')
-    return flask.redirect(config.devserver_url + dest)
-
-
 @app.route('/services/session', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True, origins=config.cors_origins)
 @auth_util.user_required

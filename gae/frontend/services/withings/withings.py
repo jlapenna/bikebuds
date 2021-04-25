@@ -173,7 +173,7 @@ def redirect(user):
 
     task_util.sync_service(service)
 
-    return flask.redirect('/services/redirect?dest=' + dest)
+    return flask.redirect(config.devserver_url + dest)
 
 
 def get_callback_uri(dest):

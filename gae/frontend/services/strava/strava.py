@@ -164,4 +164,4 @@ def _oauth(request: flask.Request, user: Entity, dest: str):
     )
     Service.update_credentials(service, dict(creds))
     task_util.sync_service(service)
-    return flask.redirect('/services/redirect?dest=' + dest)
+    return flask.redirect(config.devserver_url + dest)
