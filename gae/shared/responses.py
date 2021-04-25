@@ -22,6 +22,7 @@ Response = collections.namedtuple('Response', ('message', 'code'))
 OK = Response('OK', 200)
 # 200, because this is what withings requires as a response.
 OK_SUB_EVENT_FAILED = Response('SUB_EVENT_FAILED', 200)
+OK_NO_UNFURLS = Response('NO_UNFURLS', 200)
 
 OK_SYNC_EXCEPTION = Response('UNKNOWN EXCEPTION', 201)
 OK_NO_SERVICE = Response('NO SERVICE', 210)
@@ -43,3 +44,11 @@ INTERNAL_SERVER_ERROR = Response('INTERNAL SERVER ERROR', 500)
 
 def abort(response: Response):
     flask.abort(response.code, response.message)
+
+
+def assertResponse(test_case, r, expected):
+    if isinstance(r, Response):
+        test_case.assertEqual(r, expected)
+    else:
+        test_case.assertTupleEqual((r.data.decode('utf-8'), r.status_code), expected)
+        # msg=f'Got "{r.status}" but expected {expected}')

@@ -27,4 +27,4 @@ class MainTest(unittest.TestCase):
 
     def test_base(self):
         r = self.client.get('/unittest')
-        self.assertEqual(r.status_code, responses.OK.code)
+        responses.assertResponse(self, r, responses.OK)

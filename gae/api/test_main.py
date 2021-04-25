@@ -26,4 +26,4 @@ class MainTest(unittest.TestCase):
 
     def test_index(self):
         r = self.client.get('/bikebuds/unittest')
-        self.assertEqual(r.status_code, responses.OK.code)
+        responses.assertResponse(self, r, ("null\n", 200))

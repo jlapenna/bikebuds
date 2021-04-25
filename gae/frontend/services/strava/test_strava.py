@@ -50,7 +50,7 @@ class StravaTest(unittest.TestCase):
         athlete_get_by_id_mock.return_value = mock_athlete
 
         r = self.client.post('/events', json=self._create_event())
-        self.assertEqual(r.status_code, responses.OK.code)
+        responses.assertResponse(self, r, responses.OK)
         _post_task_for_dev_mock.assert_called_once()
 
     @mock.patch('shared.datastore.athlete.Athlete.get_by_id', return_value=None)
@@ -59,6 +59,6 @@ class StravaTest(unittest.TestCase):
         self, _post_task_for_dev_mock, athlete_get_by_id_mock
     ):
         r = self.client.post('/events', json=self._create_event())
-        self.assertEqual(r.status_code, responses.OK.code)
+        responses.assertResponse(self, r, responses.OK)
 
         _post_task_for_dev_mock.assert_not_called()

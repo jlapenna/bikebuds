@@ -18,8 +18,8 @@ from urllib.parse import urlencode
 
 import flask
 
-from shared.config import config
 from shared import responses
+from shared.config import config
 
 from services.withings import withings
 
@@ -46,7 +46,7 @@ class WithingsTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        self.assertEqual(r.status_code, responses.OK.code)
+        responses.assertResponse(self, r, responses.OK)
         _post_task_for_dev_mock.assert_called_once()
 
     @mock.patch('shared.task_util._post_task_for_dev')
@@ -61,5 +61,5 @@ class WithingsTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        self.assertEqual(r.status_code, responses.OK_SUB_EVENT_FAILED.code)
+        responses.assertResponse(self, r, responses.OK_SUB_EVENT_FAILED)
         _post_task_for_dev_mock.assert_not_called()
