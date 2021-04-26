@@ -36,6 +36,7 @@ def unfurl_activity(client, url):
 def _unfurl_activity_from_crawl(url):
     activity = _fetch_parse_activity_url(url)
     if not activity:
+        logging.warn(f'Unable to crawl url {url}')
         return
     block = _crawled_activity_block(url, activity)
     if not block:

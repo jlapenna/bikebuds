@@ -36,8 +36,8 @@ Babel==2.9.0
 sortedcontainers==2.3.0
 
 # Slack
-slack_sdk==3.4.2
 bs4
+slack_sdk==3.4.2
 
 # Google Maps
 googlemaps

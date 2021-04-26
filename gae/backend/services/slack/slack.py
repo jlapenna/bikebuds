@@ -19,17 +19,19 @@ import urllib.request
 
 import flask
 
-from slack.errors import SlackApiError
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 from shared import responses
 from shared import task_util
 from shared.datastore.bot import Bot
 from shared.datastore.service import Service
+from shared.services.slack.installation_store import DatastoreInstallationStore
 from shared.services.strava.client import ClientWrapper
-from shared.slack_util import slack_client
 
 from services.slack.unfurl_activity import unfurl_activity
 from services.slack.unfurl_route import unfurl_route
+from shared import ds_util
 
 _STRAVA_APP_LINK_REGEX = re.compile('(https://www.strava.com/([^/]+)/[0-9]+)')
 
@@ -42,33 +44,16 @@ def event():
     params = task_util.get_payload(flask.request)
     event = params['event']
     logging.info('SlackEvent: %s', event.key)
-    return process_slack_event(event)
-
-
-def process_slack_event(event):
-    """Procesess an event.
-
-    Args:
-        event: An entity representing a full event message, including event_id, etc.
-    """
-    logging.debug('process_slack_event: %s', event)
     if event['event']['type'] == 'link_shared':
-        return process_link_shared(event)
+        return _process_link_shared(event)
     return responses.OK_SUB_EVENT_UNKNOWN
 
 
-def process_link_shared(event):
-    service = Service.get('strava', parent=Bot.key())
-    client = ClientWrapper(service)
-    unfurls = {}
-    for link in event['event']['links']:
-        alt_url = _resolve_rewrite_link(link)
-        unfurl = _unfurl(client, link, alt_url)
-        if unfurl:
-            unfurls[link['url']] = unfurl
+def _process_link_shared(event):
+    slack_client = _create_slack_client(event)
+    unfurls = _create_unfurls(event)
     if not unfurls:
-        return responses.OK
-    logging.warning('process_link_shared: debug: unfurling: %s', unfurls)
+        return responses.OK_NO_UNFURLS
 
     try:
         response = slack_client.chat_unfurl(
@@ -76,9 +61,8 @@ def process_link_shared(event):
             ts=event['event']['message_ts'],
             unfurls=unfurls,
         )
-    except SlackApiError as e:
+    except SlackApiError:
         logging.exception('process_link_shared: failed: unfurling: %s', unfurls)
-        logging.warning('dir: %s', dir(e))
         return responses.INTERNAL_SERVER_ERROR
 
     if not response['ok']:
@@ -86,6 +70,35 @@ def process_link_shared(event):
         return responses.INTERNAL_SERVER_ERROR
     logging.debug('process_link_shared: %s', response)
     return responses.OK
+
+
+def _create_slack_client(event):
+    slack_service = Service.get('slack', parent=Bot.key())
+    installation_store = DatastoreInstallationStore(
+        ds_util.client, parent=slack_service.key
+    )
+    slack_bot = installation_store.find_bot(
+        enterprise_id=event.get('authorizations', [{}])[0].get('enterprise_id'),
+        team_id=event.get('authorizations', [{}])[0].get('team_id'),
+        is_enterprise_install=event.get('authorizations', [{}])[0].get(
+            'is_enterprise_install'
+        ),
+    )
+    return WebClient(slack_bot.bot_token)
+
+
+def _create_unfurls(event):
+    strava = Service.get('strava', parent=Bot.key())
+    strava_client = ClientWrapper(strava)
+
+    unfurls = {}
+    for link in event['event']['links']:
+        alt_url = _resolve_rewrite_link(link)
+        unfurl = _unfurl(strava_client, link, alt_url)
+        if unfurl:
+            unfurls[link['url']] = unfurl
+    logging.warning(f'_create_unfurls: {unfurls}')
+    return unfurls
 
 
 def _resolve_rewrite_link(link):
@@ -107,11 +120,11 @@ def _resolve_rewrite_link(link):
     return resolved_url
 
 
-def _unfurl(client, link, alt_url=None):
+def _unfurl(strava_client, link, alt_url=None):
     url = alt_url if alt_url else link['url']
     if '/routes/' in url:
-        return unfurl_route(client, url)
+        return unfurl_route(strava_client, url)
     elif '/activities/' in url:
-        return unfurl_activity(client, url)
+        return unfurl_activity(strava_client, url)
     else:
         return None

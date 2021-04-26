@@ -35,7 +35,8 @@ Babel==2.9.0
 sortedcontainers==2.3.0
 
 # Slack
-git+git://github.com/jlapenna/python-slack-events-api@master
+slack_sdk==3.4.2
+slackeventsapi==2.2.1
 
 # pass_util.py
 cryptography==3.4.7

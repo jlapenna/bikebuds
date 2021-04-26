@@ -33,16 +33,92 @@ class SlackTest(unittest.TestCase):
         self.app.testing = True
         self.client = self.app.test_client()
 
-    @mock.patch('main.slack.process_slack_event', return_value=responses.OK)
-    def test_process_slack_event_task_valid(self, slack_process_slack_event_mock):
+    @mock.patch('main.slack._process_link_shared', return_value=responses.OK)
+    def test_process_link_shared_called(self, slack_process_link_shared_mock):
         event_entity = Entity(
             ds_util.client.key('SubscriptionEvent', 'slack-E232eq2ee')
         )
-        event_entity.update({'event_id': 'EVENT_ID'})
+        event_entity.update(LINK_SHARED_EVENT)
+
+        self.client.post(
+            '/tasks/event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+        # It doesn't matter what code gets returned, since the method returns
+        # whatever _process_link_shared returns, which is a mock. Only test
+        # that _process_link_shared is called.
+        slack_process_link_shared_mock.assert_called_once()
+
+    @mock.patch('main.slack._create_slack_client')
+    @mock.patch('main.slack._create_unfurls')
+    def test_process_link_shared(self, mock_create_unfurls, mock_slack_client):
+        mock_create_unfurls.return_value = {'http://example.com': 'unfurl'}
+
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', 'slack-E232eq2ee')
+        )
+        event_entity.update(LINK_SHARED_EVENT)
 
         r = self.client.post(
             '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
-        slack_process_slack_event_mock.assert_called_once()
-        self.assertEqual(r.status_code, responses.OK.code)
+
+        mock_slack_client.assert_called_once()
+        responses.assertResponse(self, r, responses.OK)
+
+    @mock.patch('main.slack._create_slack_client')
+    @mock.patch('main.slack._create_unfurls')
+    def test_process_link_shared_no_unfurls(
+        self, mock_create_unfurls, mock_slack_client
+    ):
+        mock_create_unfurls.return_value = {}
+
+        event_entity = Entity(
+            ds_util.client.key('SubscriptionEvent', 'slack-E232eq2ee')
+        )
+        event_entity.update(LINK_SHARED_EVENT)
+
+        r = self.client.post(
+            '/tasks/event',
+            data=task_util.task_body_for_test(event=event_entity),
+        )
+
+        mock_slack_client.assert_called_once()
+        responses.assertResponse(self, r, responses.OK_NO_UNFURLS)
+
+
+LINK_SHARED_EVENT = {
+    'api_app_id': 'SOME_APP_ID',
+    'authed_users': ['SOME_USER_ID'],
+    'authorizations': [
+        {
+            'enterprise_id': None,
+            'is_bot': True,
+            'is_enterprise_install': False,
+            'team_id': 'SOME_TEAM_ID',
+            'user_id': 'SOME_USER_ID',
+        }
+    ],
+    'event': {
+        'channel': 'SOME_CHANNEL_ID',
+        'event_ts': '1619381634.662237',
+        'is_bot_user_member': True,
+        'links': [
+            {
+                'domain': 'strava.com',
+                'url': 'https://www.strava.com/activities/3040564323',
+            }
+        ],
+        'message_ts': '1619381633.004900',
+        'type': 'link_shared',
+        'user': 'U01V550PQ5U',
+    },
+    'event_context': '1-link_shared-SOME_TEAM_ID-SOME_CHANNEL_ID',
+    'event_id': 'Ev01V67ECVF0',
+    'event_time': 1619381634,
+    'is_ext_shared_channel': False,
+    'team_id': 'SOME_TEAM_ID',
+    'token': 'SOME_TOKEN',
+    'type': 'event_callback',
+}

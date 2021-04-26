@@ -44,7 +44,7 @@ class SlackTest(unittest.TestCase):
         verify_signature_mock.return_value = True
         challenge = 'CHALLENGE_STRING'
         resp = self.client.post(
-            '/services/slack/events',
+            '/events',
             headers=self._headers(),
             json={
                 'token': 'unYFPYx2dZIR4Eb2MwfabpoI',
@@ -52,19 +52,20 @@ class SlackTest(unittest.TestCase):
                 'challenge': challenge,
             },
         )
-        self.assertEqual(resp.status_code, responses.OK.code)
-        self.assertEqual(resp.data.decode('utf-8'), challenge)
+        # self.assertEqual(resp.status_code, responses.OK.code)
+        # self.assertEqual(resp.data.decode('utf-8'), challenge)
+        responses.assertResponse(self, resp, (challenge, 200))
 
     @mock.patch('services.slack.slack.slack_events_adapter.server.verify_signature')
-    @mock.patch('shared.task_util._post_task_for_dev')
-    def test_slack_event(self, _post_task_for_dev, verify_signature_mock):
+    @mock.patch('shared.task_util._queue_task')
+    def test_slack_event(self, _queue_task, verify_signature_mock):
         """Verifies we handle events correctly.
 
         https://api.slack.com/events/link_shared
         """
         verify_signature_mock.return_value = True
         self.client.post(
-            '/services/slack/events',
+            '/events',
             headers=self._headers(),
             json=json.loads(
                 """
@@ -94,4 +95,4 @@ class SlackTest(unittest.TestCase):
         """
             ),
         )
-        _post_task_for_dev.assert_called_once()
+        _queue_task.assert_called_once()

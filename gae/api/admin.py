@@ -31,6 +31,7 @@ from shared.services.strava.club_worker import ClubWorker as StravaClubWorker
 from shared.services.withings.client import create_client as withings_create_client
 
 from models import (
+    EntityModel,
     club_entity_model,
     key_model,
     service_entity_model,
@@ -53,6 +54,19 @@ user_state_model = api.model(
         'strava': fields.Nested(service_model, skip_none=True),
         'withings': fields.Nested(service_model, skip_none=True),
         'fitbit': fields.Nested(service_model, skip_none=True),
+    },
+)
+
+slack_workspace_model = api.model('SlackWorkspace', {})
+slack_workspace_entity_model = EntityModel(slack_workspace_model)
+
+slack_model = api.model(
+    'Slack',
+    {
+        'service': fields.Nested(service_entity_model, skip_none=True),
+        'workspaces': fields.Nested(slack_workspace_entity_model),
+        'installers': fields.Wildcard(fields.String),
+        'bots': fields.Wildcard(fields.String),
     },
 )
 
@@ -230,6 +244,18 @@ class ClubUntrackResource(Resource):
             ds_util.client.delete(club.key)
 
         return None
+
+
+@api.route('/slack')
+class SlackResource(Resource):
+    @api.doc('get_slack')
+    @api.marshal_with(slack_model, skip_none=True)
+    def get(self):
+        bot = auth_util.get_bot(flask.request)
+        service = Service.get('slack', parent=bot.key)
+        query = ds_util.client.query(kind='SlackWorkspace', ancestor=service.key)
+        workspaces = [e for e in query.fetch()]
+        return {'service': WrapEntity(service), 'workspaces': workspaces}
 
 
 @api.route('/service/<name>')

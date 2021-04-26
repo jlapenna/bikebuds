@@ -23,6 +23,7 @@ import Grid from '@material-ui/core/Grid';
 import AdminUsers from 'AdminUsers';
 import AdminStravaClubs from 'AdminStravaClubs';
 import ServiceCard from './ServiceCard';
+import SlackCard from './SlackCard';
 
 class Admin extends Component {
   static styles = createStyles({});
@@ -68,6 +69,12 @@ class Admin extends Component {
             firebase={this.props.firebase}
             serviceName={'google'}
           />
+        </Grid>
+        <Grid item>
+        <SlackCard
+          adminApi={this.props.adminApi}
+          firebase={this.props.firebase}
+        />
         </Grid>
         <Grid item>
         <AdminStravaClubs

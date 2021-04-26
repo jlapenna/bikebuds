@@ -211,7 +211,7 @@ def process_slack_event(event):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
-        relative_uri='/services/slack/tasks/process_event',
+        relative_uri='/services/slack/tasks/event',
         service='backend',
         parent=_slack_events_parent,
     )
