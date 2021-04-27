@@ -37,7 +37,10 @@ def _unfurl_activity_from_crawl(url):
     activity = _fetch_parse_activity_url(url)
     if not activity:
         return
-    return _crawled_activity_block(url, activity)
+    block = _crawled_activity_block(url, activity)
+    if not block:
+        logging.warn(f'Unable parse {activity} for {url}')
+    return block
 
 
 def _unfurl_activity_from_datastore(client, url):
@@ -126,25 +129,26 @@ def _fetch_parse_activity_url(url):
 
 
 def _crawled_activity_block(url, activity):
-    if 'og:title' not in activity:
-        return
-    title = activity['og:title']
+    title = None
+    if 'og:title' in activity:
+        title = activity['og:title']
+    elif 'twitter:title' not in activity:
+        title = activity['twitter:title']
 
-    if 'twitter:title' not in activity:
-        return
-    name = activity['twitter:title']
+    description = None
+    if 'og:description' in activity:
+        description = activity['og:description']
+    elif 'twitter:description' in activity:
+        description = activity['twitter:description']
 
-    if 'og:description' not in activity:
-        return
-    description = activity['og:description']
-
-    if 'og:image' not in activity:
-        return
-    image = activity['og:image']
+    image = None
+    if 'og:image' in activity:
+        image = activity['og:image']
+    elif 'twitter:image' not in activity:
+        image = activity['twitter:image']
 
     activity_sub = {
         'title': title,
-        'name': name,
         'description': description,
         'url': url,
         'image_url': image,

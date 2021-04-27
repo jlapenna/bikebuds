@@ -19,9 +19,14 @@ from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 
-from services.slack.testutil import activity_entity_for_test, set_mockurlopen
+from services.slack.testutil import (
+    activity_entity_for_test,
+    set_mockurlopen,
+    MOCK_CRAWLED_ACTIVITY,
+)
 from services.slack.unfurl_activity import (
     _api_activity_block,
+    _crawled_activity_block,
     _unfurl_activity_from_crawl,
     _unfurl_activity_from_datastore,
     unfurl_activity,
@@ -163,3 +168,36 @@ class MainTest(unittest.TestCase):
             ]
         }
         self.assertDictEqual(dict(activity_block), expected)
+
+    def test_crawled_activity_block(self):
+        block = _crawled_activity_block(
+            {'url': 'https://www.strava.com/activities/11111'}, MOCK_CRAWLED_ACTIVITY
+        )
+        expected_block = {
+            'blocks': [
+                {
+                    'accessory': {
+                        'alt_text': 'activity image',
+                        'image_url': 'http://d3nn82uaxijpm6.cloudfront.net/assets/sharing/summary_activity_generic-ec8c36660493881ac5fb7b7.png',
+                        'type': 'image',
+                    },
+                    'text': {
+                        'text': "<{'url': "
+                        "'https://www.strava.com/activities/11111'}|*Morning "
+                        "Ride - Bob Stover's 58.0 mi bike ride*>\n"
+                        'Bob S. rode 58.0 mi on Apr 24, 2021.',
+                        'type': 'mrkdwn',
+                    },
+                    'type': 'section',
+                },
+                {'type': 'divider'},
+                {
+                    'fields': [
+                        {'text': '*Distance:* 58.1mi', 'type': 'mrkdwn'},
+                        {'text': '*Speed:* 15.0mph', 'type': 'mrkdwn'},
+                    ],
+                    'type': 'section',
+                },
+            ]
+        }
+        self.assertEqual(block, expected_block)

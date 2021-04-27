@@ -177,3 +177,41 @@ layout orion app
 </body>
 </html>
 """
+
+
+MOCK_CRAWLED_ACTIVITY = {
+    'fb:app_id': '284597785309',
+    'og:site_name': 'Strava',
+    'al:ios:url': 'strava://activities/538',
+    'al:ios:app_name': 'Strava',
+    'al:ios:app_store_id': '426826309',
+    'al:android:url': 'strava://activities/538',
+    'al:android:app_name': 'Strava',
+    'al:android:package': 'com.strava',
+    'og:type': 'fitness.course',
+    'og:title': "Morning Ride - Bob Stover's 58.0 mi bike ride",
+    'og:url': 'https://www.strava.com/activities/538',
+    'og:image': 'http://d3nn82uaxijpm6.cloudfront.net/assets/sharing/summary_activity_generic-ec8c36660493881ac5fb7b7.png',
+    'og:image:height': '200',
+    'og:image:width': '200',
+    'fitness:custom_unit_energy:value': '5219',
+    'fitness:custom_unit_energy:units': 'https://www.strava.com/activities/facebook_open_graph_unit_elevation_gain',
+    'fitness:distance:value': '58.1',
+    'fitness:distance:units': 'mi',
+    'fitness:duration:value': '14175',
+    'fitness:duration:units': 's',
+    'fitness:speed:value': '6.594554',
+    'fitness:speed:units': 'm/s',
+    'twitter:card': 'summary',
+    'twitter:site': '@Strava',
+    'twitter:domain': 'strava.com',
+    'twitter:title': 'Morning Ride',
+    'twitter:app:name:googleplay': 'Strava',
+    'twitter:app:id:googleplay': 'com.strava',
+    'twitter:app:url:googleplay': 'https://www.strava.com/activities/538',
+    'twitter:app:name:iphone': 'Strava',
+    'twitter:app:id:iphone': '426826309',
+    'twitter:app:url:iphone': 'strava://activities/538',
+    'twitter:description': 'Bob S. rode 58.0 mi on Apr 24, 2021.',
+    'twitter:image': 'http://d3nn82uaxijpm6.cloudfront.net/assets/sharing/summary_activity_generic-ec8c36660493881ac5fb7b7.png',
+}
