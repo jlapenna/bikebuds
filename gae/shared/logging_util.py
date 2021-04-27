@@ -16,21 +16,19 @@
 
 import flask
 import logging
+import os
 
 from shared.config import config
-
-
-# Alias our bblogger for later hacks.
-bblogger = logging.getLogger('bblog')
 
 LOG_HEADERS = True
 LOG_QUERY = True
 LOG_RESPONSES = True
 
 LOGS_TO_SILENCE = [
-    'urllib3.connectionpool',
-    # 'oauth2client.contrib.multistore_file',
-    # 'requests_oauthlib.oauth2_session',
+    'DatastoreInstallationStore',
+    'google.auth.transport.requests',
+    'google_auth_httplib2',
+    'googleapiclient.discovery',
     'stravalib.model',
     'stravalib.model.Activity',
     'stravalib.model.Athlete',
@@ -40,9 +38,7 @@ LOGS_TO_SILENCE = [
     'stravalib.attributes.Attribute',
     'stravalib.attributes.EntityAttribute',
     'stravalib.attributes.EntityCollection',
-    'google.auth.transport.requests',
-    # 'google_auth_httplib2',
-    # 'garminconnect',
+    'urllib3.connectionpool',
 ]
 
 PROD_ONLY_LOGS_TO_SILENCE = [
@@ -50,25 +46,34 @@ PROD_ONLY_LOGS_TO_SILENCE = [
 ]
 
 
-def all_logging():
-    # Standardize default logging.
-    logging.basicConfig(
-        format='%(levelname)s\t %(asctime)s %(filename)s:%(lineno)s]\t%(message)s'  # noqa: E501
-    )
+def _set_logging_config(logger):
+    base = '[%(levelname).1s:%(name)s:%(filename)s:%(lineno)s] %(message)s'
+    if config.is_dev:
+        # Include log time in dev.
+        logger.basicConfig(
+            format='%(asctime)s [' + os.environ.get('GAE_SERVICE', '') + ']' + base
+        )
+    else:
+        # But don't include it in prod, gcp logging includes a timestamp.
+        logger.basicConfig(format=base)
 
 
-def debug_logging():
-    all_logging()
+_set_logging_config(logging)
 
+request_logger = logging.getLogger('bblog.request')
+response_logger = logging.getLogger('bblog.response')
+
+
+def _debug_logging(app=None):
     # dev_appserver doesn't seem to properly set up logging.
+    if app:
+        app.logger.setLevel(logging.DEBUG)
     logging.getLogger().setLevel(logging.DEBUG)
 
-    # From:
-    #     https://medium.com/@trstringer/logging-flask-and-gunicorn-the-manageable-way-2e6f0b8beb2f
-    # gunicorn_bblogger = logging.getLogger('gunicorn.error')
-    # gunicorn_bblogger.setLevel(logging.DEBUG)
-    # werkzeug_bblogger = logging.getLogger('werkzeug')
-    # werkzeug_bblogger.setLevel(logging.DEBUG)
+
+def setup_logging(app=None):
+    _debug_logging(app)
+    _silence_logs(app)
 
 
 # From: https://stackoverflow.com/a/39734260
@@ -88,7 +93,7 @@ def before():
         headers += ', '.join(
             ['%s=%s' % (k, v) for k, v in flask.request.headers.items()]
         )
-    bblogger.debug(
+    request_logger.debug(
         '%s %s: %s; %s', flask.request.method, flask.request.path, query, headers
     )
 
@@ -102,7 +107,7 @@ def after(response):
     else:
         body = response.data.decode('utf-8')
     try:
-        bblogger.debug(
+        response_logger.debug(
             '%s %s: response: %s, %s',
             flask.request.method,
             flask.request.path,
@@ -110,13 +115,13 @@ def after(response):
             body,
         )
     except Exception:
-        bblogger.debug(
+        response_logger.debug(
             '%s %s: response: could not parse', flask.request.method, flask.request.path
         )
     return response
 
 
-def silence_logs():
+def _silence_logs(app=None):
     for log in LOGS_TO_SILENCE:
         logging.getLogger(log).setLevel(logging.ERROR)
     if not config.is_dev:

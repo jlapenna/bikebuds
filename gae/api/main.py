@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-import logging
-
 from flask import Flask
 from flask_cors import CORS
 from flask_restx import Api
@@ -30,9 +28,7 @@ from models import api as models_api
 app = Flask(__name__)
 CORS(app, origins=config.cors_origins)
 
-app.logger.setLevel(logging.DEBUG)
-logging_util.debug_logging()
-logging_util.silence_logs()
+logging_util.setup_logging(app)
 
 # https://flask-restplus.readthedocs.io/en/stable/swagger.html#documenting-authorizations
 # https://cloud.google.com/endpoints/docs/openapi/authenticating-users-firebase#configuring_your_openapi_document

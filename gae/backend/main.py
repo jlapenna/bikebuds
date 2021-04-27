@@ -48,9 +48,7 @@ app.register_blueprint(trainerroad.module, url_prefix='/services/trainerroad')
 app.register_blueprint(withings.module, url_prefix='/services/withings')
 app.register_blueprint(slack.module, url_prefix='/services/slack')
 
-app.logger.setLevel(logging.DEBUG)
-logging_util.debug_logging()
-logging_util.silence_logs()
+logging_util.setup_logging(app)
 
 
 @app.route('/tasks/cleanup', methods=['GET'])

@@ -43,9 +43,7 @@ app.register_blueprint(withings.module, url_prefix='/services/withings')
 CORS(app, origins=config.cors_origins)
 Talisman(app, force_https_permanent=True)
 
-app.logger.setLevel(logging.DEBUG)
-logging_util.debug_logging()
-logging_util.silence_logs()
+logging_util.setup_logging(app)
 
 
 @app.route('/ok', methods=['GET', 'POST'])
