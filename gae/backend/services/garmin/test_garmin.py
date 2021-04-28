@@ -42,7 +42,7 @@ class ModuleTest(unittest.TestCase):
     @mock.patch('sync_helper.do')
     def test_do_called(self, sync_helper_do_mock):
         r = self.client.post(
-            flask.url_for('garmin.process_livetrack'),
+            '/tasks/livetrack',
             data=task_util.task_body_for_test(url='http://anyurl'),
         )
         self.assertTrue(sync_helper_do_mock.called)

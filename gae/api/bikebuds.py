@@ -311,7 +311,7 @@ class WeightResource(Resource):
         # isn't being converted to a date time, even though the model says it
         # is. So, convert it.
         measure['date'] = datetime.datetime.fromisoformat(measure['date'])
-        task_util.process_measure(user.key, measure)
+        task_util.xsync_tasks_measure(user.key, measure)
         return measure
 
 
@@ -326,7 +326,7 @@ class BackfillResource(Resource):
         dest = Service.get(backfill['dest'], parent=user.key)
         start = datetime.datetime.fromisoformat(backfill.get('start'))
         end = datetime.datetime.fromisoformat(backfill.get('end'))
-        task_util.process_backfill(source.key, dest.key, start, end)
+        task_util.xsync_tasks_backfill(source.key, dest.key, start, end)
         # TODO: pre-check there are credentials.
         return backfill
 

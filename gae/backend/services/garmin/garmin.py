@@ -42,8 +42,8 @@ LIVETRACK_TRACKPOINTS_FIRST_URL = 'https://livetrack.garmin.com/services/session
 LIVETRACK_TRACKPOINTS_URL = 'https://livetrack.garmin.com/services/session/%(session)s/trackpoints?requestTime=%(requestTime)s&from=%(from)s'
 
 
-@module.route('/process/livetrack', methods=['POST'])
-def process_livetrack():
+@module.route('/tasks/livetrack', methods=['POST'])
+def tasks_livetrack():
     params = task_util.get_payload(flask.request)
     url = params['url']
     logging.info('process/livetrack: %s', url)

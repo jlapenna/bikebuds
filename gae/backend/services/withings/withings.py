@@ -34,6 +34,7 @@ from shared.exceptions import SyncException
 from shared.services.withings import client
 
 import sync_helper
+from services.withings.weight_trend_notif import WeightTrendWorker
 
 
 module = flask.Blueprint('withings', __name__)
@@ -60,7 +61,7 @@ def sync():
         return responses.OK_SYNC_EXCEPTION
 
 
-@module.route('/tasks/process_event', methods=['POST'])
+@module.route('/tasks/event', methods=['POST'])
 def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']
@@ -82,6 +83,26 @@ def process_event_task():
 
     try:
         sync_helper.do(EventsWorker(service, event), work_key=event.key)
+    except SyncException:
+        return responses.OK_SYNC_EXCEPTION
+    return responses.OK
+
+
+@module.route('/tasks/weight_trend', methods=['POST'])
+def withings_tasks_weight_trend_task():
+    params = task_util.get_payload(flask.request)
+    event = params['event']
+    logging.info('WeightTrendEvent: %s', event.key)
+    service_key = event.key.parent
+    service = ds_util.client.get(service_key)
+
+    if service is None:
+        logging.error('WeightTrendEvent: No service: %s', event.key)
+        return responses.OK_NO_SERVICE
+
+    try:
+        if service.key.name == 'withings':
+            sync_helper.do(WeightTrendWorker(service, event), work_key=event.key)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -266,7 +287,7 @@ class EventsWorker(object):
                 user.key,
                 self.event.key,
             )
-            task_util.process_weight_trend(self.event)
+            task_util.withings_tasks_weight_trend(self.event)
         if user['preferences']['sync_weight']:
             logging.debug(
                 'WithingsEvent: ProcessMeasure: Queued: %s: %s',
@@ -274,4 +295,4 @@ class EventsWorker(object):
                 self.event.key,
             )
             for measure in new_measures:
-                task_util.process_measure(user.key, measure)
+                task_util.xsync_tasks_measure(user.key, measure)

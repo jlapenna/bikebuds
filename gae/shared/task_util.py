@@ -200,14 +200,14 @@ def process_event(service_key: Key, event):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
-        relative_uri='/services/%s/tasks/process_event' % (service_key.name,),
+        relative_uri='/services/%s/tasks/event' % (service_key.name,),
         service='backend',
         parent=_events_parent,
         delay_timedelta=datetime.timedelta(seconds=5),
     )
 
 
-def process_slack_event(event):
+def slack_tasks_event(event):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
@@ -217,50 +217,50 @@ def process_slack_event(event):
     )
 
 
-def process_weight_trend(event):
+def withings_tasks_weight_trend(event):
     return _queue_task(
         entity=_params_entity(event=event),
-        relative_uri='/tasks/process_weight_trend',
+        relative_uri='/services/withings/tasks/weight_trend',
         service='backend',
         parent=_notifications_parent,
     )
 
 
-def process_measure(user_key, measure):
+def xsync_tasks_measure(user_key, measure):
     return _queue_task(
         entity=_params_entity(user_key=user_key, measure=measure),
-        relative_uri='/xsync/tasks/process_measure',
+        relative_uri='/xsync/tasks/measure',
         service='backend',
         parent=_events_parent,
     )
 
 
-def process_backfill(
+def xsync_tasks_backfill(
     source_key: Key, dest_key: Key, start: datetime.datetime, end: datetime.datetime
 ):
     return _queue_task(
         entity=_params_entity(
             source_key=source_key, dest_key=dest_key, start=start, end=end
         ),
-        relative_uri='/xsync/tasks/process_backfill',
+        relative_uri='/xsync/tasks/backfill',
         service='backend',
         parent=_backfill_parent,
     )
 
 
-def process_pubsub_rides(user: Entity, data: dict):
+def google_tasks_rides(user: Entity, data: dict):
     return _queue_task(
         entity=_params_entity(user=user, data=data),
-        relative_uri='/services/google/process/rides',
+        relative_uri='/services/google/tasks/rides',
         service='backend',
         parent=_gmail_parent,
     )
 
 
-def process_garmin_livetrack(url):
+def garmin_tasks_livetrack(url):
     return _queue_task(
         entity=_params_entity(url=url),
-        relative_uri='/services/garmin/process/livetrack',
+        relative_uri='/services/garmin/tasks/livetrack',
         service='backend',
         parent=_livetrack_parent,
     )

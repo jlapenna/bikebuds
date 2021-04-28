@@ -40,7 +40,7 @@ class WithingsTest(unittest.TestCase):
         self.app.testing = True
         self.client = self.app.test_client()
 
-    @mock.patch('shared.task_util.process_weight_trend')
+    @mock.patch('shared.task_util.withings_tasks_weight_trend')
     @mock.patch('shared.services.withings.client.create_client')
     @mock.patch('shared.ds_util.client.delete_multi')
     @mock.patch('shared.ds_util.client.query')
@@ -53,7 +53,7 @@ class WithingsTest(unittest.TestCase):
         ds_util_client_query_mock,
         ds_util_client_delete_multi_mock,
         withings_create_client_mock,
-        process_weight_trend_mock,
+        withings_tasks_weight_trend_mock,
     ):
         user = Entity(ds_util.client.key('User', 'someuser'))
         user['preferences'] = {'daily_weight_notif': True}
@@ -87,9 +87,9 @@ class WithingsTest(unittest.TestCase):
         worker.sync()
 
         ds_util_client_put_mock.assert_any_call(event_entity)
-        process_weight_trend_mock.assert_called_once()
+        withings_tasks_weight_trend_mock.assert_called_once()
 
-    @mock.patch('shared.task_util.process_weight_trend')
+    @mock.patch('shared.task_util.withings_tasks_weight_trend')
     @mock.patch('shared.services.withings.client.create_client')
     @mock.patch('shared.ds_util.client.delete_multi')
     @mock.patch('shared.ds_util.client.query')
@@ -102,7 +102,7 @@ class WithingsTest(unittest.TestCase):
         ds_util_client_query_mock,
         ds_util_client_delete_multi_mock,
         withings_create_client_mock,
-        process_weight_trend_mock,
+        withings_tasks_weight_trend_mock,
     ):
         user = Entity(ds_util.client.key('User', 'someuser'))
         user['preferences'] = {'daily_weight_notif': True}
@@ -128,7 +128,7 @@ class WithingsTest(unittest.TestCase):
         worker.sync()
 
         ds_util_client_put_mock.assert_not_called()
-        process_weight_trend_mock.assert_not_called()
+        withings_tasks_weight_trend_mock.assert_not_called()
 
     @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
     @mock.patch('shared.ds_util.client.put')
@@ -149,7 +149,7 @@ class WithingsTest(unittest.TestCase):
         )
 
         r = self.client.post(
-            '/tasks/process_event',
+            '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
         responses.assertResponse(self, r, responses.OK)
@@ -166,7 +166,7 @@ class WithingsTest(unittest.TestCase):
         event_entity = Entity(ds_util.client.key('SubscriptionEvent'))
 
         r = self.client.post(
-            '/tasks/process_event',
+            '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
         responses.assertResponse(self, r, responses.OK_NO_SERVICE)
@@ -190,7 +190,7 @@ class WithingsTest(unittest.TestCase):
         )
 
         r = self.client.post(
-            '/tasks/process_event',
+            '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
         responses.assertResponse(self, r, responses.OK_NO_CREDENTIALS)

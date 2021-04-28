@@ -40,7 +40,7 @@ module = flask.Blueprint('slack', __name__)
 
 
 @module.route('/tasks/event', methods=['POST'])
-def event():
+def tasks_event():
     params = task_util.get_payload(flask.request)
     event = params['event']
     logging.info('SlackEvent: %s', event.key)

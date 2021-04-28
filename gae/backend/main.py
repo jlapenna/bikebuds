@@ -24,7 +24,6 @@ from shared import responses
 from shared import task_util
 from shared.config import config
 from shared.datastore.service import Service
-from shared.exceptions import SyncException
 
 from services.bbfitbit import bbfitbit
 from services.garmin import garmin
@@ -33,10 +32,7 @@ from services.slack import slack
 from services.strava import strava
 from services.trainerroad import trainerroad
 from services.withings import withings
-from services.withings.weight_trend_notif import WeightTrendWorker
 from xsync import xsync
-
-import sync_helper
 
 app = flask.Flask(__name__)
 app.register_blueprint(xsync.module, url_prefix='/xsync')
@@ -78,26 +74,6 @@ def sync_task():
         if Service.has_credentials(service)
     ]
     task_util.sync_services(services)
-    return responses.OK
-
-
-@app.route('/tasks/process_weight_trend', methods=['POST'])
-def process_weight_trend_task():
-    params = task_util.get_payload(flask.request)
-    event = params['event']
-    logging.info('WeightTrendEvent: %s', event.key)
-    service_key = event.key.parent
-    service = ds_util.client.get(service_key)
-
-    if service is None:
-        logging.error('WeightTrendEvent: No service: %s', event.key)
-        return responses.OK_NO_SERVICE
-
-    try:
-        if service.key.name == 'withings':
-            sync_helper.do(WeightTrendWorker(service, event), work_key=event.key)
-    except SyncException:
-        return responses.OK_SYNC_EXCEPTION
     return responses.OK
 
 

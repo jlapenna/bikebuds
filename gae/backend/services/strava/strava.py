@@ -68,7 +68,7 @@ def sync_club(club_id):
     return responses.OK
 
 
-@module.route('/tasks/process_event', methods=['POST'])
+@module.route('/tasks/event', methods=['POST'])
 def process_event_task():
     params = task_util.get_payload(flask.request)
     event = params['event']

@@ -59,7 +59,7 @@ class StravaTest(unittest.TestCase):
         )
 
         r = self.client.post(
-            '/tasks/process_event',
+            '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
         responses.assertResponse(self, r, responses.OK)

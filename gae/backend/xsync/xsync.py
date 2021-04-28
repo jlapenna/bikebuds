@@ -40,8 +40,8 @@ import sync_helper
 module = flask.Blueprint('xsync', __name__)
 
 
-@module.route('/tasks/process_measure', methods=['POST'])
-def process_measure():
+@module.route('/tasks/measure', methods=['POST'])
+def xsync_tasks_measure():
     params = task_util.get_payload(flask.request)
     user_key = params['user_key']
     measure = params['measure']
@@ -101,14 +101,14 @@ def _withings_trainerroad(request, user_key, measure):
     return responses.OK
 
 
-@module.route('/tasks/process_backfill', methods=['POST'])
-def tasks_process_backfill():
+@module.route('/tasks/backfill', methods=['POST'])
+def tasks_xsync_tasks_backfill():
     params = task_util.get_payload(flask.request)
     source_key = params['source_key']
     dest_key = params['dest_key']
     start = params['start']
     end = params['end']
-    logging.info('process_backfill: %s->%s', source_key, dest_key)
+    logging.info('xsync_tasks_backfill: %s->%s', source_key, dest_key)
 
     try:
         sync_helper.do(

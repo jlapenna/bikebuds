@@ -59,7 +59,7 @@ def link_shared(event_data):
         name='slack-%s' % event_data['event_id'],
     )
     try:
-        task_util.process_slack_event(event_entity)
+        task_util.slack_tasks_event(event_entity)
     except AlreadyExists:
         logging.debug('Duplicate event: %s', event_entity.key)
     return responses.OK

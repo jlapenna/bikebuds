@@ -69,23 +69,23 @@ def pubsub_rides():
 
     envelope = json.loads(flask.request.data)
     data = json.loads(base64.b64decode(envelope['message']['data']))
-    logging.debug('Received data: %s', data)
+    logging.debug('pubsub_rides: Received data: %s', data)
 
     uid = auth_util.get_uid_by_email(data['emailAddress'])
     user = User.from_uid(uid)
 
-    task_util.process_pubsub_rides(user, data)
+    task_util.google_tasks_rides(user, data)
 
     return responses.OK
 
 
-@module.route('/process/rides', methods=['POST'])
-def process_rides():
+@module.route('/tasks/rides', methods=['POST'])
+def tasks_rides():
     payload = task_util.get_payload(flask.request)
 
     service = Service.get('google', Bot.key())
     data = payload['data']
-    logging.info('process_pubsub_rides: %s', data.get('historyId'))
+    logging.info('tasks_rides: %s', data.get('historyId'))
 
     try:
         client = create_gmail_client(service)
@@ -129,7 +129,7 @@ class Worker(object):
             # This shouldn't ever happen, since we use pubsub, but if it does,
             # we need to sync the latest.
             user = ds_util.client.get(self.service.key.parent)
-            task_util.process_pubsub_rides(user, {'historyId': synced_history_id})
+            task_util.google_tasks_rides(user, {'historyId': synced_history_id})
             return responses.OK
         else:
             logging.debug('Nothing to sync')
@@ -144,7 +144,7 @@ class Worker(object):
 
             garmin_url = _extract_garmin_url(request_id, response)
             if garmin_url is not None:
-                task_util.process_garmin_livetrack(garmin_url)
+                task_util.garmin_tasks_livetrack(garmin_url)
 
         logging.debug('Fetching messages')
         request = (
@@ -187,7 +187,7 @@ class PubsubWorker(object):
 
             garmin_url = _extract_garmin_url(request_id, response)
             if garmin_url is not None:
-                task_util.process_garmin_livetrack(garmin_url)
+                task_util.garmin_tasks_livetrack(garmin_url)
 
         request = (
             self.client.users()
