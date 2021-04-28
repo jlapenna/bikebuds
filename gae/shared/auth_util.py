@@ -37,10 +37,11 @@ logger = logging.getLogger('auth')
 app = firebase_util.get_app()
 
 
-def create_custom_token(claims):
+def create_custom_token(request: flask.Request):
     if config.is_dev and config.fake_user:
         logger.warning('Create Custom Token: Using Fake User')
         return b'FAKE TOKEN'
+    claims = _verify_claims(request)
     return auth.create_custom_token(claims['sub'], app=firebase_util.get_app())
 
 
@@ -60,39 +61,59 @@ def user_required(func):
     return wrapper
 
 
-def verify_claims(request: flask.Request):
+def _verify_claims(request: flask.Request):
     if config.is_dev and config.fake_user:
         return _fake_claims()
 
+    claims = None
     # Check that there is a real user by this identity.
-    claims = _verify_claims_from_headers(request)
-    if not claims:
-        # If we couldn't find it in headers, find it in cookies.
-        claims = _verify_claims_from_cookie(request)
+    if 'Authorization' in request.headers:
+        id_token = request.headers['Authorization'].split(' ').pop()
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, google.auth.transport.requests.Request()
+            )
+        except auth.RevokedIdTokenError:
+            logger.exception('firebase token has been revoked')
+            responses.abort(responses.INVALID_CLAIMS)
+        except auth.ExpiredIdTokenError:
+            logger.exception('firebase token is expired')
+            responses.abort(responses.INVALID_CLAIMS)
+        except auth.InvalidIdTokenError:
+            logger.exception('firebase token is invalid')
+            responses.abort(responses.INVALID_CLAIMS)
 
-    if not claims:
-        # If we can't find it, we're done.
-        responses.abort(responses.INVALID_CLAIMS)
+    # If no auth header provided, try to use a session cookie.
+    session_cookie = request.cookies.get('__Secure-oauthsession')
+    if session_cookie:
+        try:
+            claims = auth.verify_session_cookie(session_cookie, check_revoked=True)
+        except FirebaseError:
+            logger.exception('Session cookie was invalid')
+            responses.abort(responses.INVALID_COOKIE)
+        except ValueError:
+            logger.exception('Session cookie was invalid')
+            responses.abort(responses.INVALID_COOKIE)
 
-    # Ensure we've given them access to the service.
+    # Finally, also ensure we've given them access to the service.
     if not (claims.get('roleAdmin') or claims.get('roleBot') or claims.get('roleUser')):
         responses.abort(responses.FORBIDDEN_NO_ROLE)
     return claims
 
 
 def get_user(request: flask.Request):
-    return User.get(verify_claims(request))
+    return User.get(_verify_claims(request))
 
 
 def get_admin(request: flask.Request):
-    claims = verify_claims(request)
+    claims = _verify_claims(request)
     if 'roleAdmin' not in claims:
         responses.abort(responses.FORBIDDEN)
     return User.get(claims)
 
 
 def get_bot(request: flask.Request):
-    claims = verify_claims(request)
+    claims = _verify_claims(request)
     if 'roleAdmin' not in claims:
         responses.abort(responses.FORBIDDEN)
     return Bot.get()
@@ -105,36 +126,20 @@ def get_uid_by_email(email: str):
         return auth.get_user_by_email(email).uid
 
 
-def _verify_claims_from_headers(request, impersonate=None):
-    """Return valid claims or throw an Exception."""
-    if 'Authorization' not in request.headers:
-        return None
+def verify_gcp_claims(request: flask.Request):
+    if config.is_dev and config.fake_user:
+        return _fake_claims()
+
     id_token = request.headers['Authorization'].split(' ').pop()
-    try:
-        return google.oauth2.id_token.verify_firebase_token(
-            id_token, google.auth.transport.requests.Request()
-        )
-    except auth.RevokedIdTokenError:
-        logger.exception('firebase token has been revoked')
-    except auth.ExpiredIdTokenError:
-        logger.exception('firebase token is expired')
-    except auth.InvalidIdTokenError:
-        logger.exception('firebase token is invalid')
-    return None
-
-
-def _verify_claims_from_cookie(request):
-    """Return valid claims or throw an Exception."""
-    session_cookie = request.cookies.get('__Secure-oauthsession')
-    # Verify the session cookie. In this case an additional check is added to
-    # detect if the user's Firebase session was revoked, user deleted/disabled,
-    # etc.
-    try:
-        return auth.verify_session_cookie(session_cookie, check_revoked=True)
-    except FirebaseError:
-        logger.exception('Session cookie was invalid')
-    except ValueError:
-        logger.exception('Session cookie was invalid')
+    claims = google.oauth2.id_token.verify_oauth2_token(
+        id_token, google.auth.transport.requests.Request()
+    )
+    # The claims have an email address that we have verified. Use that to
+    # find the firebase user.
+    if claims['iss'] == 'https://accounts.google.com':
+        # TODO: verify this is actually a google server's identity, too.
+        return claims
+    responses.abort(responses.INVALID_CLAIMS)
 
 
 def _fake_claims():

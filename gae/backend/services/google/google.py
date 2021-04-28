@@ -64,7 +64,6 @@ def sync():
 
 @module.route('/pubsub/rides', methods=['POST'])
 def pubsub_rides():
-    auth_util.verify_claims(flask.request)
     if flask.request.args.get('token', '') != config.pubsub_creds['token']:
         return responses.INVALID_TOKEN
 
@@ -82,7 +81,6 @@ def pubsub_rides():
 
 @module.route('/process/rides', methods=['POST'])
 def process_rides():
-    auth_util.verify_claims(flask.request)
     payload = task_util.get_payload(flask.request)
 
     service = Service.get('google', Bot.key())

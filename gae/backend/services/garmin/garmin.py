@@ -22,7 +22,6 @@ import dateutil.parser
 import flask
 import requests
 
-from shared import auth_util
 from shared import ds_util
 from shared import responses
 from shared import task_util
@@ -45,7 +44,6 @@ LIVETRACK_TRACKPOINTS_URL = 'https://livetrack.garmin.com/services/session/%(ses
 
 @module.route('/process/livetrack', methods=['POST'])
 def process_livetrack():
-    auth_util.verify_claims(flask.request)
     params = task_util.get_payload(flask.request)
     url = params['url']
     logging.info('process/livetrack: %s', url)
@@ -59,7 +57,6 @@ def process_livetrack():
 
 @module.route('/tasks/sync', methods=['POST'])
 def sync():
-    auth_util.verify_claims(flask.request)
     logging.debug('Syncing: garmin')
     params = task_util.get_payload(flask.request)
 
