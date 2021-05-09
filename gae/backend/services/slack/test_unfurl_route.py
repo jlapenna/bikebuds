@@ -14,7 +14,7 @@
 
 import unittest
 
-from services.slack.testutil import route_for_test
+from services.slack.testing_util import route_for_test
 from services.slack.unfurl_route import _route_block
 
 

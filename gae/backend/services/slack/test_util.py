@@ -15,7 +15,7 @@
 import re
 import unittest
 
-from services.slack.testutil import EXPECTED_URL, route_for_test
+from services.slack.testing_util import EXPECTED_URL, route_for_test
 from services.slack.util import generate_url
 
 

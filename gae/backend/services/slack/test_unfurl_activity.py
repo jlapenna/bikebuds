@@ -19,7 +19,7 @@ from google.cloud.datastore.entity import Entity
 
 from shared import ds_util
 
-from services.slack.testutil import (
+from services.slack.testing_util import (
     activity_entity_for_test,
     set_mockurlopen,
     MOCK_CRAWLED_ACTIVITY,
