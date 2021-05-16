@@ -32,7 +32,6 @@ import Typography from '@material-ui/core/Typography';
 import Moment from 'react-moment';
 import moment from 'moment';
 import makeCancelable from 'makecancelable';
-import JSONPretty from 'react-json-pretty';
 
 import { config } from './config';
 import { createSession } from './session_util';
