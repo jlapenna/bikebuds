@@ -13,19 +13,24 @@
 # limitations under the License.
 
 import json
+import logging
 
 from babel.dates import format_date
 from measurement.measures import Distance
+from stravalib import exc
 
 from shared.datastore.route import Route
-
 from services.slack.templates import ROUTE_BLOCK
 from services.slack.util import get_id, generate_url
 
 
 def unfurl_route(client, url):
     route_id = get_id(url)
-    route = client.get_route(route_id)
+    try:
+        route = client.get_route(route_id)
+    except exc.ObjectNotFound:
+        logging.debug('Unknown Route: {route_id}')
+        return None
     route_entity = Route.to_entity(route)
     return _route_block(url, route_entity)
 
