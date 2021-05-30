@@ -1,7 +1,7 @@
 /environments
 /virtualenv
 /generated
-.credentials.json
+/.*credentials*
 
 # Python pycache:
 __pycache__/
