@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 
 from babel.dates import format_date
@@ -20,7 +19,6 @@ from measurement.measures import Distance
 from stravalib import exc
 
 from shared.datastore.route import Route
-from services.slack.templates import ROUTE_BLOCK
 from services.slack.util import get_id, generate_url
 
 
@@ -32,10 +30,10 @@ def unfurl_route(client, url):
         logging.debug('Unknown Route: {route_id}')
         return None
     route_entity = Route.to_entity(route)
-    return _route_block(url, route_entity)
+    return {'blocks': _route_blocks(url, route_entity)}
 
 
-def _route_block(url, route):
+def _route_blocks(url, route):
     route_sub = {
         'id': route['id'],
         'timestamp': format_date(route['timestamp'], format='medium'),
@@ -44,10 +42,23 @@ def _route_block(url, route):
         'athlete.id': route['athlete']['id'],
         'athlete.firstname': route['athlete']['firstname'],
         'athlete.lastname': route['athlete']['lastname'],
-        'map_image_url': generate_url(route),
         'url': url,
     }
-    unfurl = json.loads(ROUTE_BLOCK % route_sub)
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "<%(url)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>\n%(description)s\n\nCreated on %(timestamp)s"
+                % route_sub,
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": generate_url(route),
+                "alt_text": "route map",
+            },
+        }
+    ]
 
     fields = []
     if route.get('distance', None):
@@ -68,6 +79,6 @@ def _route_block(url, route):
         )
 
     if fields:
-        unfurl['blocks'].append({"type": "divider"})
-        unfurl['blocks'].append({"type": "section", "fields": fields})
-    return unfurl
+        blocks.append({"type": "divider"})
+        blocks.append({"type": "section", "fields": fields})
+    return blocks

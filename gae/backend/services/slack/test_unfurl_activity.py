@@ -25,8 +25,8 @@ from services.slack.testing_util import (
     MOCK_CRAWLED_ACTIVITY,
 )
 from services.slack.unfurl_activity import (
-    _api_activity_block,
-    _crawled_activity_block,
+    _api_activity_blocks,
+    _crawled_activity_blocks,
     _unfurl_activity_from_crawl,
     _unfurl_activity_from_datastore,
     unfurl_activity,
@@ -39,24 +39,24 @@ class MainTest(unittest.TestCase):
 
     def test_api_activity_block(self):
         activity = activity_entity_for_test(11111)
-        block = _api_activity_block(
+        blocks = _api_activity_blocks(
             {'url': 'https://www.strava.com/activities/11111'}, activity
         )
-        self.assertTrue(block)
+        self.assertTrue(blocks)
 
     def test_api_activity_block_with_primary_photo(self):
         activity = activity_entity_for_test(11111, with_photo=True)
-        block = _api_activity_block(
+        blocks = _api_activity_blocks(
             {'url': 'https://www.strava.com/activities/11111'}, activity
         )
-        self.assertTrue(block)
+        self.assertTrue(blocks)
 
     @mock.patch('urllib.request.urlopen')
     def test_unfurl_activity(self, mock_urlopen):
         set_mockurlopen(mock_urlopen)
 
         url = 'https://www.strava.com/activities/3123195350'
-        activity_block = unfurl_activity(None, url)
+        activity_blocks = unfurl_activity(None, url)
 
         expected = {
             'blocks': [
@@ -83,14 +83,14 @@ class MainTest(unittest.TestCase):
                 },
             ]
         }
-        self.assertDictEqual(dict(activity_block), expected)
+        self.assertDictEqual(dict(activity_blocks), expected)
 
     @mock.patch('urllib.request.urlopen')
     def test_unfurl_from_crawl(self, mock_urlopen):
         set_mockurlopen(mock_urlopen)
 
         url = 'https://www.strava.com/activities/3123195350'
-        activity_block = _unfurl_activity_from_crawl(url)
+        activity_blocks = _unfurl_activity_from_crawl(url)
 
         expected = {
             'blocks': [
@@ -117,7 +117,7 @@ class MainTest(unittest.TestCase):
                 },
             ]
         }
-        self.assertDictEqual(dict(activity_block), expected)
+        self.assertDictEqual(dict(activity_blocks), expected)
 
     def test_unfurl_from_datastore(self):
         client_mock = mock.Mock()
@@ -132,11 +132,11 @@ class MainTest(unittest.TestCase):
         client_mock.query.return_value = query_mock
 
         url = 'https://www.strava.com/activities/3123195350'
-        activity_block = _unfurl_activity_from_datastore(client_mock, url)
+        activity_unfurl = _unfurl_activity_from_datastore(client_mock, url)
 
         # This strips the API key, so we have to strip it from the expected output, too; for reasonable comparisons.
-        if activity_block.get('blocks', [{}])[0].get('accessory', {}).get('image_url'):
-            activity_block['blocks'][0]['accessory']['image_url'] = 'XYZ_URL'
+        if activity_unfurl.get('blocks', [{}])[0].get('accessory', {}).get('image_url'):
+            activity_unfurl['blocks'][0]['accessory']['image_url'] = 'XYZ_URL'
 
         # This strips the API key, so we have to strip it from the actual output, too; for reasonable comparisons.
         expected = {
@@ -167,37 +167,35 @@ class MainTest(unittest.TestCase):
                 },
             ]
         }
-        self.assertDictEqual(dict(activity_block), expected)
+        self.assertDictEqual(dict(activity_unfurl), expected)
 
-    def test_crawled_activity_block(self):
-        block = _crawled_activity_block(
+    def test_crawled_activity_blocks(self):
+        blocks = _crawled_activity_blocks(
             {'url': 'https://www.strava.com/activities/11111'}, MOCK_CRAWLED_ACTIVITY
         )
-        expected_block = {
-            'blocks': [
-                {
-                    'accessory': {
-                        'alt_text': 'activity image',
-                        'image_url': 'http://d3nn82uaxijpm6.cloudfront.net/assets/sharing/summary_activity_generic-ec8c36660493881ac5fb7b7.png',
-                        'type': 'image',
-                    },
-                    'text': {
-                        'text': "<{'url': "
-                        "'https://www.strava.com/activities/11111'}|*Morning "
-                        "Ride - Bob Stover's 58.0 mi bike ride*>\n"
-                        'Bob S. rode 58.0 mi on Apr 24, 2021.',
-                        'type': 'mrkdwn',
-                    },
-                    'type': 'section',
+        expected_blocks = [
+            {
+                'accessory': {
+                    'alt_text': 'activity image',
+                    'image_url': 'http://d3nn82uaxijpm6.cloudfront.net/assets/sharing/summary_activity_generic-ec8c36660493881ac5fb7b7.png',
+                    'type': 'image',
                 },
-                {'type': 'divider'},
-                {
-                    'fields': [
-                        {'text': '*Distance:* 58.1mi', 'type': 'mrkdwn'},
-                        {'text': '*Speed:* 15.0mph', 'type': 'mrkdwn'},
-                    ],
-                    'type': 'section',
+                'text': {
+                    'text': "<{'url': "
+                    "'https://www.strava.com/activities/11111'}|*Morning "
+                    "Ride - Bob Stover's 58.0 mi bike ride*>\n"
+                    'Bob S. rode 58.0 mi on Apr 24, 2021.',
+                    'type': 'mrkdwn',
                 },
-            ]
-        }
-        self.assertEqual(block, expected_block)
+                'type': 'section',
+            },
+            {'type': 'divider'},
+            {
+                'fields': [
+                    {'text': '*Distance:* 58.1mi', 'type': 'mrkdwn'},
+                    {'text': '*Speed:* 15.0mph', 'type': 'mrkdwn'},
+                ],
+                'type': 'section',
+            },
+        ]
+        self.assertEqual(blocks, expected_blocks)

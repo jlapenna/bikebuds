@@ -15,7 +15,7 @@
 import unittest
 
 from services.slack.testing_util import route_for_test
-from services.slack.unfurl_route import _route_block
+from services.slack.unfurl_route import _route_blocks
 
 
 class MainTest(unittest.TestCase):
@@ -24,5 +24,5 @@ class MainTest(unittest.TestCase):
 
     def test_route_block(self):
         route = route_for_test()
-        block = _route_block({'url': 'https://www.strava.com/routes/10285651'}, route)
-        self.assertTrue(block)
+        blocks = _route_blocks({'url': 'https://www.strava.com/routes/10285651'}, route)
+        self.assertTrue(blocks)

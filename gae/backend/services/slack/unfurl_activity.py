@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 import urllib
 import urllib.request
@@ -22,10 +21,6 @@ from bs4 import BeautifulSoup
 from measurement.measures import Distance, Speed
 from measurement.utils import guess
 
-from services.slack.templates import (
-    API_ACTIVITY_BLOCK,
-    CRAWLED_ACTIVITY_BLOCK,
-)
 from services.slack.util import get_id, generate_url
 
 
@@ -38,10 +33,12 @@ def _unfurl_activity_from_crawl(url):
     if not activity:
         logging.warn(f'Unable to crawl url {url}')
         return
-    block = _crawled_activity_block(url, activity)
-    if not block:
-        logging.warn(f'Unable parse {activity} for {url}')
-    return block
+    logging.debug(f'{activity}')
+    blocks = _crawled_activity_blocks(url, activity)
+    logging.debug(f'{blocks}')
+    if not blocks:
+        logging.warn(f'Unable to parse {activity} for {url}')
+    return {'blocks': blocks}
 
 
 def _unfurl_activity_from_datastore(client, url):
@@ -56,10 +53,13 @@ def _unfurl_activity_from_datastore(client, url):
     activity_entity = all_activities[0]
     if activity_entity.get('private'):
         return None
-    return _api_activity_block(url, activity_entity)
+    blocks = _api_activity_blocks(url, activity_entity)
+    if not blocks:
+        logging.warn(f'Unable to parse {activity_entity} for {url}')
+    return {'blocks': blocks}
 
 
-def _api_activity_block(url, activity):
+def _api_activity_blocks(url, activity):
     activity_sub = {
         'id': activity['id'],
         'timestamp': format_date(activity['start_date'], format='long'),
@@ -68,10 +68,23 @@ def _api_activity_block(url, activity):
         'athlete.id': activity['athlete']['id'],
         'athlete.firstname': activity['athlete']['firstname'],
         'athlete.lastname': activity['athlete']['lastname'],
-        'map_image_url': generate_url(activity),
         'url': url,
     }
-    unfurl = json.loads(API_ACTIVITY_BLOCK % activity_sub)
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "<%(url)s|*%(name)s*> by <https://www.strava.com/athletes/%(athlete.id)s|%(athlete.firstname)s %(athlete.lastname)s>, %(timestamp)s\n%(description)s"
+                % activity_sub,
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": generate_url(activity),
+                "alt_text": "route map",
+            },
+        }
+    ]
 
     fields = []
     if activity.get('distance', None):
@@ -102,18 +115,18 @@ def _api_activity_block(url, activity):
         )
 
     if fields:
-        unfurl['blocks'].append({"type": "divider"})
-        unfurl['blocks'].append({"type": "section", "fields": fields})
+        blocks.append({"type": "divider"})
+        blocks.append({"type": "section", "fields": fields})
 
     try:
         primary_image = activity['photos']['primary']['urls']['600']
     except (KeyError, TypeError):
         primary_image = None
     if primary_image:
-        unfurl['blocks'].append(
+        blocks.append(
             {"type": "image", "image_url": primary_image, "alt_text": "Cover Photo"}
         )
-    return unfurl
+    return blocks
 
 
 def _fetch_parse_activity_url(url):
@@ -129,7 +142,7 @@ def _fetch_parse_activity_url(url):
     return dict((meta['property'], meta['content']) for meta in metas)
 
 
-def _crawled_activity_block(url, activity):
+def _crawled_activity_blocks(url, activity):
     title = None
     if 'og:title' in activity:
         title = activity['og:title']
@@ -142,19 +155,23 @@ def _crawled_activity_block(url, activity):
     elif 'twitter:description' in activity:
         description = activity['twitter:description']
 
-    image = None
+    image_url = None
     if 'og:image' in activity:
-        image = activity['og:image']
+        image_url = activity['og:image']
     elif 'twitter:image' not in activity:
-        image = activity['twitter:image']
+        image_url = activity['twitter:image']
 
-    activity_sub = {
-        'title': title,
-        'description': description,
-        'url': url,
-        'image_url': image,
-    }
-    unfurl = json.loads(CRAWLED_ACTIVITY_BLOCK % activity_sub)
+    blocks = [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": f"<{url}|*{title}*>\n{description}"},
+            "accessory": {
+                "type": "image",
+                "image_url": image_url,
+                "alt_text": "activity image",
+            },
+        }
+    ]
 
     fields = []
     if 'fitness:distance:value' in activity:
@@ -184,7 +201,7 @@ def _crawled_activity_block(url, activity):
         )
 
     if fields:
-        unfurl['blocks'].append({"type": "divider"})
-        unfurl['blocks'].append({"type": "section", "fields": fields})
+        blocks.append({"type": "divider"})
+        blocks.append({"type": "section", "fields": fields})
 
-    return unfurl
+    return blocks
