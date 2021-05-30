@@ -38,15 +38,15 @@ function source_files() {
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/package-lock.json)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
-    \) -prune -o \
-    \( \
-        -name '*.sh' -o \
-        -name '*.dart'  -o \
-        -name '*.java'  -o \
-        -name '*.js' -o \
-        -name '*.jsx' -o \
-        -name '*.py' -o \
-        -name '*.json' \
+    \) -prune \
+    -o \( \
+        -name '*.sh' \
+        -o -name '*.dart'  \
+        -o -name '*.java'  \
+        -o -name '*.js' \
+        -o -name '*.jsx' \
+        -o -name '*.py' \
+        -o -name '*.json' \
     \) -type f -print \
     ;
 
@@ -65,12 +65,12 @@ function config_files() {
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
     -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
-    \) -prune -o \
-    \( \
-        -name '*.yaml' -o \
-        -name '*requirements*txt' -o \
-        -name '*.json' -o \
-        -name '*.txt' \
+    \) -prune \
+    -o \( \
+        -name '*.yaml' \
+        -o -name '*requirements*txt' \
+        -o -name '*.json' \
+        -o -name '*.txt' \
     \) -type f -print \
     ;
 
