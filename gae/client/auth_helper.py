@@ -57,7 +57,7 @@ def load_configuration(flow_creds):
 
 def run_flow():
     oauth_flow = InstalledAppFlow.from_client_secrets_file(
-        os.path.join(config.base_path, 'service_keys/server-oauth.json'),
+        os.path.join(config.base_path, 'service_keys/gcp-server-oauth.json'),
         scopes=[
             'openid',
             'https://www.googleapis.com/auth/userinfo.email',
