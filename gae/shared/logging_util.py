@@ -39,6 +39,7 @@ LOGS_TO_SILENCE = [
     'stravalib.attributes.EntityAttribute',
     'stravalib.attributes.EntityCollection',
     'urllib3.connectionpool',
+    'requests_oauthlib.oauth2_session',
 ]
 
 PROD_ONLY_LOGS_TO_SILENCE = [

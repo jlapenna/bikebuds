@@ -74,7 +74,6 @@ def create_creds2(creds_dict: dict):
         # really don't know when the token expired. So, we just expire it.
         creds_dict['created'] = now
         creds_dict['expires_in'] = -1
-        logging.debug('Creating creds2 using short circuit: %s', creds_dict)
         return Credentials2(**creds_dict)
 
     # A bug in withings_api doesn't use created to indicate when the token
@@ -92,7 +91,6 @@ def create_creds2(creds_dict: dict):
     # As such, when we create a Credentials2, we need to make sure that
     # expires_in is relative to the current time.
     # Calculate the original expires at, that Credentials2 uses for token_expiry
-    logging.debug('Creating creds2 starting with: %s', creds_dict)
     expires_at = creds_dict['created'] + datetime.timedelta(
         seconds=creds_dict.get('expires_in', -1)
     )
@@ -100,5 +98,4 @@ def create_creds2(creds_dict: dict):
     # Now frame the token in relation to "now," what OAuth2Session expects.
     creds_dict['created'] = now
     creds_dict['expires_in'] = (expires_at - creds_dict['created']).total_seconds()
-    logging.debug('Creating creds2 using: %s', creds_dict)
     return Credentials2(**creds_dict)

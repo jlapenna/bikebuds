@@ -19,8 +19,11 @@ from urllib.parse import urlencode
 
 import flask
 
-from withings_api.common import MeasureGetMeasGroupCategory
-from withings_api.common import InvalidParamsException
+from withings_api.common import (
+    InvalidParamsException,
+    MeasureGetMeasGroupCategory,
+    NotifyAppli,
+)
 
 from shared import ds_util
 from shared import responses
@@ -138,7 +141,7 @@ class Worker(object):
             }
         )
         callbackurl = '%s/services/withings/events?%s' % (
-            config.frontend_url,
+            config.withings_creds['sub_url'],
             query_string,
         )
         comment = self.service.key.to_legacy_urlsafe().decode()
@@ -152,7 +155,7 @@ class Worker(object):
 
         self._revoke_unknown_subscriptions(callbackurl)
 
-        # After previous cleanup, see if we need to re-subscribed:
+        # After previous cleanup, see if we need to re-subscribe
         try:
             sub = self.client.notify_get(callbackurl)
         except InvalidParamsException:
@@ -160,10 +163,6 @@ class Worker(object):
 
         if sub:
             self._store_sub(sub.callbackurl, sub.comment)
-        elif config.is_dev:
-            logging.debug(
-                'Dev server. Not registering %s to %s', self.service.key, callbackurl
-            )
         else:
             self._subscribe(callbackurl, comment)
 
@@ -173,7 +172,7 @@ class Worker(object):
         for sub in notify_response.profiles:
             logging.debug('Examining sub: %s to %s', self.service.key, sub)
             if (
-                config.frontend_url in sub.callbackurl
+                config.withings_creds['sub_url'] in sub.callbackurl
                 and sub.callbackurl != callbackurl
             ):
                 # This sub is bikebuds, but we don't recognize it.
@@ -192,7 +191,9 @@ class Worker(object):
 
     def _subscribe(self, callbackurl, comment):
         try:
-            self.client.notify_subscribe(callbackurl, comment=comment)
+            self.client.notify_subscribe(
+                callbackurl, appli=NotifyAppli.WEIGHT, comment=comment
+            )
             logging.info('Subscribed: %s to %s', self.service.key, callbackurl)
             self._store_sub(callbackurl, comment)
         except Exception:
