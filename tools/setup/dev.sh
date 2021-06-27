@@ -66,7 +66,7 @@ function main() {
 
   echo "Initializing shell requirements."
   activate_virtualenv dev python3
-  pip3 install -r tools/setup/shell_requirements.txt
+  pip3 install -r tools/setup/dev_requirements.txt
 
   echo "Initializing pre-commit."
   pre-commit install
