@@ -22,13 +22,17 @@ from shared.config import config
 
 LOG_HEADERS = True
 LOG_QUERY = True
-LOG_RESPONSES = True
+LOG_RESPONSE_BODY = False
+LOG_RESPONSE_BODY_API = True
+LOG_RESPONSE_BODY_BACKEND = True
+LOG_RESPONSE_BODY_FRONTEND = True
 
 LOGS_TO_SILENCE = [
     'DatastoreInstallationStore',
     'google.auth.transport.requests',
     'google_auth_httplib2',
     'googleapiclient.discovery',
+    'slack_sdk.web.slack_response',
     'stravalib.model',
     'stravalib.model.Activity',
     'stravalib.model.Athlete',
@@ -101,13 +105,26 @@ def before():
 
 # Useful debugging interceptor to log all endpoint responses
 def after(response):
-    if not LOG_RESPONSES:
-        body = ''
-    elif flask.request.path in ['/activities', '/swagger.json', '/series']:
-        body = len(response.data.decode('utf-8'))
-    else:
-        body = response.data.decode('utf-8')
     try:
+        if not LOG_RESPONSE_BODY:
+            body = ''
+        elif flask.request.path.endswith('png'):
+            body = 'png'
+        elif flask.request.host_url == config.api_url:
+            if LOG_RESPONSE_BODY_API:
+                body = len(response.data.decode('utf-8'))
+            else:
+                body = 'api response'
+        elif flask.request.host_url == config.backend_url:
+            if LOG_RESPONSE_BODY_BACKEND:
+                body = response.data.decode('utf-8')
+            else:
+                body = 'backend response'
+        elif flask.request.host_url == config.frontend_url:
+            if LOG_RESPONSE_BODY_FRONTEND:
+                body = response.data.decode('utf-8')
+            else:
+                body = 'frontend response'
         response_logger.debug(
             '%s %s: response: %s, %s',
             flask.request.method,
