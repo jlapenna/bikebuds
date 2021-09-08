@@ -2,7 +2,7 @@
 Flask==1.1.2
 Flask-Cors==3.0.10
 Werkzeug==1.0.1 # https://github.com/python-restx/flask-restx/issues/34
-flask-restx==0.3.0
+flask-restx==0.5.1
 
 # auth_util3.py
 firebase-admin==4.5.3
