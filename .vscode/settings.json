@@ -1,0 +1,6 @@
+{
+  "python.pythonPath": "virtualenv/dev/bin/python",
+  "python.venvPath": "virtualenv",
+  "python.autoComplete.extraPaths": ["gae", "gae/shared"],
+  "python.analysis.extraPaths": ["gae", "gae/shared"]
+}
