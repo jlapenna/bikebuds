@@ -8,7 +8,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/styles": "^4.11.3",
     "@react-google-maps/api": "^2.1.1",
-    "@types/googlemaps": "^3.43.3",
+    "@types/google.maps": "^3.45.6",
     "@types/markerclustererplus": "^2.1.33",
     "ajv": "^7.2.1",
     "convert-units": "^2.3.4",
@@ -23,7 +23,6 @@
     "react-json-pretty": "^2.2.0",
     "react-moment": "^1.1.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.3",
     "recharts": "^2.0.9",
     "swagger-client": "^3.13.1",
     "typeface-roboto": "^1.1.13"
@@ -64,6 +63,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "firebase-mock": "^2.3.2",
     "jest-extended": "^0.11.5",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "react-scripts": "4.0.3"
   }
 }

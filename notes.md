@@ -457,7 +457,7 @@ cd flutter/android;
 # Update python packages
 
 ```
-for i in gae/*/; do pushd $i; for r in requirements*txt; do pur -r $r; done; pushd; done;
+for i in gae/*/requirements*.txt; do echo "$i"; pur -r $i; done;
 ```
 
 # Slack web push

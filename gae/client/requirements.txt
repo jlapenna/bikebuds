@@ -1,34 +1,34 @@
-ipython==7.22.0
+ipython==7.28.0
 
 # ds_helper.py
-google-cloud-datastore==2.1.0
+google-cloud-datastore==2.2.0
 
 # Talks to firebase
-firebase-admin==4.5.3
+firebase-admin==5.0.3
 
 # Talks oauth
-google-auth-oauthlib==0.4.4
+google-auth-oauthlib==0.4.6
 
 # Talks to the bikebuds API
 pyswagger==0.8.39
-requests==2.25.1
+requests==2.26.0
 
 # tasks_util.py
-google-cloud-tasks==2.2.0
+google-cloud-tasks==2.6.0
 
 # For natural language dates and such
-Babel==2.9.0
+Babel==2.9.1
 
 # /services/
 fitbit==0.3.1
-stravalib==0.10.2
+stravalib==0.10.4
 withings-api==2.3.2
 
 # trainerroad
 lxml==4.6.3
 
 # Utility
-sortedcontainers==2.3.0
+sortedcontainers==2.4.0
 
 # bikebuds API
 ./generated/python_bikebuds_api
@@ -37,4 +37,4 @@ sortedcontainers==2.3.0
 googlemaps
 
 # pass_util.py
-cryptography==3.4.7
+cryptography==35.0.0
