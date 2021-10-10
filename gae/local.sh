@@ -25,8 +25,6 @@ function main() {
 
   deactivate 2>/dev/null || echo ""
 
-  sudo sed -i 's/37/39/g' \
-      /usr/lib/google-cloud-sdk/platform/google_appengine/google/appengine/tools/devappserver2/runtime_factories.py;
   activate_virtualenv dev_appserver python2
 
   load_config;
