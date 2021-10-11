@@ -155,18 +155,22 @@ def _process_livetrack(url: str, url_info: dict) -> Entity:
     track['status'] = Track.STATUS_INFO
 
     if 'start' in track['info']['session']:
+        start = dateutil.parser.parse(track['info']['session']['start'])
+        track['start'] = start
         track['status'] = Track.STATUS_STARTED
         # livetrack_start_millis = int(
-        #     dateutil.parser.parse(track['session_data']['session']['start']).timestamp()
+        #     dateutil.parser.parse(track['info']['session']['start']).timestamp()
         #     * 1000
         # )
     if 'end' in track['info']['session']:
-        ended_ago = now - dateutil.parser.parse(track['info']['session']['end'])
+        end = dateutil.parser.parse(track['info']['session']['end'])
+        track['end'] = end
+        track['status'] = Track.STATUS_FINISHED
+        ended_ago = now - end
         if ended_ago:
             logging.debug(
-                'Expired LiveTrack: %s (Already finished %s ago)', url, ended_ago
+                'Expired LiveTrack: %s (Finished at %s, %s ago)', url, end, ended_ago
             )
-        track['status'] = Track.STATUS_FINISHED
         return Track.to_entity(track)
 
     # Gets some coures info, like perhaps, where they currently are.
