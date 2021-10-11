@@ -144,7 +144,7 @@ class RoutesListCard extends Component {
                 }
               }
               var startDate = undefined;
-              if (this.props.showDate) {
+              if (this.props.showDate && route.properties.start_date_local !== undefined) {
                 startDate = moment(route.properties.start_date_local).format(
                   'LLL'
                 );
@@ -156,6 +156,7 @@ class RoutesListCard extends Component {
               } else if (fullName !== undefined) {
                 secondary = fullName;
               } else if (startDate !== undefined) {
+                console.log(startDate)
                 secondary = startDate;
               }
               return (

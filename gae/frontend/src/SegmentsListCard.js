@@ -145,7 +145,7 @@ class SegmentsListCard extends Component {
                 }
               }
               var startDate = undefined;
-              if (this.props.showDate) {
+              if (this.props.showDate && segment.properties.start_date_local !== undefined) {
                 startDate = moment(segment.properties.start_date_local).format(
                   'LLL'
                 );

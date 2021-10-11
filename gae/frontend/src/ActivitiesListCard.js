@@ -146,7 +146,7 @@ class ActivitiesListCard extends Component {
                 }
               }
               var startDate = undefined;
-              if (this.props.showDate) {
+              if (this.props.showDate && activity.properties.start_date_local !== undefined) {
                 startDate = moment(activity.properties.start_date_local).format(
                   'LLL'
                 );
