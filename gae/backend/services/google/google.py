@@ -146,25 +146,30 @@ class Worker(object):
             if garmin_url is not None:
                 task_util.garmin_tasks_livetrack(garmin_url)
 
-        logging.debug('Fetching messages')
+        logging.debug('Fetching the latest 100 messages')
         request = (
             self.client.users()
             .messages()
             .list(
                 userId='me',
                 labelIds=['INBOX'],
+                maxResults=100,
             )
         )
         batch = self.client.new_batch_http_request(callback=process_message)
-        while request is not None:
+        batch_size = 0
+        while request is not None and batch_size < 100:
             response = request.execute()
             for message in response['messages']:
+                if batch_size >= 100:
+                    break
                 batch.add(
                     self.client.users()
                     .messages()
                     .get(userId='me', id=message['id'], format='full'),
                     request_id=message['id'],
                 )
+                batch_size += 1
             request = self.client.users().messages().list_next(request, response)
         batch.execute()
         return responses.OK
