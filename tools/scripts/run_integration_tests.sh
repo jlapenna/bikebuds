@@ -16,11 +16,10 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main() {
-  local repo_path="$(get_repo_path)"; 
-  local client_path="${repo_path}/gae/client"
+  local client_path="${BIKEBUDS_PATH}/gae/client"
 
   activate_virtualenv integration python3
   pip -q install -r ${client_path}/requirements.txt

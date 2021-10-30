@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 load_config
 
 QUEUES=("

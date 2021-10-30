@@ -16,11 +16,9 @@
 
 # Update firebase services in prod.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main() {
-  local repo_path="$(get_repo_path)";
-
   pushd firebase/bikebuds-next;
   firebase deploy --only firestore:rules,indexes
   popd

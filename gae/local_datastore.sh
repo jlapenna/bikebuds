@@ -18,12 +18,10 @@
 
 set -e
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 load_config;
 
 function main() {
-  local repo_path="$(get_repo_path)"; 
-
   activate_gae3_virtualenv;
 
   echo "Starting datastore emulator."

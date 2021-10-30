@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main {
   curl -H "Content-Type: application/x-www-form-urlencoded" \

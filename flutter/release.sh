@@ -16,7 +16,7 @@
 
 # Build a production apk.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 ANDROID_BUILD_GRADLE="android/app/build.gradle"
 ANDROID_AAB_LOCATION="build/app/outputs/bundle/release/app.aab"
@@ -29,9 +29,6 @@ function ctrl_c() {
 trap ctrl_c INT
 
 function main() {
-  # Verify repo
-  local repo_path="$(get_repo_path)";
-
   # Flag defaults
   local android="";
   local ios="";

@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-source tools/scripts/base.sh
-load_config;
+source tools/scripts/base.sh || exit 1
 
 function main() {
   if [[ -z "$@" ]]; then
@@ -48,7 +47,7 @@ function main() {
     fi
 
     export GOOGLE_APPLICATION_CREDENTIALS=environments/env/service_keys/appengine.json
-    export PYTHONPATH="$PYTHONPATH:$BIKEBUDS_REPO/gae"
+    export PYTHONPATH="${PYTHONPATH}:${BIKEBUDS_PATH}/gae"
 
     python -m unittest discover
     result=$?;

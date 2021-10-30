@@ -16,7 +16,7 @@
 
 # Deploy the service to appengine, rewriting code to support production.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function ctrl_c() {
   echo "Trapped and ignored ctrl+c"
@@ -44,8 +44,6 @@ function delete_old_versions() {
 }
 
 function main() {
-  local repo_path="$(get_repo_path)";
-
   if [[ -z "$@" ]]; then
     local services="frontend api backend";
   else

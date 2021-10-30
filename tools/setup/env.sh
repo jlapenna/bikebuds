@@ -16,23 +16,21 @@
 
 # Configures an environment to run the backend in.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main() {
-  local repo_path="$(get_repo_path)";
-
   echo ""
   echo "Setting up config environments."
   pushd environments;
   if [[ ! -d "dev" ]]; then
     echo "TODO: Please install the dev config git repo, then press enter."
-    echo "cd ${repo_path}/environments"
+    echo "cd ${BIKEBUDS_PATH}/environments"
     echo "gcloud --project=bikebuds-test source repos clone env dev"
     read
   fi
   if [[ ! -d "prod" ]]; then
     echo "TODO: Please install the prod config git repo, then press enter."
-    echo "cd ${repo_path}/environments;"
+    echo "cd ${BIKEBUDS_PATH}/environments;"
     echo "gcloud --project=bikebuds-app source repos clone env prod"
     read
   fi

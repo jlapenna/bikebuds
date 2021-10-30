@@ -16,9 +16,7 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
-source tools/scripts/base.sh
-
-export REPO_PATH="$(get_repo_path)";
+source tools/scripts/base.sh || exit 1
 
 export FCM_SERVER_KEY="$(jq -r '.["server_key"]' environments/env/service_keys/firebase-messaging.json)"
 export FCM_PROD_SERVER_KEY="$(jq -r '.["server_key"]' environments/prod/service_keys/firebase-messaging.json)"
@@ -27,17 +25,17 @@ export FCM_DEV_SERVER_KEY="$(jq -r '.["server_key"]' environments/dev/service_ke
 function source_files() {
   find . \
     \( \
-    -path "./$(realpath --relative-to=. $REPO_PATH/virtualenv)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/.dart_tool)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/client/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/build)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/package-lock.json)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/virtualenv)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/flutter/build)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/flutter/.dart_tool)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/api/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/backend/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/client/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/build)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/node_modules)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/package-lock.json)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/generated)" \
     \) -prune \
     -o \( \
         -name '*.sh' \
@@ -55,16 +53,16 @@ function source_files() {
 function config_files() {
   find . \
     \( \
-    -path "./$(realpath --relative-to=. $REPO_PATH/virtualenv)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/build)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/flutter/.dart_tool)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/api/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/backend/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/client/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/build)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/lib)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/gae/frontend/node_modules)" -o \
-    -path "./$(realpath --relative-to=. $REPO_PATH/generated)" \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/virtualenv)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/flutter/build)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/flutter/.dart_tool)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/api/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/backend/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/client/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/build)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/lib)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/gae/frontend/node_modules)" -o \
+    -path "./$(realpath --relative-to=. ${BIKEBUDS_PATH}/generated)" \
     \) -prune \
     -o \( \
         -name '*.yaml' \

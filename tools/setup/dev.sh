@@ -16,11 +16,9 @@
 
 # Dependencies for development, in order to start a dev server, for example.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main() {
-  local repo_path="$(get_repo_path)";
-
   echo "Installing the correct packages with apt"
   sudo apt install -y python3 python3-dev python3-pip python3-virtualenv python3-venv
   sudo apt install -y virtualenv

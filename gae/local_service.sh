@@ -18,13 +18,11 @@
 
 set -e
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 load_config;
 
 function main() {
   local service=$1
-
-  local repo_path="$(get_repo_path)"; 
 
   activate_virtualenv ${service} python3
 

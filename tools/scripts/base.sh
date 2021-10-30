@@ -14,43 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROD_API_HOSTNAME='api.bikebuds.cc'
-LOCAL_API_HOSTNAME='localhost:8082'
+
+function set_bikebuds_path() {
+  if [[ "${BIKEBUDS_PATH}" != "" ]]; then
+    return 0;
+  fi
+
+  local readlink_pwd="$(readlink -m "$PWD")"
+  if [[ "$(basename ${readlink_pwd})" != "bikebuds" ]]; then
+    echo "Must be in the bikebuds code repo!" >&2
+    return 1;
+  fi
+  export BIKEBUDS_PATH="${readlink_pwd}"
+}
+
+function verify_bikebuds_path() {
+  local readlink_pwd="$(readlink -m "$PWD")"
+  if [[ "$(basename ${readlink_pwd})" != "bikebuds" ]]; then
+    echo "Must be in the bikebuds code repo!" >&2
+    exit 1;
+  fi
+}
 
 function load_config() {
-  get_repo_path
-  local env=${BIKEBUDS_ENV}
-  if [[ "${env}" == "" ]]; then
-    env="environments/env"
-  fi
-  config="${env}/config.json";
+  set_bikebuds_path
+
+  local bikebuds_env="environments/env";
+  local config="${bikebuds_env}/config.json";
 
   for kv in $(jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' ${config}); do
     export "CONFIG_${kv}";
   done;
 }
 
-function verify_deps() {
-  for dep in "${@}"; do 
-    if [[ ! "$(command -v $dep)" ]]; then
-      echo "Error: $dep is not installed." >&2
-      return 1
-    fi
-  done
-}
-
-function get_repo_path() {
-  export BIKEBUDS_REPO="$(readlink -m "$PWD")"
-  echo "${BIKEBUDS_REPO}";
-  if [[ "$(basename ${BIKEBUDS_REPO})" != "bikebuds" ]]; then
-    echo "Must be in the bikebuds code repo!" >&2
-    return 1;
-  fi
-}
-
 function get_virtualenv_path() {
   local env_name="$1"
-  local env_path=$(readlink -m "$(get_repo_path)/virtualenv/${env_name}")
+  local env_path=$(readlink -m "${BIKEBUDS_PATH}/virtualenv/${env_name}")
   echo "${env_path}";
   if [ ! -d "${env_path}" ]; then
     return 1;
@@ -121,3 +120,6 @@ function setup_datastore_emulator() {
   export DATASTORE_HOST=${CONFIG_datastore_emulator_host}
   export DATASTORE_PORT="$(echo ${CONFIG_datastore_emulator_host} | cut -d':' -f2)"
 }
+
+verify_bikebuds_path
+set_bikebuds_path

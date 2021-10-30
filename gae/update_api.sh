@@ -1,17 +1,16 @@
 #!/bin/bash
 # Update API.
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 API="bikebuds"
 VERSION="v1"
 
-REPO_PATH="$(get_repo_path)";
-GENERATOR_PATH="${REPO_PATH}/generated/openapi-generator";
+GENERATOR_PATH="${BIKEBUDS_PATH}/generated/openapi-generator";
 
 function main() {
-  generate dart "${REPO_PATH}/generated/bikebuds_api";
-  generate python "${REPO_PATH}/generated/python_bikebuds_api";
+  generate dart "${BIKEBUDS_PATH}/generated/bikebuds_api";
+  generate python "${BIKEBUDS_PATH}/generated/python_bikebuds_api";
 }
 
 function generate() {

@@ -18,11 +18,9 @@
 
 set -e
 
-source tools/scripts/base.sh
+source tools/scripts/base.sh || exit 1
 
 function main() {
-  local repo_path="$(get_repo_path)";
-
   deactivate 2>/dev/null || echo ""
 
   activate_virtualenv dev_appserver python2
