@@ -143,6 +143,11 @@ def _params_entity(**kwargs):
     return params_entity
 
 
+def task_body_for_test(**kwargs):
+    params_entity = _params_entity(**kwargs)
+    return _serialize_entity(params_entity)
+
+
 def sync_club(club_id):
     return _queue_task(
         **{
@@ -181,6 +186,7 @@ def sync_services(services, force=False):
 
 
 def get_payload(request):
+    """Returns an Entity with the task's params."""
     return _deserialize_entity(request.get_data())
 
 
@@ -207,7 +213,7 @@ def process_event(service_key: Key, event):
     )
 
 
-def slack_tasks_event(event):
+def slack_tasks_event(event: Entity):
     return _queue_task(
         name=event.key.name,
         entity=_params_entity(event=event),
@@ -257,15 +263,19 @@ def google_tasks_rides(user: Entity, data: dict):
     )
 
 
-def garmin_tasks_livetrack(url):
+def garmin_tasks_livetrack(url, publish: bool = False):
     return _queue_task(
-        entity=_params_entity(url=url),
+        entity=_params_entity(url=url, publish=publish),
         relative_uri='/services/garmin/tasks/livetrack',
         service='backend',
         parent=_livetrack_parent,
     )
 
 
-def task_body_for_test(**kwargs):
-    params_entity = _params_entity(**kwargs)
-    return _serialize_entity(params_entity)
+def slack_tasks_livetrack(track: Entity):
+    return _queue_task(
+        entity=_params_entity(track=track),
+        relative_uri='/services/slack/tasks/livetrack',
+        service='backend',
+        parent=_livetrack_parent,
+    )

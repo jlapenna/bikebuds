@@ -46,10 +46,11 @@ LIVETRACK_TRACKPOINTS_URL = 'https://livetrack.garmin.com/services/session/%(ses
 def tasks_livetrack():
     params = task_util.get_payload(flask.request)
     url = params['url']
-    logging.info('process/livetrack: %s', url)
+    publish = params['publish']
+    logging.info(f'process/livetrack: {url} {publish}')
 
     try:
-        sync_helper.do(TrackWorker(url=url), work_key=url)
+        sync_helper.do(TrackWorker(url=url, publish=publish), work_key=url)
     except SyncException:
         return responses.OK_SYNC_EXCEPTION
     return responses.OK
@@ -103,8 +104,9 @@ class Worker(object):
 
 
 class TrackWorker(object):
-    def __init__(self, url: str):
+    def __init__(self, url: str, publish: bool = False):
         self.url = url
+        self.publish = publish
 
     def sync(self):
         match = re.match(r'.*/session/(?P<session>.*)/token/(?P<token>.*)', self.url)
@@ -122,6 +124,11 @@ class TrackWorker(object):
         if track_entity.get('status', Track.STATUS_UNKNOWN) <= 0:
             logging.warning('Sync failed: %s', track_entity)
             return responses.OK_INVALID_LIVETRACK
+
+        if self.publish:
+            # Ship the track off to slack to get posted.
+            task_util.slack_tasks_livetrack(track_entity)
+
         return responses.OK
 
 

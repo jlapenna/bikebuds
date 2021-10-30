@@ -22,6 +22,56 @@ from stravalib.model import Athlete, Map, Route
 from shared import ds_util
 
 
+def track_finished_for_test() -> Entity:
+    track = Entity(ds_util.client.key('Track', 10285651))
+    track.update(
+        {
+            "info": {
+                "gcAvatar": "https://s3.amazonaws.com/garmin-connect-prod/profile_images/avatar.png",
+                "session": {
+                    "end": "2021-04-11T20:28:36.000Z",
+                    "position": {
+                        "lat": 37.77,
+                        "locationName": "San Francisco",
+                        "lon": -122.44,
+                    },
+                    "publisher": {
+                        "connectUserProfileId": 123456,
+                        "identifier": "PUBLISHERIDPUBLISHERID",
+                        "nickname": "Joe LaPenna",
+                        "trackerId": "UA69B7XL",
+                        "type": "WEARABLE",
+                    },
+                    "publisherState": "ACTIVE",
+                    "sessionId": "session-session",
+                    "sessionName": "04/11/21",
+                    "start": "2021-04-11T15:00:09.000Z",
+                    "subscriber": {
+                        "identifier": "jlapenna.test.1@gmail.com",
+                        "type": "EMAIL",
+                    },
+                    "subscriberState": "ACTIVE",
+                    "token": "1618153228",
+                    "url": "https://livetrack.garmin.com/session/session-session/token/TOKENTOKEN",
+                    "userDisplayName": "Joe LaPenna",
+                    "viewable": "2021-04-11T20:28:36.000Z",
+                },
+                "shortened": False,
+                "unitId": 3996815102,
+                "viewable": False,
+            },
+            "start": datetime.datetime(
+                2021, 4, 11, 15, 00, tzinfo=datetime.timezone.utc
+            ),
+            "end": datetime.datetime(2021, 4, 11, 20, 28, tzinfo=datetime.timezone.utc),
+            "status": 4,  # FINISHED
+            "url": "https://livetrack.garmin.com/session/session-session/token/TOKENTOKEN",
+            "url_info": {"session": "session-session", "token": "TOKENTOKEN"},
+        }
+    )
+    return track
+
+
 def route_for_test():
     route = Entity(ds_util.client.key('Route', 10285651))
     route.update(

@@ -104,6 +104,7 @@ class Worker(object):
         self.client = client
 
     def sync(self):
+        logging.info('Worker: sync')
         request = {
             'labelIds': ['INBOX'],
             'topicName': 'projects/%s/topics/rides' % (config.project_id,),
@@ -121,13 +122,14 @@ class Worker(object):
         )
 
         if synced_history_id == 0:
-            try:
-                return self.full_sync()
-            finally:
-                ds_util.client.put(self.service)
+            logging.debug('synced_history_id is 0, doing full_sync')
+            return self._full_sync()
         elif synced_history_id < int(watch['historyId']):
             # This shouldn't ever happen, since we use pubsub, but if it does,
             # we need to sync the latest.
+            logging.warn(
+                f"synced_history_id unexpectedly low: {synced_history_id} < {watch['historyId']}"
+            )
             user = ds_util.client.get(self.service.key.parent)
             task_util.google_tasks_rides(user, {'historyId': synced_history_id})
             return responses.OK
@@ -135,16 +137,17 @@ class Worker(object):
             logging.debug('Nothing to sync')
             return responses.OK
 
-    def full_sync(self):
+    def _full_sync(self):
         def process_message(request_id, response, exception):
             message_history_id = int(response['historyId'])
             synced_history_id = self.service['settings'].get('synced_history_id', 0)
             if message_history_id > synced_history_id:
                 self.service['settings']['synced_history_id'] = message_history_id
+                ds_util.client.put(self.service)
 
             garmin_url = _extract_garmin_url(request_id, response)
             if garmin_url is not None:
-                task_util.garmin_tasks_livetrack(garmin_url)
+                task_util.garmin_tasks_livetrack(garmin_url, publish=False)
 
         logging.debug('Fetching the latest 100 messages')
         request = (
@@ -153,25 +156,29 @@ class Worker(object):
             .list(
                 userId='me',
                 labelIds=['INBOX'],
-                maxResults=100,
+                maxResults=100,  # Also the default, but being explicit.
             )
         )
-        batch = self.client.new_batch_http_request(callback=process_message)
-        batch_size = 0
-        while request is not None and batch_size < 100:
+        batch_message_ids = []
+        while request is not None:
             response = request.execute()
-            for message in response['messages']:
-                if batch_size >= 100:
-                    break
-                batch.add(
-                    self.client.users()
-                    .messages()
-                    .get(userId='me', id=message['id'], format='full'),
-                    request_id=message['id'],
-                )
-                batch_size += 1
+            batch_message_ids += [
+                message['id'] for message in response.get('messages', [])
+            ]
+            if len(batch_message_ids) >= 100:
+                break
             request = self.client.users().messages().list_next(request, response)
+
+        batch = self.client.new_batch_http_request(callback=process_message)
+        for message_id in list(dict.fromkeys(batch_message_ids))[:100]:
+            batch.add(
+                self.client.users()
+                .messages()
+                .get(userId='me', id=message_id, format='full'),
+                request_id=message_id,
+            )
         batch.execute()
+
         return responses.OK
 
 
@@ -189,11 +196,15 @@ class PubsubWorker(object):
             synced_history_id = self.service['settings'].get('synced_history_id', 0)
             if message_history_id > synced_history_id:
                 self.service['settings']['synced_history_id'] = message_history_id
+                ds_util.client.put(self.service)
 
             garmin_url = _extract_garmin_url(request_id, response)
             if garmin_url is not None:
-                task_util.garmin_tasks_livetrack(garmin_url)
+                task_util.garmin_tasks_livetrack(garmin_url, publish=True)
 
+        logging.debug(
+            f"Fetching messages after {self.service['settings']['synced_history_id']}"
+        )
         request = (
             self.client.users()
             .history()
@@ -201,23 +212,30 @@ class PubsubWorker(object):
                 userId='me',
                 labelId='INBOX',
                 startHistoryId=self.service['settings'].get('synced_history_id'),
+                maxResults=100,  # Also the default, but being explicit.
             )
         )
-        batch = self.client.new_batch_http_request(callback=process_message)
+        batch_message_ids = []
         while request is not None:
             response = request.execute()
             for history in response.get('history', []):
-                for message in history.get('messages', []):
-                    batch.add(
-                        self.client.users()
-                        .messages()
-                        .get(userId='me', id=message['id'], format='full'),
-                        request_id=message['id'],
-                    )
+                batch_message_ids += [
+                    message['id'] for message in history.get('messages', [])
+                ]
+            if len(batch_message_ids) >= 100:
+                break
             request = self.client.users().history().list_next(request, response)
+
+        batch = self.client.new_batch_http_request(callback=process_message)
+        for message_id in list(dict.fromkeys(batch_message_ids))[:100]:
+            batch.add(
+                self.client.users()
+                .messages()
+                .get(userId='me', id=message_id, format='full'),
+                request_id=message_id,
+            )
         batch.execute()
 
-        ds_util.client.put(self.service)
         return responses.OK
 
 

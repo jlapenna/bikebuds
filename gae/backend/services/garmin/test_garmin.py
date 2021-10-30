@@ -43,7 +43,7 @@ class ModuleTest(unittest.TestCase):
     def test_do_called(self, sync_helper_do_mock):
         r = self.client.post(
             '/tasks/livetrack',
-            data=task_util.task_body_for_test(url='http://anyurl'),
+            data=task_util.task_body_for_test(url='http://anyurl', publish=False),
         )
         self.assertTrue(sync_helper_do_mock.called)
         responses.assertResponse(self, r, responses.OK)
@@ -53,14 +53,16 @@ class TrackWorkerTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_invalid_url(self):
+    @mock.patch('shared.task_util._queue_task')
+    def test_invalid_url(self, mock_queue_task):
         worker = garmin.TrackWorker(url='http://dummyurl')
         r = worker.sync()
         responses.assertResponse(self, r, responses.OK_INVALID_LIVETRACK)
 
+    @mock.patch('shared.task_util._queue_task')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch.object(Session, 'get')
-    def test_failed_info_url(self, mock_session_get, mock_put):
+    def test_failed_info_url(self, mock_session_get, mock_put, mock_queue_task):
         instance = mock.MagicMock(Response)
         instance.status_code = 500
         mock_session_get.return_value = instance
@@ -75,9 +77,10 @@ class TrackWorkerTest(unittest.TestCase):
         track = mock_put.call_args[0][0]
         self.assertEqual(track.get('status'), Track.STATUS_FAILED)
 
+    @mock.patch('shared.task_util._queue_task')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch.object(Session, 'get')
-    def test_finished(self, mock_session_get, mock_put):
+    def test_finished(self, mock_session_get, mock_put, mock_queue_task):
         instance = mock.MagicMock(Response)
         instance.status_code = 200
         instance.json.return_value = INFO_URL_RESPONSE
@@ -93,9 +96,10 @@ class TrackWorkerTest(unittest.TestCase):
         track = mock_put.call_args[0][0]
         self.assertEqual(track.get('status'), Track.STATUS_FINISHED)
 
+    @mock.patch('shared.task_util._queue_task')
     @mock.patch('shared.ds_util.client.put')
     @mock.patch.object(Session, 'get')
-    def test_404(self, mock_session_get, mock_put):
+    def test_404(self, mock_session_get, mock_put, mock_queue_task):
         """Test that a 200 http response, for a track that is unavailable with an in-json status code, is handled."""
         instance = mock.MagicMock(Response)
         instance.status_code = 200

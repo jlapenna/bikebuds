@@ -19,6 +19,8 @@ import urllib.request
 
 import flask
 
+from google.cloud.datastore.entity import Entity
+
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -29,11 +31,17 @@ from shared.datastore.service import Service
 from shared.services.slack.installation_store import DatastoreInstallationStore
 from shared.services.strava.client import ClientWrapper
 
+from services.slack.track_blocks import create_track_blocks
 from services.slack.unfurl_activity import unfurl_activity
 from services.slack.unfurl_route import unfurl_route
 from shared import ds_util
+from shared.config import config
 
 _STRAVA_APP_LINK_REGEX = re.compile('(https://www.strava.com/([^/]+)/[0-9]+)')
+_TRACKS_TEAM_ID = 'T01U8EC3H8T'
+_TRACKS_CHANNEL_ID = 'C020755FX3L'
+_DEV_TRACKS_TEAM_ID = 'T01U4PCGSQM'
+_DEV_TRACKS_CHANNEL_ID = 'C01U82F2STD'
 
 
 module = flask.Blueprint('slack', __name__)
@@ -47,6 +55,14 @@ def tasks_event():
     if event['event']['type'] == 'link_shared':
         return _process_link_shared(event)
     return responses.OK_SUB_EVENT_UNKNOWN
+
+
+@module.route('/tasks/livetrack', methods=['POST'])
+def tasks_livetrack():
+    params = task_util.get_payload(flask.request)
+    track = params['track']
+    logging.info('process/livetrack: %s', track)
+    return _process_track(track)
 
 
 def _process_link_shared(event):
@@ -83,6 +99,19 @@ def _create_slack_client(event):
         is_enterprise_install=event.get('authorizations', [{}])[0].get(
             'is_enterprise_install'
         ),
+    )
+    return WebClient(slack_bot.bot_token)
+
+
+def _create_slack_client_for_team(team_id):
+    slack_service = Service.get('slack', parent=Bot.key())
+    installation_store = DatastoreInstallationStore(
+        ds_util.client, parent=slack_service.key
+    )
+    slack_bot = installation_store.find_bot(
+        enterprise_id=None,
+        team_id=team_id,
+        is_enterprise_install=False,
     )
     return WebClient(slack_bot.bot_token)
 
@@ -128,3 +157,32 @@ def _unfurl(strava_client, link, alt_url=None):
         return unfurl_activity(strava_client, url)
     else:
         return None
+
+
+def _process_track(track: Entity) -> responses.Response:
+    if config.is_dev:
+        team_id = _DEV_TRACKS_TEAM_ID
+        channel_id = _DEV_TRACKS_CHANNEL_ID
+    else:
+        team_id = _TRACKS_TEAM_ID
+        channel_id = _TRACKS_CHANNEL_ID
+    slack_client = _create_slack_client_for_team(team_id)
+    blocks = create_track_blocks(track)
+    if not blocks:
+        return responses.OK_INVALID_LIVETRACK
+
+    try:
+        response = slack_client.chat_postMessage(
+            channel=channel_id, blocks=blocks, unfurl_links=False, unfurl_media=False
+        )
+    except SlackApiError:
+        logging.exception(f'process_track: failed: track: {track}, blocks: {blocks}')
+        return responses.INTERNAL_SERVER_ERROR
+
+    if not response['ok']:
+        logging.error(
+            f'process_track: failed: response: {response}, track: {track}, blocks: {blocks}'
+        )
+        return responses.INTERNAL_SERVER_ERROR
+    logging.debug('process_track: %s', response)
+    return responses.OK
