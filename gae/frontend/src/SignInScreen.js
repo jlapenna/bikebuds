@@ -46,27 +46,8 @@ class SignInScreen extends Component {
     firebase: PropTypes.object.isRequired,
   };
 
-  handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
-    this.props.firebase.authNext
-      .signInAndRetrieveDataWithCredential(authResult.credential)
-      .catch(error => {
-        console.warn(
-          'SignInScreen.signInWithCredential: authNext: ',
-          authResult,
-          error
-        );
-      });
-
-    // Return false to not redirect
-    return false;
-  };
-
   uiConfig = {
     // Popup signin flow rather than redirect flow.
-    callbacks: {
-      signInSuccessWithAuthResult: this.handleSignInSuccessWithAuthResult,
-    },
-    signInFlow: 'popup',
     signInOptions: [
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,

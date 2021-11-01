@@ -40,16 +40,12 @@ firebasemock.MockMessaging.prototype.getToken = () => {
 };
 
 var mockAuth = new firebasemock.MockAuthentication();
-var mockAuthNext = new firebasemock.MockAuthentication();
-var mockFirestore = new firebasemock.MockFirestore();
 var mockMessaging = new firebasemock.MockMessaging();
 
 global.createFirebaseState = () => {
   const firebase = new FirebaseState(true /* forTest */);
   firebase.auth = mockAuth;
-  firebase.authNext = mockAuthNext;
   firebase.messaging = mockMessaging;
-  firebase.firestore = mockFirestore;
   return firebase;
 };
 

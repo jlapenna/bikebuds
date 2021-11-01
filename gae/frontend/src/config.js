@@ -16,8 +16,6 @@
 
 import config_json from './config.json';
 import firebase_web_json from './firebase-web.json';
-import firebase_web_next_json from './firebase-web-next.json';
 
 export const config = config_json;
 export const firebase_config = firebase_web_json;
-export const firebase_next_config = firebase_web_next_json;

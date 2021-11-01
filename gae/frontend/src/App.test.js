@@ -55,9 +55,7 @@ test('Renders signed-in without crashing', async () => {
   const { getByTestId } = render(<App firebase={firebase} />);
 
   firebase.auth.changeAuthState(createSignedInState());
-  firebase.authNext.changeAuthState(createSignedInState());
   firebase.auth.flush();
-  firebase.authNext.flush();
 
   await waitForElement(() => getByTestId('main'));
 });
@@ -67,12 +65,9 @@ test('Renders signed-out without crashing', async () => {
   const { getByTestId } = render(<App firebase={firebase} />);
 
   firebase.auth.changeAuthState(undefined);
-  firebase.authNext.changeAuthState(undefined);
   firebase.auth.signOut();
-  firebase.authNext.signOut();
 
   firebase.auth.flush();
-  firebase.authNext.flush();
 
   await waitForElement(() => getByTestId('mock-sign-in-screen'));
 });
@@ -84,14 +79,14 @@ describe('Signed-in via dev/fakeuser config', () => {
   });
 
   test('Renders signed-in without crashing', async () => {
-    const firebase = new FirebaseState(true /* forTest */);
+    const firebase = createFirebaseState();
     const { queryByTestId } = render(<App firebase={firebase} />);
     expect(queryByTestId('main')).toBeInTheDocument();
   });
 });
 
 //test('Snapshot test', async () => {
-//  const firebase = new FirebaseState(true /* forTest */);
+//  const firebase = createFirebaseState();
 //  const { container, queryByTestId } = render(<App firebase={firebase} />);
 //  expect(container).toMatchSnapshot();
 //});

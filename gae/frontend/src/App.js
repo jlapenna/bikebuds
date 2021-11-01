@@ -132,14 +132,14 @@ export class MainApp extends Component {
         embed={this.props.embed}
         firebase={this.props.firebase}
         render={authWrapperState => {
-          if (authWrapperState.isSignedIn() === undefined) {
-            return (
-              <SpinnerScreen>
-                <span data-testid="unknown-app">Loading bikebuds...</span>
-              </SpinnerScreen>
-            );
-          }
           if (this.props.embed) {
+            if (authWrapperState.isSignedIn() === undefined) {
+              return (
+                <SpinnerScreen>
+                  <span data-testid="unknown-app">Loading bikebuds...</span>
+                </SpinnerScreen>
+              );
+            }
             if (authWrapperState.isSignedIn()) {
               return (
                 <SignedInApp embed={this.props.embed} {...authWrapperState} />
@@ -151,19 +151,25 @@ export class MainApp extends Component {
                 </SpinnerScreen>
               );
             }
+          }
+          if (authWrapperState.isSignedIn() === undefined) {
+            return (
+              <SpinnerScreen>
+                <span data-testid="unknown-app">Loading bikebuds...</span>
+              </SpinnerScreen>
+            );
+          }
+          if (authWrapperState.isSignedIn()) {
+            return (
+              <SignedInApp embed={this.props.embed} {...authWrapperState} />
+            );
           } else {
-            if (authWrapperState.isSignedIn()) {
-              return (
-                <SignedInApp embed={this.props.embed} {...authWrapperState} />
-              );
-            } else {
-              return (
-                <SignedOutApp
-                  embed={this.props.embed}
-                  firebase={this.props.firebase}
-                />
-              );
-            }
+            return (
+              <SignedOutApp
+                embed={this.props.embed}
+                firebase={this.props.firebase}
+              />
+            );
           }
         }}
       />

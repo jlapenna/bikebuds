@@ -34,8 +34,6 @@ class AuthWrapper extends Component {
     this.state = {
       firebaseUser: undefined,
       firebaseToken: undefined,
-      firebaseUserNext: undefined,
-      firebaseTokenNext: undefined,
       mobileEmbedNotified: false,
     };
   }
@@ -46,15 +44,11 @@ class AuthWrapper extends Component {
         return undefined;
       }
       return !!this.state.firebaseUser;
-    } else {
-      if (
-        this.state.firebaseUser === undefined ||
-        this.state.firebaseUserNext === undefined
-      ) {
-        return undefined;
-      }
-      return !!this.state.firebaseUser && !!this.state.firebaseUserNext;
     }
+    if (this.state.firebaseUser === undefined) {
+      return undefined;
+    }
+    return !!this.state.firebaseUser;
   };
 
   componentDidMount() {
@@ -75,8 +69,6 @@ class AuthWrapper extends Component {
       this.setState({
         firebaseUser: firebaseUser,
         firebaseToken: 'XYZ_TOKEN',
-        firebaseUserNext: firebaseUser,
-        firebaseTokenNext: 'XYZ_TOKEN_NEXT',
       });
       return;
     }
@@ -84,7 +76,6 @@ class AuthWrapper extends Component {
     LOG && console.log('AuthWrapper: Using Real Auth');
     this.unregisterAuthObserver = this.props.firebase.onAuthStateChanged(
       this._onAuthStateChangedFn('firebaseUser', 'firebaseToken'),
-      this._onAuthStateChangedFn('firebaseUserNext', 'firebaseTokenNext')
     );
 
     this.customToken = new URLSearchParams(window.location.search).get('token');
@@ -173,8 +164,6 @@ class AuthWrapper extends Component {
       firebase: this.props.firebase,
       firebaseUser: this.state.firebaseUser,
       firebaseToken: this.state.firebaseToken,
-      firebaseUserNext: this.state.firebaseUserNext,
-      firebaseTokenNext: this.state.firebaseTokenNext,
       isSignedIn: this.isSignedIn,
     });
   }

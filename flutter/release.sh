@@ -102,13 +102,6 @@ function build_web() {
   else
     echo ""
     echo "Releasing..."
-
-    pushd ../firebase/bikebuds-next
-    firebase deploy \
-        --only hosting \
-        --message "Build: ${build_version}" \
-        ;
-    popd
   fi
 }
 

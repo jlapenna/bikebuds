@@ -18,10 +18,9 @@ import React from 'react';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/firestore';
 import 'firebase/messaging';
 
-import { firebase_config, firebase_next_config } from './config';
+import { firebase_config } from './config';
 
 export class FirebaseState {
   constructor(forTest) {
@@ -30,9 +29,6 @@ export class FirebaseState {
       this.app = null;
       this.auth = null;
       this.messaging = null;
-      this.appNext = null;
-      this.authNext = null;
-      this.firestore = null;
       return;
     }
     try {
@@ -45,30 +41,14 @@ export class FirebaseState {
       }
     }
     this.auth = firebase.auth();
-
-    try {
-      this.appNext = firebase.initializeApp(firebase_next_config, 'next');
-    } catch (err) {
-      console.warn('FirebaseState: Tried to re-initialize next app.', err);
-      this.app = firebase.app('next');
-    }
-    this.authNext = firebase.auth(this.appNext);
-    this.firestore = firebase.firestore(this.appNext);
   }
 
-  onAuthStateChanged = (appObserver, appNextObserver) => {
+  onAuthStateChanged = (appObserver) => {
     if (this.auth === null) {
       console.warn('FirebaseState: Not setting up auth listeners, under test.');
       return;
     }
-    var unregisterAppObserver = this.auth.onAuthStateChanged(appObserver);
-    var unregisterAppNextObserver = this.authNext.onAuthStateChanged(
-      appNextObserver
-    );
-    return function() {
-      unregisterAppObserver();
-      unregisterAppNextObserver();
-    };
+    return this.auth.onAuthStateChanged(appObserver);
   };
 
   enableMessaging = () => {
@@ -86,9 +66,7 @@ export class FirebaseState {
 
   signOut = e => {
     console.log('FirebaseState.signOut', e);
-    var signOutPromise = this.auth.signOut();
-    var nextSignOutPromise = this.authNext.signOut();
-    return Promise.all([signOutPromise, nextSignOutPromise]);
+    return this.auth.signOut();
   };
 }
 

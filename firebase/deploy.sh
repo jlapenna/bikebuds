@@ -19,8 +19,7 @@
 source tools/scripts/base.sh || exit 1
 
 function main() {
-  pushd firebase/bikebuds-next;
-  firebase deploy --only firestore:rules,indexes
+  pushd firebase/bikebuds;
   popd
 }
 
