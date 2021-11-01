@@ -44,7 +44,6 @@ class SignInScreen extends Component {
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
-    match: PropTypes.object.isRequired,
   };
 
   handleSignInSuccessWithAuthResult = (authResult, redirectUrl) => {
@@ -88,7 +87,7 @@ class SignInScreen extends Component {
         spacing={0}
         direction="column"
         alignItems="center"
-        justify="center"
+        justifyContent="center"
       >
         <Grid item xs={3}>
           <img

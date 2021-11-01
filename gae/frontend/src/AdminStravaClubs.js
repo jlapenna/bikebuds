@@ -27,7 +27,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
 import makeCancelable from 'makecancelable';
-import JSONPretty from 'react-json-pretty';
+import ReactJson from 'react-json-view';
 
 class AdminStravaClubs extends Component {
   static styles = createStyles({});
@@ -150,7 +150,7 @@ class AdminStravaClubs extends Component {
               </Button>
             </CardActions>
             <CardContent>
-              {club && <JSONPretty id="json-pretty" data={club}></JSONPretty>}
+              {club && <ReactJson enableClipboard={false} displayDataTypes={false} style={{fontSize: 'x-small'}} src={club} />}
             </CardContent>
           </Card>
           </Grid>

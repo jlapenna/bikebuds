@@ -220,7 +220,7 @@ class UserPassServiceCard extends Component {
           className={this.props.classes.contentGrid}
           container
           direction="column"
-          justify="center"
+          justifyContent="center"
           alignItems="center"
         >
           <Grid item>
@@ -230,6 +230,7 @@ class UserPassServiceCard extends Component {
             {this.renderSyncStatus()}
           </Grid>
           <Grid item>
+            <React.Fragment>
             {this.state.service === undefined ||
               (!this.state.service.properties.credentials && (
                 <form noValidate autoComplete="off">
@@ -253,6 +254,7 @@ class UserPassServiceCard extends Component {
                   />
                 </form>
               ))}
+            </React.Fragment>
           </Grid>
           <Grid item>
             <FormControlLabel

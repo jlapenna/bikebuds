@@ -21,7 +21,10 @@ import UserPassServiceCard from './UserPassServiceCard';
 
 it('renders without crashing', () => {
   const firebase = createFirebaseState();
+  const bikebudsApi = {
+    get_service: () => Promise.resolve({ body: {properties: {sync_successful: true}} }),
+  };
   const div = document.createElement('div');
-  ReactDOM.render(<UserPassServiceCard firebase={firebase} serviceName='example' />, div);
+  ReactDOM.render(<UserPassServiceCard firebase={firebase} bikebudsApi={bikebudsApi} serviceName='example' />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

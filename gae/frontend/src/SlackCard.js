@@ -216,7 +216,7 @@ class SlackCard extends Component {
           className={this.props.classes.contentGrid}
           container
           direction="column"
-          justify="center"
+          justifyContent="center"
           alignItems="center"
         >
           <Grid item>

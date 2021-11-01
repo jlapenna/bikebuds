@@ -80,6 +80,22 @@ class DrawerContent extends React.Component {
           </ListItem>
           <ListItem
             button
+            key="Routes"
+            component={DrawerItemLink}
+            to={{ pathname: '/routes', search: window.location.search }}
+          >
+            <ListItemText>Routes</ListItemText>
+          </ListItem>
+          <ListItem
+            button
+            key="Segments"
+            component={DrawerItemLink}
+            to={{ pathname: '/segments', search: window.location.search }}
+          >
+            <ListItemText>Segments</ListItemText>
+          </ListItem>
+          <ListItem
+            button
             key="Health"
             component={DrawerItemLink}
             to={{ pathname: '/health', search: window.location.search }}

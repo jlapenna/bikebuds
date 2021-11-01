@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme as coreCreateTheme } from '@material-ui/core/styles';
 
 export function createTheme(colorType) {
-  return createMuiTheme({
+  return coreCreateTheme({
     palette: {
       type: colorType,
       primary: {

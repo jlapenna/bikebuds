@@ -19,27 +19,19 @@ import ReactDOM from 'react-dom';
 
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import ProfileCard from './ProfileCard';
+import { FirebaseState } from './firebase_util';
+import Routes from './Routes';
 
 it('renders without crashing', () => {
   const firebase = createFirebaseState();
-  const firebaseUser = {
-    displayName: 'Display Name',
-    photoUrl: '/logo-round.svg',
+  const bikebudsApi = {
+      get_routes: () => Promise.resolve({ body: [] }),
   };
-  const profile = {
-    athlete: { properties: { city: 'San Francisco' } },
-  };
-  const match = {};
+
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <ProfileCard
-        firebase={firebase}
-        firebaseUser={firebaseUser}
-        profile={profile}
-        match={match}
-      />
+      <Routes firebase={firebase} bikebudsApi={bikebudsApi} />
     </Router>,
     div
   );

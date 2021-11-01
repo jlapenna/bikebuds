@@ -20,21 +20,18 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import { FirebaseState } from './firebase_util';
-import Events from './Events';
+import Segments from './Segments';
 
 it('renders without crashing', () => {
-  var firebase = new FirebaseState(true /* forTest */);
+  const firebase = createFirebaseState();
   const bikebudsApi = {
-    bikebuds: {
-      get_activities: () => Promise.resolve({ body: [] }),
-      get_routes: () => Promise.resolve({ body: [] }),
-    },
+    get_segments: () => Promise.resolve({ body: [] }),
   };
 
   const div = document.createElement('div');
   ReactDOM.render(
     <Router>
-      <Events firebase={firebase} bikebudsApi={bikebudsApi} />
+      <Segments firebase={firebase} bikebudsApi={bikebudsApi} />
     </Router>,
     div
   );

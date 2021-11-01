@@ -157,7 +157,7 @@ class _ClubWidget extends Component {
                 <Grid
                   container
                   direction="column"
-                  justify="space-evenly"
+                  justifyContent="space-evenly"
                   alignItems="center"
                 >
                   <Grid item>
@@ -170,7 +170,7 @@ class _ClubWidget extends Component {
                       container
                       className={this.props.classes.membersContainer}
                       direction="row"
-                      justify="space-evenly"
+                      justifyContent="space-evenly"
                       alignItems="center"
                     >
                       {this.props.club.properties.members.map(

@@ -95,7 +95,6 @@ export class SignedOutApp extends Component {
             render={props => (
               <SignInScreen
                 firebase={this.props.firebase}
-                match={props.match}
               />
             )}
           />

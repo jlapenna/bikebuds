@@ -56,32 +56,32 @@ class Admin extends Component {
   render() {
     return (
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid xs item>
         <ServiceCard
           adminApi={this.props.adminApi}
           firebase={this.props.firebase}
           serviceName={'strava'}
         />
         </Grid>
-        <Grid item>
+        <Grid xs item>
           <ServiceCard
             adminApi={this.props.adminApi}
             firebase={this.props.firebase}
             serviceName={'google'}
           />
         </Grid>
-        <Grid item>
+        <Grid xs item>
         <SlackCard
           adminApi={this.props.adminApi}
           firebase={this.props.firebase}
         />
         </Grid>
-        <Grid item>
+        <Grid xs={12} item>
         <AdminStravaClubs
           adminApi={this.props.adminApi}
         />
         </Grid>
-        <Grid item>
+        <Grid xs={12} item>
         <AdminUsers
           adminApi={this.props.adminApi}
         />

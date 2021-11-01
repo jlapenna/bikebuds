@@ -104,10 +104,19 @@ class ServiceCard extends Component {
     if (this.state.service) {
       return;
     }
-    this.get_service({ name: this.props.serviceName }).then(this.handleService);
+    this._cancelGetService = makeCancelable(
+      this.get_service({ name: this.props.serviceName }),
+      this.handleService,
+      console.error);
   }
 
   componentWillUnmount() {
+    if (this._cancelGetService) {
+      this._cancelGetService();
+    }
+    if (this._cancelUpdateService) {
+      this._cancelUpdateService();
+    }
     if (this._cancelDisconnect) {
       this._cancelDisconnect();
     }
@@ -145,7 +154,6 @@ class ServiceCard extends Component {
   };
 
   handleService = response => {
-    console.log(response);
     response.body.properties.sync_date =
       response.body.properties.sync_successful &&
       !!response.body.properties.sync_date
@@ -186,12 +194,13 @@ class ServiceCard extends Component {
 
     this.setState(newState);
 
-    this.props.bikebudsApi
-      .update_service({
+    this._cancelUpdateService = makeCancelable(
+      this.props.bikebudsApi.update_service({
         name: this.props.serviceName,
         payload: { sync_enabled: event.target.checked },
-      })
-      .then(this.handleService);
+      }),
+      this.handleService,
+      console.error);
   };
 
   render() {
@@ -243,7 +252,7 @@ class ServiceCard extends Component {
           className={this.props.classes.contentGrid}
           container
           direction="column"
-          justify="center"
+          justifyContent="center"
           alignItems="center"
         >
           <Grid item>

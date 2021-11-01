@@ -32,7 +32,6 @@ import ClubAvatar from './ClubAvatar';
 
 class ProfileCard extends Component {
   static propTypes = {
-    bikebudsApi: PropTypes.object.isRequired,
     firebase: PropTypes.object.isRequired,
     firebaseUser: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
@@ -96,7 +95,7 @@ class ProfileCard extends Component {
           <Grid
             container
             direction="column"
-            justify="space-evenly"
+            justifyContent="space-evenly"
             alignItems="center"
           >
             <Grid item>
@@ -126,7 +125,7 @@ class ProfileCard extends Component {
                 className={this.props.classes.clubContainer}
                 container
                 direction="row"
-                justify="space-evenly"
+                justifyContent="space-evenly"
                 alignItems="center"
               >
                 {this.renderClubs()}

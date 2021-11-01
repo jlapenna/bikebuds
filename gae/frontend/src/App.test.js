@@ -33,11 +33,9 @@ jest.mock('./SwagWrapper');
 beforeEach(() => {
   __setMockClientForSwagWrapper({
     apis: {
-      bikebuds: {
         get_profile: () => Promise.resolve({ body: { signup_complete: true } }),
         get_series: () => Promise.resolve({ body: { properties: {} } }),
         update_client: () => Promise.resolve({ body: {} }),
-      },
     },
   });
 });

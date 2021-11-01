@@ -19,11 +19,13 @@ import React from 'react';
 
 import { Redirect, Route, Switch } from 'react-router-dom';
 
+import Activities from './Activities';
 import Admin from './Admin';
 import Club from './Club';
 import CompareSegments from './CompareSegments';
-import Events from './Events';
 import Health from './Health';
+import Routes from './Routes';
+import Segments from './Segments';
 import Settings from './Settings';
 import SpinnerScreen from './SpinnerScreen';
 
@@ -62,7 +64,29 @@ export default class MainContent extends React.Component {
           path={`${this.props.match.path}activities`}
           exact
           render={props => (
-            <Events
+            <Activities
+              firebase={this.props.firebase}
+              bikebudsApi={this.props.bikebudsApi}
+            />
+          )}
+        />)}
+        {this.props.firebaseUser.roleUser && (
+        <Route
+          path={`${this.props.match.path}routes`}
+          exact
+          render={props => (
+            <Routes
+              firebase={this.props.firebase}
+              bikebudsApi={this.props.bikebudsApi}
+            />
+          )}
+        />)}
+        {this.props.firebaseUser.roleUser && (
+        <Route
+          path={`${this.props.match.path}segments`}
+          exact
+          render={props => (
+            <Segments
               firebase={this.props.firebase}
               bikebudsApi={this.props.bikebudsApi}
             />

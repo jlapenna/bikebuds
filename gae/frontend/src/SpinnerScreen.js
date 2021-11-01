@@ -38,7 +38,7 @@ class SpinnerScreen extends Component {
         spacing={0}
         direction="column"
         alignItems="center"
-        justify="center"
+        justifyContent="center"
       >
         <Grid item>
           <CircularProgress />

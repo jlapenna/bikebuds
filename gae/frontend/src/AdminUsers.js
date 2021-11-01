@@ -26,10 +26,14 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Grid from '@material-ui/core/Grid';
 
 import makeCancelable from 'makecancelable';
-import JSONPretty from 'react-json-pretty';
+import ReactJson from 'react-json-view';
 
 class AdminUsers extends Component {
-  static styles = createStyles({});
+  static styles = createStyles({
+    json: {
+      font_size: 'x-small',
+    }
+  });
 
   static propTypes = {
     adminApi: PropTypes.object.isRequired,
@@ -77,25 +81,23 @@ class AdminUsers extends Component {
         {this.state.users &&
           this.state.users.body.map((user, index) => {
             return (
-              <Grid item key={index}>
-              <Card key={index}>
+              <Grid xs={6} item component={Card} key={index}>
                 <CardHeader title={"User: " + user.user.key.path[0].name} />
                 <CardContent>
-                  <JSONPretty id="json-pretty" data={user}></JSONPretty>
+                  <ReactJson enableClipboard={false} displayDataTypes={false} style={{fontSize: 'x-small'}} src={user} />
                 </CardContent>
-      <CardActions>
-        <form noValidate autoComplete="off" onSubmit={this.handleDeleteUser}>
-        <Button
-          color="primary"
-          variant="contained"
-          disabled={this.state.actionPending}
-          onClick={() => this.handleDeleteUser(user.user.key)}
-        >
-          Delete User
-        </Button>
-      </form>
-      </CardActions>
-              </Card>
+                <CardActions>
+                  <form noValidate autoComplete="off" onSubmit={this.handleDeleteUser}>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    disabled={this.state.actionPending}
+                    onClick={() => this.handleDeleteUser(user.user.key)}
+                  >
+                    Delete User
+                  </Button>
+                </form>
+                </CardActions>
               </Grid>
             );
           })}

@@ -17,13 +17,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { BrowserRouter as Router } from 'react-router-dom';
+
 import { FirebaseState } from './firebase_util';
-import SignInScreen from './SignInScreen';
+import Activities from './Activities';
 
 it('renders without crashing', () => {
   var firebase = new FirebaseState(true /* forTest */);
+  const bikebudsApi = {
+      get_activities: () => Promise.resolve({ body: [] }),
+  };
 
   const div = document.createElement('div');
-  ReactDOM.render(<SignInScreen firebase={firebase} />, div);
+  ReactDOM.render(
+    <Router>
+      <Activities firebase={firebase} bikebudsApi={bikebudsApi} />
+    </Router>,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
 });

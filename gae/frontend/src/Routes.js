@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,40 +17,41 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { Link } from 'react-router-dom';
-
+import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 
-class ClubAvatar extends Component {
+import BikebudsFetcher from './bikebuds_api';
+import RoutesListCard from './RoutesListCard';
+
+class Routes extends Component {
   static styles = createStyles({
-    avatar: {
-      maxHeight: 32,
-      maxWidth: 32,
+    root: {
+      flexGrow: 1,
     },
   });
 
   static propTypes = {
-    club: PropTypes.object.isRequired,
+    bikebudsApi: PropTypes.object.isRequired,
   };
 
   render() {
     return (
-      <IconButton
-        component={Link}
-        to={{
-          pathname: `club/${this.props.club.id}`,
-          search: window.location.search,
-        }}
-      >
-        <Avatar
-          className={this.props.classes.avatar}
-          alt={this.props.club.name}
-          src={this.props.club.profile_medium}
-        />
-      </IconButton>
+      <Grid className={this.props.classes.root} container spacing={3}>
+        <Grid item xs={12}>
+          <BikebudsFetcher
+            fetcher={this.props.bikebudsApi.get_routes}
+            params={{}}
+            render={wrapperState => (
+              <RoutesListCard
+                profile={this.props.profile}
+                response={wrapperState.response}
+                showDate={true}
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
     );
   }
 }
-export default withStyles(ClubAvatar.styles)(ClubAvatar);
+export default withStyles(Routes.styles)(Routes);

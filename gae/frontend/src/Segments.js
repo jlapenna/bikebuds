@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 
 import BikebudsFetcher from './bikebuds_api';
-import SegmentDetail from './SegmentDetail';
+import SegmentsListCard from './SegmentsListCard';
 
-class CompareSegments extends Component {
+class Segments extends Component {
   static styles = createStyles({
     root: {
       flexGrow: 1,
@@ -32,7 +32,6 @@ class CompareSegments extends Component {
 
   static propTypes = {
     bikebudsApi: PropTypes.object.isRequired,
-    profile: PropTypes.object.isRequired,
   };
 
   render() {
@@ -40,24 +39,19 @@ class CompareSegments extends Component {
       <Grid className={this.props.classes.root} container spacing={3}>
         <Grid item xs={12}>
           <BikebudsFetcher
-            fetcher={this.props.bikebudsApi.compare_segments}
-            params={{ segments: [229781, 563888] }}
-            render={fetcherResult => {
-              if (!fetcherResult.response) {
-                return;
-              }
-              return fetcherResult.response.body.map((segment, index) => (
-                <SegmentDetail
-                  key={index}
-                  profile={this.props.profile}
-                  segment={segment}
-                />
-              ));
-            }}
+            fetcher={this.props.bikebudsApi.get_segments}
+            params={{}}
+            render={wrapperState => (
+              <SegmentsListCard
+                profile={this.props.profile}
+                response={wrapperState.response}
+                showDate={true}
+              />
+            )}
           />
         </Grid>
       </Grid>
     );
   }
 }
-export default withStyles(CompareSegments.styles)(CompareSegments);
+export default withStyles(Segments.styles)(Segments);
