@@ -63,13 +63,21 @@ sync_state_model = api.model(
 )
 
 
+_settings_wild = fields.Wildcard(fields.Wildcard(fields.Wildcard(fields.String)))
+settings_model = api.model(
+    'Settings',
+    {
+        '*': _settings_wild,
+    },
+)
+
 service_model = api.model(
     'Service',
     {
         'credentials': CredentialsField(default=False),
         'sync_enabled': fields.Boolean(default=False),
         'sync_state': fields.Nested(sync_state_model),
-        'settings': fields.Wildcard(fields.String),
+        'settings': fields.Nested(settings_model, skip_none=True),
     },
 )
 service_entity_model = EntityModel(service_model)
