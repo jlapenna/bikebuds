@@ -281,6 +281,13 @@ class SyncResource(Resource):
         task_util.sync_service(service, force=force)
         return WrapEntity(service)
 
+    def get(self, name):
+        bot = auth_util.get_bot(flask.request)
+
+        service = Service.get(name, parent=bot.key)
+        task_util.sync_service(service, force=True)
+        return responses.OK
+
 
 @api.route('/admin_disconnect/<name>')
 class ServiceDisconnect(Resource):

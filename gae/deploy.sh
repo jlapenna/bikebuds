@@ -89,6 +89,7 @@ function main() {
   echo ""
   echo "Deploying apps."
   yes|gcloud --project=bikebuds-app app deploy \
+    gae/frontend/cron.yaml \
     gae/frontend/dispatch.yaml \
     gae/frontend/index.yaml \
     $(for service in ${services}; do echo gae/${service}/app.yaml; done) \

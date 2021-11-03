@@ -113,6 +113,10 @@ def get_admin(request: flask.Request):
 
 
 def get_bot(request: flask.Request):
+    if request.headers.get('X-Appengine-Cron') == 'true':
+        logger.debug('Authenticated Bot coming from X-Appengine-Cron')
+        return Bot.get()
+
     claims = _verify_claims(request)
     if 'roleAdmin' not in claims:
         responses.abort(responses.FORBIDDEN)
