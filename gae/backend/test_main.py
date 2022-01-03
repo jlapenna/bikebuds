@@ -26,4 +26,4 @@ class MainTest(unittest.TestCase):
 
     def test_base(self):
         r = self.client.post('/unittest')
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)

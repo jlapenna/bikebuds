@@ -26,4 +26,4 @@ class MainTest(unittest.TestCase):
 
     def test_index(self):
         r = self.client.get('/bikebuds/unittest')
-        responses.assertResponse(self, r, ("null\n", 200))
+        responses.assertResponse(self, (None, 200), r)

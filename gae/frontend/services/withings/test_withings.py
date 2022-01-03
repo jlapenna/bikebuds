@@ -46,7 +46,7 @@ class WithingsTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
         _post_task_for_dev_mock.assert_called_once()
 
     @mock.patch('shared.task_util._post_task_for_dev')
@@ -61,5 +61,5 @@ class WithingsTest(unittest.TestCase):
         r = self.client.post(
             url, data={'startdate': '1532017199', 'enddate': '1532017200', 'appli': '1'}
         )
-        responses.assertResponse(self, r, responses.OK_SUB_EVENT_FAILED)
+        responses.assertResponse(self, responses.OK_SUB_EVENT_FAILED, r)
         _post_task_for_dev_mock.assert_not_called()

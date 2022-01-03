@@ -46,7 +46,7 @@ class ModuleTest(unittest.TestCase):
             data=task_util.task_body_for_test(url='http://anyurl', publish=False),
         )
         self.assertTrue(sync_helper_do_mock.called)
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
 
 
 class TrackWorkerTest(unittest.TestCase):
@@ -57,7 +57,7 @@ class TrackWorkerTest(unittest.TestCase):
     def test_invalid_url(self, mock_queue_task):
         worker = garmin.TrackWorker(url='http://dummyurl')
         r = worker.sync()
-        responses.assertResponse(self, r, responses.OK_INVALID_LIVETRACK)
+        responses.assertResponse(self, responses.OK_INVALID_LIVETRACK, r)
 
     @mock.patch('shared.task_util._queue_task')
     @mock.patch('shared.ds_util.client.put')
@@ -71,7 +71,7 @@ class TrackWorkerTest(unittest.TestCase):
             url='https://livetrack.garmin.com/session/session-session/token/TOKENTOKEN'
         )
         r = worker.sync()
-        responses.assertResponse(self, r, responses.OK_INVALID_LIVETRACK)
+        responses.assertResponse(self, responses.OK_INVALID_LIVETRACK, r)
 
         mock_put.assert_called_once()
         track = mock_put.call_args[0][0]
@@ -90,7 +90,7 @@ class TrackWorkerTest(unittest.TestCase):
             url='https://livetrack.garmin.com/session/session-session/token/TOKENTOKEN'
         )
         r = worker.sync()
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
 
         mock_put.assert_called_once()
         track = mock_put.call_args[0][0]
@@ -110,7 +110,7 @@ class TrackWorkerTest(unittest.TestCase):
             url='https://livetrack.garmin.com/session/session-session/token/TOKENTOKEN'
         )
         r = worker.sync()
-        responses.assertResponse(self, r, responses.OK_INVALID_LIVETRACK)
+        responses.assertResponse(self, responses.OK_INVALID_LIVETRACK, r)
 
         mock_put.assert_called_once()
         track = mock_put.call_args[0][0]

@@ -62,7 +62,7 @@ class StravaTest(unittest.TestCase):
             '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
         strava_worker_mock.assert_called_once()
 
 

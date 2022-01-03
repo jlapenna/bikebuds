@@ -16,6 +16,8 @@ import collections
 
 import flask
 
+from werkzeug.wrappers.response import Response as WResponse
+
 
 Response = collections.namedtuple('Response', ('message', 'code'))
 
@@ -46,9 +48,14 @@ def abort(response: Response):
     flask.abort(response.code, response.message)
 
 
-def assertResponse(test_case, r, expected):
-    if isinstance(r, Response):
-        test_case.assertEqual(r, expected)
+def assertResponse(test_case, first, second):
+    if isinstance(second, WResponse):
+        if second.content_type == 'application/json':
+            test_case.assertTupleEqual(first, (second.json, second.status_code))
+        else:
+            test_case.assertTupleEqual(
+                first, (second.data.decode('utf-8'), second.status_code)
+            )
     else:
-        test_case.assertTupleEqual((r.data.decode('utf-8'), r.status_code), expected)
+        test_case.assertEqual(first, second)
         # msg=f'Got "{r.status}" but expected {expected}')

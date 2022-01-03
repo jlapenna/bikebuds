@@ -65,7 +65,7 @@ class SlackTest(unittest.TestCase):
         )
 
         mock_slack_client.assert_called_once()
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
 
     @mock.patch('main.slack._create_slack_client')
     @mock.patch('main.slack._create_unfurls')
@@ -85,7 +85,7 @@ class SlackTest(unittest.TestCase):
         )
 
         mock_slack_client.assert_called_once()
-        responses.assertResponse(self, r, responses.OK_NO_UNFURLS)
+        responses.assertResponse(self, responses.OK_NO_UNFURLS, r)
 
 
 LINK_SHARED_EVENT = {

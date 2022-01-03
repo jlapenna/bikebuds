@@ -152,7 +152,7 @@ class WithingsTest(unittest.TestCase):
             '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
-        responses.assertResponse(self, r, responses.OK)
+        responses.assertResponse(self, responses.OK, r)
         withings_worker_mock.assert_called_once()
 
     @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
@@ -169,7 +169,7 @@ class WithingsTest(unittest.TestCase):
             '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
-        responses.assertResponse(self, r, responses.OK_NO_SERVICE)
+        responses.assertResponse(self, responses.OK_NO_SERVICE, r)
         withings_worker_mock.assert_not_called()
 
     @mock.patch('services.withings.withings.EventsWorker', return_value=MockWorker())
@@ -193,7 +193,7 @@ class WithingsTest(unittest.TestCase):
             '/tasks/event',
             data=task_util.task_body_for_test(event=event_entity),
         )
-        responses.assertResponse(self, r, responses.OK_NO_CREDENTIALS)
+        responses.assertResponse(self, responses.OK_NO_CREDENTIALS, r)
         withings_worker_mock.assert_not_called()
 
 
