@@ -23,7 +23,7 @@ function main() {
     local services="$@";
   fi
 
-  local final_result=0;
+  local results="";
   for service in ${services}; do
     local result=0;
 
@@ -34,7 +34,7 @@ function main() {
     result=$?;
     if [[ ${result} != 0 ]]; then
       echo "Unable to pip install. Aborting."
-      exit 3;
+      return 3;
     fi
 
     if [ -e "test_requirements.txt" ]; then
@@ -42,7 +42,7 @@ function main() {
       result=$?;
       if [[ ${result} != 0 ]]; then
         echo "Unable to pip install test_requirements.txt. Aborting."
-        exit 3;
+        return 3;
       fi
     fi
 
@@ -51,21 +51,21 @@ function main() {
 
     python -m unittest discover
     result=$?;
+    if [[ ${result} != 0 ]]; then
+      results="${results}${service}\n"
+    fi
     echo '================================================================================'
     popd
 
     deactivate
-
-    if [[ ${result} != 0 ]]; then
-      final_result=${result};
-    fi
   done
 
-  if [[ ${final_result} != 0 ]]; then
+  if [[ ${results} != "" ]]; then
     echo ""
-    echo "SOME TESTS FAILED, SEE ABOVE!";
+    echo "SOME TESTS FAILED:";
+    echo -e "${results}"
   fi
-  exit ${final_result};
+  return 0;
 }
 
 main "$@"

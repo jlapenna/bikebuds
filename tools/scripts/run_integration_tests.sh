@@ -40,7 +40,7 @@ function main() {
 
   deactivate
 
-  exit ${result};
+  return ${result};
 }
 
 main "$@"
