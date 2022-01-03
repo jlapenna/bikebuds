@@ -54,7 +54,7 @@ class SlackTest(unittest.TestCase):
         )
         # self.assertEqual(resp.status_code, responses.OK.code)
         # self.assertEqual(resp.data.decode('utf-8'), challenge)
-        responses.assertResponse(self, (challenge, 200), resp)
+        responses.assertResponse(self, ({'challenge': challenge}, 200), resp)
 
     @mock.patch('services.slack.slack.slack_events_adapter.server.verify_signature')
     @mock.patch('shared.task_util._queue_task')

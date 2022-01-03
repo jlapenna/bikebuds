@@ -4,18 +4,18 @@ Flask-Cors==3.0.10
 Werkzeug==2.0.2
 flask-restx==0.5.1
 
-requests==2.26.0
+requests==2.27.0
 requests-toolbelt==0.9.1
 curlify==2.2.1
 
 # auth_util.py
-firebase-admin==5.0.3
-google-auth==2.3.0
+firebase-admin==5.2.0
+google-auth==2.3.3
 google-auth-httplib2==0.1.0
 google-auth-oauthlib==0.4.6
 
 # ds_helper.py
-google-cloud-datastore==2.2.0
+google-cloud-datastore==2.4.0
 
 # /services/
 fitbit==0.3.1
@@ -24,10 +24,10 @@ withings-api==2.3.2
 measurement==3.2.0
 
 # trainerroad
-lxml==4.6.3
+lxml==4.7.1
 
 # task_util.py
-google-cloud-tasks==2.6.0
+google-cloud-tasks==2.7.1
 
 # For natural language dates and such
 Babel==2.9.1
@@ -37,7 +37,7 @@ sortedcontainers==2.4.0
 
 # Slack
 bs4
-slack_sdk==3.11.2
+slack_sdk==3.13.0
 
 # Google Maps
 googlemaps
@@ -45,8 +45,8 @@ googlemaps
 retrying==1.3.3
 
 # live tracks tracker
-google-cloud-pubsub==2.8.0
-google-api-python-client==2.24.0
+google-cloud-pubsub==2.9.0
+google-api-python-client==2.33.0
 beautifulsoup4==4.10.0
 python-dateutil==2.8.2
 
@@ -54,4 +54,4 @@ python-dateutil==2.8.2
 chardet==4.0.0
 
 # pass_util.py
-cryptography==35.0.0
+cryptography==36.0.1
