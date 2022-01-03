@@ -82,13 +82,18 @@ class UserPassServiceCard extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.bikebudsApi && this.state.service === undefined) {
+      this._cancelGetService = makeCancelable(
       this.props.bikebudsApi
-        .get_service({ name: this.props.serviceName })
-        .then(this.handleService);
+        .get_service({ name: this.props.serviceName }),
+        this.handleService,
+        console.error);
     }
   }
 
   componentWillUnmount() {
+    if (this._cancelGetService) {
+      this._cancelGetService();
+    }
     if (this._cancelConnectUserPass) {
       this._cancelConnectUserPass();
     }
@@ -97,6 +102,9 @@ class UserPassServiceCard extends Component {
     }
     if (this._cancelSync) {
       this._cancelSync();
+    }
+    if (this._cancelUpdateService) {
+      this._cancelUpdateService();
     }
   }
 
@@ -175,12 +183,13 @@ class UserPassServiceCard extends Component {
 
     this.setState(newState);
 
-    this.props.bikebudsApi
-      .update_service({
+    this._cancelUpdateService = makeCancelable(
+      this.props.bikebudsApi.update_service({
         name: this.props.serviceName,
         payload: { sync_enabled: event.target.checked },
-      })
-      .then(this.handleService);
+      }),
+      this.handleService,
+      console.error);
   };
 
   renderSyncStatus = () => {

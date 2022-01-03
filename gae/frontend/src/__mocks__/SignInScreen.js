@@ -16,12 +16,14 @@
 
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { createStyles, withStyles } from '@material-ui/core/styles';
 
 const defaultMockComponentDidMount = () => null;
 var mockComponentDidMount = () => defaultMockComponentDidMount;
 
 class SignInScreen extends Component {
+  static styles = createStyles({});
+
   componentDidMount() {
     mockComponentDidMount();
   }

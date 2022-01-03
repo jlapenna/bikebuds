@@ -20,7 +20,7 @@ import { Component } from 'react';
 import { config } from './config';
 import { MobileEmbedEventChannel } from './MobileEmbed';
 
-const LOG = true;
+const LOG = false;
 
 class AuthWrapper extends Component {
   static propTypes = {
@@ -58,7 +58,9 @@ class AuthWrapper extends Component {
       );
     }
     if (config.is_dev && config.fake_user) {
-      console.warn('AuthWrapper: Using Fake User.');
+      if (process.env.JEST_WORKER_ID === undefined) {
+        console.warn('AuthWrapper: Using Fake User.');
+      }
       const firebaseUser = {
         displayName: config.fake_user,
         photoUrl: '/logo-round.svg',

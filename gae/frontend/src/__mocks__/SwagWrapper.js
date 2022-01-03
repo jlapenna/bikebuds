@@ -21,7 +21,6 @@ var mockClient = defaultMockClient;
 
 class SwagWrapper extends Component {
   componentDidMount() {
-    console.log('SwagWrapper.Mock: Loaded client: ', mockClient);
     this.setState({ clientLoaded: true, client: mockClient });
     this.props.onReady(mockClient);
   }

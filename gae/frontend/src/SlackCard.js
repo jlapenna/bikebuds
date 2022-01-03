@@ -133,7 +133,6 @@ class SlackCard extends Component {
   };
 
   handleSlack = response => {
-    console.log(response);
     var service = response.body.service;
     service.properties.sync_date =
       service.properties.sync_successful &&

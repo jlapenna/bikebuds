@@ -52,24 +52,25 @@ test('Renders unknown without crashing', async () => {
 
 test('Renders signed-in without crashing', async () => {
   const firebase = createFirebaseState();
-  const { getByTestId } = render(<App firebase={firebase} />);
+  const { findByTestId } = render(<App firebase={firebase} />);
 
   firebase.auth.changeAuthState(createSignedInState());
   firebase.auth.flush();
 
-  await waitForElement(() => getByTestId('main'));
+  //await waitForElement(() => getByTestId('main'));
+  await findByTestId('main');
 });
 
 test('Renders signed-out without crashing', async () => {
   const firebase = createFirebaseState();
-  const { getByTestId } = render(<App firebase={firebase} />);
+  const { findByTestId} = render(<App firebase={firebase} />);
 
   firebase.auth.changeAuthState(undefined);
   firebase.auth.signOut();
 
   firebase.auth.flush();
 
-  await waitForElement(() => getByTestId('mock-sign-in-screen'));
+  await findByTestId('mock-sign-in-screen');
 });
 
 describe('Signed-in via dev/fakeuser config', () => {
