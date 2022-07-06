@@ -24,7 +24,7 @@ withings-api==2.3.2
 measurement==3.2.0
 
 # trainerroad
-lxml==4.7.1
+lxml==4.9.1
 
 # task_util.py
 google-cloud-tasks==2.7.1
