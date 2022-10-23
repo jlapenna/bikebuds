@@ -61,7 +61,7 @@ def user_required(func):
     return wrapper
 
 
-def _verify_claims(request: flask.Request):
+def _verify_claims(request: flask.Request):  # noqa: C901
     if config.is_dev and config.fake_user:
         return _fake_claims()
 
@@ -94,6 +94,11 @@ def _verify_claims(request: flask.Request):
         except ValueError:
             logger.exception('Session cookie was invalid')
             responses.abort(responses.INVALID_COOKIE)
+
+    # If we couldn't get claims from either auth mechanism, they definitely
+    # aren't authorized.
+    if not claims:
+        responses.abort(responses.FORBIDDEN)
 
     # Finally, also ensure we've given them access to the service.
     if not (claims.get('roleAdmin') or claims.get('roleBot') or claims.get('roleUser')):
