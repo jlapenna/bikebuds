@@ -35,6 +35,8 @@ function main() {
     read
   fi
   popd
+
+  set_dev_environment
 }
 
 main "$@"
