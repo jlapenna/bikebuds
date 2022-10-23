@@ -21,6 +21,9 @@ source tools/scripts/base.sh || exit 1
 function main() {
   echo ""
   echo "Setting up config environments."
+  if [[ ! -d "environments" ]]; then
+    mkdir environments
+  fi
   pushd environments;
   if [[ ! -d "dev" ]]; then
     echo "TODO: Please install the dev config git repo, then press enter."
