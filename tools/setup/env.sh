@@ -26,15 +26,13 @@ function main() {
   fi
   pushd environments;
   if [[ ! -d "dev" ]]; then
-    echo "TODO: Please install the dev config git repo, then press enter."
-    echo "cd ${BIKEBUDS_PATH}/environments"
-    echo "gcloud --project=bikebuds-test source repos clone env dev"
+    cd "${BIKEBUDS_PATH}/environments";
+    gcloud --project=bikebuds-test source repos clone env dev;
     read
   fi
   if [[ ! -d "prod" ]]; then
-    echo "TODO: Please install the prod config git repo, then press enter."
-    echo "cd ${BIKEBUDS_PATH}/environments;"
-    echo "gcloud --project=bikebuds-app source repos clone env prod"
+    cd "${BIKEBUDS_PATH}/environments";
+    gcloud --project=bikebuds-app source repos clone env prod;
     read
   fi
   popd
