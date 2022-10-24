@@ -29,7 +29,7 @@ def main(email, role, enabled):
         user = auth.create_user(email=email, email_verified=True)
     role_key = 'role' + role[0].upper() + role[1:]
     custom_claims = user.custom_claims or {}
-    custom_claims.update({role_key: True})
+    custom_claims.update({role_key: enabled})
     # Despite docs, set_custom_user_claims overrides all existing custom claims.
     auth.set_custom_user_claims(user.uid, custom_claims)
     print('Set custom claims for %s: %s' % (email, custom_claims))
