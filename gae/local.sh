@@ -23,7 +23,7 @@ source tools/scripts/base.sh || exit 1
 function main() {
   deactivate 2>/dev/null || echo ""
 
-  activate_virtualenv dev_appserver python2
+  activate_virtualenv "dev_appserver" "python2.7";
 
   load_config;
 

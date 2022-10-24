@@ -23,6 +23,7 @@ function main() {
   sudo apt install -y python3 python3-dev python3-pip python3-virtualenv python3-venv
   sudo apt install -y virtualenv
   sudo apt install -y gradle
+  sudo apt install -y python2.7 python2.7-dev  # required by dev_appserver.py
   sudo apt install -y google-cloud-sdk-app-engine-python \
       google-cloud-sdk-app-engine-python-extras google-cloud-sdk-datastore-emulator
   sudo apt install -y jq
@@ -62,7 +63,7 @@ function main() {
   npm install
   popd
 
-  echo "Initializing shell requirements."
+  echo "Initializing dev shell requirements."
   activate_virtualenv dev python3
   pip3 install -r tools/setup/dev_requirements.txt
 
@@ -70,6 +71,13 @@ function main() {
   pre-commit install
 
   deactivate
+  echo "Finished initializing dev shell requirements."
+
+  echo "Initializing dev_appserver environment."
+  activate_virtualenv "dev_appserver" "python2.7";
+  pip install grpcio;
+  deactivate
+
   echo "Finished setting up shell requirements."
 }
 
