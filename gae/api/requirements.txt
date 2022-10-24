@@ -1,30 +1,30 @@
 # main.py
-Flask==2.0.2
+Flask==2.1.2
 Flask-Cors==3.0.10
-Werkzeug==2.0.2
+Werkzeug==2.1.2
 flask-restx==0.5.1
 
 # auth_util3.py
 firebase-admin==5.2.0
-google-auth==2.3.3
+google-auth==2.13.0
 google-auth-httplib2==0.1.0
-google-auth-oauthlib==0.4.6
+google-auth-oauthlib==0.5.3
 
 # ds_helper.py
-google-cloud-datastore==2.4.0
+google-cloud-datastore==2.9.0
 
 # task_util.py
-google-cloud-tasks==2.7.1
+google-cloud-tasks==2.10.4
 
 # /services/
 stravalib==0.10.4
-withings-api==2.3.2
+withings-api==2.4.0
 
 # For natural language dates and such
-Babel==2.9.1
+Babel==2.10.3
 
 # Utility
 sortedcontainers==2.4.0
 
 # pass_util.py
-cryptography==36.0.1
+cryptography==38.0.1

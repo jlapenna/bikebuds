@@ -1,42 +1,42 @@
 # main.py
-Flask==2.0.2
+Flask==2.1.2
 Flask-Cors==3.0.10
-Werkzeug==2.0.2
+Werkzeug==2.1.2
 flask-restx==0.5.1
-flask-talisman==0.8.1
+flask-talisman==1.0.0
 
-requests==2.27.0
-requests-toolbelt==0.9.1
+requests==2.28.1
+requests-toolbelt==0.10.0
 
 # auth_util3.py
 firebase-admin==5.2.0
-google-auth==2.3.3
+google-auth==2.13.0
 google-auth-httplib2==0.1.0
-google-auth-oauthlib==0.4.6
+google-auth-oauthlib==0.5.3
 
 # ds_helper.py
-google-cloud-datastore==2.4.0
+google-cloud-datastore==2.9.0
 
 # task_util.py
-google-cloud-tasks==2.7.1
+google-cloud-tasks==2.10.4
 
 # /services/
 fitbit==0.3.1
 stravalib==0.10.4
-withings-api==2.3.2
+withings-api==2.4.0
 
 # trainerroad
-lxml==4.7.1
+lxml==4.9.1
 
 # For natural language dates and such
-Babel==2.9.1
+Babel==2.10.3
 
 # Utility
 sortedcontainers==2.4.0
 
 # Slack
-slack_sdk==3.13.0
+slack_sdk==3.19.1
 slackeventsapi==3.0.1
 
 # pass_util.py
-cryptography==36.0.1
+cryptography==38.0.1
