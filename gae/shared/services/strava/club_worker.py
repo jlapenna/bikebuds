@@ -45,7 +45,9 @@ class ClubWorker(object):
 
         with ds_util.client.transaction():
             club = Club.get(self.club_id, parent=self.service.key)
-            activity_query = ds_util.client.query(kind='Activity', ancestor=club.key)
+            activity_query = ds_util.client.query(
+                kind='Activity', ancestor=club.key, order=['-start_date']
+            )
             activity_query.keys_only()
             ds_util.client.delete_multi(
                 activity.key for activity in activity_query.fetch()

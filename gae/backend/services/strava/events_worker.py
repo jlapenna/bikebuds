@@ -73,7 +73,7 @@ class EventsWorker(object):
                     self.event.key,
                 )
                 activities_query = ds_util.client.query(
-                    kind='Activity', ancestor=self.service.key
+                    kind='Activity', ancestor=self.service.key, order=['-start_date']
                 )
                 for activity in activities_query.fetch():
                     activity['athlete'] = athlete

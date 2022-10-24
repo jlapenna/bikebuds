@@ -143,7 +143,9 @@ class ClubActivitiesResource(Resource):
         if club is None:
             flask.abort(404)
 
-        activities_query = ds_util.client.query(kind='Activity', ancestor=club.key)
+        activities_query = ds_util.client.query(
+            kind='Activity', ancestor=club.key, order=['-start_date']
+        )
         all_activities = [a for a in activities_query.fetch()]
 
         return [WrapEntity(a) for a in all_activities]
