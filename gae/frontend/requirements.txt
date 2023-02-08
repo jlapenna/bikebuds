@@ -39,4 +39,4 @@ slack_sdk==3.19.1
 slackeventsapi==3.0.1
 
 # pass_util.py
-cryptography==38.0.1
+cryptography==39.0.1
