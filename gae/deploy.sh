@@ -50,20 +50,6 @@ function main() {
     local services="$@";
   fi
 
-  local date="$(date)";
-  # First, commit all the code outstanding into a temporary commit for
-  # safe-keeping.
-  git add .
-  git commit --no-verify -a -m"Working Set: ${date}";
-  local working_set_committed=$?
-
-  # Abort if our tests don't pass commit.
-  if [[ "$working_set_committed" == "10" ]]; then
-    echo "Git commit failed verification, abort!"
-    git reset .
-    exit 10
-  fi
-
   set_prod_environment
 
   if [[ "$services" == *"frontend"* ]]; then
@@ -72,18 +58,6 @@ function main() {
     npm run build
     popd
   fi
-
-  git push --force production master
-
-  # Generate source contexts for debugging.
-  echo ""
-  echo "Generating source contexts."
-  for service in $services; do
-    gcloud --project=bikebuds-app debug source gen-repo-info-file \
-        --output-directory=gae/$service \
-        ;
-    cat gae/$service/source-context.json
-  done;
 
   # Deploy apps
   echo ""
@@ -107,18 +81,6 @@ function main() {
 
   # And restore the dev environment config.
   set_dev_environment
-
-  # Remove the generated source contexts
-  rm gae/*/source-context.json >/dev/null 2>&1
-
-  # And then check that out, effectively reverting to the working set.
-  git checkout .
-
-  # Break apart the working set commit, back to where we started before
-  # the deploy script.
-  if [[ "$working_set_committed" == "0" ]]; then
-    git reset HEAD~
-  fi
 
   # Finally, delete older versions.
   for service in ${services}; do
