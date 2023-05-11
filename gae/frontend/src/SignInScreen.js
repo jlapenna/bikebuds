@@ -26,6 +26,7 @@ import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 import logoRound from './logo-round.svg';
+import stravaLogo from './strava-logo.png';
 
 class SignInScreen extends Component {
   static styles = createStyles({
@@ -88,6 +89,12 @@ class SignInScreen extends Component {
           >
             <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
           </Typography>
+        </Grid>
+        <Grid item xs={3}>
+          <img
+            alt="Strava Logo"
+            src={stravaLogo}
+          />
         </Grid>
       </Grid>
     );

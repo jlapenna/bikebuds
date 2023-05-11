@@ -26,6 +26,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
+import stravaLogo from './strava-logo.png';
+
 class DrawerContent extends React.Component {
   static styles = theme =>
     createStyles({
@@ -37,6 +39,12 @@ class DrawerContent extends React.Component {
       },
       active: {
         backgroundColor: theme.palette.action.selected,
+      },
+      strava: {
+        display: 'block',
+        margin: '20px auto 10px',
+        width: '80%',
+        height: 'auto',
       },
     });
 
@@ -127,6 +135,11 @@ class DrawerContent extends React.Component {
           <Typography variant="caption">
             <a href="/privacy">Privacy</a> - <a href="/tos">ToS</a>
           </Typography>
+          <img
+            className={this.props.classes.strava}
+            alt="Strava Logo"
+            src={stravaLogo}
+          />
         </div>
       </React.Fragment>
     );

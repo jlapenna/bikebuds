@@ -34,6 +34,8 @@ import Consent from './Consent';
 import Privacy from './Privacy';
 import ToS from './ToS';
 
+import stravaButton from './strava-button.png';
+
 class SignupStepper extends React.Component {
   static styles = theme =>
     createStyles({
@@ -108,7 +110,8 @@ class SignupStepper extends React.Component {
         },
         isOptional: false,
         serviceName: 'strava',
-        buttonLabel: 'Connect',
+        buttonLabel: '',
+        buttonImage: stravaButton,
       },
       /* Don't require withings or fitbit for now.
       {
@@ -334,15 +337,26 @@ class SignupStepper extends React.Component {
               Skip
             </Button>
           )}
-          <Button
-            disabled={connectPending}
-            variant="contained"
-            color="primary"
-            onClick={this.handleNext}
-            className={classes.desktopButton}
-          >
-            {activeStep.buttonLabel}
-          </Button>
+          {activeStep.buttonImage && (
+            <img
+              disabled={connectPending}
+              alt="Connect"
+              src={activeStep.buttonImage}
+              onClick={this.handleNext}
+              className={classes.desktopButton}
+            />
+          )}
+          {activeStep.buttonLabel && (
+            <Button
+              disabled={connectPending}
+              variant="contained"
+              color="primary"
+              onClick={this.handleNext}
+              className={classes.desktopButton}
+            >
+              {activeStep.buttonLabel}
+            </Button>
+          )}
         </Hidden>
       </div>
     );
