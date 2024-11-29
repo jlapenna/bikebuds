@@ -1,4 +1,4 @@
-ipython==7.28.0
+ipython==8.10.0
 
 # ds_helper.py
 google-cloud-datastore==2.2.0
