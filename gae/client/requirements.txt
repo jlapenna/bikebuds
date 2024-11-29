@@ -37,4 +37,4 @@ sortedcontainers==2.4.0
 googlemaps
 
 # pass_util.py
-cryptography==35.0.0
+cryptography==39.0.1
